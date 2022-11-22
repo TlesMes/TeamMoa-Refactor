@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'update.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+</head>
+
+<body style="overflow-y: auto">
+    <h1>User Edit</h1>
+    <div class="container">
+        <form method="POST" action=".">
+            {% csrf_token %}
+            {% for field in user_change_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_lable }}">{{ field.label }}</label>
+                {{ field.field.widget.name }}
+                <input type="{{ field.field.widget.input_type }}" class="form-control" id="{{ field.id_for_lable }}"
+                    placeholder="{{ field.label }}" name="{{ field.name }}" />
+            </div>
+            {% if field.errors %}
+
+            <span style="color:red">{{ field.errors }}</span>
+            {% endif %}
+            {% endfor %}
+            <input type="submit" value="Submit"/>
+        </form>
+        <a href="{% url 'accounts:password' %}">비밀번호 변경</a>
+    </div>
+</body>
+
+</html>

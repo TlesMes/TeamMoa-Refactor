@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+
+<body>
+    <h1>Home</h1>
+    {% if request.user.is_authenticated %}
+        <p>User is logged in :)</p>
+        <p>Username -->  {{ request.user.username }}</p>
+        <p>Nickname -->  {{ request.user.nickname }}</p>
+    {% endif %}
+    <div class="container">
+        <ul>
+            {% if not request.user.is_authenticated %}
+                <li><a href="{% url 'accounts:login' %}">로그인</a></li>
+                <li><a href="{% url 'accounts:signup' %}">회원가입</a></li>
+            {% else %}
+                <li><a href="{% url 'accounts:logout' %}">로그아웃</a></li>
+                <li><a href="{% url 'accounts:update' %}">계정정보수정</a></li>
+                <li><a href="{% url 'accounts:moveboard' %}">게시판 이동</a></li>
+            {% endif %}
+            
+        </ul>
+
+    </div>
+</body>
+
+</html>

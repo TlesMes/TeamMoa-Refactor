@@ -1,0 +1,46 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+<title> sign up and sign in</title>
+  <link rel="stylesheet" href="{% static 'Sign_up&Sign_in.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style>
+</style>
+<body>
+
+<div class="container" id="container">
+	<div class="row">
+	<div class="form-container sign-in-container">
+		<form method="POST" action="{% url 'accounts:signup' %}">
+		{% csrf_token %}
+			<h1>Create Account</h1>
+		
+			<input type="text" name="nickname" placeholder="Name" />
+			<input type="email" name="username" placeholder="Email" />
+			<input type="password" name="password1" placeholder="Password" />
+			<input type="password" name="password2" placeholder="Password" />
+			<input type="account" name="account" placeholder="Account" />
+			<button>Sign Up</button>
+			<p id="mobile_para">To keep connected with us,please login</p>
+			<button class="ghost_mobile" id="signIn_mobile">Sign In</button>
+		</form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-right">
+				<h1>Welcome Back!</h1>
+				<p>To keep connected with us please login with your personal info</p>
+				<a href="{% url 'accounts:login' %}"><button class="ghost" id="signIn">Sign In</button></a>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+<script>
+</script>
+</body>
+
+</html>
