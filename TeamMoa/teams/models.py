@@ -1,0 +1,31 @@
+from django.db import models
+
+# Create your models here.
+
+
+class Team(models.Model):
+
+    title = models.CharField(max_length=64)
+    maxuser = models.PositiveIntegerField()
+    currentuser = models.PositiveIntegerField()
+    
+    members = models.ManyToManyField('accounts.User', related_name='joined_teams', through = "Team_User")
+    host = models.ForeignKey('accounts.User', on_delete=models.CASCADE) #호스트 유저 지정 
+    
+    invitecode = models.CharField(max_length=16)
+    teampasswd = models.TextField()
+    introduction = models.TextField()
+    
+    #마인드맵
+    #게시판
+    #파일 업로드
+    
+
+
+
+
+
+class Team_User(models.Model):
+    Team = models.ForeignKey('Team',on_delete = models.CASCADE)
+    User = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
+    Todo = models.TextField(null=True, blank=True) # todolist 모델을 새로 만들어서 연결할 듯

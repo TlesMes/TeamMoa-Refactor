@@ -12,5 +12,4 @@ urlpatterns = [
     path('activate/<str:uid64>/<str:token>',views.activate, name='activate'),
     path('update/', views.update, name='update'),
     path('password/', views.password, name='password'),
-    path('moveboard/', views.moveboard, name='moveboard'),
 ]

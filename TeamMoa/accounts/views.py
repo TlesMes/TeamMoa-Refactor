@@ -80,9 +80,10 @@ def activate(request, uid64, token):
         user.is_active = True
         user.save()
         auth.login(request, user)
-        return HttpResponseRedirect('/boards/list')
+        return HttpResponseRedirect('/teams/team_list') #인증 후 연결될 페이지
     else:
         return HttpResponse('비정상적인 접근입니다.')
+
 
 @csrf_exempt
 def login(request):
@@ -108,7 +109,7 @@ def login(request):
                 response.set_cookie('username',username)
                 response.set_cookie('password',password)
                 return response
-            return HttpResponseRedirect('/boards/list')
+            return HttpResponseRedirect('/teams/team_list')
         else:
             return HttpResponse('<script>alert("계정이 존재하지 않습니다.")</script>''<script>location.href="./"</script>')
     else:
@@ -121,7 +122,7 @@ def logout(request):
     response.delete_cookie('username')
     response.delete_cookie('password')
     auth.logout(request)
-    return HttpResponseRedirect('/boards/list')
+    return HttpResponseRedirect('/teams/team_list')
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -134,7 +135,7 @@ def update(request):
         user_change_form = CustomUserChangeForm(request.POST, instance=request.user)
         if user_change_form.is_valid():
             user_change_form.save()
-            return HttpResponseRedirect('/boards/list')
+            return HttpResponseRedirect('/teams/team_list')
     
     else: #post방식이 아니면 폼을 전달해서 변경사항을 받음
         user_change_form = CustomUserChangeForm(instance = request.user) 
@@ -149,12 +150,8 @@ def password(request):
     
         if password_change_form.is_valid():
             password_change_form.save()
-            return HttpResponseRedirect('/boards/list')
+            return HttpResponseRedirect('/teams/team_list')
     
     else:
         password_change_form = PasswordChangeForm(request.user)
     return render(request, 'accounts/change_password.html',{'password_change_form':password_change_form})
-
-
-
-    
