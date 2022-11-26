@@ -19,6 +19,8 @@ class Team(models.Model):
     #마인드맵
     #게시판
     #파일 업로드
+    def __str__(self): #어드민 페이지에서 username으로 표시
+        return self.title
     
 
 

@@ -122,7 +122,7 @@ def logout(request):
     response.delete_cookie('username')
     response.delete_cookie('password')
     auth.logout(request)
-    return HttpResponseRedirect('/teams/team_list')
+    return HttpResponseRedirect('/accounts/home') #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
 
 def home(request):
     return render(request, 'accounts/home.html')

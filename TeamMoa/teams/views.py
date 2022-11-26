@@ -48,9 +48,8 @@ def team_create(request):
             team.invitecode = base64.urlsafe_b64encode(
                             codecs.encode(uuid.uuid4().bytes, "base64").rstrip()
                             ).decode()[:16]
-            team.members.add(user)
             team.save()
-
+            team.members.add(user)
             return redirect('/teams/team_list')
     else:
         form = CreateTeamForm()
@@ -68,7 +67,8 @@ def team_search(request):
         if form.is_valid():
             code=form.cleaned_data['invitecode']
             team = get_object_or_404(Team, invitecode=code)
-            return render(request, 'teams/team_search.html', {'form':form}, {'team', team})
+            
+            return redirect(f"/teams/team_join/{team.id}")   ##team id 넣어서 리다이렉트
     else:
         form = SearchTeamForm()
     return render(request, 'teams/team_search.html', {'form':form})
@@ -76,6 +76,8 @@ def team_search(request):
 
 def team_join(request, pk):
     user = request.user
+    team = get_object_or_404(Team, pk=pk)
+
     if not user.is_authenticated:
         return redirect('/accounts/login')
 
@@ -86,19 +88,24 @@ def team_join(request, pk):
             team = get_object_or_404(Team, pk=pk)
             if team.teampasswd == passwd:
                 team.members.add(user)
+                team.currentuser += 1
                 team.save()
+                return redirect('/teams/team_list')
             else:
                 return HttpResponse('<script>alert("패스워드 다름.")</script>''<script>location.href="/teams/team_list"</script>')
     else:
         form = JoinTeamForm()
-    return render(request, 'teams/team_join.html', {'form':form})
+    return render(request, 'teams/team_join.html', {'form':form, 'team':team})
+
 
 
 def team_main_page(request, pk):
     if not is_member(request, pk):
         return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
     else:
-        return render(request, 'teams/team_main_page.html')
+        team = get_object_or_404(Team, pk=pk)
+        members = Team_User.objects.filter(Team=team)
+        return render(request, 'teams/team_main_page.html', {'team':team, 'members':members})
 
 
 

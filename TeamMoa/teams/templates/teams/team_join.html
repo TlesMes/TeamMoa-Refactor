@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block contents %}
+
+<div class="row mt-5">
+    <div class="col-12">
+    <caption>팀명:{{team.title}}</caption>
+        <form method="POST" action=".">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button class="btn btn-primary" onclick="location.href='/teams/team_join/{{ team.id }}'">가입</button>
+        </form>
+        <div>
+        </div>
+    </div>
+</div>
+{% endblock %}

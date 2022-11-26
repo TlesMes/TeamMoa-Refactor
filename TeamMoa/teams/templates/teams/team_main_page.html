@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+
+{% block contents %}
+
+    {% if request.user.is_authenticated %}
+        <div class="main">
+            <h4>초대코드:{{team.invitecode}}</h4>
+            <br>
+            <br>
+        </div>
+
+        <h4>팀장</h4>
+        <h5>{{ team.host.nickname }}</h3>
+        <br>
+
+        <h4>팀원</h4>
+        {% for member in members %}
+            <h5>{{member.User.nickname}}</h3>
+        {% endfor %}
+
+        <br>
+        <br>
+        <br>
+        {% if request.user.username == team.host.username %}
+            <h4>you are the Host of this board!</h4><br>
+        {% endif %} 
+
+
+
+    {% endif %}
+
+{% endblock %}
+
