@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block contents %}
+<div class="containerr">
+    <div class="main">
+        {% if request.user.is_authenticated %}
+            <table class="table table-light">
+                <caption>내팀 ㅋㅋ..</caption>
+                <thead class="thead-light text-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>제목</th>
+                        <th>최대인원</th>
+                        <th>현재인원</th>
+                    </tr>
+                </thead>
+                {% for team in teams %}
+                <tbody class="text-dark">
+                    <tr onclick="location.href='/teams/team_main_page/{{ team.id }}'">
+                        <th>{{ team.id }}</th>
+                        <td>{{ team.title }}</td>
+                        <td>{{ team.maxuser }}</td>
+                        <td>{{ team.currentuser }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        
+
+            {% if teams.has_previous %}
+            <button class="btn btn-primary" onclick='location.href ="?page=1"'>맨 앞으로</button>
+            <button class="btn btn-primary" onclick='location.href ="?page={{teams.previous_page_number}}"'>이전으로</button>
+            {% endif %}
+            <span>{{teams.number}}</span>
+            <span>/</span>
+            <span>{{teams.paginator.num_pages}}</span>
+            {% if boards.has_next %}
+            <button class="btn btn-primary" onclick='location.href ="?page1={{teams.next_page_number}}"'>다음으로</button>
+            <button class="btn btn-primary" onclick='location.href ="?page1={{teams.paginator.num_pages}}"'>맨 뒤로</button>
+            {% endif %}
+            <hr>
+        {% endif %}
+    </div>
+    <div class="footer">
+        <div class="row">
+            
+                <button class="btn btn-primary" onclick="location.href='/teams/team_create/'">팀생성</button>
+                <button class="btn btn-primary" onclick="location.href='/teams/team_search/'">팀검색</button>
+            
+        </div>
+    </div>
+
+{% endblock %}

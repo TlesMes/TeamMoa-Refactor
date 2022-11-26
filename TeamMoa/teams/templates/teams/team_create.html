@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contents %}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action=".">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button class="btn btn-primary" onclick="location.href='/teams/team_create/'">팀생성</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
