@@ -21,11 +21,6 @@ class Team(models.Model):
     #파일 업로드
     def __str__(self): #어드민 페이지에서 username으로 표시
         return self.title
-    
-
-
-
-
 
 class Team_User(models.Model):
     Team = models.ForeignKey('Team',on_delete = models.CASCADE)
