@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
+    'shares.apps.SharesConfig',
+    'django.contrib.humanize'
 ]
 
 MIDDLEWARE = [
