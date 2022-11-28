@@ -39,12 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
-<<<<<<< HEAD
     'shares.apps.SharesConfig',
-    'django.contrib.humanize'
-=======
+    'django.contrib.humanize',
     'schedules.apps.SchedulesConfig',
->>>>>>> schedule
 ]
 
 MIDDLEWARE = [
