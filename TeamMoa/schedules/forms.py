@@ -1,10 +1,11 @@
-from schedules.models import DaySchedule
+from schedules.models import PersonalDaySchedule
 from django import forms
 #닉네임, 
-class CreateTeamForm(forms.ModelForm):
+class ScheduleForm(forms.ModelForm):
     class Meta:
-        model = DaySchedule
+        model = PersonalDaySchedule
         fields = [
+            'date',
             'time_0',
             'time_1',
             'time_2',
@@ -30,3 +31,10 @@ class CreateTeamForm(forms.ModelForm):
             'time_22',
             'time_23',
         ]
+        widgets = {
+            'date' : forms.DateTimeInput(
+            attrs={
+                'type': 'date',
+                'class' : 'form-control'
+            })
+        }

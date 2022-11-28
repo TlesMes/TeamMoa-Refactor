@@ -3,53 +3,53 @@ from django.db import models
 # Create your models here.
 
 
-class WeekSchedule(models.Model):
-    dayschedule = models.ForeignKey('schedules.DaySchedule', related_name="week", on_delete=models.CASCADE)
-    
-
 #팀에 시간대별로 몇명이 가용시간인지
 class TeamDaySchedule(models.Model):
-    date = models.DateField()
 
-    time_0 = models.PositiveIntegerField()
-    time_1 = models.PositiveIntegerField()
-    time_2 = models.PositiveIntegerField()
-    time_3 = models.PositiveIntegerField()
-    time_4 = models.PositiveIntegerField()
-    time_5 = models.PositiveIntegerField()
-    time_6 = models.PositiveIntegerField()
-    time_7 = models.PositiveIntegerField()
-    time_8 = models.PositiveIntegerField()
-    time_9 = models.PositiveIntegerField()
-    time_10 = models.PositiveIntegerField()
-    time_11 = models.PositiveIntegerField()
-    time_12 = models.PositiveIntegerField()
-    time_13 = models.PositiveIntegerField()
-    time_14 = models.PositiveIntegerField()
-    time_15 = models.PositiveIntegerField()
-    time_16 = models.PositiveIntegerField()
-    time_17 = models.PositiveIntegerField()
-    time_18 = models.PositiveIntegerField()
-    time_19 = models.PositiveIntegerField()
-    time_20 = models.PositiveIntegerField()
-    time_21 = models.PositiveIntegerField()
-    time_22 = models.PositiveIntegerField()
-    time_23 = models.PositiveIntegerField()
+    
+    date = models.DateField()
+    team = models.ForeignKey('teams.Team',on_delete = models.CASCADE) #어떤 팀의 시간표인지
+
+    time_0 = models.PositiveIntegerField(default=0)
+    time_1 = models.PositiveIntegerField(default=0)
+    time_2 = models.PositiveIntegerField(default=0)
+    time_3 = models.PositiveIntegerField(default=0)
+    time_4 = models.PositiveIntegerField(default=0)
+    time_5 = models.PositiveIntegerField(default=0)
+    time_6 = models.PositiveIntegerField(default=0)
+    time_7 = models.PositiveIntegerField(default=0)
+    time_8 = models.PositiveIntegerField(default=0)
+    time_9 = models.PositiveIntegerField(default=0)
+    time_10 = models.PositiveIntegerField(default=0)
+    time_11 = models.PositiveIntegerField(default=0)
+    time_12 = models.PositiveIntegerField(default=0)
+    time_13 = models.PositiveIntegerField(default=0)
+    time_14 = models.PositiveIntegerField(default=0)
+    time_15 = models.PositiveIntegerField(default=0)
+    time_16 = models.PositiveIntegerField(default=0)
+    time_17 = models.PositiveIntegerField(default=0)
+    time_18 = models.PositiveIntegerField(default=0)
+    time_19 = models.PositiveIntegerField(default=0)
+    time_20 = models.PositiveIntegerField(default=0)
+    time_21 = models.PositiveIntegerField(default=0)
+    time_22 = models.PositiveIntegerField(default=0)
+    time_23 = models.PositiveIntegerField(default=0)
 
 #개인별로 가능한 시간대가 언제인지
 class PersonalDaySchedule(models.Model):
-    dayoftheweek_choices=(
-        (1,'일'),
-        (2,'월'),
-        (3,'화'),
-        (4,'수'),
-        (5,'목'),
-        (6,'금'),
-        (7,'토'),
-    )
-    #해당 day스케줄이 어느 요일인지 (날짜로 바꿀수도?)
-    dayoftheweek = models.PositiveIntegerField(choices=dayoftheweek_choices)
-
+    # dayoftheweek_choices=(
+    #     (1,'일'),
+    #     (2,'월'),
+    #     (3,'화'),
+    #     (4,'수'),
+    #     (5,'목'),
+    #     (6,'금'),
+    #     (7,'토'),
+    # )
+    # #해당 day스케줄이 어느 요일인지 (날짜로 바꿀수도?)
+    # dayoftheweek = models.PositiveIntegerField(choices=dayoftheweek_choices)
+    date = models.DateField()
+    owner = models.ForeignKey('teams.Team_User',on_delete = models.CASCADE) #어떤 유저의 시간표인지
     #시간대별 가능 여부를 저장한 bool필드
     time_0 = models.BooleanField(default=False)
     time_1 = models.BooleanField(default=False)

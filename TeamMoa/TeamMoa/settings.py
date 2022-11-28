@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
-    'sechedules.apps.SchedulesConfig',
+    'schedules.apps.SchedulesConfig',
 ]
 
 MIDDLEWARE = [

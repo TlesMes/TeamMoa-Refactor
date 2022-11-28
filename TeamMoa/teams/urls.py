@@ -9,4 +9,5 @@ urlpatterns = [
     path('team_search/', views.team_search, name='team_search'),
     path('team_join/<int:pk>/', views.team_join, name='team_join'),
     path('team_main_page/<int:pk>/', views.team_main_page, name='team_main_page'),
+    path('team_schedule/<int:pk>/', views.team_schedule, name='team_schedule')
 ]
