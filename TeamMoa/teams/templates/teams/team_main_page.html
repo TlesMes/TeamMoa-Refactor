@@ -21,6 +21,8 @@
 
         <br>
         <br>
+        <a href="{% url 'schedules:scheduler_page' team.id %}"><button>시간표 공유</button></a>
+        <br>
         <br>
         {% if request.user.username == team.host.username %}
             <h4>you are the Host of this board!</h4><br>

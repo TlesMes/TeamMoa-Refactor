@@ -20,5 +20,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('teams/', include('teams.urls')),
+<<<<<<< HEAD
     path('shares/',include('shares.urls')),
+=======
+    path('schedules/', include('schedules.urls')),
+>>>>>>> schedule
 ]
