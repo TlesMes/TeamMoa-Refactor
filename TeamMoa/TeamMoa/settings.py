@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'shares.apps.SharesConfig',
     'django.contrib.humanize',
     'schedules.apps.SchedulesConfig',
+    'members.apps.MembersConfig',
+    
 ]
 
 MIDDLEWARE = [
