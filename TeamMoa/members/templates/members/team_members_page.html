@@ -17,11 +17,11 @@
             {% for todo in todos %}
                 {% if todo.owner == member %}
                     {%if not todo.is_completed %}
-                        <h5>Todo:{{todo.content}} <input type="checkbox" onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'" >
-                            {% if todo.owner.User == request.user %}-----<button class="btn btn-primary" onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'>X</button>{% endif %}</h5>
+                        <h5>Todo:{{todo.content}} {% if todo.owner.User == request.user %}<input type="checkbox" onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'" >
+                            -----<button class="btn btn-primary" onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'>X</button>{% endif %}</h5>
                     {% else %}
-                        <h5>Todo:<del>{{todo.content}}</del> <input type="checkbox" onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'" checked="on">
-                            {% if todo.owner.User == request.user %}-----<button class="btn btn-primary" onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'>X</button>{% endif %}</h5>
+                        <h5>Todo:<del>{{todo.content}}</del> {% if todo.owner.User == request.user %}<input type="checkbox" onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'" checked="on">
+                            -----<button class="btn btn-primary" onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'>X</button>{% endif %}</h5>
                     {% endif %}
                     <br>
                 {% endif %}
