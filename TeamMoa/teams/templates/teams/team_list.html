@@ -34,7 +34,7 @@
             <span>{{teams.number}}</span>
             <span>/</span>
             <span>{{teams.paginator.num_pages}}</span>
-            {% if boards.has_next %}
+            {% if teams.has_next %}
             <button class="btn btn-primary" onclick='location.href ="?page1={{teams.next_page_number}}"'>다음으로</button>
             <button class="btn btn-primary" onclick='location.href ="?page1={{teams.paginator.num_pages}}"'>맨 뒤로</button>
             {% endif %}

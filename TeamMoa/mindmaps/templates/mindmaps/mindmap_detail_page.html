@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+
+
+    <script>
+        function loaded(){
+            var canvas = document.getElementById('mindmap');
+            var ctx = canvas.getContext('2d');
+            ctx.font = '20px bold serif';
+
+            {% for line in lines %}
+                ctx.beginPath();
+                ctx.moveTo({{line.from_node.posX}}+40,{{line.from_node.posY}});
+                ctx.lineTo({{line.to_node.posX}}+40,{{line.to_node.posY}});
+                ctx.stroke();
+            {% endfor %}
+            {% for node in nodes %}
+                ctx.strokeRect({{node.posX}}-10,{{node.posY}}-30,100,60);
+                ctx.fillStyle = "green";
+                ctx.fillRect({{node.posX}}-10,{{node.posY}}-30,100,60);
+                
+                ctx.fillStyle = "black";
+                ctx.fillText("{{node.title}}",{{node.posX}},{{node.posY}});
+            {% endfor %}
+            
+        }
+    </script>
+</head>
+
+
+
+
+
+
+
+<body onload="loaded()">
+    <h2>{{mindmap.title}} 상세 화면</h2>
+
+    <canvas id="mindmap" width="800" height="600" style="border: 1px solid black"></canvas>
+    <form method="POST" action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}">
+		{% csrf_token %}
+			<input type="number" name="posX" placeholder="posX" />
+			<input type="number" name="posY" placeholder="posY" />
+            <input type="text" name="title" placeholder="title" />
+            <input type="text" name="content" placeholder="content" />
+            <input type="text" name="parent" placeholder="parent" />
+			<button type="submit">node</button>
+		</form>
+</body>
+</html>
+
+
+
+
+
+
+

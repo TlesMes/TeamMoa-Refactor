@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'schedules.apps.SchedulesConfig',
     'members.apps.MembersConfig',
+    'mindmaps.apps.MindmapsConfig',
     
 ]
 
