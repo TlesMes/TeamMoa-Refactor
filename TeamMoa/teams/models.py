@@ -12,6 +12,8 @@ class Team(models.Model):
     members = models.ManyToManyField('accounts.User', related_name='joined_teams', through = "Team_User")
     host = models.ForeignKey('accounts.User', on_delete=models.CASCADE) #호스트 유저 지정 
     
+    dev_phase = models.DateTimeField
+
     invitecode = models.CharField(max_length=16)
     teampasswd = models.TextField()
     introduction = models.TextField()
@@ -31,3 +33,12 @@ class Team_User(models.Model):
 
     def __str__(self):  # admin에서 표시될 user 필드 정보 설정
         return self.User.nickname
+
+class DevPhase(models.Model):
+    team = models.ForeignKey('Team',on_delete = models.CASCADE)
+    content = models.TextField()
+    startdate = models.DateField()
+    enddate = models.DateField()
+
+    def __str__(self):
+        return self.content

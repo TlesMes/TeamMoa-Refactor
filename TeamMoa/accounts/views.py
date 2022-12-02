@@ -47,7 +47,7 @@ def signup(request):
                     'uid': urlsafe_base64_encode(force_bytes(user.pk)).encode().decode(),
                     'token': account_activation_token.make_token(user),
                 })
-                mail_subject = "[SOT] 회원가입 인증 메일입니다."
+                mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
                 user_email = user.username
                 email = EmailMessage(mail_subject, message, to=[user_email])
                 email.send()

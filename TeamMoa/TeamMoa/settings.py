@@ -66,10 +66,10 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
 
 #  발신할 이메일 주소 '~@gmail.com'
-EMAIL_HOST_USER = 'shdkseho@gmail.com'
+EMAIL_HOST_USER = 'teammoa1234@gmail.com'
 
 # 발신할 이메일 비밀번호 (2단계 인증일경우 앱 비밀번호)
-EMAIL_HOST_PASSWORD = 'smdetdnyfwbwefjc'
+EMAIL_HOST_PASSWORD = 'frfgwdwepfxercze'
 
 # TLS 보안 방법 (SMPT 서버와 통신할 떄 TLS (secure) connection 을 사용할지 말지 여부)
 EMAIL_USE_TLS = True
