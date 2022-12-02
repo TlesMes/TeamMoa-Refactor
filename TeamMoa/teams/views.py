@@ -176,6 +176,16 @@ def team_add_devPhase(request,pk):
             form = AddPhaseForm()
         return render(request, 'teams/team_add_devPhase.html', {'form':form, 'team':team})
 
+def team_delete_devPhase(request, pk, phase_id):
+    team = get_object_or_404(Team, pk=pk)
+    user = request.user
+    if team.host != user:
+        return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
+    else:
+        phase = DevPhase.objects.get(pk=phase_id)
+        phase.delete()
+        return redirect(f'/teams/team_main_page/{pk}')
+
 
 def team_mindmap(request, pk):
     pass
