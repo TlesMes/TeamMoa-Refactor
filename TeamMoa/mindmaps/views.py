@@ -110,6 +110,22 @@ def node_detail_page(request, pk, node_id):
     comments = Comment.objects.filter(node=node)
     return render(request, 'mindmaps/node_detail_page.html',{'node':node, 'team':team,'comments':comments})
     
+def node_vote(request, pk, node_id):
+    user = request.user
+    team = get_object_or_404(Team, pk=pk)
+    node = Node.objects.get(pk=node_id)
+    nodeuser = Node_User.objects.get(Node=node, User=user)
+    comments = Comment.objects.filter(node=node)
+    if nodeuser.voted:
+        node.vote = node.vote - 1
+    else:
+        node.vote = node.vote + 1
+    node.save()
+    nodeuser.voted = not nodeuser.voted
+    nodeuser.save()
+
+    return render(request, 'mindmaps/node_detail_page.html',{'node':node, 'team':team,'comments':comments})
+
 
 def node_add_comment(request):
     pass

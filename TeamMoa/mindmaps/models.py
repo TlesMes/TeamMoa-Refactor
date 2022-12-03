@@ -40,5 +40,5 @@ class Node_User(models.Model):
     Node = models.ForeignKey('Node',on_delete = models.CASCADE)
     User = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
     voted = models.BooleanField(default=False)
-    comment = models.TextField()
+
 
