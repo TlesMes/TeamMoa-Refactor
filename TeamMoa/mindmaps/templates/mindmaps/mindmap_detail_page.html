@@ -6,9 +6,10 @@
 
 
     <script>
+        
         function loaded(){
-            var canvas = document.getElementById('mindmap');
-            var ctx = canvas.getContext('2d');
+            const canvas = document.getElementById('mindmap');
+            const ctx = canvas.getContext('2d');
             ctx.font = '20px bold serif';
 
             {% for line in lines %}
@@ -25,8 +26,25 @@
                 ctx.fillStyle = "black";
                 ctx.fillText("{{node.title}}",{{node.posX}},{{node.posY}});
             {% endfor %}
-            
+
+
+            canvas.onclick = function(event){
+                const x = event.clientX - ctx.canvas.offsetLeft; 
+                const y = event.clientY - ctx.canvas.offsetTop;  
+                
+                {% for node in nodes %}
+                    minX={{node.posX}}-10;
+                    maxX={{node.posX}}+90;
+                    minY={{node.posY}}-30;
+                    maxY={{node.posY}}+30;
+                    if(minX<x && maxX>x && minY<y && maxY>y){
+                        window.location.href = "/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}"
+                    }
+                {% endfor %}
+            } 
         }
+
+        
     </script>
 </head>
 

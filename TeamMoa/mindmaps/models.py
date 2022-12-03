@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 
 # Create your models here.
@@ -21,6 +22,14 @@ class Node(models.Model):
 
     def __str__(self):
         return self.content
+
+class Comment(models.Model):
+    comment = models.TextField()
+    node = models.ForeignKey('Node', on_delete = models.CASCADE)
+    user = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
+    commented_at = models.DateTimeField(default=datetime.now, blank=True)
+    def __str__(self):
+        return self.comment
 
 class Node_Node(models.Model):
     from_node = models.ForeignKey('Node', related_name='to+', on_delete = models.CASCADE)

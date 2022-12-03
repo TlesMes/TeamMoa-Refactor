@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from teams.models import Team_User
 from .forms import CreateMindmapForm
 from teams.models import Team
-from .models import Mindmap, Node, Node_Node, Node_User
+from .models import Comment, Mindmap, Node, Node_Node, Node_User
 from accounts.models import User
 import logging
 def is_member(request, pk) -> bool:
@@ -86,16 +86,30 @@ def mindmap_create_node(request, pk, mindmap_id):
             Node_Node.objects.create(from_node=node,to_node=parentnode,mindmap=mindmap)
 
     return redirect(f'/mindmaps/mindmap_detail_page/{pk}/{mindmap_id}')
-    
+
 
 def mindmap_delete_node(request, pk, node_id):
-    pass
+    team = get_object_or_404(Team, pk=pk)
+    node = Node.objects.get(pk=node_id)
+    node.delete()
+    return redirect(f'/mindmaps/mindmap_detail_page/{pk}/{node.mindmap.id}')
 
 def mindmap_empower(request, pk, mindmap_id, user_id):
     pass
 
 def node_detail_page(request, pk, node_id):
-    pass#여기서 투표, 코멘트 다가능?
+    team = get_object_or_404(Team, pk=pk)
+    node = Node.objects.get(pk=node_id)
+    if request.method =='POST':
+        user = request.user
+        comment = Comment()
+        comment.comment = request.POST["comment"]
+        comment.node = node
+        comment.user = user
+        comment.save()
+    comments = Comment.objects.filter(node=node)
+    return render(request, 'mindmaps/node_detail_page.html',{'node':node, 'team':team,'comments':comments})
+    
 
 def node_add_comment(request):
     pass
