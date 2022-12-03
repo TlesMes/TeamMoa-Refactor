@@ -77,8 +77,6 @@ def mindmap_create_node(request, pk, mindmap_id):
         node.save()
         members=Team_User.objects.filter(Team=team)
         for member in members:
-            logger = logging.getLogger('test')
-            logger.error(member.User.nickname)
             node.user.add(member.User)
         parent=request.POST["parent"]
         if parent != "":

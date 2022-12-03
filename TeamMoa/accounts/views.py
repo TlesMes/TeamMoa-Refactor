@@ -31,10 +31,10 @@ def signup(request):
                 user.is_active = False
                 user.save()
                 nickname = request.POST["nickname"]
-                account_number = request.POST["account"]
+                user.profile = request.POST["profile"]
                 user.nickname=nickname
 
-                user.account_number=account_number
+                
                 user.save()
                 REGEX_EMAIL = '([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@mju+(\.[A-Z|a-z]{2,})+'
                 if not re.fullmatch(REGEX_EMAIL, user.username):

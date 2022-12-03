@@ -22,9 +22,13 @@ class Node(models.Model):
 
     def __str__(self):
         return self.content
-
+class Node_User(models.Model):
+    Node = models.ForeignKey('Node',on_delete = models.CASCADE)
+    User = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
+    voted = models.BooleanField(default=False)
+    
 class Comment(models.Model):
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
     node = models.ForeignKey('Node', on_delete = models.CASCADE)
     user = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
     commented_at = models.DateTimeField(default=datetime.now, blank=True)
@@ -36,9 +40,6 @@ class Node_Node(models.Model):
     to_node = models.ForeignKey('Node', related_name='from+', on_delete = models.CASCADE)
     mindmap = models.ForeignKey('Mindmap',on_delete = models.CASCADE)
 
-class Node_User(models.Model):
-    Node = models.ForeignKey('Node',on_delete = models.CASCADE)
-    User = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
-    voted = models.BooleanField(default=False)
+
 
 

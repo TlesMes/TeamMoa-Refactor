@@ -55,7 +55,7 @@
 
 
 <body onload="loaded()">
-    <h2>{{mindmap.title}} 상세 화면</h2>
+    <h2>{{mindmap.title}} 상세 화면 <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}"><button>새로고침</button></a></h2>
 
     <canvas id="mindmap" width="800" height="600" style="border: 1px solid black"></canvas>
     <form method="POST" action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}">

@@ -56,7 +56,6 @@ def team_create(request):
     return render(request,'teams/team_create.html',{'form':form})
 
 
-
 def team_search(request):
     user = request.user
     if not user.is_authenticated:
