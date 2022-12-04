@@ -6,11 +6,13 @@
         <form method="POST" action=".">
         {% csrf_token %}
         <table>
-            <input type="date" name="date" required>
+            <input type="week" name="week" required>
         </table>
             <button type="submit" class="btn btn-primary" >날짜 확인</button>
         </form>
         {{message}}<br>
+        {% for schedule in schedules %}
+        <h3>여기서부터 {{schedule.date}}</h3>
         0시~1시 | {{schedule.time_0}}<hr>
         1시~2시 | {{schedule.time_1}}<hr>
         2시~3시 | {{schedule.time_2}}<hr>
@@ -35,6 +37,8 @@
         21시~22시 | {{schedule.time_21}}<hr>
         22시~23시 | {{schedule.time_22}}<hr>
         23시~0시 | {{schedule.time_23}}<hr>
+        {% endfor %}
+
         
         <a href="{% url 'schedules:scheduler_upload_page' team.id %}"><button>시간표 업로드</button></a>
     </div>

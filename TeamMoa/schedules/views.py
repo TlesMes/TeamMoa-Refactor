@@ -3,7 +3,9 @@ from django.shortcuts import render,redirect,get_object_or_404
 from schedules.forms import ScheduleForm
 from teams.models import Team, Team_User
 from .models import PersonalDaySchedule, TeamDaySchedule
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from django.utils.dateparse import parse_datetime
+import logging
 # Create your views here.
 
 def is_member(request, pk) -> bool:
@@ -22,11 +24,16 @@ def scheduler_page(request, pk):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
     if request.method =='POST':
-        date=request.POST["date"]
-        exteamSchedule = TeamDaySchedule.objects.filter(team=team, date=date)
-        if exteamSchedule.exists():
-            teamSchedule = TeamDaySchedule.objects.get(team=team, date=date)
-            return render(request, 'schedules/scheduler_page.html', {'schedule':teamSchedule,'team':team})
+        week=request.POST["week"]
+
+        date_mon = date.fromisoformat(week)
+        date_sun = date_mon + timedelta(days=6)
+        logger = logging.getLogger('test')
+        logger.error(date_sun)
+        
+        teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
+        if teamSchedules.exists():
+            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team})
         else:
             message = '해당 날짜는 스케줄 X'
             return render(request, 'schedules/scheduler_page.html', {'message':message,'team':team})
