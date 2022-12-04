@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block contents %}
+
+<strong>{{node.title}}-상세 내용</strong>
+<br>
+<br>
+<br>
+<p>내용 == {{node.content}}</p>
+
+
+<p>투표수 == {{node.vote}}</p>
+<br>
+<br>
+
+{% for comment in comments %}
+    <p>{{comment.user.nickname}}:{{comment.comment}}   ---   {{comment.commented_at|date:'Y-m-d, H:i:s'}} </p>
+{% endfor %}
+
+<form method="POST" action="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}">
+		{% csrf_token %}
+            <input type="text" name="comment" placeholder="comment" />
+			<button type="submit">코멘트 추가</button>
+		</form>
+
+
+
+
+<a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ node.mindmap.id }}"><button>돌아가기</button></a>
+<br>
+<a href="/mindmaps/node_vote/{{ team.id }}/{{ node.id }}"><button>투표</button></a>
+<br>
+<a href="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}"><button>삭제</button></a>
+<br>
+<a href="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}"><button>새로고침</button></a>
+
+{% endblock %}

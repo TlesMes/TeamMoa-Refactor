@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contents %}
+<h1>{{ team.title }} 정보 변경</h1>
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action=".">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button type="submit" class="btn btn-primary" >변경</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

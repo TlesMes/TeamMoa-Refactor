@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block contents %}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action=".">
+        {% csrf_token %}
+        <table>
+            <input type="date" name="date" required>
+        </table>
+            <button type="submit" class="btn btn-primary" >날짜 확인</button>
+        </form>
+        {{message}}<br>
+        0시~1시 | {{schedule.time_0}}<hr>
+        1시~2시 | {{schedule.time_1}}<hr>
+        2시~3시 | {{schedule.time_2}}<hr>
+        3시~4시 | {{schedule.time_3}}<hr>
+        4시~5시 | {{schedule.time_4}}<hr>
+        5시~6시 | {{schedule.time_5}}<hr>
+        6시~7시 | {{schedule.time_6}}<hr>
+        7시~8시 | {{schedule.time_7}}<hr>
+        8시~9시 | {{schedule.time_8}}<hr>
+        9시~10시 | {{schedule.time_9}}<hr>
+        10시~11시 | {{schedule.time_10}}<hr>
+        11시~12시 | {{schedule.time_11}}<hr>
+        12시~13시 | {{schedule.time_12}}<hr>
+        13시~14시 | {{schedule.time_13}}<hr>
+        14시~15시 | {{schedule.time_14}}<hr>
+        15시~16시 | {{schedule.time_15}}<hr>
+        16시~17시 | {{schedule.time_16}}<hr>
+        17시~18시 | {{schedule.time_17}}<hr>
+        18시~19시 | {{schedule.time_18}}<hr>
+        19시~20시 | {{schedule.time_19}}<hr>
+        20시~21시 | {{schedule.time_20}}<hr>
+        21시~22시 | {{schedule.time_21}}<hr>
+        22시~23시 | {{schedule.time_22}}<hr>
+        23시~0시 | {{schedule.time_23}}<hr>
+        
+        <a href="{% url 'schedules:scheduler_upload_page' team.id %}"><button>시간표 업로드</button></a>
+    </div>
+</div>
+{% endblock %}

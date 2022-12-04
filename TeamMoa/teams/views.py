@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from datetime import datetime
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
 from django.core.paginator import Paginator
-from .models import Team, Team_User
-from .forms import CreateTeamForm, JoinTeamForm, SearchTeamForm
+from .models import DevPhase, Team, Team_User
+from .forms import AddPhaseForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
 import uuid
 import base64
 import codecs
@@ -56,7 +56,6 @@ def team_create(request):
     return render(request,'teams/team_create.html',{'form':form})
 
 
-
 def team_search(request):
     user = request.user
     if not user.is_authenticated:
@@ -87,6 +86,8 @@ def team_join(request, pk):
             passwd=form.cleaned_data['teampasswd']
             team = get_object_or_404(Team, pk=pk)
             if team.teampasswd == passwd:
+                if team.maxuser == team.currentuser:
+                    return HttpResponse('<script>alert("팀 최대인원 초과.")</script>''<script>location.href="/teams/team_list"</script>')
                 team.members.add(user)
                 team.currentuser += 1
                 team.save()
@@ -105,10 +106,84 @@ def team_main_page(request, pk):
     else:
         team = get_object_or_404(Team, pk=pk)
         members = Team_User.objects.filter(Team=team)
-        return render(request, 'teams/team_main_page.html', {'team':team, 'members':members})
+        phases = DevPhase.objects.filter(team=team).order_by('startdate')
+        
+        today_date = datetime.now().date()
+        today_phase='일정이 없습니다.'
+        for phase in phases:
+            if (phase.startdate <= today_date) & (phase.enddate > today_date):
+                left = phase.enddate-today_date
+                today_phase = f'{phase.content}, {left.days}일 남았습니다'
+            else:
+                today_phase = "일정이 없습니다."
+        
+        return render(request, 'teams/team_main_page.html', {'team':team, 'members':members,'phases':phases, 'today_date':today_date, 'today_phase':today_phase})
+
+
+def team_info_change(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    user = request.user
+
+    if team.host != user:
+        return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
+    else:
+        if request.method =='POST':
+            form = ChangeTeamInfoForm(request.POST)
+            if form.is_valid():
+                team.maxuser = form.cleaned_data['maxuser']
+                team.introduction = form.cleaned_data['introduction']
+                team.save()
+                return redirect(f'/teams/team_main_page/{pk}')
+        else:
+            form = ChangeTeamInfoForm()
+        return render(request, 'teams/team_info_change.html', {'form':form, 'team':team})
 
 
 
+def team_add_devPhase(request,pk):
+    team = get_object_or_404(Team, pk=pk)
+    user = request.user
+    if team.host != user:
+        return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
+    else:
+        if request.method =='POST':
+            form = AddPhaseForm(request.POST)
+            if form.is_valid():
+
+                #겹치는 부분이 있는지 검사해야 함
+                start=form.cleaned_data['startdate']
+                end=form.cleaned_data['enddate']
+                devphases = DevPhase.objects.filter(team=team)
+                for p in devphases:
+                    if (p.startdate < start) & (p.enddate > start):
+                        return HttpResponse('<script>alert("개발 기간 중복.")</script>'f'<script>location.href="/teams/team_add_devPhase/{pk}"</script>')
+                    if (p.startdate < end) & (p.enddate > end):
+                        return HttpResponse('<script>alert("개발 기간 중복.")</script>'f'<script>location.href="/teams/team_add_devPhase/{pk}"</script>')
+                    if (p.startdate > start) & (p.startdate < end):
+                        return HttpResponse('<script>alert("개발 기간 중복.")</script>'f'<script>location.href="/teams/team_add_devPhase/{pk}"</script>')
+                    
+                
+                phase = DevPhase()
+                phase.team = team
+                phase.content = form.cleaned_data['content']
+                phase.startdate = form.cleaned_data['startdate']
+                phase.enddate = form.cleaned_data['enddate']
+                phase.save()
+
+                return redirect(f'/teams/team_main_page/{pk}')
+        else:
+            form = AddPhaseForm()
+        return render(request, 'teams/team_add_devPhase.html', {'form':form, 'team':team})
+
+def team_delete_devPhase(request, pk, phase_id):
+    team = get_object_or_404(Team, pk=pk)
+    user = request.user
+    if team.host != user:
+        return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
+    else:
+        phase = DevPhase.objects.get(pk=phase_id)
+        phase.delete()
+        return redirect(f'/teams/team_main_page/{pk}')
 
 
 def team_mindmap(request, pk):

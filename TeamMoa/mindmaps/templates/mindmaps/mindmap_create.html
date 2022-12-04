@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contents %}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action="{% url 'mindmaps:mindmap_create' team.id %}">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button type="submit" class="btn btn-primary" >생성</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

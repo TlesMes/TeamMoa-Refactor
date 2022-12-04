@@ -9,21 +9,38 @@
             <br>
             <br>
         </div>
-
+        <h4>팀 소개<h4>
+        <p>{{team.introduction}}</p>
+        <br>
+        <br>
+        <h4>개발 일정 - {{today_date|date:'오늘은 Y년 m월 d일'}} -- {{today_phase}}</h4>
+        {% for phase in phases %}
+        <p>{{phase.startdate|date:'Y-m-d'}}~{{phase.enddate|date:'Y-m-d'}} -- {{phase.content}} 
+        {% if team.host == request.user %}-----<button class="btn btn-primary" onclick='location.href ="/teams/team_delete_devPhase/{{ team.id }}/{{ phase.id }}"'>X</button>{% endif %}</h5></p>
+        {% endfor %}
+        <br>
+        <br>
         <h4>팀장</h4>
         <h5>{{ team.host.nickname }}</h5>
         <br>
 
         <h4>팀원</h4>
         {% for member in members %}
-            <h5>{{member.User.nickname}}</h5>
+            <h5>{{member.User.nickname}} -- 최근 로그인:{{member.User.last_login|date:'Y-m-d, H:i:s'}}</h5>
         {% endfor %}
 
         <br>
         <br>
+        <a href="{% url 'schedules:scheduler_page' team.id %}"><button>시간표 공유</button></a>
         <br>
-        {% if request.user.username == team.host.username %}
-            <h4>you are the Host of this board!</h4><br>
+        <a href="{% url 'members:team_members_page' team.id %}"><button>팀원 정보(todo)</button></a>
+        <br>
+        <a href="{% url 'mindmaps:mindmap_list_page' team.id %}"><button>마인드맵</button></a>
+        <br>
+        {% if request.user == team.host %}
+            <h4>you are the Host of this Team!</h4><br>
+            <a href="{% url 'teams:team_add_devPhase' team.id %}"><button>개발 단계 추가(팀장만)</button></a>
+            <a href="{% url 'teams:team_info_change' team.id %}"><button>팀 정보 변경(팀장만)</button></a>
         {% endif %} 
 
 
@@ -31,4 +48,6 @@
     {% endif %}
 
 {% endblock %}
+
+
 
