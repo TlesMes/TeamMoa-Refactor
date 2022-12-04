@@ -21,6 +21,5 @@ class TeamAdmin(admin.ModelAdmin):
 
 admin.site.register(Team,TeamAdmin)
 
-admin.site.register(Team)
 admin.site.register(Team_User)
 admin.site.register(DevPhase)
