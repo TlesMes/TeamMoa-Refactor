@@ -1,6 +1,5 @@
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
-from schedules.forms import ScheduleForm
 from teams.models import Team, Team_User
 from .models import PersonalDaySchedule, TeamDaySchedule
 from datetime import datetime, date, timedelta
@@ -28,8 +27,8 @@ def scheduler_page(request, pk):
 
         date_mon = date.fromisoformat(week)
         date_sun = date_mon + timedelta(days=6)
-        logger = logging.getLogger('test')
-        logger.error(date_sun)
+        #logger = logging.getLogger('test')
+        #logger.error(date_sun)
         
         teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
         if teamSchedules.exists():
@@ -48,13 +47,16 @@ def scheduler_upload_page(request, pk):
     team = get_object_or_404(Team, pk=pk)
     teamuser = Team_User.objects.get(Team=team,User=user)
     if request.method =='POST':
-        form = ScheduleForm(request.POST)           #체크한 구간으로 Schedule 객체를 하나 만듦
-        if form.is_valid():
-            existSchedule=PersonalDaySchedule.objects.filter(owner=teamuser, date=form.cleaned_data['date'])
+        week=request.POST["week"]
+        week_day = date.fromisoformat(week)
+        identifier = 1
+        for form in range(7):
+            week_day = week_day + timedelta(days=identifier-1)
+            existSchedule=PersonalDaySchedule.objects.filter(owner=teamuser, date=week_day)
 
             if (existSchedule.exists()): #해당 유저, 날짜의 시간표가 이미 등록되어 있을 때
-                existSchedule=PersonalDaySchedule.objects.get(owner=teamuser, date=form.cleaned_data['date'])
-                existTeamSchedule = TeamDaySchedule.objects.get(team=team, date=form.cleaned_data['date'])
+                existSchedule = PersonalDaySchedule.objects.get(owner=teamuser, date=week_day)
+                existTeamSchedule = TeamDaySchedule.objects.get(team=team, date=week_day)
                 # remove_scheduler(existTeamSchedule,existSchedule) #해당 유저로 등록되어 있던 가용인원을 일단 없앰
                 if existSchedule.time_0:
                     existTeamSchedule.time_0 -= 1
@@ -106,39 +108,43 @@ def scheduler_upload_page(request, pk):
                     existTeamSchedule.time_23 -= 1
                 existTeamSchedule.save()
                 existSchedule.delete()
-
-            userSchedule = PersonalDaySchedule()        
-            userSchedule.time_0 = form.cleaned_data['time_0']
-            userSchedule.time_1 = form.cleaned_data['time_1']
-            userSchedule.time_2 = form.cleaned_data['time_2']
-            userSchedule.time_3 = form.cleaned_data['time_3']
-            userSchedule.time_4 = form.cleaned_data['time_4']
-            userSchedule.time_5 = form.cleaned_data['time_5']
-            userSchedule.time_6 = form.cleaned_data['time_6']
-            userSchedule.time_7 = form.cleaned_data['time_7']
-            userSchedule.time_8 = form.cleaned_data['time_8']
-            userSchedule.time_9 = form.cleaned_data['time_9']
-            userSchedule.time_10 = form.cleaned_data['time_10']
-            userSchedule.time_11 = form.cleaned_data['time_11']
-            userSchedule.time_12 = form.cleaned_data['time_12']
-            userSchedule.time_13 = form.cleaned_data['time_13']
-            userSchedule.time_14 = form.cleaned_data['time_14']
-            userSchedule.time_15 = form.cleaned_data['time_15']
-            userSchedule.time_16 = form.cleaned_data['time_16']
-            userSchedule.time_17 = form.cleaned_data['time_17']
-            userSchedule.time_18 = form.cleaned_data['time_18']
-            userSchedule.time_19 = form.cleaned_data['time_19']
-            userSchedule.time_20 = form.cleaned_data['time_20']
-            userSchedule.time_21 = form.cleaned_data['time_21']
-            userSchedule.time_22 = form.cleaned_data['time_22']
-            userSchedule.time_23 = form.cleaned_data['time_23']
+            logger = logging.getLogger('test')
+            logger.error(identifier)
+            logger.error(week_day)
+            request.POST.get('time_0'+f'-{identifier}')
+            userSchedule = PersonalDaySchedule()    
+            userSchedule.time_0 = False if request.POST.get('time_0'+f'-{identifier}') == None else True
+            userSchedule.time_1 = False if request.POST.get('time_1'+f'-{identifier}') == None else True
+            userSchedule.time_2 = False if request.POST.get('time_2'+f'-{identifier}') == None else True
+            userSchedule.time_3 = False if request.POST.get('time_3'+f'-{identifier}') == None else True
+            userSchedule.time_4 = False if request.POST.get('time_4'+f'-{identifier}') == None else True
+            userSchedule.time_5 = False if request.POST.get('time_5'+f'-{identifier}') == None else True
+            userSchedule.time_6 = False if request.POST.get('time_6'+f'-{identifier}') == None else True
+            userSchedule.time_7 = False if request.POST.get('time_7'+f'-{identifier}') == None else True
+            userSchedule.time_8 = False if request.POST.get('time_8'+f'-{identifier}') == None else True
+            userSchedule.time_9 = False if request.POST.get('time_9'+f'-{identifier}') == None else True
+            userSchedule.time_10 = False if request.POST.get('time_10'+f'-{identifier}') == None else True
+            userSchedule.time_11 = False if request.POST.get('time_11'+f'-{identifier}') == None else True
+            userSchedule.time_12 = False if request.POST.get('time_12'+f'-{identifier}') == None else True
+            userSchedule.time_13 = False if request.POST.get('time_13'+f'-{identifier}') == None else True
+            userSchedule.time_14 = False if request.POST.get('time_14'+f'-{identifier}') == None else True
+            userSchedule.time_15 = False if request.POST.get('time_15'+f'-{identifier}') == None else True
+            userSchedule.time_16 = False if request.POST.get('time_16'+f'-{identifier}') == None else True
+            userSchedule.time_17 = False if request.POST.get('time_17'+f'-{identifier}') == None else True
+            userSchedule.time_18 = False if request.POST.get('time_18'+f'-{identifier}') == None else True
+            userSchedule.time_19 = False if request.POST.get('time_19'+f'-{identifier}') == None else True
+            userSchedule.time_20 = False if request.POST.get('time_20'+f'-{identifier}') == None else True
+            userSchedule.time_21 = False if request.POST.get('time_21'+f'-{identifier}') == None else True
+            userSchedule.time_22 = False if request.POST.get('time_22'+f'-{identifier}') == None else True
+            userSchedule.time_23 = False if request.POST.get('time_23'+f'-{identifier}') == None else True
             userSchedule.owner = teamuser
-            userSchedule.date = form.cleaned_data['date']
+            userSchedule.date = week_day
             userSchedule.save()
+            identifier = identifier + 1
             
-            existTeamSchedule = TeamDaySchedule.objects.filter(team=team, date=form.cleaned_data['date'])
+            existTeamSchedule = TeamDaySchedule.objects.filter(team=team, date=week_day)
             if existTeamSchedule.exists():
-                existTeamSchedule = TeamDaySchedule.objects.get(team=team, date=form.cleaned_data['date'])
+                existTeamSchedule = TeamDaySchedule.objects.get(team=team, date=week_day)
                 #if로 1씩 더하기
                 if userSchedule.time_0:
                     existTeamSchedule.time_0 += 1
@@ -242,10 +248,11 @@ def scheduler_upload_page(request, pk):
                 teamSchedule.team = team
                 teamSchedule.date = userSchedule.date
                 teamSchedule.save()
+
         return redirect(f'/schedules/scheduler_page/{pk}')
         #return render(request, 'schedules/scheduler_page.html', {'team':team})
-    form = ScheduleForm()
-    return render(request, 'schedules/scheduler_upload_page.html', {'form':form})
+
+    return render(request, 'schedules/scheduler_upload_page.html', {'team':team})
 
 
         
