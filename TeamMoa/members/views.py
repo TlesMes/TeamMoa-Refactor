@@ -25,25 +25,24 @@ def team_members_page(request, pk):
         team = get_object_or_404(Team, pk=pk)
         members = Team_User.objects.filter(Team=team)
         todos = Todo.objects.filter(team = team)
-        return render(request, 'members/team_members_page.html', {'members':members, 'todos':todos, 'team':team})
+        if request.method =='POST':
+            form = CreateTodoForm(request.POST)
+            if form.is_valid():
+                member_add_Todo(request, pk ,form.cleaned_data['content'])
+            return redirect(f'/members/team_members_page/{pk}')
+        
+        form = CreateTodoForm()
+        return render(request, 'members/team_members_page.html', {'members':members, 'todos':todos, 'team':team, 'form':form})
 
-def member_add_Todo(request, pk):
+def member_add_Todo(request, pk, content):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
     teamuser = Team_User.objects.get(Team=team,User=user)
-    members = Team_User.objects.filter(Team=team)
-    todos = Todo.objects.filter(team = team)
-    if request.method =='POST':
-        form = CreateTodoForm(request.POST)
-        if form.is_valid():
-            todo = Todo()
-            todo.content = form.cleaned_data['content']
-            todo.team = team
-            todo.owner = teamuser
-            todo.save()
-        return redirect(f'/members/team_members_page/{pk}')
-    form = CreateTodoForm()
-    return render(request, 'members/member_add_Todo.html', {'form':form})
+    todo = Todo()
+    todo.content = content
+    todo.team = team
+    todo.owner = teamuser
+    todo.save()
     
 def member_complete_Todo(request, pk, todo_id):
     user = request.user

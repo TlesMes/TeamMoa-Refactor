@@ -14,6 +14,8 @@
         <br>
         {% for member in members %}
             <h4>{{member.User.nickname}}</h4>
+            <h4>{{member.User.profile}}</h4>
+            <h4>{{member.User.username}}</h4>
             {% for todo in todos %}
                 {% if todo.owner == member %}
                     {%if not todo.is_completed %}
@@ -27,7 +29,17 @@
                 {% endif %}
             {% endfor %}
         {% endfor %}
-        <a href="{% url 'members:member_add_Todo' team.id %}"><button>Todo 추가</button></a>
+        
+        <form method="POST" action="{% url 'members:team_members_page' team.id %}">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button type="submit" class="btn btn-primary" >todo 등록</button>
+        </form>
+
+
+
 
         {% if request.user == team.host %}
             <h4>you are the Host of this board!</h4><br>
