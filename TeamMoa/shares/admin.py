@@ -10,6 +10,9 @@ class PostAdmin(admin.ModelAdmin):
         'writer',
         'hits',
         'registered_date',
+        'article'
     )
-    search_fields = ('title','content','writer__user_id',)
+    search_fields = ('title','article','writer__user_id',)
+   # summernote_fields = ('content',)
+    #def get_member_
 admin.site.register(Post, PostAdmin)
