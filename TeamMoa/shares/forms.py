@@ -18,7 +18,7 @@ class PostWriteForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'article',  'top_fixed']
+        fields = ['title', 'article',  'top_fixed','upload_files']
         widgets = {
             'content':SummernoteWidget(),
         }
