@@ -24,4 +24,5 @@ urlpatterns = [
     path('schedules/', include('schedules.urls')),
     path('members/', include('members.urls')),
     path('mindmaps/', include('mindmaps.urls')),
+
 ]

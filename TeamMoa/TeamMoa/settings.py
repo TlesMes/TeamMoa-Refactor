@@ -1,3 +1,4 @@
+
 """
 Django settings for TeamMoa project.
 
@@ -14,6 +15,12 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+X_FRAME_OPTIONS='SAMEORIGIN'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,10 +49,12 @@ INSTALLED_APPS = [
     'teams.apps.TeamsConfig',
     'shares.apps.SharesConfig',
     'django.contrib.humanize',
+    'django_summernote',
     'schedules.apps.SchedulesConfig',
     'members.apps.MembersConfig',
     'mindmaps.apps.MindmapsConfig',
     
+
 ]
 
 MIDDLEWARE = [
@@ -56,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -103,7 +114,8 @@ STATICFILES_DIRS = [
 
 WSGI_APPLICATION = 'TeamMoa.wsgi.application'
 
-
+MEDIA_URL= '/media/'
+MEDIA_ROOT= os.path.join(BASE_DIR,'media/')
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -155,3 +167,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
