@@ -5,6 +5,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from .forms import PostWriteForm
 from accounts.models import User
 from django.contrib import messages
+
 import urllib
 import os
 from django.http import HttpResponse, Http404
@@ -101,13 +102,15 @@ def post_write_view(request):
         print("포스트 입니다",post.article)
         post.writer = user_id
 
+
         if request.FILES:
             if 'upload_files' in request.FILES.keys():
                 post.filename = request.FILES['upload_files'].name
         post.save(post)
+
         return redirect('shares:post_list')
     else:
-
+        print("여긴왔다")
         form = PostWriteForm()
     return render(request, "shares/post_write_renew.html", {'form': form})
 
@@ -145,6 +148,7 @@ def post_delete_view(request, pk):
     else:
         messages.error(request, "본인 게시글이 아닙니다.")
         return redirect('/shares/' + str(pk))
+
 
 def post_download_view(request, pk):
     try:
