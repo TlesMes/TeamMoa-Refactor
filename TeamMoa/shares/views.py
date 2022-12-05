@@ -5,10 +5,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from .forms import PostWriteForm
 from accounts.models import User
 from django.contrib import messages
-import urllib
-import os
-from django.http import HttpResponse, Http404
-import mimetypes
+
 #로그인 확인 임포트
 #404 임포트
 class PostListView(ListView):
@@ -75,13 +72,11 @@ def post_write_view(request):
         post = form.save(commit = False)
         print("포스트 입니다",post.article)
         post.writer = user_id
-        if request.FILES:
-            if 'upload_files' in request.FILES.keys():
-                post.filename = request.FILES['upload_files'].name
+
         post.save(post.article)
         return redirect('shares:post_list')
     else:
-
+        print("여긴왔다")
         form = PostWriteForm()
     return render(request, "shares/post_write_renew.html", {'form': form})
 
@@ -119,16 +114,3 @@ def post_delete_view(request, pk):
     else:
         messages.error(request, "본인 게시글이 아닙니다.")
         return redirect('/shares/' + str(pk))
-
-def post_download_view(request, pk):
-    post = get_object_or_404(Post, pk = pk)
-    url = post.upload_files.url[1:]
-    file_url= urllib.parse.unquote(url)
-    print(file_url)
-    if os.path.exists(file_url):
-        with open(file_url,'rb')as fh:
-            quote_file_url = urllib.parse.quote(post.filename.encode('utf-8'))
-            response = HttpResponse(fh.read(), content_type=mimetypes.guess_type(file_url)[0])
-            response['Content-Disposition'] = 'attachment;filename*=UTF-8\'\'%s' % quote_file_url
-            return response
-        raise Http404
