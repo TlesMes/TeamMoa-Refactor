@@ -1,19 +1,16 @@
 from django.db import models
-
 from datetime import datetime
 from uuid import uuid4
 import os
 from django.conf import settings
+
+
 import teams.models
-from uuid import uuid4
-from datetime import datetime
-import accounts.models
-
-
-def get_file_path(instance, filename):
-    ymd_path = datetime.now().strftime('%Y/%m/%d')
+def get_file_path(instance , filename ) :
+    ymd_path =datetime.now().strftime('%Y/%m/%d')
     uuid_name = uuid4().hex
     return '/'.join(['upload_file/', ymd_path, uuid_name])
+
 
 class Post(models.Model):
     title = models.CharField(max_length=64, verbose_name='제목')
@@ -29,10 +26,6 @@ class Post(models.Model):
     #isTeams = models.ForeignKey('teams.Team_User',on_delete=models.SET_NULL, null = True, verbose_name='작성자')
 
     #filename = models.CharField(max_length=64, null=True, verbose_name='첨부파일명'
-
-    
-    
-
     def __str__(self):
         return self.title
 
@@ -45,8 +38,3 @@ class Post(models.Model):
         verbose_name ='공지사항'
         verbose_name_plural ='공지사항'
 # Create your models here.
-
-
-
-
-
