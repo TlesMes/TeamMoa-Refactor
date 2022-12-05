@@ -9,6 +9,9 @@ import urllib
 import os
 from django.http import HttpResponse, Http404
 import mimetypes
+import logging
+from teams.models import Team, Team_User
+
 #로그인 확인 임포트
 #404 임포트
 class PostListView(ListView):
@@ -16,18 +19,31 @@ class PostListView(ListView):
     paginate_by = 10
     template_name = 'shares/post_list.html'
     context_object_name = 'post_list'
-
+   # print("PostList id",Post.isTeams)
     def get_queryset(self):
+        team = Post.objects.get(pk=self.kwargs["pk"])
+        Post.isTeams = team.id
         post_list = Post.objects.order_by('-id')
+
+        #logger = logging.getLogger('test')
+        #logger.error("thisis timerid", team.id)
+
+
         return post_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         paginator = context['paginator']
+        #post_fixed = Post.objects.filter(isTeams=Post.isTeams).order_by('-registered_date')
         page_numbers_range = 5
-        max_index = len(paginator.page_range)
-        post_fixed = Post.objects.filter(top_fixed=True).order_by('-registered_date')
+        max_index =len(paginator.page_range)
+        team = Post.objects.get(pk=self.kwargs["pk"])
+
+        post_fixed = Post.objects.filter(isTeams = team.id)
         context['post_fixed'] = post_fixed
+        #teamid = Post.objects.get(pk=team.id)
+        #print("PRINT",context_object_name)
+        #post_team = Post.objects.get(isTeams = )
 
         page = self.request.GET.get('page')
         current_page = int(page) if page else 1
@@ -47,9 +63,17 @@ def post_detail_view(request, pk):
         post_auth = False
         return redirect('/accounts/login')
 
+    """try:
+               ismember = Team.objects.get(team_id=pk)
+               print(ismember.members.all())
 
+           except ismember.DoesNotExist:
+               return HttpResponse(
+                       '<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')"""
     if user.is_authenticated:
         post = get_object_or_404(Post, pk=pk)
+        print("thisis post:",post)
+
         if request.user == post.writer:
             post_auth = True
         else:
@@ -62,23 +86,25 @@ def post_detail_view(request, pk):
     return render(request, 'shares/post_detail1.html', context)
 def post_write_view(request):
     user =request.user
-
+    print("1")
     if not user.is_authenticated:
         post_auth = False
+        print("2")
         return redirect('/accounts/login')
 
     if request.method =="POST":
         form = PostWriteForm(request.POST)
         user_id = User.objects.get(username =user.username)
-
+        print("3")
        # if form.is_valid():
         post = form.save(commit = False)
         print("포스트 입니다",post.article)
         post.writer = user_id
+
         if request.FILES:
             if 'upload_files' in request.FILES.keys():
                 post.filename = request.FILES['upload_files'].name
-        post.save(post.article)
+        post.save(post)
         return redirect('shares:post_list')
     else:
 
@@ -121,7 +147,11 @@ def post_delete_view(request, pk):
         return redirect('/shares/' + str(pk))
 
 def post_download_view(request, pk):
-    post = get_object_or_404(Post, pk = pk)
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        return HttpResponse('<script>alert("File Does not exist.")</script>''<script>location.href="/shares/post_list"</script>')
+    #post = get_object_or_404(Post, pk = pk)
     url = post.upload_files.url[1:]
     file_url= urllib.parse.unquote(url)
     print(file_url)

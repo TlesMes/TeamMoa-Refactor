@@ -25,13 +25,7 @@ class Post(models.Model):
     upload_files = models.FileField(upload_to=get_file_path, null=True, blank=True, verbose_name='파일')
     upload_images = models.FileField(upload_to=get_file_path, null=True, blank=True, verbose_name='이미지파일')
     filename = models.CharField(max_length=64, null=True, verbose_name='첨부파일명')
-
-    #isTeams = models.ForeignKey('teams.Team_User',on_delete=models.SET_NULL, null = True, verbose_name='작성자')
-
-    #filename = models.CharField(max_length=64, null=True, verbose_name='첨부파일명'
-
-    
-    
+    isTeams = models.ForeignKey('teams.Team',on_delete=models.CASCADE, verbose_name='팀')
 
     def __str__(self):
         return self.title
