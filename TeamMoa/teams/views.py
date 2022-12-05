@@ -114,6 +114,7 @@ def team_main_page(request, pk):
             if (phase.startdate <= today_date) & (phase.enddate > today_date):
                 left = phase.enddate-today_date
                 today_phase = f'{phase.content}, {left.days}일 남았습니다'
+                break
             else:
                 today_phase = "일정이 없습니다."
         
