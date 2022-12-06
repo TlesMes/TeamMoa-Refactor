@@ -29,8 +29,8 @@ class Post(models.Model):
         return self.title
 
     def delete(self, *args, **kargs):
-       # if self.upload_files:
-        #    os.remove(os.path.join(settings.MEDIA_ROOT, self.upload_files.path))
+        if self.upload_files:
+            os.remove(os.path.join(settings.MEDIA_ROOT, self.upload_files.path))
         super(Post, self).delete(*args,**kargs)
     class Meta:
         db_table = '공지사항'
