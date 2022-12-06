@@ -39,8 +39,8 @@ class PostListView(ListView):
         context['team_id'] = team.id
 
         print("THIS IS CONTEXT TEAMID ",context)
-        post_fixed = Post.objects.filter(isTeams = team.id)
-        context['post_fixed'] = post_fixed
+        #post_fixed = Post.objects.filter(isTeams = team.id)
+        #context['post_fixed'] = post_fixed
         #teamid = Post.objects.get(pk=team.id)
         #print("PRINT",context_object_name)
         #post_team = Post.objects.get(isTeams = )
@@ -92,7 +92,7 @@ def post_write_view(request,pk):
         return redirect('/accounts/login')
 
     if request.method =="POST":
-        form = PostWriteForm(request.POST)
+        form = PostWriteForm(request.POST,request.FILES)
         user_id = User.objects.get(username =user.username)
         #print("form .isteam", form.isTeams)
         #print("team_number", team_number)
@@ -111,8 +111,9 @@ def post_write_view(request,pk):
             if request.FILES:
                 if 'upload_files' in request.FILES.keys():
                     post.filename = request.FILES['upload_files'].name
-            post.save(post)
+            post.save()
             return redirect('shares:post_list', pk)
+
     else:
         print( "team_number:", team_number )
         form = PostWriteForm()
@@ -147,13 +148,14 @@ def post_edit_view(request, pk):
 
 def post_delete_view(request, pk):
     post = Post.objects.get(id=pk)
+    teamno=post.isTeams_id
     if post.writer == request.user or request.user.level == '0':
         post.delete()
         messages.success(request, "삭제되었습니다.")
-        return redirect('/shares/')
+        return redirect(f'/shares/{teamno}/')
     else:
         messages.error(request, "본인 게시글이 아닙니다.")
-        return redirect('/shares/' + str(pk))
+        return redirect(f'/shares/{teamno}' )
 
 
 def post_download_view(request, pk):
