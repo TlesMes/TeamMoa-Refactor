@@ -20,5 +20,4 @@ urlpatterns =[
 ]
 urlpatterns += static(settings.MEDIA_URL, protected_file, document_root=settings.MEDIA_ROOT)
 
-]
 
