@@ -22,15 +22,11 @@ class PostListView(ListView):
     context_object_name = 'post_list'
    # print("PostList id",Post.isTeams)
     def get_queryset(self):
-        team = Post.objects.get(pk=self.kwargs["pk"])
-        Post.objects.isTeams = team.id
-        #logger = logging.getLogger('test')
-        #logger.error("thisis timerid", team.id)
-        post_list = Post.objects.filter(pk=team.id)
-        print("TEAM.ID",Post.objects.isTeams)
+        team = Team.objects.get(pk=self.kwargs["pk"])
+    
+        post_list = Post.objects.filter(isTeams=team.id)
 
-        #print("thisis post index,",Post.objects.get(pk=team.id).id)
-        #Todo 해당 팀 정보 가져오는거 까지 성공, 근데 post에 is team이 없다. 게시글 생성시 teamid 도 추가해야됨.
+        
         return post_list
 
     def get_context_data(self, **kwargs):
@@ -38,7 +34,7 @@ class PostListView(ListView):
         paginator = context['paginator']
         page_numbers_range = 5
         max_index =len(paginator.page_range)
-        team = Post.objects.get(pk=self.kwargs["pk"])
+        team = Team.objects.get(pk=self.kwargs["pk"])
 
         context['team_id'] = team.id
 
@@ -85,8 +81,9 @@ def post_detail_view(request, pk):
             'post_auth': post_auth,
         }
     return render(request, 'shares/post_detail1.html', context)
+
 def post_write_view(request,pk):
-    user =request.user
+    user = request.user
     team_number = pk
     print("Thsis request method", request.method)
     if not user.is_authenticated:
@@ -121,7 +118,7 @@ def post_write_view(request,pk):
         form = PostWriteForm()
 
 
-    return render(request, "shares/post_write_renew.html", {'form': form},{'pk':pk})
+    return render(request, "shares/post_write_renew.html", {'form': form, 'pk':pk})
 
 
 def post_edit_view(request, pk):
