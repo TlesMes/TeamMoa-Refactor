@@ -14,12 +14,8 @@
 
 {% block summernote %}
 <script type="text/javascript">
-
-    console.log("hi")
-    alert('ddddd')
     $(document).ready(function () {
-
-
+        $('#id_content').summernote({
             placeholder: '내용을 입력해주세요.',
             height: 500,
             minHeight: 500,
@@ -35,13 +31,12 @@
             ['insert', ['link', 'picture', 'video']],
             ['view', ['fullscreen', 'help']]
             ]
-
+        });
         $('p').css('margin-bottom','0')
         $('.note-resizebar').css('display','none');
     });
-
 </script>
-$('#id_article').summernote({});
+
 <link rel="stylesheet" href="{% static 'css/users/checkbox.css' %}" type="text/css">
 {% endblock %}
 
@@ -59,19 +54,22 @@ $('#id_article').summernote({});
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card" style="width: 100%;">
-                <!--제목,분류,작성일-->
+                <!--제목,분류,작성일-->xs
                 <div class="card-header" style="padding: 0rem 0.8rem">
                     <div class="md-form form-group" style="margin-top: 8.5px;">
                         <div style="padding: 0 5.5px;">
 
                             {{ form.title }}
+
                         </div>
                     </div>
                 </div>
                 <div>
                     <!--내용-->
                     {{ form.article }}
+
                 </div>
+
             </div>
 
             <div class="card-footer" style="padding-left: 0px; margin-top:18px;">
@@ -79,7 +77,7 @@ $('#id_article').summernote({});
                     <div class="col-sm-12">
                         {{ form.upload_files }}
                         <small id="help" class="form-text text-muted" style="margin-bottom: -15px;">
-                            &nbsp;&nbsp;[파일 업로드]&nbsp;&nbsp;<i class="fas fa-upload"></i>&nbsp;10MB 이하의 파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
+                           [파일 업로드]<i class="fas fa-upload"></i>&nbsp;10MB 이하의 파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
                         </small>
                     </div>
                 </div>

@@ -23,23 +23,26 @@ class PostListView(ListView):
    # print("PostList id",Post.isTeams)
     def get_queryset(self):
         team = Post.objects.get(pk=self.kwargs["pk"])
-        Post.isTeams = team.id
-        post_list = Post.objects.order_by('-id')
-
+        Post.objects.isTeams = team.id
         #logger = logging.getLogger('test')
         #logger.error("thisis timerid", team.id)
+        post_list = Post.objects.filter(pk=team.id)
+        print("TEAM.ID",Post.objects.isTeams)
 
-
+        #print("thisis post index,",Post.objects.get(pk=team.id).id)
+        #Todo 해당 팀 정보 가져오는거 까지 성공, 근데 post에 is team이 없다. 게시글 생성시 teamid 도 추가해야됨.
         return post_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         paginator = context['paginator']
-        #post_fixed = Post.objects.filter(isTeams=Post.isTeams).order_by('-registered_date')
         page_numbers_range = 5
         max_index =len(paginator.page_range)
         team = Post.objects.get(pk=self.kwargs["pk"])
 
+        context['team_id'] = team.id
+
+        print("THIS IS CONTEXT TEAMID ",context)
         post_fixed = Post.objects.filter(isTeams = team.id)
         context['post_fixed'] = post_fixed
         #teamid = Post.objects.get(pk=team.id)
@@ -60,20 +63,17 @@ class PostListView(ListView):
         return context
 def post_detail_view(request, pk):
     user =request.user
+
+    postid =Post.objects.filter(id=pk)
+    print(postid)
     if not user.is_authenticated:
         post_auth = False
         return redirect('/accounts/login')
 
-    """try:
-               ismember = Team.objects.get(team_id=pk)
-               print(ismember.members.all())
 
-           except ismember.DoesNotExist:
-               return HttpResponse(
-                       '<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')"""
     if user.is_authenticated:
         post = get_object_or_404(Post, pk=pk)
-        print("thisis post:",post)
+
 
         if request.user == post.writer:
             post_auth = True
@@ -85,9 +85,10 @@ def post_detail_view(request, pk):
             'post_auth': post_auth,
         }
     return render(request, 'shares/post_detail1.html', context)
-def post_write_view(request):
+def post_write_view(request,pk):
     user =request.user
-    print("1")
+    team_number = pk
+    print("Thsis request method", request.method)
     if not user.is_authenticated:
         post_auth = False
         print("2")
@@ -96,23 +97,31 @@ def post_write_view(request):
     if request.method =="POST":
         form = PostWriteForm(request.POST)
         user_id = User.objects.get(username =user.username)
-        print("3")
-       # if form.is_valid():
-        post = form.save(commit = False)
-        print("포스트 입니다",post.article)
-        post.writer = user_id
+        #print("form .isteam", form.isTeams)
+        #print("team_number", team_number)
+        #form.isTeams = team_number
 
+        if form.is_valid():
 
-        if request.FILES:
-            if 'upload_files' in request.FILES.keys():
-                post.filename = request.FILES['upload_files'].name
-        post.save(post)
+            post=form.save(commit=False)
+            messages.success(request, '성공적으로 등록되었습니다.')
+            print("포스트 내용 입니다",post.article)
+            print("포스트 제목 입니다", post.title)
 
-        return redirect('shares:post_list')
+            post.writer = user_id
+            post.isTeams_id = team_number
+        #post.isTeams
+            if request.FILES:
+                if 'upload_files' in request.FILES.keys():
+                    post.filename = request.FILES['upload_files'].name
+            post.save(post)
+            return redirect('shares:post_list', pk)
     else:
-        print("여긴왔다")
+        print( "team_number:", team_number )
         form = PostWriteForm()
-    return render(request, "shares/post_write_renew.html", {'form': form})
+
+
+    return render(request, "shares/post_write_renew.html", {'form': form},{'pk':pk})
 
 
 def post_edit_view(request, pk):

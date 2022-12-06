@@ -6,8 +6,10 @@ class PostWriteForm(forms.ModelForm):
     # files = forms.FileField(widget=forms.ClearableFileInput(attrs={
     #     'multiple': True
     #     }))
+
     def __init__(self, *args, **kwargs):
         super(PostWriteForm, self).__init__(*args, **kwargs)
+
         self.fields['title'].label = '제목'
         self.fields['title'].widget.attrs.update({
             'placeholder': '제목을 입력해주세요.',
@@ -18,7 +20,8 @@ class PostWriteForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'article',  'top_fixed','upload_files']
+        fields = ['title', 'article','upload_files']
         widgets = {
-            'content':SummernoteWidget(),
+            #'article':SummernoteWidget(),
+
         }
