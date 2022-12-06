@@ -38,18 +38,21 @@
                 </tr>
                 {% endfor %}
                 {% endif %}
+
                 {% endif %}
             </thead>
             <tbody>
                 {% if post_list %}
                 {% for post in post_list %}
-                <tr class="text-center" style="cursor:pointer;" onclick="location.href='/shares/{{ post.id }}/'">
+                <tr class="text-center" style="cursor:pointer;" onclick="location.href='/shares/{{ post.id }}/detail/'">
+                <!-- 여기 고침-->
                     <td style="font-weight: 500;">{{ post.id }}</td>
                     <td class="text-left" style="width:50%; font-weight: 600;"><a id="post-{{ post.id }}">{{ post.title|truncatechars:30 }}</a></td>
                     <td style="font-weight: 500;">{{ post.writer }}</td>
                     <td style="font-weight: 500;">{{ post.registered_date|date:'Y. m. d' }}</td>
                     <td style="font-weight: 500;">{{ post.hits }}</td>
-                    <td style="font-weight: 500;">{{ post.id }}</td>
+                    <td style="font-weight: 500;">{{ team.id }}</td>
+
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -98,7 +101,10 @@
             </div>
         </form>
         <div>
-            <a href="{% url 'shares:post_write' %}" id="write_btn" class="btn btn-sm">글쓰기</a>
+            {% if team_id %}
+                <a href="{% url 'shares:post_write' team_id%}" id="write_btn" class="btn btn-sm">글쓰기</a>-->
+            {% endif %}
+            <!--<a onclick="location.href='/shares/{{ team.id }}/write/'">글쓰기</a>-->
         </div>
         <div class="col-md-offset-6">
             {% if is_paginated %}
