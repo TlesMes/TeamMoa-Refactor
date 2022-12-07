@@ -17,11 +17,12 @@ class PostWriteForm(forms.ModelForm):
             'id': 'form_title',
             'autofocus': True,
         })
+        #self.fields['article'] =forms.CharField(widget=SummernoteWidget())
 
     class Meta:
         model = Post
         fields = ['title', 'article','upload_files']
-        widgets = {
-            #'article':SummernoteWidget(),
+        #widgets = {
+       #     'article':SummernoteWidget(),
 
-        }
+       # }

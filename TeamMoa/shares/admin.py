@@ -8,7 +8,6 @@ class PostAdmin(admin.ModelAdmin):
     list_display =(
         'title',
         'writer',
-        'hits',
         'registered_date',
         'article'
     )

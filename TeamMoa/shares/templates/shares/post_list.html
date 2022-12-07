@@ -23,7 +23,7 @@
                     <th style="font-weight: bold; font-size: 16px;">제목</th>
                     <th style="font-weight: bold; font-size: 16px;">작성자</th>
                     <th style="font-weight: bold; font-size: 16px;">등록일</th>
-                    <th style="font-weight: bold; font-size: 16px;">조회수</th>
+
                 </tr>
                 {% if q %}
                 {% else %}
@@ -34,12 +34,13 @@
                     <td class="text-left" style="width:50%"><a id="post-{{ post.id }}"><i class="fas fa-bullhorn"></i>&nbsp;&nbsp;&nbsp;{{ post.title|truncatechars:30 }}</a></td>
                     <td>{{ post.writer }}</td>
                     <td>{{ post.registered_date|date:'Y. m. d' }}</td>
-                    <td>{{ post.hits }}</td>
+
                 </tr>
                 {% endfor %}
                 {% endif %}
 
                 {% endif %}
+            <!-- <td>{{ post.hits }}</td>-->
             </thead>
             <tbody>
                 {% if post_list %}
