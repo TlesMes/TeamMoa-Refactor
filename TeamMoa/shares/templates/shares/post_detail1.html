@@ -28,7 +28,7 @@
                     <!--{% if post.upload_files %}-->
                     <div class="col-12 text-right">
                         <span style="color: gray;">첨부파일 :&nbsp;</span>
-                        <a id="id_uploaded_file" href="{% url 'post:post_download' post.id %}" >{{ post.filename|truncatechars:25 }}</a>
+                        <a id="id_uploaded_file" href="{% url 'shares:post_download' post.id %}" >{{ post.filename|truncatechars:25 }}</a>
                     </div>
                    <!-- {% endif %}-->
                     <!--내용-->
