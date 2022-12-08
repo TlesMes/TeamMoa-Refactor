@@ -187,8 +187,12 @@ def team_delete_devPhase(request, pk, phase_id):
         return redirect(f'/teams/team_main_page/{pk}')
 
 
-def team_mindmap(request, pk):
-    pass
+def team_disband(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    user = request.user
 
-def team_schedule(request, pk):
-    pass
+    if team.host != user:
+        return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
+    else:
+        team.delete()
+        return redirect('/teams/team_list')
