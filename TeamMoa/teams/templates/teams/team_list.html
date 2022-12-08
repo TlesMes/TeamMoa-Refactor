@@ -1,32 +1,23 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'css/team_list.css' %}" />
-    <img src="{% static 'img/LogoW.svg' %}" />
-  </head>
-
-  {% block contents %}
-
-  <div class="Container">
+{% extends 'base2.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/team_list.css' %}" />
+<section class="teamlistsection">
+  <div class="container">
     {% if request.user.is_authenticated %}
     <div class="scroll_section">
       {% for team in teams %}
       <div class="teamlist">
-        <div class="list_content">
-          <p id="team_title">{{ team.title }}(#{{ team.id }})</p>
-          <p id="user_num">({{ team.maxuser }}/{{ team.currentuser }})</p>
-          <!-- <br><p id ="introduction">팀 소개 {{introduction}}</p> !-->
-          <button
-            class="join"
-            onclick="location.href='/teams/team_main_page/{{ team.id }}'"
-          >
-            참가
-          </button>
-        </div>
+        <h2 id="team_title">
+          {{ team.title }}<span>(#{{team.invitecode}})</span>
+          <span id="user_num">
+            ({{ team.currentuser }}/{{ team.maxuser }})
+          </span>
+        </h2>
+        <button
+          class="join"
+          onclick="location.href='/teams/team_main_page/{{ team.id }}'"
+        >
+          참가
+        </button>
       </div>
       {% endfor %}
     </div>
@@ -46,21 +37,8 @@
         팀 검색
       </button>
     </div>
-    <!--
-            {% if teams.has_previous %}
-            <button class="btn btn-primary" onclick='location.href ="?page=1"'>맨 앞으로</button>
-            <button class="btn btn-primary" onclick='location.href ="?page={{teams.previous_page_number}}"'>이전으로</button>
-            {% endif %}
-            <span>{{teams.number}}</span>
-            <span>/</span>
-            <span>{{teams.paginator.num_pages}}</span>
-            {% if teams.has_next %}
-            <button class="btn btn-primary" onclick='location.href ="?page1={{teams.next_page_number}}"'>다음으로</button>
-            <button class="btn btn-primary" onclick='location.href ="?page1={{teams.paginator.num_pages}}"'>맨 뒤로</button>
-            {% endif %}
-            -->
     {% endif %}
   </div>
+</section>
 
-  {% endblock %}
-</html>
+{% endblock %}

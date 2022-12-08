@@ -26,10 +26,10 @@ def team_list(request):
     user = request.user
     if user.is_authenticated:
         joined_teams = Team.objects.filter(members=user).order_by('id')
-        page = request.GET.get('page',1)
-        mypaginator = Paginator(joined_teams, 5)
-        myteams = mypaginator.get_page(page)
-    return render(request, 'teams/team_list.html', {'teams': myteams})
+        # page = request.GET.get('page',1)
+        # mypaginator = Paginator(joined_teams, 5)
+        # myteams = mypaginator.get_page(page)
+    return render(request, 'teams/team_list.html', {'teams': joined_teams})
 
 
 def team_create(request):

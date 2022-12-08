@@ -1,82 +1,77 @@
-/* 인원수 number 바 */
-
-body {
-    background: #2D3D57;
+.teamcreatesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
 }
 
-#create {
-    margin-left: auto;
-    margin-right: auto;
-    width: 30%;
+h2 {
+  font-size: 19px;
+  color: #a6b0d0;
+  margin-bottom: 10px;
 }
 
-label {
-    font-size: 20px;
-    font-weight: 700px;
-    line-height: 30px;
-    color: #A6B0D0;
+input {
+  width: 480px;
+  padding: 15px;
+  background-color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  color: #465173;
+  outline: none;
+  margin-bottom: 20px;
 }
 
-.create_input {
-    /* title, maxuser, teampasswd */
-    width: 98%;
-    max-width: 98%;
-    padding-left: 5px;
-    padding-right: 0px;
-    height: 30px;
-    background: #FFFFFF;
-    border-radius: 10px;
-    font-size: 20px;
-    font-weight: 500;
-    line-height: 30px;
-    color: #465173;
+textarea {
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  height: 150px;
+  font-size: 20px;
+  color: #465173;
 }
 
-.introduction {
-    width: 98%;
-    max-width: 98%;
-    height: 55px;
-    padding-left: 5px;
-    padding-right: 0px;
-    border-radius: 10px;
-    font-style: medium;
-    font-size: 22px;
-    font-weight: 700;
-    color: #465173;
-    background: #FFFFFF;
+button {
+  width: 100%;
+  height: 70px;
+  background: #a6b0d0;
+  color: #fff;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
 }
 
-#create_button {
-    display: block;
-    margin-top: 30px;
-    width: 100%;
-    height: 60px;
-    line-height: 15px;
-    color: #FFFFFF;
-    font-size: 20px;
-    font-style: bold;
-    border-radius: 10px;
-    background: #A6B0D0;
-    text-align: center;
+.caption {
+  margin-top: 18px;
+  text-align: center;
 }
 
-#create_button:hover {
-    cursor: pointer;
-    background-color: #7f8bb1;
+.caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
 }
 
-#exist {
-    text-align: center;
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 30px;
-    color: #A6B0D0;
+.caption a span {
+  color: #6285f6;
 }
 
-.toTeamList {
-    font-style: normal;
-    font-weight: 500;
-    font-size: 16px;
-    color: #6285f6;
-    text-decoration: none;
+a:hover {
+  color: #7f8bb1;
+}
+
+a:visited,
+a:hover,
+a:focus,
+a:active {
+  text-decoration: none;
 }
