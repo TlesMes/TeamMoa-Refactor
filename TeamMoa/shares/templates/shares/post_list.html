@@ -29,7 +29,7 @@
                 {% else %}
                 {% if post_fixed %}
                 {% for post in post_fixed %}
-                <tr class="table-secondary text-center" style="font-weight: bold; cursor:pointer;" onclick="location.href='/shares/{{ post.id}}/'">
+                <tr class="table-secondary text-center" style="font-weight: bold; cursor:pointer;" onclick="location.href='/shares/{{team.id}}/'">
                     <td>{{ post.id }}</td>
                     <td class="text-left" style="width:50%"><a id="post-{{ post.id }}"><i class="fas fa-bullhorn"></i>&nbsp;&nbsp;&nbsp;{{ post.title|truncatechars:30 }}</a></td>
                     <td>{{ post.writer }}</td>
@@ -45,7 +45,7 @@
             <tbody>
                 {% if post_list %}
                 {% for post in post_list %}
-                <tr class="text-center" style="cursor:pointer;" onclick="location.href='/shares/{{ post.id }}/detail/'">
+                <tr class="text-center" style="cursor:pointer;" onclick="location.href='/shares/{{ team.id }}/detail/{{ post.id }}'">
                 <!-- 여기 고침-->
                     <td style="font-weight: 500;">{{ post.id }}</td>
                     <td class="text-left" style="width:50%; font-weight: 600;"><a id="post-{{ post.id }}">{{ post.title|truncatechars:30 }}</a></td>

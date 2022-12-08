@@ -55,12 +55,13 @@ class PostListView(ListView):
 
         page_range = paginator.page_range[start_index:end_index]
         context['page_range'] = page_range
-
+        context['team'] = team
         return context
-def post_detail_view(request, pk):
-    user =request.user
 
-    postid =Post.objects.filter(id=pk)
+def post_detail_view(request, pk, post_id):
+    user =request.user
+    team = get_object_or_404(Team, pk=pk)
+    postid =Post.objects.filter(id=post_id)
     print(postid)
     if not user.is_authenticated:
         post_auth = False
@@ -68,7 +69,7 @@ def post_detail_view(request, pk):
 
 
     if user.is_authenticated:
-        post = get_object_or_404(Post, pk=pk)
+        post = get_object_or_404(Post, pk=post_id)
 
 
         if request.user == post.writer:
@@ -79,11 +80,13 @@ def post_detail_view(request, pk):
         context = {
             'post': post,
             'post_auth': post_auth,
+            'team' : team
         }
     return render(request, 'shares/post_detail1.html', context)
 
 def post_write_view(request,pk):
     user = request.user
+    team = get_object_or_404(Team, pk=pk)
     team_number = pk
     print("Thsis request method", request.method)
     if not user.is_authenticated:
@@ -119,12 +122,12 @@ def post_write_view(request,pk):
         form = PostWriteForm()
 
 
-    return render(request, "shares/post_write_renew.html", {'form': form, 'pk':pk})
+    return render(request, "shares/post_write_renew.html", {'form': form, 'pk':pk, 'team':team})
 
 
-def post_edit_view(request, pk):
-    post = Post.objects.get(id=pk)
-
+def post_edit_view(request, pk, post_id):
+    post = Post.objects.get(id=post_id)
+    team = get_object_or_404(Team, pk=pk)
     if request.method == "POST":
         #로그인
             form = PostWriteForm(request.POST, instance=post)
@@ -134,20 +137,22 @@ def post_edit_view(request, pk):
                 messages.success(request, "수정되었습니다.")
                 return redirect('/shares/' + str(pk))
     else:
-        post = Post.objects.get(id=pk)
+        post = Post.objects.get(id=post_id)
         if post.writer == request.user or request.user.level == '0':
             form = PostWriteForm(instance=post)
             context = {
                 'form': form,
                 'edit': '수정하기',
+                'team' : team
             }
             return render(request, "shares/post_write_renew.html", context)
         else:
             messages.error(request, "본인 게시글이 아닙니다.")
             return redirect('/shares/' + str(pk))
 
-def post_delete_view(request, pk):
-    post = Post.objects.get(id=pk)
+def post_delete_view(request, pk, post_id):
+    team = get_object_or_404(Team, pk=pk)
+    post = Post.objects.get(id=post_id)
     teamno=post.isTeams_id
     if post.writer == request.user or request.user.level == '0':
         post.delete()
@@ -158,9 +163,9 @@ def post_delete_view(request, pk):
         return redirect(f'/shares/{teamno}' )
 
 
-def post_download_view(request, pk):
+def post_download_view(request, post_id):
     try:
-        post = Post.objects.get(pk=pk)
+        post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return HttpResponse('<script>alert("File Does not exist.")</script>''<script>location.href="/shares/post_list"</script>')
     #post = get_object_or_404(Post, pk = pk)
