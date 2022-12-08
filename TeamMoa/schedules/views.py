@@ -26,7 +26,7 @@ def scheduler_page(request, pk):
         week=request.POST["week"]
 
         date_mon = date.fromisoformat(week)
-        date_sun = date_mon + timedelta(days=6)
+        date_sun = date_mon + timedelta(days=7)
         #logger = logging.getLogger('test')
         #logger.error(date_sun)
         
@@ -51,7 +51,7 @@ def scheduler_upload_page(request, pk):
         week_day = date.fromisoformat(week)
         identifier = 1
         for form in range(7):
-            week_day = week_day + timedelta(days=identifier-1)
+            week_day = week_day + timedelta(days=1)
             existSchedule=PersonalDaySchedule.objects.filter(owner=teamuser, date=week_day)
 
             if (existSchedule.exists()): #해당 유저, 날짜의 시간표가 이미 등록되어 있을 때
