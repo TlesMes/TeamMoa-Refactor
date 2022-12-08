@@ -27,11 +27,8 @@ def mindmap_list_page(request, pk):
 
     user = request.user
     team = get_object_or_404(Team, pk=pk)
-    team_mindmaps = Mindmap.objects.filter(team=team)
-    page = request.GET.get('page',1)
-    paginator = Paginator(team_mindmaps, 10)
-    mindmaps = paginator.get_page(page)
-
+    mindmaps = Mindmap.objects.filter(team=team)
+  
     return render(request, 'mindmaps/mindmap_list_page.html', {'mindmaps':mindmaps, 'team':team})
 
 def mindmap_detail_page(request, pk, mindmap_id):
