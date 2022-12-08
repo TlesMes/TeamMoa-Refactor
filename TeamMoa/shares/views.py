@@ -24,7 +24,7 @@ class PostListView(ListView):
     def get_queryset(self):
         team = Team.objects.get(pk=self.kwargs["pk"])
     
-        post_list = Post.objects.filter(isTeams=team.id)
+        post_list = Post.objects.filter(isTeams=team.id).order_by('-id')
 
         
         return post_list

@@ -91,7 +91,7 @@ select {
               post.title|truncatechars:30 }}</a
             >
           </td>
-          <td>{{ post.writer }}</td>
+          <td>{{ post.writer.nickname }}</td>
           <td>{{ post.registered_date|date:'Y. m. d' }}</td>
         </tr>
         {% endfor %} {% endif %} {% endif %}
@@ -109,12 +109,11 @@ select {
           <td class="text-left" style="width: 50%; font-weight: 600">
             <a id="post-{{ post.id }}">{{ post.title|truncatechars:30 }}</a>
           </td>
-          <td style="font-weight: 500">{{ post.writer }}</td>
+          <td style="font-weight: 500">{{ post.writer.nickname }}</td>
           <td style="font-weight: 500">
             {{ post.registered_date|date:'Y. m. d' }}
           </td>
           <td style="font-weight: 500">{{ post.hits }}</td>
-          <td style="font-weight: 500">{{ team.id }}</td>
         </tr>
         {% endfor %} {% else %} {% if q %}
         <tr class="text-center">
