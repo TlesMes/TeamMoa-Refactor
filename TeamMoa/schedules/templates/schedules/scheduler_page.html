@@ -15,8 +15,87 @@
       </a>
     </div>
     <div class="schedulesdiv" id="schedulesdiv">
+      <div class="timediv">
+        <table>
+          <tr>
+            <td>12:00 AM</td>
+          </tr>
+          <tr>
+            <td>01:00 AM</td>
+          </tr>
+          <tr>
+            <td>02:00 AM</td>
+          </tr>
+          <tr>
+            <td>03:00 AM</td>
+          </tr>
+          <tr>
+            <td>04:00 AM</td>
+          </tr>
+          <tr>
+            <td>05:00 AM</td>
+          </tr>
+          <tr>
+            <td>06:00 AM</td>
+          </tr>
+          <tr>
+            <td>07:00 AM</td>
+          </tr>
+          <tr>
+            <td>08:00 AM</td>
+          </tr>
+          <tr>
+            <td>09:00 AM</td>
+          </tr>
+          <tr>
+            <td>10:00 AM</td>
+          </tr>
+          <tr>
+            <td>11:00 AM</td>
+          </tr>
+          <tr>
+            <td>12:00 PM</td>
+          </tr>
+          <tr>
+            <td>01:00 PM</td>
+          </tr>
+          <tr>
+            <td>02:00 PM</td>
+          </tr>
+          <tr>
+            <td>03:00 PM</td>
+          </tr>
+          <tr>
+            <td>04:00 PM</td>
+          </tr>
+          <tr>
+            <td>05:00 PM</td>
+          </tr>
+          <tr>
+            <td>06:00 PM</td>
+          </tr>
+          <tr>
+            <td>07:00 PM</td>
+          </tr>
+          <tr>
+            <td>08:00 PM</td>
+          </tr>
+          <tr>
+            <td>09:00 PM</td>
+          </tr>
+          <tr>
+            <td>10:00 PM</td>
+          </tr>
+          <tr>
+            <td>11:00 PM</td>
+          </tr>
+          <tr>
+            <td>12:00 AM</td>
+          </tr>
+        </table>
+      </div>
       {{message}} {% for schedule in schedules %}
-      <div class="schedulediv" id="schedulediv">
+      <div class="schedulediv" id="schedulediv{{forloop.counter}}">
         <h3>{{schedule.date}}</h3>
         <table>
           <tbody id="urltbody">
@@ -99,5 +178,45 @@
     </div>
   </div>
 </section>
+<script>
+  var color = 100 / `{{team.maxuser}}` / 100;
+  var color1 = color * 1;
+  var color2 = color * 2;
+  var color3 = color * 3;
+  var color4 = color * 4;
+  var color5 = color * 5;
+  for(var k = 1; k < 8; k++){
+    for (var i = 0; i < 24; i++) {
+      var str = document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+        i
+      ].childNodes[0].nodeValue;
+      if (str == 0) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = "rgba(166, 176, 208, 0)";
+      } else if (str == 1) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = `rgba(166, 176, 208, ${color1})`;
+      } else if (str == 2) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = `rgba(166, 176, 208, ${color2})`;
+      } else if (str == 3) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = `rgba(166, 176, 208, ${color3})`;
+      } else if (str == 4) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = `rgba(166, 176, 208, ${color4})`;
+      } else if (str == 5) {
+        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
+          i
+        ].style.backgroundColor = `rgba(166, 176, 208, ${color5})`;
+      }
+    }
+  }
+</script>
 
 {% endblock %}

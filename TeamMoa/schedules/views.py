@@ -51,7 +51,6 @@ def scheduler_upload_page(request, pk):
         week_day = date.fromisoformat(week)
         identifier = 1
         for form in range(7):
-            week_day = week_day + timedelta(days=1)
             existSchedule=PersonalDaySchedule.objects.filter(owner=teamuser, date=week_day)
 
             if (existSchedule.exists()): #해당 유저, 날짜의 시간표가 이미 등록되어 있을 때
@@ -248,6 +247,7 @@ def scheduler_upload_page(request, pk):
                 teamSchedule.team = team
                 teamSchedule.date = userSchedule.date
                 teamSchedule.save()
+            week_day = week_day + timedelta(days=1)
 
         return redirect(f'/schedules/scheduler_page/{pk}')
         #return render(request, 'schedules/scheduler_page.html', {'team':team})
