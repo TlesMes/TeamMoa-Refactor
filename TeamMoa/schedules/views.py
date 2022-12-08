@@ -4,7 +4,6 @@ from teams.models import Team, Team_User
 from .models import PersonalDaySchedule, TeamDaySchedule
 from datetime import datetime, date, timedelta
 from django.utils.dateparse import parse_datetime
-import logging
 # Create your views here.
 
 def is_member(request, pk) -> bool:
@@ -26,16 +25,20 @@ def scheduler_page(request, pk):
         week=request.POST["week"]
 
         date_mon = date.fromisoformat(week)
-        date_sun = date_mon + timedelta(days=7)
-        #logger = logging.getLogger('test')
-        #logger.error(date_sun)
+        date_sun = date_mon + timedelta(days=6)
+
         
         teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
         if teamSchedules.exists():
             return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team})
         else:
-            message = '해당 날짜는 스케줄 X'
-            return render(request, 'schedules/scheduler_page.html', {'message':message,'team':team})
+            for i in range(7):
+                teamSchedule = TeamDaySchedule()
+                teamSchedule.date = date_mon + timedelta(days=i)
+                teamSchedule.team = team
+                teamSchedule.save()
+            teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
+            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team})
     else:
         return render(request, 'schedules/scheduler_page.html',{'team':team})
         
@@ -107,9 +110,7 @@ def scheduler_upload_page(request, pk):
                     existTeamSchedule.time_23 -= 1
                 existTeamSchedule.save()
                 existSchedule.delete()
-            logger = logging.getLogger('test')
-            logger.error(identifier)
-            logger.error(week_day)
+
             request.POST.get('time_0'+f'-{identifier}')
             userSchedule = PersonalDaySchedule()    
             userSchedule.time_0 = False if request.POST.get('time_0'+f'-{identifier}') == None else True
