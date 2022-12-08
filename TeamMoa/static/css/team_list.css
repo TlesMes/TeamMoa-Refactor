@@ -1,150 +1,99 @@
-
-html {
-    height:100%;
-}
-body {
-    height:100%;
-    background: #2D3D57;
-}
-
-.Container {
-    width: 40%;
-    height: 500px;
-    max-height: 500px;
-    background: #D9D9D9;
-    border-radius: 15px;
-    min-width: max-content;
-    margin: 0 auto;
+.teamlistsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
 }
 
-.scroll_section{
-    height: 350px;
-    max-height: 350px;
-    overflow-y: scroll;
+.container {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+}
+
+.scroll_section {
+  overflow: auto;
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  padding: 20px 25px;
+  height: 400px;
 }
 
 .scroll_section::-webkit-scrollbar {
-    max-height: 70%;
-    border-radius: 15px;
-    background: #EDEDED;
+  width: 20px;
 }
 
 .scroll_section::-webkit-scrollbar-thumb {
-    border-radius: 30px;
-    background: #A0A0A0;
+  height: 30%;
+  background: #a0a0a0;
+  border-radius: 30px;
+}
+
+.scroll_section::-webkit-scrollbar-track {
+  background: #ededed;
+  border-radius: 30px;
 }
 
 .teamlist {
-    display: flex;
-    vertical-align: middle;
-    align-items: center;
-    border-radius: 30px;
-    width: 80%;
-    min-width: max-content;
-    min-height: max-content;
-    height: 25%;
-    margin-top: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    background: #FFFFFF;
+  background-color: #fff;
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 30px;
 }
 
-.list_content {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 30px;
+.teamlist > h2 {
+  display: inline-block;
+  color: #2d3d57;
+  font-size: 20px;
+  margin-right: 20px;
 }
 
-p {
-    display: inline-block;
-    font-style: bold;
-    font-size: 20px;
-    margin: 0px;
-}
-
-#team_title {
-    font-weight: 700;
-    color: #2D3D57;
+.teamlist h2 span {
+  color: #868686;
+  font-weight: 500;
 }
 
 #user_num {
-    color: #4B6B7C;
+  color: #4b6b7c;
+  font-weight: 400;
 }
 
-/* #introduction {
-    color: #4B6B7C;
-    font-style: normal;
-    font-size: 15px;
-}*/
+.teamlist button {
+  float: right;
+  padding: 10px 20px;
+  margin-top: -10px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
 
-.join {
-    float: right;
-    margin-top: -20px;
-    border-radius: 10px;
-    width: 80px;
-    height: 40px;
-    background: #A6B0D0;
-    color: #FFFFFF;
-    font-size: 20px;
-    font-style: bold;
-    font-weight: 700;
-    text-align: center;
-    line-height: 30px;
-    border-style: none;
+.btn_section {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #d9d9d9;
+  margin-top: 30px;
+}
+
+.btn_section button {
+  background: #a6b0d0;
+  border-style: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 25px;
+  font-weight: bold;
+  padding: 10px 20px;
 }
 
 button:hover {
-    cursor: pointer;
-    background-color: #7f8bb1;
-}
-
-.btn_section{
-    display: flex;
-    vertical-align: middle;
-    align-items: center;
-    justify-content: space-around;
-    background: #D9D9D9;
-    height:150px;
-    max-height:150px;
-    border-top:1px solid #A0A0A0;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
-}
-
-#create_button {
-    width: 150px;
-    height: 60px;
-    background: #A6B0D0;
-    border-style: none;
-    border-radius: 10px;
-    color: #FFFFFF;
-    font-size: 25px;
-    font-weight: bold;
-    line-height: 30px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#create_button:hover {
-    background-color: #7f8bb1;
-}
-
-#search_button {
-    width: 150px;
-    height: 60px;
-    background: #A6B0D0;
-    border-style: none;
-    border-radius: 10px;
-    color: #FFFFFF;
-    font-size: 25px;
-    font-weight: bold;
-    line-height: 30px;
-    margin-left: auto;
-    margin-right: auto;
-  
-}
-#search_button:hover {
-    cursor: pointer;
-    background-color: #7f8bb1;
+  cursor: pointer;
+  background-color: #7f8bb1;
 }

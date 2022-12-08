@@ -1,39 +1,32 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-<title> sign up and sign in</title>
-  <link rel="stylesheet" href="{% static 'Sign_up&Sign_in.css' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<style>
-</style>
-<body>
-
-<div class="container" id="container">
-	<div class="form-container sign-in-container">
-		<form method="POST" action="{% url 'accounts:login'%}">
-		{% csrf_token %}
-			<h1>Sign in</h1>
-            <br><br><br>
-			<input type="email" name="username" placeholder="Email" />
-			<input type="password" name="password" placeholder="Password" />
-			<button type="submit">Sign In</button>
-		</form>
-	        </div>
-	<div class="overlay-container">
-		<div class="overlay">
-			<div class="overlay-panel overlay-right">
-				<h1>Hello, Friend!</h1>
-				<p>Enter your personal details and let's go to school more comfortably!</p>
-				<a href="{% url 'accounts:signup' %}"><button class="ghost" id="signIn">Sign UP</button></a>
-			</div>
-		</div>
-	</div>
-</div>
-
-<script>
-</script>
-</body>
-
+  <head>
+    <title>로그인</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  </head>
+  <body>
+    <section class="loginsection">
+      <div class="imgdiv">
+        <img src="../../../static/assets/img/LogoW.svg" alt="logo" />
+      </div>
+      <form method="POST" action="{% url 'accounts:login'%}">
+        {% csrf_token %}
+        <div class="logindiv">
+          <input type="email" name="username" autocomplete="off" required />
+          <label for="username">USER EMAIL</label>
+        </div>
+        <div class="logindiv">
+          <input type="password" name="password" autocomplete="off" required />
+          <label for="password">PASSWORD</label>
+        </div>
+        <div class="loginbtn">
+          <button type="submit">로그인</button>
+        </div>
+      </form>
+      <div class="caption">
+        <a href="{% url 'accounts:signup' %}"> 아직 회원이 아니신가요? </a>
+      </div>
+    </section>
+  </body>
 </html>

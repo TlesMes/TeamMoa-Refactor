@@ -1,0 +1,145 @@
+.mainsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.datediv h2 {
+  margin-bottom: 20px;
+  font-size: 35px;
+  font-weight: 400;
+  color: #8a98b4;
+}
+
+.datediv span {
+  font-weight: 600;
+  color: #4b6b7c;
+}
+
+hr {
+  border: 1px solid #d3daef;
+}
+
+.datediv div {
+  display: flex;
+  margin-bottom: 10px;
+  margin-left: 50px;
+  font-size: 18px;
+}
+
+.datediv > div > img {
+  margin-right: 8px;
+  width: 15px;
+}
+
+.datediv button {
+  border: none;
+  background: transparent;
+}
+
+.deletebtn {
+  margin-top: 2px;
+  margin-left: 10px;
+  position: relative;
+  width: 12px;
+}
+
+.deletehover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+.deletebtn:hover .deletehover {
+  display: block;
+  margin-top: 2px;
+}
+
+.teamdiv {
+  margin-top: 20px;
+  border: 1px solid #071540;
+  border-radius: 30px;
+  padding: 30px;
+  width: 843px;
+}
+
+.teamdiv h2 {
+  margin: 3px 0;
+  font-size: 20px;
+  color: #2d3d57;
+}
+
+#copybtn {
+  border: none;
+  background: transparent;
+  position: relative;
+  width: 12px;
+}
+
+.copyhover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+#copybtn:hover .copyhover {
+  display: block;
+}
+
+.teamdiv h3 {
+  font-size: 19px;
+  font-weight: 400;
+  color: #4b6b7c;
+}
+
+hr {
+  margin: 15px 0;
+}
+
+.logspan {
+  font-size: 17px;
+  color: #868686;
+}
+
+.editdiv {
+  position: relative;
+}
+
+.editdiv button {
+  position: absolute;
+  background: #a6b0d0;
+  color: #fff;
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  right: 0;
+}
+
+.plusbtn {
+  margin-right: 130px;
+}
+
+.editdiv button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.deletebtn:hover path {
+  fill: #929292;
+}
+
+#copybtn:hover path {
+  fill: #7f8bb1;
+}

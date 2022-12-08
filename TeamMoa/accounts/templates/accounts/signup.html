@@ -1,46 +1,37 @@
-{% load static %}
-<!doctype html>
-<html>
-<head>
-<title> sign up and sign in</title>
-  <link rel="stylesheet" href="{% static 'Sign_up&Sign_in.css' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<style>
-</style>
-<body>
+{% extends 'base2.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/signup.css' %}" />
+<section class="signupsection">
+  <form method="POST" action="{% url 'accounts:signup' %}">
+    {% csrf_token %}
+    <div class="signupdiv">
+      <h2>이름</h2>
+      <input type="text" name="nickname" placeholder="NICKNAME" />
+    </div>
+    <div class="signupdiv">
+      <h2>이메일</h2>
+      <input type="email" name="username" placeholder="EMAIL" />
+    </div>
+    <div class="signupdiv">
+      <h2>비밀번호</h2>
+      <input type="password" name="password1" placeholder="PASSWORD" />
+    </div>
+    <div class="signupdiv">
+      <h2>비밀번호 확인</h2>
+      <input type="password" name="password2" placeholder="PASSWORD" />
+    </div>
+    <div class="signupdiv">
+      <h2>자기소개</h2>
+      <input type="profile" name="profile" placeholder="PROFILE" />
+    </div>
+    <div class="signupbtn">
+      <button>회원가입</button>
+    </div>
+  </form>
+  <div class="caption">
+    <a href="{% url 'accounts:login' %}">
+      이미 계정이 있으신가요? <span>로그인</span>
+    </a>
+  </div>
+</section>
 
-<div class="container" id="container">
-	<div class="row">
-	<div class="form-container sign-in-container">
-		<form method="POST" action="{% url 'accounts:signup' %}">
-		{% csrf_token %}
-			<h1>Create Account</h1>
-		
-			<input type="text" name="nickname" placeholder="Nickname" />
-			<input type="email" name="username" placeholder="Email" />
-			<input type="password" name="password1" placeholder="Password" />
-			<input type="password" name="password2" placeholder="Password" />
-			<input type="profile" name="profile" placeholder="Profile" />
-			<button>Sign Up</button>
-			<p id="mobile_para">To keep connected with us,please login</p>
-			<button class="ghost_mobile" id="signIn_mobile">Sign In</button>
-		</form>
-	</div>
-	<div class="overlay-container">
-		<div class="overlay">
-			<div class="overlay-panel overlay-right">
-				<h1>Welcome Back!</h1>
-				<p>To keep connected with us please login with your personal info</p>
-				<a href="{% url 'accounts:login' %}"><button class="ghost" id="signIn">Sign In</button></a>
-			</div>
-		</div>
-	</div>
-</div>
-</div>
-
-<script>
-</script>
-</body>
-
-</html>
+{% endblock %}

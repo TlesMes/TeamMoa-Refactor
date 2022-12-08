@@ -1,48 +1,28 @@
-{% extends "base.html" %}
-
-{% block contents %}
-<div class="containerr">
-    <div class="main">
-        {% if request.user.is_authenticated %}
-            <table class="table table-light">
-                <caption>마인드맵</caption>
-                <thead class="thead-light text-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>제목</th>
-                    </tr>
-                </thead>
-                {% for mindmap in mindmaps %}
-                <tbody class="text-dark">
-                    <tr onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'">
-                        <th>{{ mindmap.id }}</th>
-                        <td>{{ mindmap.title }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        
-
-            {% if mindmaps.has_previous %}
-            <button class="btn btn-primary" onclick='location.href ="?page=1"'>맨 앞으로</button>
-            <button class="btn btn-primary" onclick='location.href ="?page={{mindmaps.previous_page_number}}"'>이전으로</button>
-            {% endif %}
-            <span>{{mindmaps.number}}</span>
-            <span>/</span>
-            <span>{{mindmaps.paginator.num_pages}}</span>
-            {% if mindmaps.has_next %}
-            <button class="btn btn-primary" onclick='location.href ="?page1={{mindmaps.next_page_number}}"'>다음으로</button>
-            <button class="btn btn-primary" onclick='location.href ="?page1={{mindmaps.paginator.num_pages}}"'>맨 뒤로</button>
-            {% endif %}
-            <hr>
-        {% endif %}
+{% extends 'base1.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/mindmaplist.css' %}" />
+<section class="schedulesection">
+  <div class="changediv">
+    <div class="scrolldiv">
+      {% for mindmap in mindmaps %}
+      <div class="mindmapdiv">
+        <h2>{{ mindmap.title }} <span>(#{{ mindmap.id }})</span></h2>
+        <button
+          onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'"
+        >
+          선택
+        </button>
+      </div>
+      {% endfor %}
     </div>
-    <div class="footer">
-        <div class="row">
-            
-                <button class="btn btn-primary" onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'">마인드맵 생성</button>
-            
-        </div>
+    <div class="mindmapbtn">
+      <button
+        class="btn btn-primary"
+        onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'"
+      >
+        마인드맵 생성
+      </button>
     </div>
+  </div>
+</section>
 
 {% endblock %}
