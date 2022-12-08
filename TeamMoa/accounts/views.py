@@ -93,7 +93,7 @@ def login(request):
         user = auth.authenticate(request, username=username, password=password)
         if user is not None:
             auth.login(request, user)
-            return redirect("accounts:home")
+            return redirect("teams:team_list")
         else:
             return render(request, "accounts/login.html")
     elif request.method == "POST":
@@ -125,7 +125,11 @@ def logout(request):
     return HttpResponseRedirect('/accounts/home') #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
 
 def home(request):
-    return render(request, 'accounts/home.html')
+    if request.user.is_authenticated:
+        print("2")
+        return redirect("teams:team_list")
+    print("1")
+    return redirect("accounts:login")
 
 
 #유저 정보 변경
@@ -151,7 +155,9 @@ def password(request):
         if password_change_form.is_valid():
             password_change_form.save()
             return HttpResponseRedirect('/teams/team_list')
-    
+
     else:
         password_change_form = PasswordChangeForm(request.user)
     return render(request, 'accounts/change_password.html',{'password_change_form':password_change_form})
+
+
