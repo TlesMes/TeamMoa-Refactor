@@ -65,7 +65,7 @@ hr {
   border: 1px solid #071540;
   border-radius: 30px;
   padding: 30px;
-  width: 843px;
+  width: 900px;
 }
 
 .teamdiv h2 {
@@ -113,6 +113,7 @@ hr {
 
 .editdiv button {
   position: absolute;
+  right: 0;
   background: #a6b0d0;
   color: #fff;
   border-radius: 10px;
@@ -120,11 +121,14 @@ hr {
   padding: 10px;
   font-size: 18px;
   font-weight: 600;
-  right: 0;
 }
 
 .plusbtn {
-  margin-right: 130px;
+  margin-right: 220px;
+}
+
+.plusbtn2 {
+  margin-right: 90px;
 }
 
 .editdiv button:hover {
