@@ -23,13 +23,13 @@
           <a href="{% url 'shares:post_list' team.id %}">공유 게시판</a>
         </li>
         <li class="nav2">
-          <a href="{% url 'members:team_members_page' team.id %}"
-            >{{ team.title }}</a
-          >
+          <a href="{% url 'members:team_members_page' team.id %}">
+            {{ team.title }}
+          </a>
         </li>
         <li class="nav2">|</li>
         <li class="nav3">
-          <a href="{% url 'accounts:update' %}">유저이름</a>
+          <a href="{% url 'accounts:update' %}">{{request.user.nickname}}</a>
         </li>
       </ul>
     </nav>
