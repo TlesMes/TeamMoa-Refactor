@@ -53,6 +53,8 @@ input {
   width: 480px;
   font-size: 20px;
   color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
 }
 
 textarea {
@@ -63,8 +65,11 @@ textarea {
   background-color: #fff;
   padding: 15px;
   width: 480px;
+  height: 200px;
   font-size: 20px;
   color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
 }
 
 button {

@@ -8,7 +8,9 @@
   </head>
   <body>
     <nav class="header">
-      <img src="../../../static/assets/img/LogoB.svg" alt="logo" />
+      <a href="{% url 'teams:team_list' %}">
+        <img src="../../../static/assets/img/LogoB.svg" alt="logo" />
+      </a>
       <ul>
         <li>
           <a href="{% url 'teams:team_main_page' team.id %}">홈</a>

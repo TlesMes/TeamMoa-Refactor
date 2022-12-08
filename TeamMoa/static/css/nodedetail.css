@@ -44,7 +44,7 @@ a:hover path {
 }
 
 .changediv hr {
-  margin: 20px 0 30px;
+  margin: 20px 0 10px;
   height: 1px;
   background: #a6b0d0;
   border: 0;
@@ -93,11 +93,13 @@ input {
   width: 480px;
   font-size: 20px;
   color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
 }
 
 button {
-  display: inline-block;
-  padding: 11px 20px 12px;
+  line-height: 24px;
+  padding: 16px;
   border: 1px solid #a6b0d0;
   border-radius: 10px;
   background: #a6b0d0;

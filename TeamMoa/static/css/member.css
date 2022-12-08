@@ -100,6 +100,8 @@ input[type="checkbox"] {
   border: 2px solid #a6b0d0;
   cursor: pointer;
   margin-right: 10px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
 }
 
 input[type="checkbox"]:checked {
@@ -143,6 +145,8 @@ input[type="checkbox"]:checked {
   font-size: 20px;
   color: #465173;
   height: 80px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
 }
 
 .plusdiv button {

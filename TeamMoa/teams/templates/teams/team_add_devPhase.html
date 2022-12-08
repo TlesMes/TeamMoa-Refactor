@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="{% static 'css/devphase.css' %}" />
 <section class="devphasesection">
   <div>
-    <a href="javascript:history.back();">
+    <a href="{% url 'teams:team_main_page' team.id %}">
       <svg
         width="30"
         height="29"

@@ -1,4 +1,4 @@
-.devphasesection {
+.teamcreatesection {
   font-family: "GmarketSansMedium", sans-serif;
   display: flex;
   flex-direction: column;
@@ -8,45 +8,34 @@
   height: 83vh;
 }
 
-.devphasesection > div {
-  position: relative;
-}
-
-a:hover path {
-  fill: #7f8bb1;
-}
-
-.changediv {
-  margin-top: 30px;
-}
-
-h3 {
-  font-size: 21px;
+h2 {
+  font-size: 19px;
   color: #a6b0d0;
+  margin-bottom: 10px;
 }
 
 input {
-  margin-top: 10px;
-  margin-bottom: 20px;
+  width: 480px;
+  padding: 15px;
+  background-color: #fff;
   border: none;
   border-radius: 10px;
-  background-color: #fff;
-  padding: 15px;
-  width: 480px;
   font-size: 20px;
   color: #465173;
+  outline: none;
+  margin-bottom: 20px;
   font-family: "GmarketSansMedium", sans-serif;
   font-weight: normal;
 }
 
 textarea {
-  margin-top: 10px;
   margin-bottom: 20px;
   border: none;
   border-radius: 10px;
   background-color: #fff;
   padding: 15px;
   width: 480px;
+  height: 150px;
   font-size: 20px;
   color: #465173;
   font-family: "GmarketSansMedium", sans-serif;
@@ -54,19 +43,39 @@ textarea {
 }
 
 button {
-  display: block;
-  margin: auto;
-  margin-top: 20px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
+  width: 100%;
+  height: 70px;
   background: #a6b0d0;
   color: #fff;
-  font-size: 22px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
   font-weight: 600;
+  border: none;
+  border-radius: 10px;
 }
 
-button:hover {
-  cursor: pointer;
-  background-color: #7f8bb1;
+.caption {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
+}
+
+.caption a span {
+  color: #6285f6;
+}
+
+a:hover {
+  color: #7f8bb1;
+}
+
+a:visited,
+a:hover,
+a:focus,
+a:active {
+  text-decoration: none;
 }
