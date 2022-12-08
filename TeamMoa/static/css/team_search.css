@@ -1,0 +1,129 @@
+html {
+    height: 100%;
+}
+
+body {
+    background: #2D3D57;
+    height: 100%;
+}   
+
+#container {
+    display: flex;
+    vertical-align: middle;
+    align-items: center;
+    width: 35%;
+    min-width: max-content;
+    height: 300px;
+    margin-top: 120px; /**/
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 30px;
+    background: #D9D9D9;
+}
+
+
+.col-12 {
+    margin: 0 auto;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    max-height: 32px;
+}
+
+.invitecode {
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    padding-left: 10px;
+    width: 170px;
+    max-width: 170px;
+    float:left;
+    border-style: none;
+    background: #FFFFFF;
+    margin-right: 0px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 30px;
+    color: #465173;
+}
+
+.search_btn {
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    border-style: none;
+    background: #A6B0D0;
+    width: 80px;
+    height: 32px;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 30px;
+}
+
+.teamlist {
+    display: inline-block;
+    border-radius: 30px;
+    width: 350px;
+    max-width: 100%;
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    background: #F5F5F5;
+}
+
+.list_content {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 26px;
+}
+
+p {
+    display: inline-block;
+    font-style: bold;
+    font-size: 20px;
+    margin: 0px;
+}
+
+
+#team_title {
+    color: #2D3D57;
+}
+
+#user_num {
+    color: #4B6B7C;
+}
+
+#introduction {
+    display: inline-block;
+    color: #4B6B7C;
+    font-style: normal;
+    font-size: 15px;
+}
+
+.join {
+    display: block;
+    float: right;
+    text-align: center;
+    border-radius: 10px;
+    margin-top: -20px;
+    width: 60px;
+    height: 40px;
+    background: #A6B0D0;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-style: bold;
+    font-weight: 700;
+    border-style: none;
+    line-height: 20px;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: #7f8bb1;
+}
