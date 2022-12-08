@@ -163,7 +163,7 @@ def post_delete_view(request, pk, post_id):
         return redirect(f'/shares/{teamno}' )
 
 
-def post_download_view(request, pk, post_id):
+def post_download_view(request, post_id):
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
