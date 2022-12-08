@@ -1,0 +1,82 @@
+/* 인원수 number 바 */
+
+body {
+    background: #2D3D57;
+}
+
+#create {
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+
+label {
+    font-size: 20px;
+    font-weight: 700px;
+    line-height: 30px;
+    color: #A6B0D0;
+}
+
+.create_input {
+    /* title, maxuser, teampasswd */
+    width: 98%;
+    max-width: 98%;
+    padding-left: 5px;
+    padding-right: 0px;
+    height: 30px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 30px;
+    color: #465173;
+}
+
+.introduction {
+    width: 98%;
+    max-width: 98%;
+    height: 55px;
+    padding-left: 5px;
+    padding-right: 0px;
+    border-radius: 10px;
+    font-style: medium;
+    font-size: 22px;
+    font-weight: 700;
+    color: #465173;
+    background: #FFFFFF;
+}
+
+#create_button {
+    display: block;
+    margin-top: 30px;
+    width: 100%;
+    height: 60px;
+    line-height: 15px;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-style: bold;
+    border-radius: 10px;
+    background: #A6B0D0;
+    text-align: center;
+}
+
+#create_button:hover {
+    cursor: pointer;
+    background-color: #7f8bb1;
+}
+
+#exist {
+    text-align: center;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 30px;
+    color: #A6B0D0;
+}
+
+.toTeamList {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    color: #6285f6;
+    text-decoration: none;
+}

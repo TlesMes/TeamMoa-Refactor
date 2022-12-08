@@ -1,15 +1,27 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/team_create.css' %}">
+    <img src="{% static 'img/LogoW.svg' %}">
+</head>
+
 {% block contents %}
 
-<div class="row mt-5">
+<div id = "create" class="row mt-5">
     <div class="col-12">
         <form method="POST" action=".">
         {% csrf_token %}
-        <table>
-            {{form.as_table}}
-        </table>
-            <button class="btn btn-primary" onclick="location.href='/teams/team_create/'">팀생성</button>
+            <div class = "createForm">
+            {{form.as_p}} 
+            <button id = "create_button" class = "btn btsn-primary" onclick="location.href='/teams/team_create/'">생성</button>
+            <p id = "exist">이미 팀이 있으신가요?<a href = "location.href='/teams/team_create/'" class = "toTeamList"> 팀 목록 보기</a><p>    
+            </div>
         </form>
     </div>
 </div>
+
 {% endblock %}
