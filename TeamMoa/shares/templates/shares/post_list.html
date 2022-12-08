@@ -1,7 +1,64 @@
-{% extends "base.html" %} {% load humanize %} {% block mobileView %}
+{% extends "base1.html" %} {% load humanize %} {% block mobileView %}
 <meta name="viewport" content="width=800, user-scalable=yes" />
+
 {% endblock %} {% block contents %}
-<div class="container">
+<style>
+  .container{
+    display:inline-block;
+    margin-top:4%;
+    width:65%;
+}
+
+.col-12{
+  text-align:center;
+}
+table{
+  width:100%;
+}
+
+
+th {
+  line-height:30px;
+
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6
+}
+
+tr{
+  text-align:center;
+}
+select {
+  display:inline-block;
+  width: 6em;
+}
+button{
+    float:right;
+    background:  #FFFFFF;
+    
+    border-radius: 5px;
+    color: dark;
+    width:60px;
+    height:30px;
+    font-size: 14px;
+    font-weight: blod;
+    margin-top:5px;
+    text-align:center;
+}
+
+[name="q"] {
+  border-radius:10px;
+  line-height:30px;
+  margin-top: 10px;
+}
+
+select {
+  border: 1px solid #999;
+  border-radius:5px;
+  margin-top: 10px;
+}
+
+</style>
+<div class="container" >
   <div class="row mt-5">
     <div class="col-12">
       <h4 style="font-weight: bold">ShareField</h4>
@@ -14,7 +71,7 @@
   </div>
   <div>
     <table class="table table-sm table-hover">
-      <thead style="border-top: 1px solid #dee2e6">
+      <thead>
         <tr class="text-center">
           <th style="font-weight: bold; font-size: 16px">번호</th>
           <th style="font-weight: bold; font-size: 16px">제목</th>
@@ -95,7 +152,7 @@
                 <option value="writer">작성자</option>
               </select>
             </div>
-            <div class="col" style="margin-top: 10px">
+            <div class="col" >
               <input
                 type="text"
                 name="q"
@@ -122,7 +179,7 @@
         id="write_btn"
         class="btn btn-sm"
         >글쓰기</a
-      >--> {% endif %}
+      > {% endif %}
       <!--<a onclick="location.href='/shares/{{ team.id }}/write/'">글쓰기</a>-->
     </div>
     <div class="col-md-offset-6">
