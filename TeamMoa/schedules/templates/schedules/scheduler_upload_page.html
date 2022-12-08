@@ -1,1708 +1,983 @@
-{% extends "base.html" %}
-{% load widget_tweaks %}
-{% block contents %}
-
-<div class="row mt-5">
-    <div class="col-12">
-        <form method="POST" action=".">
-        {% csrf_token %}
-        <input type="week" name="week" required>
-        <br>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_0-1" id="id_time_0">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_1-1" id="id_time_1">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_2-1" id="id_time_2">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_3-1" id="id_time_3">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_4-1" id="id_time_4">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_5-1" id="id_time_5">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_6-1" id="id_time_6">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_7-1" id="id_time_7">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_8-1" id="id_time_8">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-              <input type="checkbox" name="time_9-1" id="id_time_9">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_10-1" id="id_time_10">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_11-1" id="id_time_11">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_12-1" id="id_time_12">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_13-1" id="id_time_13">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_14-1" id="id_time_14">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_15-1" id="id_time_15">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_16-1" id="id_time_16">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_17-1" id="id_time_17">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_18-1" id="id_time_18">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_19-1" id="id_time_19">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_20-1" id="id_time_20">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_21-1" id="id_time_21">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_22-1" id="id_time_22">
-        
-        
-            </td>
-          </tr>
-        
-          <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-              <input type="checkbox"  name="time_23-1" id="id_time_23">
-        
-        
-            </td>
-          </tr>
-        
-        <hr>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_0-2" id="id_time_0">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-2" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-2" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-2" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-2" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-2" id="id_time_5">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-2" id="id_time_6">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-2" id="id_time_7">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-2" id="id_time_8">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-2" id="id_time_9">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-2" id="id_time_10">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-2" id="id_time_11">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-2" id="id_time_12">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-2" id="id_time_13">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-2" id="id_time_14">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-2" id="id_time_15">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-2" id="id_time_16">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-2" id="id_time_17">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-2" id="id_time_18">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-2" id="id_time_19">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-2" id="id_time_20">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-2" id="id_time_21">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-2" id="id_time_22">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-2" id="id_time_23">
-        
-        
-            </td>
-            </tr>
-        
-            <hr>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_0-3" id="id_time_0">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-3" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-3" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-3" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-3" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-3" id="id_time_5">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-3" id="id_time_6">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-3" id="id_time_7">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-3" id="id_time_8">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-3" id="id_time_9">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-3" id="id_time_10">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-3" id="id_time_11">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-3" id="id_time_12">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-3" id="id_time_13">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-3" id="id_time_14">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-3" id="id_time_15">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-3" id="id_time_16">
-        
-        
-            </td>
-            </tr>
-        
+{% extends 'base1.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/schedulerupload.css' %}" />
+<section class="scheduleuploadsection">
+  <div class="changediv">
+    <form method="POST" action=".">
+      {% csrf_token %}
+      <input type="week" name="week" required />
+      <button type="submit" class="btn btn-primary">시간표 등록</button>
+      <div class="schedulesdiv">
+        <div class="timediv">
+          <table>
             <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-3" id="id_time_17">
-        
-        
-            </td>
+              <td>12:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-3" id="id_time_18">
-        
-        
-            </td>
+              <td>01:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-3" id="id_time_19">
-        
-        
-            </td>
+              <td>02:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-3" id="id_time_20">
-        
-        
-            </td>
+              <td>03:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-3" id="id_time_21">
-        
-        
-            </td>
+              <td>04:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-3" id="id_time_22">
-        
-        
-            </td>
+              <td>05:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-3" id="id_time_23">
-        
-        
-            </td>
+              <td>06:00 AM</td>
             </tr>
-            <hr>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_0-4" id="id_time_0">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-4" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-4" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-4" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-4" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
             <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-4" id="id_time_5">
-        
-        
-            </td>
+              <td>07:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-4" id="id_time_6">
-        
-        
-            </td>
+              <td>08:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-4" id="id_time_7">
-        
-        
-            </td>
+              <td>09:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-4" id="id_time_8">
-        
-        
-            </td>
+              <td>10:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-4" id="id_time_9">
-        
-        
-            </td>
+              <td>11:00 AM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-4" id="id_time_10">
-        
-        
-            </td>
+              <td>12:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-4" id="id_time_11">
-        
-        
-            </td>
+              <td>01:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-4" id="id_time_12">
-        
-        
-            </td>
+              <td>02:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-4" id="id_time_13">
-        
-        
-            </td>
+              <td>03:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-4" id="id_time_14">
-        
-        
-            </td>
+              <td>04:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-4" id="id_time_15">
-        
-        
-            </td>
+              <td>05:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-4" id="id_time_16">
-        
-        
-            </td>
+              <td>06:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-4" id="id_time_17">
-        
-        
-            </td>
+              <td>07:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-4" id="id_time_18">
-        
-        
-            </td>
+              <td>08:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-4" id="id_time_19">
-        
-        
-            </td>
+              <td>09:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-4" id="id_time_20">
-        
-        
-            </td>
+              <td>10:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-4" id="id_time_21">
-        
-        
-            </td>
+              <td>11:00 PM</td>
             </tr>
-        
             <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-4" id="id_time_22">
-        
-        
-            </td>
+              <td>12:00 AM</td>
             </tr>
-        
-            <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-4" id="id_time_23">
-        
-        
-            </td>
-            </tr>
-
-            <hr>
-
-            <tr>
-                <th><label for="id_time_0">Time 0:</label></th>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>월요일</h3>
+              <tr>
                 <td>
-            
-                  <input type="checkbox" name="time_0-5" id="id_time_0">
-            
-            
+                  <input type="checkbox" name="time_0-1" id="id_time_0" />
                 </td>
               </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-5" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-5" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-5" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-5" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-5" id="id_time_5">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-5" id="id_time_6">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-5" id="id_time_7">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-5" id="id_time_8">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-5" id="id_time_9">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-5" id="id_time_10">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-5" id="id_time_11">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-5" id="id_time_12">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-5" id="id_time_13">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-5" id="id_time_14">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-5" id="id_time_15">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-5" id="id_time_16">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-5" id="id_time_17">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-5" id="id_time_18">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-5" id="id_time_19">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-5" id="id_time_20">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-5" id="id_time_21">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-5" id="id_time_22">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-5" id="id_time_23">
-        
-        
-            </td>
-            </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-1" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-1" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-1" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-1" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-1" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-1" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-1" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-1" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-1" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-1" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-1" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-1" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-1" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-1" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-1" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-1" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-1" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-1" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-1" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-1" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-1" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-1" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-1" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>화요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-2" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-2" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-2" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-2" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-2" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-2" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-2" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-2" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-2" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-2" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-2" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-2" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-2" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-2" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-2" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-2" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-2" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-2" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-2" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-2" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-2" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-2" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-2" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-2" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>수요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-3" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-3" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-3" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-3" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-3" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-3" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-3" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-3" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-3" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-3" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-3" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-3" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-3" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-3" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-3" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-3" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-3" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-3" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-3" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-3" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-3" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-3" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-3" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-3" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>목요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-4" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-4" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-4" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-4" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-4" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-4" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-4" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-4" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-4" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-4" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-4" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-4" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-4" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-4" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-4" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-4" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-4" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-4" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-4" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-4" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-4" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-4" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-4" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-4" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>금요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-5" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-5" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-5" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-5" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-5" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-5" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-5" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-5" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-5" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-5" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-5" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-5" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-5" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-5" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-5" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-5" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-5" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-5" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-5" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-5" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-5" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-5" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-5" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-5" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>토요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-6" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-6" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-6" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-6" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-6" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-6" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-6" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-6" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-6" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-6" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-6" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-6" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-6" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-6" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-6" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-6" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-6" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-6" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-6" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-6" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-6" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-6" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-6" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-6" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="schedulediv">
+          <table>
+            <tbody>
+              <h3>일요일</h3>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_0-7" id="id_time_0" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_1-7" id="id_time_1" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_2-7" id="id_time_2" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_3-7" id="id_time_3" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_4-7" id="id_time_4" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_5-7" id="id_time_5" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_6-7" id="id_time_6" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_7-7" id="id_time_7" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_8-7" id="id_time_8" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_9-7" id="id_time_9" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_10-7" id="id_time_10" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_11-7" id="id_time_11" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_12-7" id="id_time_12" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_13-7" id="id_time_13" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_14-7" id="id_time_14" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_15-7" id="id_time_15" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_16-7" id="id_time_16" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_17-7" id="id_time_17" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_18-7" id="id_time_18" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_19-7" id="id_time_19" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_20-7" id="id_time_20" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_21-7" id="id_time_21" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_22-7" id="id_time_22" />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input type="checkbox" name="time_23-7" id="id_time_23" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
 
-            <hr>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_0-6" id="id_time_0">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-6" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-6" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-6" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-6" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-6" id="id_time_5">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-6" id="id_time_6">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-6" id="id_time_7">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-6" id="id_time_8">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-6" id="id_time_9">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-6" id="id_time_10">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-6" id="id_time_11">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-6" id="id_time_12">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-6" id="id_time_13">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-6" id="id_time_14">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-6" id="id_time_15">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-6" id="id_time_16">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-6" id="id_time_17">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-6" id="id_time_18">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-6" id="id_time_19">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-6" id="id_time_20">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-6" id="id_time_21">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-6" id="id_time_22">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-6" id="id_time_23">
-        
-        
-            </td>
-            </tr>
-
-            <hr>
-
-        <tr>
-            <th><label for="id_time_0">Time 0:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_0-7" id="id_time_0">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_1">Time 1:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_1-7" id="id_time_1">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_2">Time 2:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_2-7" id="id_time_2">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_3">Time 3:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_3-7" id="id_time_3">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_4">Time 4:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_4-7" id="id_time_4">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_5">Time 5:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_5-7" id="id_time_5">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_6">Time 6:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_6-7" id="id_time_6">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_7">Time 7:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_7-7" id="id_time_7">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_8">Time 8:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_8-7" id="id_time_8">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_9">Time 9:</label></th>
-            <td>
-        
-                <input type="checkbox" name="time_9-7" id="id_time_9">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_10">Time 10:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_10-7" id="id_time_10">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_11">Time 11:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_11-7" id="id_time_11">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_12">Time 12:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_12-7" id="id_time_12">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_13">Time 13:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_13-7" id="id_time_13">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_14">Time 14:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_14-7" id="id_time_14">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_15">Time 15:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_15-7" id="id_time_15">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_16">Time 16:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_16-7" id="id_time_16">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_17">Time 17:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_17-7" id="id_time_17">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_18">Time 18:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_18-7" id="id_time_18">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_19">Time 19:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_19-7" id="id_time_19">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_20">Time 20:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_20-7" id="id_time_20">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_21">Time 21:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_21-7" id="id_time_21">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_22">Time 22:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_22-7" id="id_time_22">
-        
-        
-            </td>
-            </tr>
-        
-            <tr>
-            <th><label for="id_time_23">Time 23:</label></th>
-            <td>
-        
-                <input type="checkbox"  name="time_23-7" id="id_time_23">
-        
-        
-            </td>
-            </tr>
-            <br>
-            <button type="submit" class="btn btn-primary" >시간표 등록</button>
-
-        </form>
-    </div>
-</div>
 {% endblock %}

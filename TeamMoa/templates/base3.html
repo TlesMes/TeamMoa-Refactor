@@ -1,0 +1,15 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>TeamMoa</title>
+    <link rel="stylesheet" href="{% static 'css/base3.css' %}" />
+  </head>
+  <body>
+    <nav class="header">
+      <img src="../../../static/assets/img/LogoB.svg" alt="logo" />
+    </nav>
+    {% block contents %} {% endblock %}
+  </body>
+</html>
