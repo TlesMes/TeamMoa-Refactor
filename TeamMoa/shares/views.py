@@ -24,7 +24,7 @@ class PostListView(ListView):
     def get_queryset(self):
         team = Team.objects.get(pk=self.kwargs["pk"])
     
-        post_list = Post.objects.filter(isTeams=team.id)
+        post_list = Post.objects.filter(isTeams=team.id).order_by('-id')
 
         
         return post_list
@@ -38,7 +38,7 @@ class PostListView(ListView):
 
         context['team_id'] = team.id
 
-        print("THIS IS CONTEXT TEAMID ",context)
+        #print("THIS IS CONTEXT TEAMID ",context)
         #post_fixed = Post.objects.filter(isTeams = team.id)
         #context['post_fixed'] = post_fixed
         #teamid = Post.objects.get(pk=team.id)
@@ -62,7 +62,7 @@ def post_detail_view(request, pk, post_id):
     user =request.user
     team = get_object_or_404(Team, pk=pk)
     postid =Post.objects.filter(id=post_id)
-    print(postid)
+    #print(postid)
     if not user.is_authenticated:
         post_auth = False
         return redirect('/accounts/login')
@@ -91,7 +91,7 @@ def post_write_view(request,pk):
     print("Thsis request method", request.method)
     if not user.is_authenticated:
         post_auth = False
-        print("2")
+        #print("2")
         return redirect('/accounts/login')
 
     if request.method =="POST":
@@ -105,8 +105,8 @@ def post_write_view(request,pk):
 
             post=form.save(commit=False)
             messages.success(request, '성공적으로 등록되었습니다.')
-            print("포스트 내용 입니다",post.article)
-            print("포스트 제목 입니다", post.title)
+            #print("포스트 내용 입니다",post.article)
+            #print("포스트 제목 입니다", post.title)
 
             post.writer = user_id
             post.isTeams_id = team_number
@@ -118,7 +118,7 @@ def post_write_view(request,pk):
             return redirect('shares:post_list', pk)
 
     else:
-        print( "team_number:", team_number )
+        #print( "team_number:", team_number )
         form = PostWriteForm()
 
 
@@ -171,7 +171,7 @@ def post_download_view(request, post_id):
     #post = get_object_or_404(Post, pk = pk)
     url = post.upload_files.url[1:]
     file_url= urllib.parse.unquote(url)
-    print(file_url)
+    #print(file_url)
     if os.path.exists(file_url):
         with open(file_url,'rb')as fh:
             quote_file_url = urllib.parse.quote(post.filename.encode('utf-8'))

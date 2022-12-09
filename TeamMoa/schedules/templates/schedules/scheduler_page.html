@@ -94,7 +94,7 @@
           </tr>
         </table>
       </div>
-      {{message}} {% for schedule in schedules %}
+       {% for schedule in schedules %}
       <div class="schedulediv" id="schedulediv{{forloop.counter}}">
         <h3>{{schedule.date}}</h3>
         <table>

@@ -1,7 +1,82 @@
-{% extends "base.html" %} {% load humanize %} {% block mobileView %}
+{% extends "base1.html" %} {% load humanize %} {% block mobileView %}
 <meta name="viewport" content="width=800, user-scalable=yes" />
 {% endblock %} {% block contents %}
+<style>
+
+.wrap{
+    width:65%;
+    margin-top:7%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.container{
+    position:relative;
+    display:inline-block;
+  
+    width:100%;
+    border:1px solid #d9d9d9;;
+    border-radius:5px;
+    border:bold;
+}
+
+#post.title {
+  margin-left:16px;
+}
+.card-header {
+  text-align:center;
+  background: #ededed;
+  padding: 10px;
+
+}
+
+#poster {
+  padding: 10px;
+}
+
+#line {
+  margin-left:16px;
+  margin-right:16px;
+}
+
+#file {
+  margin-top: 10px;
+  margin-left:15px;
+}
+
+#button_div {
+ 
+  display:flex;
+  vertical-align: bottom;
+  justify-content: end;
+}
+button {
+  display:inline-block;
+  float:right;
+  background:  #FFFFFF;
+  border-style: none;
+  border-radius: 5px;
+  color: dark;
+  width:60px;
+  height:30px;
+  font-size: 14px;
+  font-weight: blod;
+  margin-top:5px;
+  margin-right:5px;
+}
+
+
+.modal-footer{
+  display:inline-block;
+  float:left;
+}
+
+#detail_btn2{
+  margin-right: 0px;
+}
+</style>
 <br /><br /><br />
+<div class ="wrap">
 <div class="container">
   <div class="row-mt-5">
     <div class="col-12">
@@ -9,27 +84,23 @@
       <div class="card" style="width: 100%">
         <!--제목,분류,작성일-->
         <div class="card-header">
-          <strong style="font-size: 18px">{{ post.title }}</strong
+          <strong id= "post.title" style="font-size: 18px">{{ post.title }}</strong
           >&nbsp;&nbsp;<span style="font-size: 18px; color: gray"
             >[공지사항]</span
           >
-          <span style="float: right"
-            >{{ post.registered_date|date:'Y.m.d. H:i' }}</span
-          >
+          
         </div>
         <div class="card-body" style="min-height: 400px; color: black">
           <!--작성자, 조회수-->
-          <div>
-            <span
-              ><i class="fas fa-user-edit"></i>&nbsp;작성자 : {{ post.writer
-              }}</span
-            >
+          <div id ="poster">
+            <span><i class="fas fa-user-edit"></i>&nbsp;작성자 : {{ post.writer.nickname }}</span>
           </div>
-          <hr />
+          <hr id = "line">
 
           <!--{% if post.upload_files %}-->
-          <div class="col-12 text-right">
+          <div id = "file" class="col-12 text-right">
             <span style="color: gray">첨부파일 :&nbsp;</span>
+       
             <a
               id="id_uploaded_file"
               href="{% url 'shares:post_download' post.id %}"
@@ -38,52 +109,18 @@
           </div>
           <!-- {% endif %}-->
           <!--내용-->
-          <div>{{ post.article | safe }}</div>
+          
         </div>
       </div>
       <br />
-      <div class="text-right" style="margin-top: -15px">
-        {% if post_auth or request.user.level == '0' %}
-        <button
-          class="btn btn-sm"
-          id="detail_btn"
-          onclick="location.href='/shares/{{ team.id }}/edit/{{post.id}}'"
-        >
-          수정
-        </button>
-        <button
-          class="btn btn-sm"
-          id="detail_btn"
-          data-toggle="modal"
-          data-target="#delete_modal"
-        >
-          삭제
-        </button>
-        <!-- <button class="btn btn-md btn-dark" onclick="location.href='/post/{{ post.id }}/delete/'">삭제</button> -->
-        <button
-          class="btn btn-sm"
-          id="detail_btn"
-          onclick="location.href='/shares/{{ team.id }}'"
-        >
-          목록으로
-        </button>
-        {% else %}
-        <button
-          class="btn btn-sm"
-          id="detail_btn"
-          onclick="location.href='/shares/{{ team.id }}'"
-        >
-          목록으로
-        </button>
-        {% endif %}
-      </div>
+      
     </div>
   </div>
 
   <div id="delete_modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header">
+        <!-- <div class="modal-header">
           <h5 class="modal-title">삭제경고</h5>
           <button
             type="button"
@@ -91,23 +128,60 @@
             data-dismiss="modal"
             aria-label="Close"
           >
-            <span aria-hidden="true">&times;</span>
+            <span id = "delete" aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <p>게시글을 삭제하시겠습니까?</p>
-        </div>
-        <div class="modal-footer">
-          <button onclick="delete_modal()" type="button" class="btn btn-dark">
-            삭제하기
-          </button>
-          <button type="button" class="btn btn-light" data-dismiss="modal">
-            취소하기
-          </button>
-        </div>
+        </div> !-->
+        
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal-footer">
+  <button onclick="delete_modal()" type="button" class="btn btn-dark">
+    삭제하기
+  </button>
+  <button type="button" class="btn btn-light" data-dismiss="modal">
+    취소하기
+  </button>
+</div>
+<div id ="button_div" class="text-right" >
+  {% if post_auth or request.user.level == '0' %}
+  <button
+    class="btn btn-sm"
+    id="detail_btn1"
+    onclick="location.href='/shares/{{ team.id }}/edit/{{post.id}}'"
+  >
+    수정
+  </button>
+  <!-- <button>
+    class="btn btn-sm"
+    id="detail_btn"
+    data-toggle="modal"
+    data-target="#delete_modal"
+  >
+    삭제
+  </button> !-->
+  <button id = "button_" class="btn btn-md btn-dark" onclick="location.href='/post/{{ post.id }}/delete/'">삭제</button> 
+  <button
+    class="btn btn-sm"
+    id="detail_btn"
+    onclick="location.href='/shares/{{ team.id }}'"
+  >
+    목록으로
+  </button>
+  {% else %}
+  <button
+    class="btn btn-sm"
+    id="detail_btn2"
+    onclick="location.href='/shares/{{ team.id }}'"
+  >목록으로
+  </button>
+  {% endif %}
+</div>
 </div>
 
 <script type="text/javascript">
