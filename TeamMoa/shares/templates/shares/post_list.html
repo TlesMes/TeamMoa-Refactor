@@ -4,9 +4,14 @@
 {% endblock %} {% block contents %}
 <style>
 .container{
-    display:inline-block;
     margin-top:5%;
     width:65%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#row { 
+  width:100%;
 }
 
 h4 {
@@ -98,6 +103,7 @@ button {
 </style>
 
 <div class="container" >
+  <div id ="row"> 
   <div class="row mt-5">
     <div class="col-12">
       <h4>공유 게시판</h4>
@@ -273,6 +279,7 @@ button {
       </ul>
       {% endif %}
     </div>
+  </div>
   </div>
 </div>
 
