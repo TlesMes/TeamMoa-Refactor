@@ -71,7 +71,8 @@
   #form_title {
     font-family: "GmarketSansMedium", sans-serif;
     width:70%;
-    max-width:70%;
+    min-width: 70%;
+    max-width: 70%;
     margin-bottom:0px;
     height: 45px;
     border-top-left-radius: 10px;
@@ -84,8 +85,9 @@
   textarea{
     font-family: "GmarketSansMedium", sans-serif;
     margin-top:0px;
-    width:68.3%;
-    max-width:68.3%;
+    width:68.5%;
+    min-width:68.5%;
+    max-width:68.5%;
     height:250px;
     min-height:250px;
     border-bottom-left-radius:10px;
@@ -97,7 +99,7 @@
   }
   
   .card-footer{
-    width:68.3%;
+    width:68.5%;
     height: 55px;
     margin-top:10px;
     margin-left:auto;
@@ -111,12 +113,7 @@
     line-height:30px;
   }
 
-  .top-position {
-    float:right;
-  }
-  
-
-  .Submit_ {
+  #Submit_ {
     display:flex;
     flex-direction:column;
     align-items: end;
@@ -169,15 +166,12 @@
               [파일 업로드]&nbsp;<i class="fas fa-upload"></i>&nbsp;10MB 이하의
               파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
             </small>
-          <div class ="Submit_">
-            <div class="text-right" style="margin-top: 10px">
-            </div>
-            
+          <div id ="Submit_" class="text-right" style="margin-top: 10px">
               {% if edit %}
               <button type="submit" id="write" class="btn btn-sm">{{ edit }}</button>
               {% else %}
               <button type="submit" id="write" class="btn btn-sm">작성하기</button>
-            {% endif %}
+              {% endif %}
           </div>
       </div>
       
