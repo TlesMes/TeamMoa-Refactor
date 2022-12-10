@@ -88,3 +88,17 @@ h3 {
   font-size: 12px;
   color: #7f8bb1;
 }
+
+.timediv {
+  font-size: 10px;
+  color: #2d3d57;
+  margin: auto;
+}
+
+.timediv table {
+  margin-top: 40px;
+}
+
+.timediv td {
+  height: 18px;
+}
