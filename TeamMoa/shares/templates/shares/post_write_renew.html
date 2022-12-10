@@ -26,7 +26,6 @@
       minHeight: 500,
       maxHeight: 500,
       lang: "ko-KR",
-
       toolbar: [
         ["style", ["style"]],
         ["font", ["bold", "underline", "clear"]],
@@ -47,21 +46,105 @@
   href="{% static 'css/users/checkbox.css' %}"
   type="text/css"
 />
-{% endblock %} {% block contents %} {% load static %}
-<div class="container">
-  <div class="row mt-5">
-    <div class="col-12">
-      <h4 style="font-weight: bold">공유 게시글</h4>
-    </div>
-  </div>
 
+
+{% endblock %} {% block contents %} {% load static %}
+<style>
+  .container {
+    width:100%;
+  }
+
+  h4 {
+    font-size:17px;
+    font-weight: bold;
+    padding-bottom: 5px;
+  }
+
+  .row-mt-5{
+    display:inline-block;
+    align-items:center;
+    text-align:center;
+    margin-top:4%;
+    width:100%;
+  }
+
+  #form_title {
+    font-family: "GmarketSansMedium", sans-serif;
+    width:70%;
+    max-width:70%;
+    margin-bottom:0px;
+    height: 45px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-style:none;
+    background: #ededed;
+    padding-left:10px;
+  }
+
+  textarea{
+    font-family: "GmarketSansMedium", sans-serif;
+    margin-top:0px;
+    width:68.3%;
+    max-width:68.3%;
+    height:250px;
+    min-height:250px;
+    border-bottom-left-radius:10px;
+    border-bottom-right-radius:10px;
+    border:2px solid #000000;
+    padding-left:10px;
+    font-size:15px;
+    line-height:30px;
+  }
+  
+  .card-footer{
+    width:68.3%;
+    height: 55px;
+    margin-top:10px;
+    margin-left:auto;
+    margin-right:auto;
+    background:#EDEDED;
+    padding-left: 10px;
+    text-align:left;
+  }
+  
+  [type=file] {
+    line-height:30px;
+  }
+
+  .top-position {
+    float:right;
+  }
+  
+
+  .Submit_ {
+    display:flex;
+    flex-direction:column;
+    align-items: end;
+  }
+
+  [type=submit] {
+    font-family: "GmarketSansMedium", sans-serif;
+    font-size: 14px;
+    line-height: 30px;
+    width:65px;
+    height:30px;
+    margin-top: 10px;
+    float:right;
+    background: #FFFFFF;
+    border-radius: 5px;
+  }
+</style>
+<div class="container">
   <div class="row-mt-5">
+    <div class="col-12">
+      <h4>공유 게시글</h4>
+    </div>
     <form action="" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="card" style="width: 100%">
-        <!--제목,분류,작성일-->xs
+        <!--제목,분류,작성일-->
         <div class="card-header" style="padding: 0rem 0.8rem">
-          <div class="md-form form-group" style="margin-top: 8.5px">
+          <div class="md-form_form-group" style="margin-top: 8.5px">
             <div style="padding: 0 5.5px">{{ form.title }}</div>
           </div>
         </div>
@@ -71,10 +154,13 @@
         </div>
       </div>
 
-      <div class="card-footer" style="padding-left: 0px; margin-top: 18px">
+      <div class="card-footer">
         <div class="form-group">
           <div class="col-sm-12">
             {{ form.upload_files }}
+            
+          </div>
+        </div>
             <small
               id="help"
               class="form-text text-muted"
@@ -83,29 +169,20 @@
               [파일 업로드]&nbsp;<i class="fas fa-upload"></i>&nbsp;10MB 이하의
               파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
             </small>
+          <div class ="Submit_">
+            <div class="text-right" style="margin-top: 10px">
+            </div>
+            
+              {% if edit %}
+              <button type="submit" id="write" class="btn btn-sm">{{ edit }}</button>
+              {% else %}
+              <button type="submit" id="write" class="btn btn-sm">작성하기</button>
+            {% endif %}
           </div>
-        </div>
       </div>
-      <div class="text-right" style="margin-top: 10px">
-        <label>
-          {{ form.top_fixed }}
-          <span style="padding-bottom: 35px; color: black; font-weight: bold"
-            >상단에 표시하기</span
-          >
-        </label>
-        {% if edit %}
-        <button type="submit" id="write" class="btn btn-sm">{{ edit }}</button>
-        {% else %}
-        <button type="submit" id="write" class="btn btn-sm">작성하기</button>
-        {% endif %}
-        <input
-          type="checkbox"
-          id="fileChangeCheck"
-          name="fileChange"
-          style="display: none"
-        />
-      </div>
+      
     </form>
+    
   </div>
 </div>
 {% endblock %} {% block script %}

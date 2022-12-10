@@ -3,17 +3,16 @@
 {% endblock %} {% block contents %}
 <style>
 
-.wrap{
-    width:65%;
-    margin-top:7%;
-    margin-left:auto;
-    margin-right:auto;
+.wrap {
+    width: 65%;
+    height:70vh;
+    margin: auto;
+    margin-top:5%;
 }
 
 .container{
-    position:relative;
     display:inline-block;
-  
+    
     width:100%;
     border:1px solid #d9d9d9;;
     border-radius:5px;
@@ -27,7 +26,6 @@
   text-align:center;
   background: #ededed;
   padding: 10px;
-
 }
 
 #poster {
@@ -45,12 +43,13 @@
 }
 
 #button_div {
- 
   display:flex;
   vertical-align: bottom;
   justify-content: end;
 }
+    
 button {
+  font-family: "GmarketSansMedium", sans-serif;
   display:inline-block;
   float:right;
   background:  #FFFFFF;
@@ -109,7 +108,6 @@ button {
           </div>
           <!-- {% endif %}-->
           <!--내용-->
-          
         </div>
       </div>
       <br />
@@ -120,33 +118,13 @@ button {
   <div id="delete_modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <!-- <div class="modal-header">
-          <h5 class="modal-title">삭제경고</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span id = "delete" aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>게시글을 삭제하시겠습니까?</p>
-        </div> !-->
-        
       </div>
     </div>
   </div>
 </div>
 
 <div class="modal-footer">
-  <button onclick="delete_modal()" type="button" class="btn btn-dark">
-    삭제하기
-  </button>
-  <button type="button" class="btn btn-light" data-dismiss="modal">
-    취소하기
-  </button>
+
 </div>
 <div id ="button_div" class="text-right" >
   {% if post_auth or request.user.level == '0' %}
@@ -165,7 +143,7 @@ button {
   >
     삭제
   </button> !-->
-  <button id = "button_" class="btn btn-md btn-dark" onclick="location.href='/post/{{ post.id }}/delete/'">삭제</button> 
+  <button id = "button_" class="btn btn-md btn-dark" onclick="location.href='/shares/{{ team.id }}/delete/{{ post.id }}'">삭제</button> 
   <button
     class="btn btn-sm"
     id="detail_btn"

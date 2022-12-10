@@ -109,10 +109,10 @@
           ctx.stroke();
           {% endfor %}
           {% for node in nodes %}
-            ctx.strokeRect({{node.posX}}-10,{{node.posY}}-30,100,60);
-            ctx.fillStyle = "green";
-            ctx.fillRect({{node.posX}}-10,{{node.posY}}-30,100,60);
-            ctx.fillStyle = "black";
+            ctx.strokeRect({{node.posX}}-13,{{node.posY}}-35,100,60);
+            ctx.fillStyle = "#a6b0d0";
+            ctx.fillRect({{node.posX}}-13,{{node.posY}}-35,100,60);
+            ctx.fillStyle = "#fff";
             ctx.fillText("{{node.title}}",{{node.posX}},{{node.posY}});
           {% endfor %}
           canvas.onclick = function(event){
