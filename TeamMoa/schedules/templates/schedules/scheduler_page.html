@@ -15,6 +15,7 @@
       </a>
     </div>
     <div class="schedulesdiv" id="schedulesdiv">
+      {% for schedule in schedules %} {% if forloop.counter == 1 %}
       <div class="timediv">
         <table>
           <tr>
@@ -94,7 +95,7 @@
           </tr>
         </table>
       </div>
-       {% for schedule in schedules %}
+      {% endif %}
       <div class="schedulediv" id="schedulediv{{forloop.counter}}">
         <h3>{{schedule.date}}</h3>
         <table>
@@ -228,6 +229,8 @@
       }
     }
   }
+
+  timediv;
 </script>
 
 {% endblock %}
