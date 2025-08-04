@@ -36,4 +36,3 @@ class Post(models.Model):
         db_table = '공지사항'
         verbose_name ='공지사항'
         verbose_name_plural ='공지사항'
-# Create your models here.
