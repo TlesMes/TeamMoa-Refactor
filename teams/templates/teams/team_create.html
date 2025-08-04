@@ -1,0 +1,36 @@
+{% extends 'base2.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/teamcreate.css' %}" />
+<section class="teamcreatesection">
+  <form method="POST" action=".">
+    {% csrf_token %}
+    <div class="createform">
+      <h2>팀명</h2>
+      {{form.title}}
+    </div>
+    <div class="createform">
+      <h2>인원수</h2>
+      {{form.maxuser}}
+    </div>
+    <div class="createform">
+      <h2>비밀번호</h2>
+      {{form.teampasswd}}
+    </div>
+    <div class="createform">
+      <h2>팀소개</h2>
+      {{form.introduction}}
+    </div>
+    <button
+      id="create_button"
+      class="btn btsn-primary"
+      onclick="location.href='/teams/team_create/'"
+    >
+      생성
+    </button>
+  </form>
+  <div class="caption">
+    <a href="{% url 'teams:team_list' %}">
+      이미 팀이 있으신가요? <span>팀 목록 보기</span>
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+.devphasesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.devphasesection > div {
+  position: relative;
+}
+
+a:hover path {
+  fill: #7f8bb1;
+}
+
+.changediv {
+  margin-top: 30px;
+}
+
+h3 {
+  font-size: 21px;
+  color: #a6b0d0;
+}
+
+input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+textarea {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+button {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}

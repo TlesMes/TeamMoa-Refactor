@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contents %}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action=".">
+        {% csrf_token %}
+        <table>
+            {{form.as_table}}
+        </table>
+            <button type="submit" class="btn btn-primary" >todo 등록</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>로그인</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  </head>
+  <body>
+    <section class="loginsection">
+      <div class="imgdiv">
+        <img src="../../../static/assets/img/LogoW.svg" alt="logo" />
+      </div>
+      <form method="POST" action="{% url 'accounts:login'%}">
+        {% csrf_token %}
+        <div class="logindiv">
+          <input type="email" name="username" autocomplete="off" required />
+          <label for="username">USER EMAIL</label>
+        </div>
+        <div class="logindiv">
+          <input type="password" name="password" autocomplete="off" required />
+          <label for="password">PASSWORD</label>
+        </div>
+        <div class="loginbtn">
+          <button type="submit">로그인</button>
+        </div>
+      </form>
+      <div class="caption">
+        <a href="{% url 'accounts:signup' %}"> 아직 회원이 아니신가요? </a>
+      </div>
+    </section>
+  </body>
+</html>

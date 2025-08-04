@@ -1,0 +1,23 @@
+{% extends 'base2.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/teamsearch.css' %}" />
+<section class="teamsearchsection">
+  <form method="POST" action=".">
+    {% csrf_token %}
+    <div class="searchdiv">
+      <h2>팀코드를 입력해주세요</h2>
+      <div class="search">
+        {{form.as_p}}
+        <button class="search_btn" type="submit" class="btn btn-primary">
+          검색
+        </button>
+      </div>
+    </div>
+  </form>
+  <div class="caption">
+    <a href="{% url 'teams:team_list' %}">
+      이미 팀이 있으신가요? <span>팀 목록 보기</span>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

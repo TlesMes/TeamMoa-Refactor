@@ -1,0 +1,44 @@
+{% extends 'base2.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/teamlist.css' %}" />
+<section class="teamlistsection">
+  <div class="container">
+    {% if request.user.is_authenticated %}
+    <div class="scroll_section">
+      {% for team in teams %}
+      <div class="teamlist">
+        <h2 id="team_title">
+          {{ team.title }}<span>(#{{team.invitecode}})</span>
+          <span id="user_num">
+            ({{ team.currentuser }}/{{ team.maxuser }})
+          </span>
+        </h2>
+        <button
+          class="join"
+          onclick="location.href='/teams/team_main_page/{{ team.id }}'"
+        >
+          참가
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="btn_section">
+      <button
+        id="create_button"
+        class="btn btn-primary"
+        onclick="location.href='/teams/team_create/'"
+      >
+        팀 생성
+      </button>
+      <button
+        id="search_button"
+        class="btn btn-primary"
+        onclick="location.href='/teams/team_search/'"
+      >
+        팀 검색
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상환경
+env/
+venv/
+.venv/
+.Python
+
+# SQLite DB
+db.sqlite3
+
+# Django
+media/
+staticfiles/
+
+# IDE / 에디터
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 환경변수
+.env
+*.env
+local_settings.py

@@ -1,0 +1,28 @@
+{% extends 'base1.html' %} {% load static %} {% block contents %}
+<link rel="stylesheet" href="{% static 'css/mindmaplist.css' %}" />
+<section class="schedulesection">
+  <div class="changediv">
+    <div class="scrolldiv">
+      {% for mindmap in mindmaps %}
+      <div class="mindmapdiv">
+        <h2>{{ mindmap.title }} <span>(#{{ mindmap.id }})</span></h2>
+        <button
+          onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'"
+        >
+          선택
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mindmapbtn">
+      <button
+        class="btn btn-primary"
+        onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'"
+      >
+        마인드맵 생성
+      </button>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
