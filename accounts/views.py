@@ -18,59 +18,56 @@ from .forms import CustomUserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 # Create your views here.
+from . import services
 
 
 def signup(request):
     if request.method == "POST":
         try:
-            password1 = request.POST["password1"]
+            password = request.POST["password1"]
             password2 = request.POST["password2"]
             username = request.POST["username"]
             nickname = request.POST["nickname"]
             profile = request.POST["profile"]
-            if password1 != password2:
-                return HttpResponse('<script>alert("비밀번호가 일치하지 않습니다.")</script><script>location.href="./"</script>')
 
-            # 이메일 형식 검사 (User 만들기 전에!)
-            REGEX_EMAIL = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-            if not re.fullmatch(REGEX_EMAIL, username):
-                raise NotImplementedError("이메일 형식이 맞지 않습니다.")
+            if not all([password, password2, username, nickname, profile]):
+                raise ValueError("빈 칸이 존재합니다.")
 
-            # 유저 생성 및 필드 설정
-            user = User.objects.create_user(username=username, password=password1)
-            user.is_active = False
-            user.nickname = nickname
-            user.profile = profile
-            user.save()
+            if password != password2:
+                # Django Form을 사용하면 이 로직을 form.is_valid()에서 처리할 수 있습니다.
+                return HttpResponse(
+                    '<script>alert("비밀번호가 일치하지 않습니다.")</script><script>location.href="./"</script>'
+                )
 
-            # 인증 메일 전송
             current_site = get_current_site(request)
-            message = render_to_string('accounts/user_activate_email.html',                         {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)).encode().decode(),
-                'token': account_activation_token.make_token(user),
-            })
-            mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
-            email = EmailMessage(mail_subject, message, to=[username])
-            email.send()
+            services.register_user(
+                username=username,
+                password=password,
+                nickname=nickname,
+                profile=profile,
+                current_site=current_site,
+            )
 
             return HttpResponse(
                 '<div style="font-size: 40px; width: 100%; height:100%; display:flex; text-align:center; '
                 'justify-content: center; align-items: center;">'
-                '입력하신 이메일<span>로 인증 링크가 전송되었습니다.</span>'
-                '</div>'
+                "입력하신 이메일<span>로 인증 링크가 전송되었습니다.</span>"
+                "</div>"
             )
-        except ValueError:
-            return HttpResponse('<script>alert("빈 칸이 존재합니다.")</script><script>location.href="./"</script>')
-        except IntegrityError:
-            return HttpResponse('<script>alert("존재하는 계정입니다.")</script><script>location.href="./"</script>')
-        except NotImplementedError:
-            return HttpResponse('<script>alert("이메일 형식이 맞지 않습니다.")</script><script>location.href="./"</script>')
+        except ValueError as e:
+            return HttpResponse(
+                f'<script>alert("{e}")</script><script>location.href="./"</script>'
+            )
+        except IntegrityError as e:
+            return HttpResponse(
+                f'<script>alert("{e}")</script><script>location.href="./"</script>'
+            )
         except SMTPRecipientsRefused:
-            return HttpResponse('<script>alert("이메일 전송 실패")</script><script>location.href="./"</script>')
+            return HttpResponse(
+                '<script>alert("이메일 전송 실패")</script><script>location.href="./"</script>'
+            )
 
-    return render(request, 'accounts/signup.html')
+    return render(request, "accounts/signup.html")
 
 
 
