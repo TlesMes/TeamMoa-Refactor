@@ -19,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 # Create your views here.
 
-@csrf_exempt
+
 def signup(request):
     if request.method == "POST":
         try:
@@ -88,7 +88,6 @@ def activate(request, uid64, token):
         return HttpResponse('비정상적인 접근입니다.')
 
 
-@csrf_exempt
 def login(request):
     if request.COOKIES.get('username') is not None:
         username = request.COOKIES.get('username')
