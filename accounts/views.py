@@ -22,51 +22,54 @@ from django.contrib.auth.forms import PasswordChangeForm
 @csrf_exempt
 def signup(request):
     if request.method == "POST":
-
         try:
+            password1 = request.POST["password1"]
+            password2 = request.POST["password2"]
+            username = request.POST["username"]
+            nickname = request.POST["nickname"]
+            profile = request.POST["profile"]
+            if password1 != password2:
+                return HttpResponse('<script>alert("비밀번호가 일치하지 않습니다.")</script><script>location.href="./"</script>')
 
-            if request.POST["password1"] == request.POST["password2"]:
-                user = User.objects.create_user(
-                    username=request.POST["username"], password=request.POST["password1"])
-                user.is_active = False
-                user.save()
-                nickname = request.POST["nickname"]
-                user.profile = request.POST["profile"]
-                user.nickname=nickname
+            # 이메일 형식 검사 (User 만들기 전에!)
+            REGEX_EMAIL = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+            if not re.fullmatch(REGEX_EMAIL, username):
+                raise NotImplementedError("이메일 형식이 맞지 않습니다.")
 
-                
-                user.save()
-                REGEX_EMAIL = '([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@mju+(\.[A-Z|a-z]{2,})+'
-                if not re.fullmatch(REGEX_EMAIL, user.username):
-                    raise NotImplementedError("이메일 형식이 맞지 않습니다.")
-                current_site = get_current_site(request)
-                # localhost:8000
-                message = render_to_string('accounts/user_activate_email.html',                         {
-                    'user': user,
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)).encode().decode(),
-                    'token': account_activation_token.make_token(user),
-                })
-                mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
-                user_email = user.username
-                email = EmailMessage(mail_subject, message, to=[user_email])
-                email.send()
-                return HttpResponse(
-                    '<div style="font-size: 40px; width: 100%; height:100%; display:flex; text-align:center; '
-                    'justify-content: center; align-items: center;">'
-                    '입력하신 이메일<span>로 인증 링크가 전송되었습니다.</span>'
-                    '</div>'
-                )
+            # 유저 생성 및 필드 설정
+            user = User.objects.create_user(username=username, password=password1)
+            user.is_active = False
+            user.nickname = nickname
+            user.profile = profile
+            user.save()
+
+            # 인증 메일 전송
+            current_site = get_current_site(request)
+            message = render_to_string('accounts/user_activate_email.html',                         {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)).encode().decode(),
+                'token': account_activation_token.make_token(user),
+            })
+            mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
+            email = EmailMessage(mail_subject, message, to=[username])
+            email.send()
+
+            return HttpResponse(
+                '<div style="font-size: 40px; width: 100%; height:100%; display:flex; text-align:center; '
+                'justify-content: center; align-items: center;">'
+                '입력하신 이메일<span>로 인증 링크가 전송되었습니다.</span>'
+                '</div>'
+            )
         except ValueError:
-            return HttpResponse('<script>alert("빈 칸이 존재합니다.")</script>''<script>location.href="./"</script>')
+            return HttpResponse('<script>alert("빈 칸이 존재합니다.")</script><script>location.href="./"</script>')
         except IntegrityError:
-            return HttpResponse('<script>alert("존재하는 계정입니다.")</script>''<script>location.href="./"</script>')
-        #except Exception as passwordDif:
-           #  return HttpResponse('<script>alert("비밀번호가 일치하지 않습니다.")</script>''<script>location.href="./"</script>')
+            return HttpResponse('<script>alert("존재하는 계정입니다.")</script><script>location.href="./"</script>')
         except NotImplementedError:
-            return HttpResponse('<script>alert("이메일 형식이 맞지 않습니다.")</script>''<script>location.href="./"</script>')
+            return HttpResponse('<script>alert("이메일 형식이 맞지 않습니다.")</script><script>location.href="./"</script>')
         except SMTPRecipientsRefused:
-            return HttpResponse('<script>alert("이메일 형식이 맞지 않습니다.")</script>''<script>location.href="./"</script>')
+            return HttpResponse('<script>alert("이메일 전송 실패")</script><script>location.href="./"</script>')
+
     return render(request, 'accounts/signup.html')
 
 
@@ -114,7 +117,6 @@ def login(request):
             return HttpResponse('<script>alert("계정이 존재하지 않습니다.")</script>''<script>location.href="./"</script>')
     else:
         return render(request, 'accounts/login.html')
-    return render(request, 'accounts/login.html') 
 
 
 def logout(request):
