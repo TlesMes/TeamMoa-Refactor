@@ -65,7 +65,7 @@
 
 ## TODO
 
-자세한 내용은 [https://www.notion.so/TeamMoa-2465f76345eb804dbb01f9f5b8dc972d](TODO)를 참고하세요.
+자세한 내용은 [TODO](https://www.notion.so/TeamMoa-TODO-2465f76345eb804dbb01f9f5b8dc972d?source=copy_link)를 참고하세요.
 
 ---
 
