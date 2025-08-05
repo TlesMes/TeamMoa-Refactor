@@ -46,8 +46,6 @@ INSTALLED_APPS = [
     'schedules.apps.SchedulesConfig',
     'members.apps.MembersConfig',
     'mindmaps.apps.MindmapsConfig',
-    
-
 ]
 
 MIDDLEWARE = [
@@ -56,9 +54,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddlewar',
     'django.contrib.messages.middleware.MessageMiddleware'
 ]
 
