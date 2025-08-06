@@ -10,18 +10,19 @@ from .models import User
 from .tokens import account_activation_token
 
 
-def register_user(username, password, nickname, profile, current_site):
+def register_user(username, email, password, nickname, profile, current_site):
     """
     사용자를 등록하고 활성화 이메일을 발송합니다.
     """
     # 이메일 형식 검사
     REGEX_EMAIL = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-    if not re.fullmatch(REGEX_EMAIL, username):
+
+    if not re.fullmatch(REGEX_EMAIL, email):
         raise ValueError("이메일 형식이 맞지 않습니다.")
 
     try:
         # 유저 생성 및 필드 설정
-        user = User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password)
         user.is_active = False
         user.nickname = nickname
         user.profile = profile
@@ -37,7 +38,7 @@ def register_user(username, password, nickname, profile, current_site):
         'token': account_activation_token.make_token(user),
     })
     mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
-    email = EmailMessage(mail_subject, message, to=[username])
-    email.send()
+    email_message = EmailMessage(mail_subject, message, to=[email])
+    email_message.send()
 
     return user

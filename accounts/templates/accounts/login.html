@@ -13,8 +13,8 @@
       <form method="POST" action="{% url 'accounts:login'%}">
         {% csrf_token %}
         <div class="logindiv">
-          <input type="email" name="username" autocomplete="off" required />
-          <label for="username">USER EMAIL</label>
+          <input type="text" name="username" autocomplete="off" required />
+          <label for="username">USERNAME</label>
         </div>
         <div class="logindiv">
           <input type="password" name="password" autocomplete="off" required />
