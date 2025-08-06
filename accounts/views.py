@@ -17,57 +17,46 @@ import re # 정규 표현식 모듈
 from .forms import CustomUserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from accounts.forms import SignupForm
 # Create your views here.
 from . import services
 
 
 def signup(request):
-    if request.method == "POST":
-        try:
-            password = request.POST["password1"]
-            password2 = request.POST["password2"]
-            username = request.POST["username"]
-            nickname = request.POST["nickname"]
-            profile = request.POST["profile"]
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            try:
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                email = form.cleaned_data['email']
+                nickname = form.cleaned_data['nickname']
+                profile = form.cleaned_data['profile']
+                
 
-            if not all([password, password2, username, nickname, profile]):
-                raise ValueError("빈 칸이 존재합니다.")
-
-            if password != password2:
-                # Django Form을 사용하면 이 로직을 form.is_valid()에서 처리할 수 있습니다.
-                return HttpResponse(
-                    '<script>alert("비밀번호가 일치하지 않습니다.")</script><script>location.href="./"</script>'
+                current_site = get_current_site(request)
+                services.register_user(
+                    username=username,
+                    password=password,
+                    email=email,
+                    nickname=nickname,
+                    profile=profile,
+                    current_site=current_site,
                 )
 
-            current_site = get_current_site(request)
-            services.register_user(
-                username=username,
-                password=password,
-                nickname=nickname,
-                profile=profile,
-                current_site=current_site,
-            )
+                return render(request, 'accounts/signup_success.html')
 
-            return HttpResponse(
-                '<div style="font-size: 40px; width: 100%; height:100%; display:flex; text-align:center; '
-                'justify-content: center; align-items: center;">'
-                "입력하신 이메일<span>로 인증 링크가 전송되었습니다.</span>"
-                "</div>"
-            )
-        except ValueError as e:
-            return HttpResponse(
-                f'<script>alert("{e}")</script><script>location.href="./"</script>'
-            )
-        except IntegrityError as e:
-            return HttpResponse(
-                f'<script>alert("{e}")</script><script>location.href="./"</script>'
-            )
-        except SMTPRecipientsRefused:
-            return HttpResponse(
-                '<script>alert("이메일 전송 실패")</script><script>location.href="./"</script>'
-            )
+            except (IntegrityError, SMTPRecipientsRefused) as e:
+                error_message = "알 수 없는 오류가 발생했습니다."
+                if isinstance(e, IntegrityError):
+                    error_message = "이미 존재하는 계정입니다."
+                elif isinstance(e, SMTPRecipientsRefused):
+                    error_message = "유효하지 않은 이메일 주소입니다."
+                form.add_error(None, error_message)
+    else:
+        form = SignupForm()
 
-    return render(request, "accounts/signup.html")
+    return render(request, "accounts/signup.html", {"form": form})
 
 
 
@@ -86,16 +75,11 @@ def activate(request, uid64, token):
 
 
 def login(request):
-    if request.COOKIES.get('username') is not None:
-        username = request.COOKIES.get('username')
-        password = request.COOKIES.get('password')
-        user = auth.authenticate(request, username=username, password=password)
-        if user is not None:
-            auth.login(request, user)
-            return redirect("teams:team_list")
-        else:
-            return render(request, "accounts/login.html")
-    elif request.method == "POST":
+    # 이미 로그인 된 사용자가 로그인 페이지에 접근 시 패스
+    if request.user.is_authenticated:
+        return redirect('teams:team_list')
+    
+    if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
         # 해당 user가 있으면 username, 없으면 None
@@ -103,14 +87,10 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            if request.POST.get("keep_login") == "TRUE":
-                response = render(request, 'accounts/home.html')
-                response.set_cookie('username',username)
-                response.set_cookie('password',password)
-                return response
-            return HttpResponseRedirect('/teams/team_list')
+            request.session.set_expiry(0)
+            return redirect('teams:team_list')
         else:
-            return HttpResponse('<script>alert("계정이 존재하지 않습니다.")</script>''<script>location.href="./"</script>')
+            return render(request, 'accounts/login.html', {'error': '아이디 또는 비밀번호가 올바르지 않습니다.'})
     else:
         return render(request, 'accounts/login.html')
 
