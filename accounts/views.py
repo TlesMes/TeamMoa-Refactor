@@ -75,9 +75,6 @@ def login(request):
 
 
 def logout(request):
-    response = render(request, 'accounts/home.html')
-    response.delete_cookie('username')
-    response.delete_cookie('password')
     auth.logout(request)
     return redirect(HOME_URL_NAME) #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
 
