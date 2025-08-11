@@ -21,7 +21,7 @@ staticfiles/
 .idea/
 *.sublime-project
 *.sublime-workspace
-.GEMINI.md
+GEMINI.md
 
 # OS
 .DS_Store
