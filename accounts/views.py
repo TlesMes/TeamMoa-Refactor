@@ -14,6 +14,8 @@ from accounts.forms import SignupForm
 # Create your views here.
 from . import services
 
+TEAM_LIST_URL_NAME = 'teams:team_list'
+
 
 def signup(request):
     if request.method == 'POST':
@@ -45,7 +47,7 @@ def activate(request, uid64, token):
         user.is_active = True
         user.save()
         auth.login(request, user)
-        return HttpResponseRedirect('/teams/team_list') #인증 후 연결될 페이지
+        return redirect(TEAM_LIST_URL_NAME)
     else:
         return HttpResponse('비정상적인 접근입니다.')
 
@@ -53,7 +55,7 @@ def activate(request, uid64, token):
 def login(request):
     # 이미 로그인 된 사용자가 로그인 페이지에 접근 시 패스
     if request.user.is_authenticated:
-        return redirect('teams:team_list')
+        return redirect(TEAM_LIST_URL_NAME)
     
     if request.method == "POST":
         username = request.POST["username"]
@@ -64,7 +66,7 @@ def login(request):
         if user is not None:
             auth.login(request, user)
             request.session.set_expiry(0)
-            return redirect('teams:team_list')
+            return redirect(TEAM_LIST_URL_NAME)
         else:
             return render(request, 'accounts/login.html', {'error': '아이디 또는 비밀번호가 올바르지 않습니다.'})
     else:
@@ -78,11 +80,10 @@ def logout(request):
     auth.logout(request)
     return HttpResponseRedirect('/accounts/home') #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
 
+
 def home(request):
     if request.user.is_authenticated:
-        print("2")
         return redirect("teams:team_list")
-    print("1")
     return redirect("accounts:login")
 
 
