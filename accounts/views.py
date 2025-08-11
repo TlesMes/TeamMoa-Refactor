@@ -1,19 +1,12 @@
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib import auth
 from .models import User
-# from rest_framework.views import APIView, Response, status
 from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
-from django.utils.encoding import force_bytes
-from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_decode
 from .tokens import account_activation_token
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_str
 from django.http import HttpResponseRedirect,HttpResponse
-from django.db import IntegrityError
 from smtplib import SMTPRecipientsRefused
-import re # 정규 표현식 모듈
 from .forms import CustomUserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -27,31 +20,15 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             try:
-                username = form.cleaned_data['username']
-                password = form.cleaned_data['password']
-                email = form.cleaned_data['email']
-                nickname = form.cleaned_data['nickname']
-                profile = form.cleaned_data['profile']
-                
-
                 current_site = get_current_site(request)
                 services.register_user(
-                    username=username,
-                    password=password,
-                    email=email,
-                    nickname=nickname,
-                    profile=profile,
+                    form,
                     current_site=current_site,
                 )
-
                 return render(request, 'accounts/signup_success.html')
 
-            except (IntegrityError, SMTPRecipientsRefused) as e:
-                error_message = "알 수 없는 오류가 발생했습니다."
-                if isinstance(e, IntegrityError):
-                    error_message = "이미 존재하는 계정입니다."
-                elif isinstance(e, SMTPRecipientsRefused):
-                    error_message = "유효하지 않은 이메일 주소입니다."
+            except (SMTPRecipientsRefused) as e:
+                error_message = "유효하지 않은 이메일 주소입니다."
                 form.add_error(None, error_message)
     else:
         form = SignupForm()
@@ -61,7 +38,6 @@ def signup(request):
 
 
 def activate(request, uid64, token):
-
     uid = force_str(urlsafe_base64_decode(uid64))
     user = User.objects.get(pk=uid)
 
