@@ -5,7 +5,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_decode
 from .tokens import account_activation_token
 from django.utils.encoding import force_str
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponse
 from smtplib import SMTPRecipientsRefused
 from .forms import CustomUserChangeForm
 from django.contrib.auth.decorators import login_required
@@ -15,7 +15,8 @@ from accounts.forms import SignupForm
 from . import services
 
 TEAM_LIST_URL_NAME = 'teams:team_list'
-
+LOGIN_URL_NAME = 'accounts:login'
+HOME_URL_NAME = 'accounts:home'
 
 def signup(request):
     if request.method == 'POST':
@@ -78,13 +79,13 @@ def logout(request):
     response.delete_cookie('username')
     response.delete_cookie('password')
     auth.logout(request)
-    return HttpResponseRedirect('/accounts/home') #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
+    return redirect(HOME_URL_NAME) #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
 
 
 def home(request):
     if request.user.is_authenticated:
-        return redirect("teams:team_list")
-    return redirect("accounts:login")
+        return redirect(TEAM_LIST_URL_NAME)
+    return redirect(LOGIN_URL_NAME)
 
 
 #유저 정보 변경
@@ -94,7 +95,7 @@ def update(request):
         user_change_form = CustomUserChangeForm(request.POST, instance=request.user)
         if user_change_form.is_valid():
             user_change_form.save()
-            return HttpResponseRedirect('/teams/team_list')
+            return redirect(TEAM_LIST_URL_NAME)
     
     else: #post방식이 아니면 폼을 전달해서 변경사항을 받음
         user_change_form = CustomUserChangeForm(instance = request.user) 
@@ -109,7 +110,7 @@ def password(request):
     
         if password_change_form.is_valid():
             password_change_form.save()
-            return HttpResponseRedirect('/teams/team_list')
+            return redirect(TEAM_LIST_URL_NAME)
 
     else:
         password_change_form = PasswordChangeForm(request.user)
