@@ -51,6 +51,7 @@ class SignupForm(forms.ModelForm):
         # form.save()를 사용하기 위해 create_user에서 처리하던 암호화처리를 사용
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
+        user.is_active = False 
         if commit:
             user.save()
         return user
