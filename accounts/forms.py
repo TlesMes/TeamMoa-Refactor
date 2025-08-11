@@ -41,13 +41,20 @@ class SignupForm(forms.ModelForm):
         # email 필드 유효성 및 중복 검사
         email = self.cleaned_data.get('email')
         REGEX_EMAIL = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-
         if not re.fullmatch(REGEX_EMAIL, email):
             raise forms.ValidationError("이메일 형식이 맞지 않습니다.")
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('이미 사용중인 이메일입니다.')
         return email
-
+    
+    def save(self, commit=True):
+        # form.save()를 사용하기 위해 create_user에서 처리하던 암호화처리를 사용
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        user.is_active = False 
+        if commit:
+            user.save()
+        return user
 
 #닉네임, 프로필 변경 폼
 class CustomUserChangeForm(UserChangeForm):
