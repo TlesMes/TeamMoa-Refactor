@@ -14,7 +14,7 @@ def register_user(form, current_site):
     # pk는 commit되어야 db에 저장되고 부여받는 값
     # 따라서 email로 pk를 전송하려면, db에 user가 저장되어야 한다.
     # 그러나 email이 유효하지 않아, 전송이 실패하면 db에 저장된 user는 더미가 되어버린다.
-    # 따라서 transcation을 통해 원자성을 확보
+    # 따라서 transcation.atomic을 통해 원자성을 확보
     with transaction.atomic():
         # 1. 유저를 db에 임시 저장, pk부여
         user = form.save()
