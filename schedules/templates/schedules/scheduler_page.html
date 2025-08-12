@@ -1,236 +1,68 @@
 {% extends 'base_app.html' %} {% load static %} {% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="schedulesection">
-  <div class="changediv">
-    <div class="weekdiv">
-      <form method="POST" action=".">
+  <div class="schedule-header">
+    <div class="schedule-controls">
+      <form method="POST" action="." class="week-selector">
         {% csrf_token %}
-        <table>
-          <input type="week" name="week" required />
-        </table>
-        <button type="submit" class="btn btn-primary">시간표 확인</button>
+        <input type="week" name="week" required />
+        <button type="submit">시간표 확인</button>
       </form>
       <a href="{% url 'schedules:scheduler_upload_page' team.id %}">
         <button>시간표 업로드</button>
       </a>
     </div>
-    <div class="schedulesdiv" id="schedulesdiv">
-      {% for schedule in schedules %} {% if forloop.counter == 1 %}
-      <div class="timediv">
-        <table>
-          <tr>
-            <td>12:00 AM</td>
-          </tr>
-          <tr>
-            <td>01:00 AM</td>
-          </tr>
-          <tr>
-            <td>02:00 AM</td>
-          </tr>
-          <tr>
-            <td>03:00 AM</td>
-          </tr>
-          <tr>
-            <td>04:00 AM</td>
-          </tr>
-          <tr>
-            <td>05:00 AM</td>
-          </tr>
-          <tr>
-            <td>06:00 AM</td>
-          </tr>
-          <tr>
-            <td>07:00 AM</td>
-          </tr>
-          <tr>
-            <td>08:00 AM</td>
-          </tr>
-          <tr>
-            <td>09:00 AM</td>
-          </tr>
-          <tr>
-            <td>10:00 AM</td>
-          </tr>
-          <tr>
-            <td>11:00 AM</td>
-          </tr>
-          <tr>
-            <td>12:00 PM</td>
-          </tr>
-          <tr>
-            <td>01:00 PM</td>
-          </tr>
-          <tr>
-            <td>02:00 PM</td>
-          </tr>
-          <tr>
-            <td>03:00 PM</td>
-          </tr>
-          <tr>
-            <td>04:00 PM</td>
-          </tr>
-          <tr>
-            <td>05:00 PM</td>
-          </tr>
-          <tr>
-            <td>06:00 PM</td>
-          </tr>
-          <tr>
-            <td>07:00 PM</td>
-          </tr>
-          <tr>
-            <td>08:00 PM</td>
-          </tr>
-          <tr>
-            <td>09:00 PM</td>
-          </tr>
-          <tr>
-            <td>10:00 PM</td>
-          </tr>
-          <tr>
-            <td>11:00 PM</td>
-          </tr>
-          <tr>
-            <td>12:00 AM</td>
-          </tr>
-        </table>
-      </div>
-      {% endif %}
-      <div class="schedulediv" id="schedulediv{{forloop.counter}}">
-        <h3>{{schedule.date}}</h3>
-        <table>
-          <tbody id="urltbody">
-            <tr>
-              <td>{{schedule.time_0}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_1}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_2}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_3}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_4}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_5}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_6}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_7}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_8}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_9}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_10}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_11}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_12}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_13}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_14}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_15}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_16}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_17}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_18}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_19}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_20}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_21}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_22}}</td>
-            </tr>
-            <tr>
-              <td>{{schedule.time_23}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  </div>
+  <div class="schedule-grid">
+    <!-- Time Column -->
+    <div class="time-column">
+      <div class="schedule-day-header">시간</div>
+      {% for i in "012345678901234567890123"|make_list %}
+        <div class="time-slot">
+          {% if forloop.counter0 == 0 %}12:00 AM
+          {% elif forloop.counter0 <= 11 %}{{ forloop.counter0|stringformat:"02d" }}:00 AM
+          {% elif forloop.counter0 == 12 %}12:00 PM
+          {% else %}{{ forloop.counter0|add:"-12"|stringformat:"02d" }}:00 PM
+          {% endif %}
+        </div>
       {% endfor %}
     </div>
+    
+    <!-- Schedule Columns for each day -->
+    {% for schedule in schedules %}
+    <div class="schedule-column" id="schedulediv{{forloop.counter}}">
+      <div class="schedule-day-header">{{schedule.date}}</div>
+      <div class="schedule-slot availability-{{schedule.time_0}}">{{schedule.time_0}}</div>
+      <div class="schedule-slot availability-{{schedule.time_1}}">{{schedule.time_1}}</div>
+      <div class="schedule-slot availability-{{schedule.time_2}}">{{schedule.time_2}}</div>
+      <div class="schedule-slot availability-{{schedule.time_3}}">{{schedule.time_3}}</div>
+      <div class="schedule-slot availability-{{schedule.time_4}}">{{schedule.time_4}}</div>
+      <div class="schedule-slot availability-{{schedule.time_5}}">{{schedule.time_5}}</div>
+      <div class="schedule-slot availability-{{schedule.time_6}}">{{schedule.time_6}}</div>
+      <div class="schedule-slot availability-{{schedule.time_7}}">{{schedule.time_7}}</div>
+      <div class="schedule-slot availability-{{schedule.time_8}}">{{schedule.time_8}}</div>
+      <div class="schedule-slot availability-{{schedule.time_9}}">{{schedule.time_9}}</div>
+      <div class="schedule-slot availability-{{schedule.time_10}}">{{schedule.time_10}}</div>
+      <div class="schedule-slot availability-{{schedule.time_11}}">{{schedule.time_11}}</div>
+      <div class="schedule-slot availability-{{schedule.time_12}}">{{schedule.time_12}}</div>
+      <div class="schedule-slot availability-{{schedule.time_13}}">{{schedule.time_13}}</div>
+      <div class="schedule-slot availability-{{schedule.time_14}}">{{schedule.time_14}}</div>
+      <div class="schedule-slot availability-{{schedule.time_15}}">{{schedule.time_15}}</div>
+      <div class="schedule-slot availability-{{schedule.time_16}}">{{schedule.time_16}}</div>
+      <div class="schedule-slot availability-{{schedule.time_17}}">{{schedule.time_17}}</div>
+      <div class="schedule-slot availability-{{schedule.time_18}}">{{schedule.time_18}}</div>
+      <div class="schedule-slot availability-{{schedule.time_19}}">{{schedule.time_19}}</div>
+      <div class="schedule-slot availability-{{schedule.time_20}}">{{schedule.time_20}}</div>
+      <div class="schedule-slot availability-{{schedule.time_21}}">{{schedule.time_21}}</div>
+      <div class="schedule-slot availability-{{schedule.time_22}}">{{schedule.time_22}}</div>
+      <div class="schedule-slot availability-{{schedule.time_23}}">{{schedule.time_23}}</div>
+    </div>
+    {% endfor %}
   </div>
 </section>
-<script>
-  var color = 100 / `{{team.maxuser}}` / 100;
-  var color1 = color * 1;
-  var color2 = color * 2;
-  var color3 = color * 3;
-  var color4 = color * 4;
-  var color5 = color * 5;
-  var color4 = color * 6;
-  var color5 = color * 7;
-
-  for (var k = 1; k < 8; k++) {
-    for (var i = 0; i < 24; i++) {
-      var str = document
-        .getElementById(`schedulediv${k}`)
-        .getElementsByTagName("td")[i].childNodes[0].nodeValue;
-      if (str == 0) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = "rgba(86, 103, 156, 0)";
-      } else if (str == 1) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color1})`;
-      } else if (str == 2) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color2})`;
-      } else if (str == 3) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color3})`;
-      } else if (str == 4) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color4})`;
-      } else if (str == 5) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color5})`;
-      } else if (str == 6) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color6})`;
-      } else if (str == 7) {
-        document.getElementById(`schedulediv${k}`).getElementsByTagName("td")[
-          i
-        ].style.backgroundColor = `rgba(86, 103, 156, ${color7})`;
-      }
-    }
-  }
-
-  timediv;
-</script>
+{% comment %} 
+CSS classes now handle the availability colors automatically
+No JavaScript needed for styling 
+{% endcomment %}
 
 {% endblock %}

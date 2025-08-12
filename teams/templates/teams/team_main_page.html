@@ -6,73 +6,93 @@
     <h2>
       {{today_date|date:'오늘은 Y년 m월 d일'}}, <span>{{today_phase}}</span>
     </h2>
-    {% for phase in phases %}
-    <div>
-      <img src="../../../static/assets/img/Check.svg" alt="Check" />
-      {{phase.content}} : {{phase.startdate|date:'Y-m-d'}} ~
-      {{phase.enddate|date:'Y-m-d'}} {% if team.host == request.user %}
-      <button
-        class="deletebtn"
-        onclick='location.href ="/teams/team_delete_devPhase/{{ team.id }}/{{ phase.id }}"'
-      >
-        <svg
-          width="14"
-          height="18"
-          viewBox="0 0 14 18"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+    <div class="phase-list">
+      {% for phase in phases %}
+      <div class="phase-item">
+        <img src="../../../static/assets/img/Check.svg" alt="Check" />
+        <div class="phase-content">
+          {{phase.content}} : {{phase.startdate|date:'Y-m-d'}} ~ {{phase.enddate|date:'Y-m-d'}}
+        </div>
+        {% if team.host == request.user %}
+        <button
+          class="deletebtn"
+          onclick='location.href ="/teams/team_delete_devPhase/{{ team.id }}/{{ phase.id }}"'
         >
-          <path
-            d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
-            fill="#CCCCCC"
-          />
-        </svg>
-      </button>
-      {% endif %}
+          <svg
+            width="14"
+            height="18"
+            viewBox="0 0 14 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
+              fill="#CCCCCC"
+            />
+          </svg>
+        </button>
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
   <div class="teamdiv">
-    <div class="editdiv">
-      {% if request.user == team.host %}
-      <a href="{% url 'teams:team_add_devPhase' team.id %}">
-        <button class="plusbtn">개발 단계 추가</button>
-      </a>
-      <a href="{% url 'teams:team_info_change' team.id %}">
-        <button class="plusbtn2">팀 정보 수정</button>
-      </a>
-      <a href="{% url 'teams:team_disband' team.id %}">
-        <button>팀 해산</button>
-      </a>
-      {% endif %}
+    <div class="team-header">
+      <div class="team-info">
+        <h2>
+          {{ team.title }}
+          <span class="team-code">(#<span id="copycode">{{team.invitecode}}</span>)</span>
+          <button id="copybtn">
+            <svg
+              width="20"
+              height="19" 
+              viewBox="0 0 27 30" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M26.1527 3.86373L23.0259 0.82377C22.4834 0.296323 21.7476 3.90045e-06 20.9803 0L10.6071 0C9.00944 0 7.71429 1.25918 7.71429 2.8125V5.625H2.89286C1.29516 5.625 0 6.88418 0 8.4375V27.1875C0 28.7408 1.29516 30 2.89286 30H16.3929C17.9906 30 19.2857 28.7408 19.2857 27.1875V24.375H24.1071C25.7048 24.375 27 23.1158 27 21.5625V5.85246C27 5.10654 26.6952 4.39117 26.1527 3.86373ZM16.0312 27.1875H3.25446C3.15856 27.1875 3.06658 27.1505 2.99877 27.0845C2.93096 27.0186 2.89286 26.9292 2.89286 26.8359V8.78906C2.89286 8.69582 2.93096 8.6064 2.99877 8.54047C3.06658 8.47454 3.15856 8.4375 3.25446 8.4375H7.71429V21.5625C7.71429 23.1158 9.00944 24.375 10.6071 24.375H16.3929V26.8359C16.3929 26.9292 16.3548 27.0186 16.2869 27.0845C16.2191 27.1505 16.1272 27.1875 16.0312 27.1875ZM23.7455 21.5625H10.9688C10.8728 21.5625 10.7809 21.5255 10.7131 21.4595C10.6452 21.3936 10.6071 21.3042 10.6071 21.2109V3.16406C10.6071 3.07082 10.6452 2.9814 10.7131 2.91547C10.7809 2.84954 10.8728 2.8125 10.9688 2.8125H17.3571V7.96875C17.3571 8.74541 18.0047 9.375 18.8036 9.375H24.1071V21.2109C24.1071 21.3042 24.069 21.3936 24.0012 21.4595C23.9334 21.5255 23.8414 21.5625 23.7455 21.5625ZM24.1071 6.5625H20.25V2.8125H20.8305C20.9264 2.8125 21.0184 2.84953 21.0862 2.91545L24.0013 5.74951C24.0348 5.78216 24.0615 5.82092 24.0796 5.86358C24.0978 5.90624 24.1071 5.95195 24.1071 5.99812V6.5625Z" 
+                fill="#2D3D57"
+              />
+            </svg>
+          </button>
+        </h2>
+        <h3>{{team.introduction}}</h3>
+      </div>
+      <div class="editdiv">
+        {% if request.user == team.host %}
+        <a href="{% url 'teams:team_add_devPhase' team.id %}">
+          <button class="plusbtn">개발 단계 추가</button>
+        </a>
+        <a href="{% url 'teams:team_info_change' team.id %}">
+          <button class="plusbtn2">팀 정보 수정</button>
+        </a>
+        <a href="{% url 'teams:team_disband' team.id %}">
+          <button>팀 해산</button>
+        </a>
+        {% endif %}
+      </div>
     </div>
-    <h2>
-      {{ team.title }} (#<span id="copycode">{{team.invitecode}}</span>)
-      <button id="copybtn">
-        <svg
-          width="20"
-          height="19" 
-          viewBox="0 0 27 30" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path 
-            d="M26.1527 3.86373L23.0259 0.82377C22.4834 0.296323 21.7476 3.90045e-06 20.9803 0L10.6071 0C9.00944 0 7.71429 1.25918 7.71429 2.8125V5.625H2.89286C1.29516 5.625 0 6.88418 0 8.4375V27.1875C0 28.7408 1.29516 30 2.89286 30H16.3929C17.9906 30 19.2857 28.7408 19.2857 27.1875V24.375H24.1071C25.7048 24.375 27 23.1158 27 21.5625V5.85246C27 5.10654 26.6952 4.39117 26.1527 3.86373ZM16.0312 27.1875H3.25446C3.15856 27.1875 3.06658 27.1505 2.99877 27.0845C2.93096 27.0186 2.89286 26.9292 2.89286 26.8359V8.78906C2.89286 8.69582 2.93096 8.6064 2.99877 8.54047C3.06658 8.47454 3.15856 8.4375 3.25446 8.4375H7.71429V21.5625C7.71429 23.1158 9.00944 24.375 10.6071 24.375H16.3929V26.8359C16.3929 26.9292 16.3548 27.0186 16.2869 27.0845C16.2191 27.1505 16.1272 27.1875 16.0312 27.1875ZM23.7455 21.5625H10.9688C10.8728 21.5625 10.7809 21.5255 10.7131 21.4595C10.6452 21.3936 10.6071 21.3042 10.6071 21.2109V3.16406C10.6071 3.07082 10.6452 2.9814 10.7131 2.91547C10.7809 2.84954 10.8728 2.8125 10.9688 2.8125H17.3571V7.96875C17.3571 8.74541 18.0047 9.375 18.8036 9.375H24.1071V21.2109C24.1071 21.3042 24.069 21.3936 24.0012 21.4595C23.9334 21.5255 23.8414 21.5625 23.7455 21.5625ZM24.1071 6.5625H20.25V2.8125H20.8305C20.9264 2.8125 21.0184 2.84953 21.0862 2.91545L24.0013 5.74951C24.0348 5.78216 24.0615 5.82092 24.0796 5.86358C24.0978 5.90624 24.1071 5.95195 24.1071 5.99812V6.5625Z" 
-            fill="#2D3D57"
-          />
-        </svg>
-      </button>
-    </h2>
-    <h3>{{team.introduction}}</h3>
-    <hr />
-    <div>
-      <h2>팀장 : {{ team.host.nickname }}</hr>
-      {% for member in members %}
-      <h2>
-        {{member.User.nickname}}
-        <span class="logspan">&nbsp;({{member.User.last_login|date:'Y-m-d, H:i:s'}})</span>
-      </h2>
-      {% endfor %}
+    
+    <div class="team-members">
+      <div class="member-list">
+        <div class="member-item">
+          <div>
+            <span class="member-name">{{ team.host.nickname }}</span>
+            <span class="member-role">팀장</span>
+          </div>
+          <span class="member-login">{{ team.host.last_login|date:'Y-m-d, H:i:s' }}</span>
+        </div>
+        {% for member in members %}
+        <div class="member-item">
+          <div>
+            <span class="member-name">{{member.User.nickname}}</span>
+            <span class="member-role">팀원</span>
+          </div>
+          <span class="member-login">{{member.User.last_login|date:'Y-m-d, H:i:s'}}</span>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
   <script>
