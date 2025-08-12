@@ -26,7 +26,9 @@
         <a href="{% url 'schedules:scheduler_page' team.id %}" class="nav-link">시간표</a>
         <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="nav-link">마인드맵</a>
         <a href="{% url 'shares:post_list' team.id %}" class="nav-link">공유 게시판</a>
-        
+        <a href="{% url 'members:team_members_page' team.id %}" class="nav-link">
+          {{ team.title }}
+        </a>
         <div class="dropdown">
           <button class="dropdown-toggle" id="userDropdown">
             <span>{{request.user.nickname}}</span>
