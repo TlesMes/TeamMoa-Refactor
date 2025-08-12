@@ -1,4 +1,88 @@
 
+/* ========== DARK MODE SUPPORT ========== */
+body.dark-mode {
+  background-color: #2d3d57;
+  color: #f1f3f5;
+}
+/* Header + Nav 다크모드 */
+body.dark-mode .header {
+  background-color: #243247;
+  border-bottom-color: #3e4a5a;
+}
+
+body.dark-mode .logo-text {
+  color: #f1f3f5;
+}
+
+body.dark-mode .logo-icon i {
+  color: #ffe082;
+}
+
+body.dark-mode .nav-link {
+  color: #b0bec5;
+}
+
+body.dark-mode .nav-link:hover {
+  color: #ffe082;
+}
+
+body.dark-mode .dropdown-toggle {
+  color: #b0bec5;
+}
+
+body.dark-mode .dropdown-toggle:hover {
+  color: #ffe082;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #1f2a3d;
+  border-color: #3e4a5a;
+}
+
+body.dark-mode .dropdown-item {
+  color: #f1f3f5;
+}
+
+body.dark-mode .dropdown-item:hover {
+  background-color: #3e4a5a;
+}
+
+body.dark-mode .dropdown-divider {
+  border-top-color: #3e4a5a;
+}
+
+/* 버튼 스타일 */
+
+
+
+body.dark-mode .btn-secondary {
+  background-color: #5a6d8c;
+  color: #f1f3f5;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background-color: #3e4a5a;
+}
+
+body.dark-mode .btn-dark {
+  background-color: #3e4a5a;
+  color: #f1f3f5;
+}
+
+body.dark-mode .btn-dark:hover {
+  background-color: #2d3d57;
+}
+
+/* 기타 텍스트 컬러 */
+body.dark-mode .main-title {
+  color: #f1f3f5;
+}
+
+body.dark-mode .highlight {
+  color: #ffe082;
+}
+
+
 /* Header Styles */
 .header {
     width: 100%;
