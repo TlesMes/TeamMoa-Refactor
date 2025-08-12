@@ -1,16 +1,75 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <title>TeamMoa</title>
-    <link rel="icon" type="image/svg+xml" href="{% static 'assets/img/LogoB.svg' %}">
-    <link rel="stylesheet" href="{% static 'css/base_minimal.css' %}" />
-  </head>
-  <body>
-    <nav class="header">
-      <img src="../../../static/assets/img/LogoW.svg" alt="logo" />
-    </nav>
-    {% block contents %} {% endblock %}
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <title>TeamMoa</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'assets/img/LogoB.svg' %}">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base_minimal.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+</head>
+
+
+
+
+
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-left">
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <i class="ri-team-fill"></i>
+          </div>
+          <span class="logo-text">팀모아</span>
+        </a>
+      </div>
+      
+      <nav class="nav">
+        
+        <div class="dropdown">
+          <button class="dropdown-toggle" id="userDropdown">
+            <span>{{request.user.nickname}}</span>
+            <div class="dropdown-arrow">
+              <i class="ri-arrow-down-s-line"></i>
+            </div>
+          </button>
+          
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="{% url 'accounts:update' %}" class="dropdown-item">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-user-line"></i>
+                </div>
+                <span>프로필</span>
+              </div>
+            </a>
+            
+            <a href="/settings" class="dropdown-item">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-settings-line"></i>
+                </div>
+                <span>설정 미구현</span>
+              </div>
+            </a>
+            
+            <hr class="dropdown-divider">
+            
+            <a href="{% url 'accounts:logout' %}" id="logout-url" data-logout-url="{% url 'accounts:logout' %}" class="dropdown-item logout-btn">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-logout-box-line"></i>
+                </div>
+                <span>로그아웃</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+  {% block contents %} {% endblock %}
+</body>
 </html>

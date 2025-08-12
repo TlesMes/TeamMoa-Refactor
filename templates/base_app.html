@@ -10,65 +10,65 @@
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-container">
-            <div class="header-left">
-                <a href="/" class="logo">
-                    <div class="logo-icon">
-                        <i class="ri-team-fill"></i>
-                    </div>
-                    <span class="logo-text">팀모아</span>
-                </a>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-left">
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <i class="ri-team-fill"></i>
+          </div>
+          <span class="logo-text">팀모아</span>
+        </a>
+      </div>
+      
+      <nav class="nav">
+        <a href="{% url 'teams:team_main_page' team.id %}" class="nav-link">홈</a>
+        <a href="{% url 'schedules:scheduler_page' team.id %}" class="nav-link">시간표</a>
+        <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="nav-link">마인드맵</a>
+        <a href="{% url 'shares:post_list' team.id %}" class="nav-link">공유 게시판</a>
+        
+        <div class="dropdown">
+          <button class="dropdown-toggle" id="userDropdown">
+            <span>{{request.user.nickname}}</span>
+            <div class="dropdown-arrow">
+              <i class="ri-arrow-down-s-line"></i>
             </div>
-            
-            <nav class="nav">
-                <a href="{% url 'teams:team_main_page' team.id %}" class="nav-link">홈</a>
-                <a href="{% url 'schedules:scheduler_page' team.id %}" class="nav-link">시간표</a>
-                <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="nav-link">마인드맵</a>
-                <a href="{% url 'shares:post_list' team.id %}" class="nav-link">공유 게시판</a>
-                
-                <div class="dropdown">
-                    <button class="dropdown-toggle" id="userDropdown">
-                        <span>{{request.user.nickname}}</span>
-                        <div class="dropdown-arrow">
-                            <i class="ri-arrow-down-s-line"></i>
-                        </div>
-                    </button>
-                    
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="{% url 'accounts:update' %}" class="dropdown-item">
-                            <div class="dropdown-item-content">
-                                <div class="dropdown-icon">
-                                    <i class="ri-user-line"></i>
-                                </div>
-                                <span>프로필</span>
-                            </div>
-                        </a>
-                        
-                        <a href="/settings" class="dropdown-item">
-                            <div class="dropdown-item-content">
-                                <div class="dropdown-icon">
-                                    <i class="ri-settings-line"></i>
-                                </div>
-                                <span>설정 미구현</span>
-                            </div>
-                        </a>
-                        
-                        <hr class="dropdown-divider">
-                        
-                        <a href="{% url 'accounts:logout' %}" id="logout-url" data-logout-url="{% url 'accounts:logout' %}" class="dropdown-item logout-btn">
-                            <div class="dropdown-item-content">
-                                <div class="dropdown-icon">
-                                    <i class="ri-logout-box-line"></i>
-                                </div>
-                                <span>로그아웃</span>
-                            </div>
-                        </a>
-                    </div>
+          </button>
+          
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="{% url 'accounts:update' %}" class="dropdown-item">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-user-line"></i>
                 </div>
-            </nav>
+                <span>프로필</span>
+              </div>
+            </a>
+            
+            <a href="/settings" class="dropdown-item">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-settings-line"></i>
+                </div>
+                <span>설정 미구현</span>
+              </div>
+            </a>
+            
+            <hr class="dropdown-divider">
+            
+            <a href="{% url 'accounts:logout' %}" id="logout-url" data-logout-url="{% url 'accounts:logout' %}" class="dropdown-item logout-btn">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-logout-box-line"></i>
+                </div>
+                <span>로그아웃</span>
+              </div>
+            </a>
+          </div>
         </div>
-    </header>
+      </nav>
+    </div>
+  </header>
   {% block contents %} {% endblock %}
   <script src="{% static 'js/common/scripts.js' %}"></script>
 </body>
