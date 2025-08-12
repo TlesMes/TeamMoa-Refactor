@@ -1,0 +1,231 @@
+/* ========================================
+   Schedules CSS - Consolidated Schedule-related Styles
+   ======================================== */
+
+/* ==========================================================================
+   SCHEDULER STYLES
+   ========================================================================== */
+
+.schedulesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.schedulesection .changediv {
+  justify-content: center;
+  text-align: center;
+}
+
+.schedulesection input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #7f8bb1;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.schedulesection button {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.schedulesection .weekdiv {
+  float: left;
+  margin: 130px 100px;
+}
+
+.schedulesection .schedulesdiv {
+  display: flex;
+  margin: 0 100px;
+}
+
+.schedulesection .schedulediv {
+  justify-content: center;
+  margin: 0 10px;
+}
+
+.schedulesection h3 {
+  width: 70px;
+  font-size: 15px;
+  color: #2d3d57;
+}
+
+.schedulesection .schedulediv table,
+.schedulesection .schedulediv tr,
+.schedulesection .schedulediv td {
+  margin: auto;
+  border: 1px solid #7f8bb1;
+  border-collapse: collapse;
+}
+
+.schedulesection .schedulediv table {
+  margin-top: 10px;
+}
+
+.schedulesection .schedulediv tbody {
+  width: 60px;
+}
+
+.schedulesection .schedulediv td {
+  width: 60px;
+  height: 20px;
+  font-size: 12px;
+  color: #7f8bb1;
+}
+
+.schedulesection .timediv {
+  font-size: 10px;
+  color: #2d3d57;
+  margin: auto;
+}
+
+.schedulesection .timediv table {
+  margin-top: 40px;
+}
+
+.schedulesection .timediv td {
+  height: 18px;
+}
+
+/* ==========================================================================
+   SCHEDULE UPLOAD STYLES
+   ========================================================================== */
+
+.scheduleuploadsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.scheduleuploadsection .changediv {
+  justify-content: center;
+  text-align: center;
+}
+
+.scheduleuploadsection input[type="week"] {
+  margin-bottom: 30px;
+  border: 1px solid #7f8bb1;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 16px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.scheduleuploadsection a svg {
+  margin-right: 20px;
+  margin-bottom: -7px;
+}
+
+.scheduleuploadsection button {
+  display: inline-block;
+  padding: 10px 20px 15px;
+  border: 1px solid #a6b0d0;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.scheduleuploadsection .schedulediv table,
+.scheduleuploadsection .schedulediv tbody,
+.scheduleuploadsection .schedulediv tr,
+.scheduleuploadsection .schedulediv td {
+  width: 60px;
+  border-collapse: collapse;
+  border: 1px solid #a6b0d0;
+}
+
+.scheduleuploadsection input[type="checkbox"] {
+  vertical-align: middle;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  border-radius: 0;
+  background-color: #fff;
+  cursor: pointer;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.scheduleuploadsection input[type="checkbox"]:checked {
+  background-color: #a6b0d0;
+}
+
+.scheduleuploadsection .weekdiv {
+  float: left;
+  margin: 130px 100px;
+}
+
+.scheduleuploadsection .schedulesdiv {
+  display: flex;
+  justify-content: center;
+}
+
+.scheduleuploadsection .schedulediv {
+  flex-direction: column;
+  margin: 0 30px;
+}
+
+.scheduleuploadsection .schedulediv h3 {
+  font-size: 15px;
+  color: #2d3d57;
+  margin-bottom: 10px;
+}
+
+.scheduleuploadsection .timediv {
+  font-size: 10px;
+  color: #2d3d57;
+  margin: auto;
+}
+
+.scheduleuploadsection .timediv table {
+  margin-top: 18px;
+}
+
+.scheduleuploadsection .timediv td {
+  height: 21px;
+}
+
+/* ==========================================================================
+   SHARED SCHEDULE STYLES
+   ========================================================================== */
+
+/* Common hover effects for schedule pages */
+.schedulesection button:hover,
+.scheduleuploadsection button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+/* Common link hover effects */
+.scheduleuploadsection a:hover path {
+  fill: #7f8bb1;
+}

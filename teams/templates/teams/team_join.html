@@ -1,5 +1,5 @@
 {% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/teamjoin.css' %}" />
+{% comment %} Dark theme styles loaded in base_minimal.html {% endcomment %}
 <section class="teamjoinsection">
   <div class="joindiv">
     <a href="{% url 'teams:team_search' %}">

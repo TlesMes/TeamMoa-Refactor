@@ -1,5 +1,5 @@
 {% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/teamsearch.css' %}" />
+{% comment %} Dark theme styles loaded in base_minimal.html {% endcomment %}
 <section class="teamsearchsection">
   <form method="POST" action=".">
     {% csrf_token %}
