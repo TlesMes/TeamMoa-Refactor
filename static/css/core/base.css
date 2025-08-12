@@ -1,0 +1,408 @@
+/* ========================================
+   Base CSS - Common Styles and Resets
+   ======================================== */
+
+/* ==========================================================================
+   FONT IMPORTS
+   ========================================================================== */
+
+@font-face {
+  font-family: "GmarketSansMedium";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ==========================================================================
+   CSS RESET
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   BASE BODY STYLES
+   ========================================================================== */
+
+body {
+  font-family: "GmarketSansMedium", sans-serif;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background: #2d3d57;
+}
+
+/* ==========================================================================
+   HEADER STYLES
+   ========================================================================== */
+
+.header {
+  width: 100%;
+  align-items: center;
+}
+
+.header > img {
+  margin-top: 32px;
+  margin-left: 65px;
+  float: left;
+}
+
+/* ==========================================================================
+   COMMON COLOR VARIABLES (CSS Custom Properties)
+   ========================================================================== */
+
+:root {
+  --primary-bg: #2d3d57;
+  --secondary-bg: #d9d9d9;
+  --card-bg: #ffffff;
+  --button-primary: #a6b0d0;
+  --button-hover: #7f8bb1;
+  --text-primary: #2d3d57;
+  --text-secondary: #465173;
+  --text-muted: #868686;
+  --text-accent: #4b6b7c;
+  --text-light: #a6b0d0;
+  --border-color: #a6b0d0;
+  --border-alt: #7f8bb1;
+  --scrollbar-thumb: #a0a0a0;
+  --scrollbar-track: #ededed;
+  --link-accent: #6285f6;
+}
+
+/* ==========================================================================
+   COMMON UTILITY CLASSES
+   ========================================================================== */
+
+/* Typography */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-accent { color: var(--text-accent); }
+.text-light { color: var(--text-light); }
+
+/* Spacing */
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-30 { margin-bottom: 30px; }
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+
+/* Layout */
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.text-center { text-align: center; }
+
+/* ==========================================================================
+   COMMON FORM ELEMENTS
+   ========================================================================== */
+
+/* Base input styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="week"],
+textarea {
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 20px;
+  color: var(--text-secondary);
+  outline: none;
+  border: none;
+  background-color: var(--card-bg);
+}
+
+/* Base button styles */
+button {
+  font-family: "GmarketSansMedium", sans-serif;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--button-primary);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  padding: 10px 20px;
+}
+
+.btn-primary:hover {
+  background-color: var(--button-hover);
+}
+
+/* ==========================================================================
+   COMMON CONTAINER STYLES
+   ========================================================================== */
+
+/* Main section container */
+.main-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+/* Card container */
+.card-container {
+  background-color: var(--secondary-bg);
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+}
+
+/* Content card */
+.content-card {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 30px;
+}
+
+/* ==========================================================================
+   COMMON SCROLLBAR STYLES
+   ========================================================================== */
+
+.scrollable {
+  overflow: auto;
+  border-radius: 30px;
+  padding: 20px 25px;
+  height: 400px;
+}
+
+.scrollable::-webkit-scrollbar {
+  width: 20px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  height: 30%;
+  background: var(--scrollbar-thumb);
+  border-radius: 30px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 30px;
+}
+
+/* ==========================================================================
+   COMMON LINK STYLES
+   ========================================================================== */
+
+a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:visited,
+a:hover,
+a:focus,
+a:active {
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--button-hover);
+}
+
+/* SVG icon hover effects */
+a:hover path,
+button:hover path {
+  fill: var(--button-hover);
+}
+
+/* ==========================================================================
+   COMMON FORM STYLES
+   ========================================================================== */
+
+/* Form groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 21px;
+  color: var(--text-light);
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Input sizing */
+.input-standard {
+  width: 480px;
+}
+
+.input-full {
+  width: 100%;
+}
+
+/* Textarea sizing */
+.textarea-standard {
+  width: 480px;
+  height: 150px;
+}
+
+.textarea-small {
+  width: 480px;
+  height: 70px;
+}
+
+.textarea-large {
+  width: 480px;
+  height: 200px;
+}
+
+/* ==========================================================================
+   COMMON BUTTON VARIATIONS
+   ========================================================================== */
+
+.btn-block {
+  width: 100%;
+  height: 70px;
+  font-size: 21px;
+}
+
+.btn-float-right {
+  float: right;
+  margin-top: -10px;
+}
+
+.btn-center {
+  display: block;
+  margin: auto;
+}
+
+/* ==========================================================================
+   COMMON TABLE STYLES
+   ========================================================================== */
+
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  font-family: "GmarketSansMedium", sans-serif;
+}
+
+/* Schedule table specific styles */
+.schedule-table,
+.schedule-table tr,
+.schedule-table td {
+  border: 1px solid var(--border-alt);
+  margin: auto;
+}
+
+/* ==========================================================================
+   COMMON CHECKBOX STYLES
+   ========================================================================== */
+
+input[type="checkbox"] {
+  appearance: none;
+  cursor: pointer;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+/* Rounded checkbox variant */
+.checkbox-round {
+  border-radius: 100%;
+  width: 33px;
+  height: 33px;
+  border: 2px solid var(--border-color);
+}
+
+.checkbox-round:checked {
+  background-image: url("../../assets/img/Check.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 20px;
+}
+
+/* Square checkbox variant */
+.checkbox-square {
+  border-radius: 0;
+  background-color: var(--card-bg);
+}
+
+.checkbox-square:checked {
+  background-color: var(--button-primary);
+}
+
+/* ==========================================================================
+   COMMON HR STYLES
+   ========================================================================== */
+
+hr {
+  height: 1px;
+  background: var(--border-color);
+  border: 0;
+  margin: 15px 0;
+}
+
+/* ==========================================================================
+   COMMON RESPONSIVE UTILITIES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .main-section {
+    padding: 20px;
+  }
+  
+  .input-standard,
+  .textarea-standard,
+  .textarea-small,
+  .textarea-large {
+    width: 100%;
+    max-width: 480px;
+  }
+  
+  .card-container {
+    padding: 20px 25px;
+  }
+}
+
+/* ==========================================================================
+   COMMON ANIMATION UTILITIES
+   ========================================================================== */
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

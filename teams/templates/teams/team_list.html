@@ -1,5 +1,5 @@
 {% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/teamlist.css' %}" />
+{% comment %} Dark theme styles loaded in base_minimal.html {% endcomment %}
 <section class="teamlistsection">
   <div class="container">
     {% if request.user.is_authenticated %}

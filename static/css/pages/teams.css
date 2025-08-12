@@ -1,0 +1,654 @@
+/* ========================================
+   Teams CSS - Consolidated Team-related Styles
+   ======================================== */
+
+/* ==========================================================================
+   TEAM MAIN PAGE STYLES
+   ========================================================================== */
+
+.mainsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.datediv h2 {
+  margin-bottom: 20px;
+  font-size: 35px;
+  font-weight: 400;
+  color: #8a98b4;
+}
+
+.datediv span {
+  font-weight: 600;
+  color: #4b6b7c;
+}
+
+.mainsection hr {
+  border: 1px solid #d3daef;
+  margin: 15px 0;
+}
+
+.datediv div {
+  display: flex;
+  margin-bottom: 10px;
+  margin-left: 50px;
+  font-size: 18px;
+}
+
+.datediv > div > img {
+  margin-right: 8px;
+  width: 15px;
+}
+
+.datediv button {
+  border: none;
+  background: transparent;
+}
+
+.deletebtn {
+  margin-top: 2px;
+  margin-left: 10px;
+  position: relative;
+  width: 12px;
+}
+
+.deletehover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+.deletebtn:hover .deletehover {
+  display: block;
+  margin-top: 2px;
+}
+
+.deletebtn:hover path {
+  fill: #929292;
+}
+
+.teamdiv {
+  margin-top: 20px;
+  border: 1px solid #071540;
+  border-radius: 30px;
+  padding: 30px;
+  width: 900px;
+}
+
+.teamdiv h2 {
+  margin: 3px 0;
+  font-size: 20px;
+  color: #2d3d57;
+}
+
+.teamdiv h3 {
+  font-size: 19px;
+  font-weight: 400;
+  color: #4b6b7c;
+}
+
+#copybtn {
+  border: none;
+  background: transparent;
+  position: relative;
+  width: 12px;
+}
+
+.copyhover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+#copybtn:hover .copyhover {
+  display: block;
+}
+
+#copybtn:hover path {
+  fill: #7f8bb1;
+}
+
+.logspan {
+  font-size: 17px;
+  color: #868686;
+}
+
+.editdiv {
+  position: relative;
+}
+
+.editdiv button {
+  position: absolute;
+  right: 0;
+  background: #a6b0d0;
+  color: #fff;
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.plusbtn {
+  margin-right: 220px;
+}
+
+.plusbtn2 {
+  margin-right: 90px;
+}
+
+.editdiv button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+/* ==========================================================================
+   TEAM CREATE STYLES
+   ========================================================================== */
+
+.teamcreatesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamcreatesection h2 {
+  font-size: 19px;
+  color: #a6b0d0;
+  margin-bottom: 10px;
+}
+
+.teamcreatesection input {
+  width: 480px;
+  padding: 15px;
+  background-color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  color: #465173;
+  outline: none;
+  margin-bottom: 20px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamcreatesection textarea {
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  height: 150px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamcreatesection button {
+  width: 100%;
+  height: 70px;
+  background: #a6b0d0;
+  color: #fff;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+}
+
+.teamcreatesection .caption {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.teamcreatesection .caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
+}
+
+.teamcreatesection .caption a span {
+  color: #6285f6;
+}
+
+/* ==========================================================================
+   TEAM LIST STYLES
+   ========================================================================== */
+
+.teamlistsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamlistsection .container {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+}
+
+.teamlistsection .scroll_section {
+  overflow: auto;
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  padding: 20px 25px;
+  height: 400px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar {
+  width: 20px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar-thumb {
+  height: 30%;
+  background: #a0a0a0;
+  border-radius: 30px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar-track {
+  background: #ededed;
+  border-radius: 30px;
+}
+
+.teamlistsection .teamlist {
+  background-color: #fff;
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 30px;
+}
+
+.teamlistsection .teamlist > h2 {
+  display: inline-block;
+  color: #2d3d57;
+  font-size: 20px;
+  margin-right: 20px;
+}
+
+.teamlistsection .teamlist h2 span {
+  color: #868686;
+  font-weight: 500;
+}
+
+.teamlistsection #user_num {
+  color: #4b6b7c;
+  font-weight: 400;
+}
+
+.teamlistsection .teamlist button {
+  float: right;
+  padding: 10px 20px;
+  margin-top: -10px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.teamlistsection .btn_section {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #d9d9d9;
+  margin-top: 30px;
+}
+
+.teamlistsection .btn_section button {
+  background: #a6b0d0;
+  border-style: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 12px 40px;
+}
+
+/* ==========================================================================
+   TEAM JOIN STYLES
+   ========================================================================== */
+
+.teamjoinsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamjoinsection .joindiv {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+  margin: 0 auto;
+}
+
+.teamjoinsection .titlediv {
+  margin-top: 13px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 17px;
+  width: 480px;
+  height: 70px;
+  color: #465173;
+}
+
+.teamjoinsection .titlediv h2 {
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.teamjoinsection textarea {
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 19px;
+  width: 480px;
+  height: 70px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  color: #465173;
+}
+
+.teamjoinsection button {
+  width: 100%;
+  height: 70px;
+  background: #a6b0d0;
+  color: #fff;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   TEAM SEARCH STYLES
+   ========================================================================== */
+
+.teamsearchsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamsearchsection .searchdiv {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+  margin: 0 auto;
+}
+
+.teamsearchsection .searchdiv h2 {
+  color: #2d3d57;
+  font-size: 23px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.teamsearchsection .search {
+  display: flex;
+}
+
+.teamsearchsection input {
+  background-color: #fff;
+  border: none;
+  border-radius: 30px 0px 0px 30px;
+  padding: 10px 20px;
+  font-size: 20px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamsearchsection button {
+  background-color: #a6b0d0;
+  color: #fff;
+  border: none;
+  border-radius: 0px 30px 30px 0px;
+  padding: 8px 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.teamsearchsection .caption {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.teamsearchsection .caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
+}
+
+.teamsearchsection .caption a span {
+  color: #6285f6;
+}
+
+/* ==========================================================================
+   INFO CHANGE STYLES
+   ========================================================================== */
+
+.infosection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.infosection > div {
+  position: relative;
+}
+
+.infosection img {
+  width: 150px;
+  display: block;
+  margin: auto;
+}
+
+.infosection .changediv {
+  margin-top: 10px;
+}
+
+.infosection h3 {
+  font-size: 21px;
+  color: #a6b0d0;
+}
+
+.infosection .changediv div {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+}
+
+.infosection input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.infosection textarea {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  height: 200px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.infosection button {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   DEV PHASE STYLES
+   ========================================================================== */
+
+.devphasesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.devphasesection > div {
+  position: relative;
+}
+
+.devphasesection .changediv {
+  margin-top: 30px;
+}
+
+.devphasesection h3 {
+  font-size: 21px;
+  color: #a6b0d0;
+}
+
+.devphasesection input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.devphasesection textarea {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.devphasesection button {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SHARED TEAM STYLES
+   ========================================================================== */
+
+/* Common hover effects for team pages */
+.teamcreatesection button:hover,
+.teamlistsection button:hover,
+.teamjoinsection button:hover,
+.teamsearchsection button:hover,
+.infosection button:hover,
+.devphasesection button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+/* Common link hover effects */
+.teamcreatesection a:hover,
+.teamsearchsection a:hover,
+.infosection a:hover path,
+.teamjoinsection a:hover path,
+.devphasesection a:hover path {
+  color: #7f8bb1;
+}
+
+.infosection a:hover path,
+.teamjoinsection a:hover path,
+.devphasesection a:hover path {
+  fill: #7f8bb1;
+}
+
+/* Common link states */
+.teamcreatesection a:visited,
+.teamcreatesection a:hover,
+.teamcreatesection a:focus,
+.teamcreatesection a:active,
+.teamsearchsection a:visited,
+.teamsearchsection a:hover,
+.teamsearchsection a:focus,
+.teamsearchsection a:active {
+  text-decoration: none;
+}

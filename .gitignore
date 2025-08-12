@@ -18,10 +18,13 @@ staticfiles/
 
 # IDE / 에디터
 .vscode/
+.claude
 .idea/
 *.sublime-project
 *.sublime-workspace
-GEMINI.md
+*.md
+!README.md
+
 
 # OS
 .DS_Store
