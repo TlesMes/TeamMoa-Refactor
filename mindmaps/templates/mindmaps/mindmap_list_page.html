@@ -1,28 +1,42 @@
 {% extends 'base_app.html' %} {% load static %} {% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
-<section class="schedulesection">
-  <div class="changediv">
-    <div class="scrolldiv">
-      {% for mindmap in mindmaps %}
-      <div class="mindmapdiv">
-        <h2>{{ mindmap.title }} <span>(#{{ mindmap.id }})</span></h2>
-        <button
-          onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'"
-        >
-          선택
-        </button>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="mindmapbtn">
-      <button
-        class="btn btn-primary"
-        onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'"
-      >
-        마인드맵 생성
-      </button>
-    </div>
+<section class="mindmapsection">
+  <div class="mindmap-header">
+    <h1>마인드맵 목록</h1>
+    <button class="create-btn" onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'">
+      마인드맵 생성
+    </button>
   </div>
+  
+  {% if mindmaps %}
+  <div class="mindmap-grid">
+    {% for mindmap in mindmaps %}
+    <div class="mindmap-card">
+      <h3 class="mindmap-title">{{ mindmap.title }}</h3>
+      <p class="mindmap-id">#{{ mindmap.id }}</p>
+      <div class="mindmap-actions">
+        <button class="view-btn" onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'">
+          보기
+        </button>
+        {% if request.user == team.host %}
+        <button class="delete-btn" onclick="if(confirm('정말로 이 마인드맵을 삭제하시겠습니까?')) location.href='/mindmaps/mindmap_delete/{{ team.id }}/{{ mindmap.id }}'">
+          삭제
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🧠</div>
+    <h3>아직 마인드맵이 없습니다</h3>
+    <p>팀의 첫 번째 마인드맵을 만들어보세요!</p>
+    <button class="empty-create-btn" onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'">
+      마인드맵 생성하기
+    </button>
+  </div>
+  {% endif %}
 </section>
 
 {% endblock %}
