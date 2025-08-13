@@ -528,6 +528,15 @@ body:has(.schedule-grid-container) .content-card,
   background-color: var(--accent-hover);
 }
 
+/* 드래그 중 커서 및 선택 방지 */
+.schedule-grid.dragging {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 /* Selection Tools */
 .selection-tools {
   background-color: var(--bg-secondary);
