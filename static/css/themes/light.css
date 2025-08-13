@@ -251,7 +251,7 @@ body {
 
 .schedulesection {
   font-family: "GmarketSansMedium", sans-serif;
-  max-width: 1400px;
+  max-width: 1000px; /* 1400px에서 축소 */
   margin: 0 auto;
   padding: 2rem;
   background-color: var(--bg-primary);
@@ -311,6 +311,8 @@ body {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: fit-content; /* 내용에 맞는 크기로 제한 */
+  margin: 0 auto; /* 중앙 정렬 */
 }
 
 .time-column {
@@ -321,22 +323,36 @@ body {
 .schedule-column {
   flex: 1;
   background-color: var(--bg-primary);
-  min-width: 120px;
+  min-width: 80px; /* 날짜 표기 간소화로 너비 축소 */
+  max-width: 100px; /* 최대 너비 제한으로 공간 절약 */
 }
 
 .schedule-day-header {
   background-color: var(--accent-primary);
   color: white;
-  padding: 0.875rem 0.5rem;
+  padding: 0.5rem 0.25rem;
   text-align: center;
   font-weight: 600;
-  font-size: 0.9rem;
   border-bottom: 1px solid var(--border-color);
-  height: 50px; /* 고정 높이로 통일 */
+  height: 50px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+}
+
+.schedule-day-header .date-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.schedule-day-header .day-line {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+  opacity: 0.9;
 }
 
 .time-slot,

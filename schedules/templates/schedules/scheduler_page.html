@@ -31,7 +31,10 @@
     <!-- Schedule Columns for each day -->
     {% for schedule in schedules %}
     <div class="schedule-column" id="schedulediv{{forloop.counter}}">
-      <div class="schedule-day-header">{{schedule.date}}</div>
+      <div class="schedule-day-header">
+        <div class="date-line">{{schedule.date|date:"n/j"}}</div>
+        <div class="day-line">({{schedule.date|date:"D"}})</div>
+      </div>
       <div class="schedule-slot availability-{{schedule.time_0}}">{{schedule.time_0}}</div>
       <div class="schedule-slot availability-{{schedule.time_1}}">{{schedule.time_1}}</div>
       <div class="schedule-slot availability-{{schedule.time_2}}">{{schedule.time_2}}</div>
