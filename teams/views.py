@@ -39,25 +39,10 @@ def main_page(request):
         # 미로그인 상태: 랜딩 페이지
         return render(request, 'teams/main_landing.html')
 
+# team_list 함수는 main_page로 통합되어 더 이상 사용되지 않습니다.
+# 기존 URL 호환성을 위해 main_page로 리다이렉트합니다.
 def team_list(request):
-    """
-    통합 메인 화면
-    - 미로그인: 사이트 소개 + 로그인/회원가입 안내
-    - 로그인: 팀 목록 화면
-    """
-    user = request.user
-    if user.is_authenticated:
-        # 로그인 상태: 팀 목록 표시
-        joined_teams = Team.objects.filter(members=user).order_by('id')
-        return render(request, 'teams/main_page.html', {
-            'teams': joined_teams,
-            'is_authenticated': True
-        })
-    else:
-        # 미로그인 상태: 랜딩 페이지
-        return render(request, 'teams/main_page.html', {
-            'is_authenticated': False
-        })
+    return redirect('teams:main_page')
 
 
 def team_create(request):
@@ -78,7 +63,7 @@ def team_create(request):
                             ).decode()[:16]
             team.save()
             team.members.add(user)
-            return redirect('/teams/team_list')
+            return redirect('teams:main_page')
     else:
         form = CreateTeamForm()
     return render(request,'teams/team_create.html',{'form':form})
@@ -115,13 +100,13 @@ def team_join(request, pk):
             team = get_object_or_404(Team, pk=pk)
             if team.teampasswd == passwd:
                 if team.maxuser == team.currentuser:
-                    return HttpResponse('<script>alert("팀 최대인원 초과.")</script>''<script>location.href="/teams/team_list"</script>')
+                    return HttpResponse('<script>alert("팀 최대인원 초과.")</script>''<script>location.href="/teams/"</script>')
                 team.members.add(user)
                 team.currentuser += 1
                 team.save()
-                return redirect('/teams/team_list')
+                return redirect('teams:main_page')
             else:
-                return HttpResponse('<script>alert("패스워드 다름.")</script>''<script>location.href="/teams/team_list"</script>')
+                return HttpResponse('<script>alert("패스워드 다름.")</script>''<script>location.href="/teams/"</script>')
     else:
         form = JoinTeamForm()
     return render(request, 'teams/team_join.html', {'form':form, 'team':team})
@@ -130,7 +115,7 @@ def team_join(request, pk):
 
 def team_main_page(request, pk):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     else:
         team = get_object_or_404(Team, pk=pk)
         members = Team_User.objects.filter(Team=team)
@@ -223,4 +208,4 @@ def team_disband(request, pk):
         return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
     else:
         team.delete()
-        return redirect('/teams/team_list')
+        return redirect('teams:main_page')

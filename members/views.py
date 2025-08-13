@@ -20,7 +20,7 @@ def is_member(request, pk) -> bool:
 
 def team_members_page(request, pk):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     else:
         team = get_object_or_404(Team, pk=pk)
         members = Team_User.objects.filter(Team=team)
