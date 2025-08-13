@@ -1,23 +1,60 @@
-{% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-{% comment %} Dark theme styles loaded in base_minimal.html {% endcomment %}
-<section class="teamsearchsection">
-  <form method="POST" action=".">
-    {% csrf_token %}
-    <div class="searchdiv">
-      <h2>팀코드를 입력해주세요</h2>
-      <div class="search">
-        {{form.as_p}}
-        <button class="search_btn" type="submit" class="btn btn-primary">
-          검색
-        </button>
-      </div>
-    </div>
-  </form>
-  <div class="caption">
-    <a href="{% url 'teams:main_page' %}">
-      이미 팀이 있으신가요? <span>팀 목록 보기</span>
-    </a>
-  </div>
-</section>
+{% extends 'base_minimal.html' %} 
+{% load static %} 
 
+{% block contents %}
+<section class="auth-section">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>팀 검색하기</h2>
+      <p>팀 코드를 입력하여 기존 팀에 가입하세요</p>
+    </div>
+    
+    <form method="POST" action="." class="auth-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="id_team_code">팀 코드</label>
+        <div class="input-wrapper">
+          <i class="ri-qr-code-line"></i>
+          {% for field in form %}
+            {{ field }}
+            {% if field.errors %}
+              <div class="field-error">
+                {% for error in field.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit" class="auth-btn">
+        <i class="ri-search-line"></i>
+        팀 검색하기
+      </button>
+    </form>
+    
+    <div class="auth-links">
+      <p>
+        팀이 없으신가요? 
+        <a href="{% url 'teams:team_create' %}">새 팀 만들기</a>
+      </p>
+      <p>
+        <a href="{% url 'teams:main_page' %}">팀 목록 보기</a>
+      </p>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+          <i class="ri-information-line"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
 {% endblock %}

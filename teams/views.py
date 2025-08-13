@@ -139,6 +139,7 @@ def team_info_change(request, pk):
         if request.method =='POST':
             form = ChangeTeamInfoForm(request.POST)
             if form.is_valid():
+                team.title = form.cleaned_data['title']
                 team.maxuser = form.cleaned_data['maxuser']
                 team.introduction = form.cleaned_data['introduction']
                 team.save()
