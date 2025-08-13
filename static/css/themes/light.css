@@ -459,6 +459,7 @@ body:has(.schedule-grid-container) .content-card,
   padding-right: 0.75rem;
 }
 
+/* Schedule Slot - 전체 클릭 가능한 영역 */
 .schedule-slot {
   background-color: var(--bg-primary);
   height: 36px; 
@@ -466,69 +467,65 @@ body:has(.schedule-grid-container) .content-card,
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .schedule-slot:hover {
   background-color: var(--bg-accent);
 }
 
-/* Custom Checkbox Styling */
-.checkbox-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.checkbox-wrapper input[type="checkbox"] {
-  opacity: 0;
+/* 체크박스 숨기기 */
+.schedule-slot input[type="checkbox"] {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  cursor: pointer;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.checkmark {
-  width: 20px; /* 체크박스 크기 축소 */
-  height: 20px;
-  border: 2px solid var(--border-color);
-  border-radius: 3px;
-  background-color: var(--bg-primary);
+/* 슬롯 표시기 (체크 아이콘) */
+.slot-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
   transition: all 0.2s ease;
-  pointer-events: none;
 }
 
-.checkmark i {
-  font-size: 12px; /* 아이콘 크기도 축소 */
+.slot-indicator i {
+  font-size: 16px;
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+/* 선택된 상태 스타일링 */
+.schedule-slot:has(input[type="checkbox"]:checked) {
+  background-color: var(--accent-primary);
   color: white;
-  opacity: 0;
-  transition: opacity 0.2s ease;
 }
 
-.checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+.schedule-slot:has(input[type="checkbox"]:checked) .slot-indicator i {
+  color: white;
+}
+
+.schedule-slot:has(input[type="checkbox"]:checked):hover {
+  background-color: var(--accent-hover);
+}
+
+/* :has 지원하지 않는 브라우저를 위한 대안 */
+.schedule-slot.selected {
   background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  color: white;
 }
 
-.checkbox-wrapper input[type="checkbox"]:checked + .checkmark i {
-  opacity: 1;
+.schedule-slot.selected .slot-indicator i {
+  color: white;
 }
 
-.checkbox-wrapper:hover .checkmark {
-  border-color: var(--accent-hover);
-}
-
-.checkbox-wrapper.checked .checkmark {
-  background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
+.schedule-slot.selected:hover {
+  background-color: var(--accent-hover);
 }
 
 /* Selection Tools */
