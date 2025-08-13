@@ -1,33 +1,64 @@
+{% extends 'base_minimal.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>로그인</title>
-    <link rel="stylesheet" href="{% static 'css/core/base.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}" />
-  </head>
-  <body>
-    <section class="loginsection">
-      <div class="imgdiv">
-        <img src="../../../static/assets/img/LogoW.svg" alt="logo" />
+
+{% block contents %}
+<section class="auth-section">
+  <div class="auth-container">
+    
+    <!-- 로고 및 헤더 -->
+    <div class="auth-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="ri-team-fill"></i>
+        </div>
+        <h1 class="site-title">팀모아</h1>
       </div>
-      <form method="POST" action="{% url 'accounts:login'%}">
+      <h2 class="auth-title">로그인</h2>
+      <p class="auth-subtitle">팀 협업을 시작하세요</p>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <div class="auth-card">
+      {% if error %}
+        <div class="error-message">
+          <i class="ri-error-warning-line"></i>
+          <span>{{ error }}</span>
+        </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'accounts:login' %}" class="auth-form">
         {% csrf_token %}
-        <div class="logindiv">
-          <input type="text" name="username" autocomplete="off" required />
-          <label for="username">USERNAME</label>
+        
+        <div class="form-group">
+          <label for="username">사용자명</label>
+          <div class="input-wrapper">
+            <i class="ri-user-line"></i>
+            <input type="text" name="username" id="username" autocomplete="username" required>
+          </div>
         </div>
-        <div class="logindiv">
-          <input type="password" name="password" autocomplete="off" required />
-          <label for="password">PASSWORD</label>
+
+        <div class="form-group">
+          <label for="password">비밀번호</label>
+          <div class="input-wrapper">
+            <i class="ri-lock-line"></i>
+            <input type="password" name="password" id="password" autocomplete="current-password" required>
+          </div>
         </div>
-        <div class="loginbtn">
-          <button type="submit">로그인</button>
-        </div>
+
+        <button type="submit" class="auth-btn">
+          <i class="ri-login-circle-line"></i>
+          로그인
+        </button>
       </form>
-      <div class="caption">
-        <a href="{% url 'accounts:signup' %}"> 아직 회원이 아니신가요? </a>
+
+      <!-- 링크 섹션 -->
+      <div class="auth-links">
+        <a href="{% url 'accounts:signup' %}" class="link-secondary">
+          아직 회원이 아니신가요? <span>회원가입</span>
+        </a>
       </div>
-    </section>
-  </body>
-</html>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
