@@ -42,4 +42,4 @@ class AccountFlowTest(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.is_active)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('teams:team_list'))
+        self.assertRedirects(response, reverse('teams:main_page'))

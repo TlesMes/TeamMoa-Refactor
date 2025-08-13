@@ -14,7 +14,7 @@ from accounts.forms import SignupForm
 # Create your views here.
 from . import services
 
-TEAM_LIST_URL_NAME = 'teams:team_list'
+TEAM_LIST_URL_NAME = 'teams:main_page'
 LOGIN_URL_NAME = 'accounts:login'
 HOME_URL_NAME = 'accounts:home'
 

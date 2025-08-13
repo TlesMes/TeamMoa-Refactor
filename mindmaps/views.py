@@ -23,7 +23,7 @@ def is_member(request, pk) -> bool:
 # Create your views here.
 def mindmap_list_page(request, pk):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
 
     user = request.user
     team = get_object_or_404(Team, pk=pk)
@@ -33,7 +33,7 @@ def mindmap_list_page(request, pk):
 
 def mindmap_detail_page(request, pk, mindmap_id):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     
     user = request.user
     team = get_object_or_404(Team, pk=pk)
