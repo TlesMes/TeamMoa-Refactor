@@ -228,12 +228,14 @@
 function selectAllSlots() {
   document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
     checkbox.checked = true;
+    checkbox.dispatchEvent(new Event('change'));
   });
 }
 
 function clearAllSlots() {
   document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
     checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
   });
 }
 
@@ -243,7 +245,10 @@ function selectWorkingHours() {
   for (let hour = 9; hour <= 17; hour++) {
     for (let day = 1; day <= 7; day++) {
       const checkbox = document.getElementById(`id_time_${hour}_${day}`);
-      if (checkbox) checkbox.checked = true;
+      if (checkbox) {
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
+      }
     }
   }
 }
@@ -254,7 +259,10 @@ function selectEveningHours() {
   for (let hour = 18; hour <= 21; hour++) {
     for (let day = 1; day <= 7; day++) {
       const checkbox = document.getElementById(`id_time_${hour}_${day}`);
-      if (checkbox) checkbox.checked = true;
+      if (checkbox) {
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
+      }
     }
   }
 }
@@ -267,6 +275,7 @@ function selectWeekdays() {
     if (dayMatch) {
       const day = parseInt(dayMatch[1]);
       checkbox.checked = (day >= 1 && day <= 5);
+      checkbox.dispatchEvent(new Event('change'));
     }
   });
 }
@@ -279,23 +288,176 @@ function selectWeekends() {
     if (dayMatch) {
       const day = parseInt(dayMatch[1]);
       checkbox.checked = (day === 6 || day === 7);
+      checkbox.dispatchEvent(new Event('change'));
     }
   });
 }
 
+// 드래그 선택 기능
+let isDragging = false;
+let dragMode = null; // 'select' 또는 'deselect'
+let dragStartSlot = null; // 드래그 시작 슬롯
+let hasMoved = false; // 드래그 중 실제로 움직였는지 확인
+
 // 체크박스 상태 변경 시 시각적 피드백 (구형 브라우저 지원)
 document.addEventListener('DOMContentLoaded', function() {
+  const scheduleGrid = document.querySelector('.schedule-grid');
+  
+  // 개별 클릭 처리
   document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
       const slot = this.closest('.schedule-slot');
-      
-      if (this.checked) {
-        slot.classList.add('selected');
-      } else {
-        slot.classList.remove('selected');
-      }
+      updateSlotVisual(slot, this.checked);
     });
   });
+
+  // 드래그 시작 (마우스)
+  scheduleGrid.addEventListener('mousedown', function(e) {
+    if (e.target.closest('.schedule-slot')) {
+      const slot = e.target.closest('.schedule-slot');
+      const checkbox = slot.querySelector('input[type="checkbox"]');
+      
+      isDragging = true;
+      dragStartSlot = slot;
+      hasMoved = false;
+      
+      // 드래그 모드 결정 (현재 상태의 반대)
+      dragMode = checkbox.checked ? 'deselect' : 'select';
+      
+      // 첫 번째 슬롯 토글
+      toggleSlot(slot);
+      
+      // 드래그 시각적 피드백
+      scheduleGrid.classList.add('dragging');
+      
+      e.preventDefault(); // 텍스트 선택 방지
+    }
+  });
+
+  // 드래그 중 (마우스)
+  scheduleGrid.addEventListener('mouseover', function(e) {
+    if (isDragging && e.target.closest('.schedule-slot')) {
+      const slot = e.target.closest('.schedule-slot');
+      const checkbox = slot.querySelector('input[type="checkbox"]');
+      
+      // 시작 슬롯이 아닌 경우에만 처리
+      if (slot !== dragStartSlot) {
+        hasMoved = true;
+        
+        // 드래그 모드에 따라 선택/해제
+        if (dragMode === 'select' && !checkbox.checked) {
+          checkbox.checked = true;
+          checkbox.dispatchEvent(new Event('change'));
+        } else if (dragMode === 'deselect' && checkbox.checked) {
+          checkbox.checked = false;
+          checkbox.dispatchEvent(new Event('change'));
+        }
+      }
+    }
+  });
+
+  // 드래그 끝 (마우스)
+  document.addEventListener('mouseup', function(e) {
+    if (isDragging) {
+      const slot = e.target.closest('.schedule-slot');
+      
+      // 시작점에서 끝났고 실제로 이동하지 않았다면 (단일 클릭)
+      if (slot === dragStartSlot && !hasMoved) {
+        // 시작점의 토글을 되돌림 (단일 클릭 무효화)
+        toggleSlot(dragStartSlot);
+      }
+      
+      // 드래그는 무조건 중지
+      isDragging = false;
+      dragMode = null;
+      dragStartSlot = null;
+      hasMoved = false;
+      scheduleGrid.classList.remove('dragging');
+    }
+  });
+
+  // 터치 이벤트 (모바일 지원)
+  scheduleGrid.addEventListener('touchstart', function(e) {
+    if (e.target.closest('.schedule-slot')) {
+      const slot = e.target.closest('.schedule-slot');
+      const checkbox = slot.querySelector('input[type="checkbox"]');
+      
+      isDragging = true;
+      dragStartSlot = slot;
+      hasMoved = false;
+      
+      dragMode = checkbox.checked ? 'deselect' : 'select';
+      toggleSlot(slot);
+      
+      e.preventDefault();
+    }
+  });
+
+  scheduleGrid.addEventListener('touchmove', function(e) {
+    if (isDragging) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = element?.closest('.schedule-slot');
+      
+      if (slot && slot !== dragStartSlot) {
+        hasMoved = true;
+        const checkbox = slot.querySelector('input[type="checkbox"]');
+        if (dragMode === 'select' && !checkbox.checked) {
+          checkbox.checked = true;
+          checkbox.dispatchEvent(new Event('change'));
+        } else if (dragMode === 'deselect' && checkbox.checked) {
+          checkbox.checked = false;
+          checkbox.dispatchEvent(new Event('change'));
+        }
+      }
+    }
+  });
+
+  document.addEventListener('touchend', function(e) {
+    if (isDragging) {
+      // 터치 종료 시점의 요소 확인
+      const touch = e.changedTouches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = element?.closest('.schedule-slot');
+      
+      // 시작점에서 끝났고 실제로 이동하지 않았다면 (단일 터치)
+      if (slot === dragStartSlot && !hasMoved) {
+        // 시작점의 토글을 되돌림 (단일 터치 무효화)
+        toggleSlot(dragStartSlot);
+      }
+      
+      // 드래그는 무조건 중지
+      isDragging = false;
+      dragMode = null;
+      dragStartSlot = null;
+      hasMoved = false;
+      scheduleGrid.classList.remove('dragging');
+    }
+  });
+
+  // 드래그 중 선택 방지
+  scheduleGrid.addEventListener('selectstart', function(e) {
+    if (isDragging) {
+      e.preventDefault();
+    }
+  });
 });
+
+// 슬롯 토글 함수
+function toggleSlot(slot) {
+  const checkbox = slot.querySelector('input[type="checkbox"]');
+  checkbox.checked = !checkbox.checked;
+  checkbox.dispatchEvent(new Event('change'));
+}
+
+// 슬롯 시각적 업데이트 함수
+function updateSlotVisual(slot, isChecked) {
+  if (isChecked) {
+    slot.classList.add('selected');
+  } else {
+    slot.classList.remove('selected');
+  }
+}
 </script>
 {% endblock %}
