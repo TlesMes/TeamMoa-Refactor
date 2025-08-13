@@ -1,36 +1,95 @@
-{% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-{% comment %} Dark theme styles loaded in base_minimal.html {% endcomment %}
-<section class="teamcreatesection">
-  <form method="POST" action=".">
-    {% csrf_token %}
-    <div class="createform">
-      <h2>팀명</h2>
-      {{form.title}}
+{% extends 'base_minimal.html' %} 
+{% load static %} 
+
+{% block contents %}
+<section class="auth-section">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>새 팀 만들기</h2>
+      <p>팀을 생성하여 프로젝트를 시작하세요</p>
     </div>
-    <div class="createform">
-      <h2>인원수</h2>
-      {{form.maxuser}}
+    
+    <form method="POST" action="." class="auth-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="id_title">팀명</label>
+        <div class="input-wrapper">
+          <i class="ri-team-line"></i>
+          {{ form.title }}
+        </div>
+        {% if form.title.errors %}
+          <div class="field-error">
+            {% for error in form.title.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_maxuser">최대 인원수</label>
+        <div class="input-wrapper">
+          <i class="ri-group-line"></i>
+          {{ form.maxuser }}
+        </div>
+        {% if form.maxuser.errors %}
+          <div class="field-error">
+            {% for error in form.maxuser.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_teampasswd">팀 비밀번호</label>
+        <div class="input-wrapper">
+          <i class="ri-lock-line"></i>
+          {{ form.teampasswd }}
+        </div>
+        <div class="help-text">
+          <small>팀원들이 가입할 때 사용할 비밀번호입니다</small>
+        </div>
+        {% if form.teampasswd.errors %}
+          <div class="field-error">
+            {% for error in form.teampasswd.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_introduction">팀 소개</label>
+        <div class="textarea-wrapper">
+          <i class="ri-file-text-line"></i>
+          {{ form.introduction }}
+        </div>
+        <div class="help-text">
+          <small>팀의 목표나 프로젝트에 대해 간단히 설명해주세요</small>
+        </div>
+        {% if form.introduction.errors %}
+          <div class="field-error">
+            {% for error in form.introduction.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="auth-btn">
+        <i class="ri-add-circle-line"></i>
+        팀 생성하기
+      </button>
+    </form>
+    
+    <div class="auth-links">
+      <p>
+        이미 팀이 있으신가요? 
+        <a href="{% url 'teams:team_search' %}">팀 검색하기</a>
+      </p>
     </div>
-    <div class="createform">
-      <h2>비밀번호</h2>
-      {{form.teampasswd}}
-    </div>
-    <div class="createform">
-      <h2>팀소개</h2>
-      {{form.introduction}}
-    </div>
-    <button
-      id="create_button"
-      class="btn btsn-primary"
-      onclick="location.href='/teams/team_create/'"
-    >
-      생성
-    </button>
-  </form>
-  <div class="caption">
-    <a href="{% url 'teams:main_page' %}">
-      이미 팀이 있으신가요? <span>팀 목록 보기</span>
-    </a>
   </div>
 </section>
 {% endblock %}

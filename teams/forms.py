@@ -51,7 +51,7 @@ class JoinTeamForm(forms.ModelForm):
 class ChangeTeamInfoForm(forms.ModelForm):
     class Meta:
         model = Team
-        fields = ['maxuser','introduction']
+        fields = ['title','maxuser','introduction']
 
 class AddPhaseForm(forms.ModelForm):
     class Meta:
