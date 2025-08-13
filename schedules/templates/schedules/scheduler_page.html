@@ -5,7 +5,7 @@
     <div class="schedule-controls">
       <form method="POST" action="." class="week-selector">
         {% csrf_token %}
-        <input type="week" name="week" required />
+        <input type="week" name="week" value="{{ selected_week }}" required />
         <button type="submit">시간표 확인</button>
       </form>
       <a href="{% url 'schedules:scheduler_upload_page' team.id %}">
