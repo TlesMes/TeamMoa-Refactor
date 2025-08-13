@@ -371,6 +371,379 @@ body {
 .availability-5 { background-color: rgba(166, 176, 208, 1) !important; color: white !important; }
 
 /* ==========================================================================
+   Schedule Upload Page Styles (Light)
+   ========================================================================== */
+
+/* Schedule Upload 페이지 전용 넓은 카드 */
+body:has(.schedule-grid-container) .content-card,
+.schedule-upload-page .content-card {
+  max-width: fit-content;
+  width: auto;
+  min-width: 780px; /* 스케줄 그리드 최소 너비 + 패딩 */
+  margin: 0 auto;
+}
+
+.schedule-grid-container {
+  margin: 2rem 0;
+}
+
+.schedule-grid-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.schedule-grid-container h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.schedule-instruction {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* Schedule Grid Improvements */
+.schedule-grid {
+  display: flex;
+  gap: 1px;
+  background-color: var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  min-width: 720px; /* 시간컬럼(90) + 7일컬럼(90*7) = 720px */
+}
+
+.time-column,
+.day-column {
+  background-color: var(--bg-primary);
+}
+
+.time-column {
+  background-color: var(--bg-secondary);
+  min-width: 90px;
+  width: 90px;
+}
+
+.day-column {
+  flex: 1;
+  min-width: 80px; /* 요일 컬럼 최소 너비 축소 */
+  max-width: 90px; /* 최대 너비 제한 */
+}
+
+.time-header,
+.day-header {
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.875rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.time-slot {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  height: 36px; /* schedule-slot과 동일하게 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding-right: 0.75rem;
+}
+
+.schedule-slot {
+  background-color: var(--bg-primary);
+  height: 36px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.schedule-slot:hover {
+  background-color: var(--bg-accent);
+}
+
+/* Custom Checkbox Styling */
+.checkbox-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  width: 20px; /* 체크박스 크기 축소 */
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.checkmark i {
+  font-size: 12px; /* 아이콘 크기도 축소 */
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark i {
+  opacity: 1;
+}
+
+.checkbox-wrapper:hover .checkmark {
+  border-color: var(--accent-hover);
+}
+
+.checkbox-wrapper.checked .checkmark {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Selection Tools */
+.selection-tools {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
+}
+
+.selection-tools h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.tool-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-btn:hover {
+  background-color: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.tool-btn i {
+  font-size: 1rem;
+}
+
+/* Form Styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(166, 176, 208, 0.1);
+}
+
+.help-text {
+  margin-top: 0.5rem;
+}
+
+.help-text small {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Phase Info Section */
+.phase-info-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background-color: var(--bg-accent);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.phase-icon {
+  background-color: var(--accent-primary);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phase-icon i {
+  font-size: 1.5rem;
+}
+
+.phase-description h4 {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.phase-description p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.875rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: var(--text-muted);
+  color: white;
+  text-decoration: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .schedule-grid {
+    overflow-x: auto;
+    min-width: 600px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .create-btn,
+  .form-actions .cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-grid {
+    min-width: 500px;
+  }
+  
+  .phase-info-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
    Mindmap Page Styles (Light)
    ========================================================================== */
 
