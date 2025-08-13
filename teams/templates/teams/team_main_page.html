@@ -1,5 +1,4 @@
 {% extends 'base_app.html' %} {% load static %} {% block contents %}
-{% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="mainsection">
   {% if request.user.is_authenticated %}
   <div class="datediv">
@@ -68,7 +67,7 @@
           <button class="plusbtn2">팀 정보 수정</button>
         </a>
         <a href="{% url 'teams:team_disband' team.id %}">
-          <button>팀 해산</button>
+          <button class="delete-btn">팀 해산</button>
         </a>
         {% endif %}
       </div>
@@ -76,7 +75,7 @@
     
     <div class="team-members">
       <div class="member-list">
-        <div class="member-item">
+        <div class="member-item leader">
           <div>
             <span class="member-name">{{ team.host.nickname }}</span>
             <span class="member-role">팀장</span>
@@ -84,6 +83,7 @@
           <span class="member-login">{{ team.host.last_login|date:'Y-m-d, H:i:s' }}</span>
         </div>
         {% for member in members %}
+        {% if member.User != team.host %}
         <div class="member-item">
           <div>
             <span class="member-name">{{member.User.nickname}}</span>
@@ -91,6 +91,7 @@
           </div>
           <span class="member-login">{{member.User.last_login|date:'Y-m-d, H:i:s'}}</span>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
