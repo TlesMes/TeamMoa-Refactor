@@ -39,11 +39,6 @@ def main_page(request):
         # 미로그인 상태: 랜딩 페이지
         return render(request, 'teams/main_landing.html')
 
-# team_list 함수는 main_page로 통합되어 더 이상 사용되지 않습니다.
-# 기존 URL 호환성을 위해 main_page로 리다이렉트합니다.
-def team_list(request):
-    return redirect('teams:main_page')
-
 
 def team_create(request):
     if request.method =='POST':
