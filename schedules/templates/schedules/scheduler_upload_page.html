@@ -62,119 +62,105 @@
           <div class="day-column">
             <div class="day-header">월요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_1">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-1" 
-                         id="id_time_{{ forloop.counter0 }}_1"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_1">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-1" 
+                       id="id_time_{{ forloop.counter0 }}_1"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">화요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_2">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-2" 
-                         id="id_time_{{ forloop.counter0 }}_2"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_2">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-2" 
+                       id="id_time_{{ forloop.counter0 }}_2"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">수요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_3">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-3" 
-                         id="id_time_{{ forloop.counter0 }}_3"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_3">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-3" 
+                       id="id_time_{{ forloop.counter0 }}_3"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">목요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_4">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-4" 
-                         id="id_time_{{ forloop.counter0 }}_4"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_4">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-4" 
+                       id="id_time_{{ forloop.counter0 }}_4"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">금요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_5">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-5" 
-                         id="id_time_{{ forloop.counter0 }}_5"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_5">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-5" 
+                       id="id_time_{{ forloop.counter0 }}_5"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">토요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_6">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-6" 
-                         id="id_time_{{ forloop.counter0 }}_6"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_6">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-6" 
+                       id="id_time_{{ forloop.counter0 }}_6"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
 
           <div class="day-column">
             <div class="day-header">일요일</div>
             {% for hour in "012345678901234567890123"|make_list %}
-              <div class="schedule-slot">
-                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_7">
-                  <input type="checkbox" 
-                         name="time_{{ forloop.counter0 }}-7" 
-                         id="id_time_{{ forloop.counter0 }}_7"
-                         class="schedule-checkbox" />
-                  <span class="checkmark">
-                    <i class="ri-check-line"></i>
-                  </span>
-                </label>
-              </div>
+              <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_7">
+                <input type="checkbox" 
+                       name="time_{{ forloop.counter0 }}-7" 
+                       id="id_time_{{ forloop.counter0 }}_7"
+                       class="schedule-checkbox" />
+                <span class="slot-indicator">
+                  <i class="ri-check-line"></i>
+                </span>
+              </label>
             {% endfor %}
           </div>
           </div>
@@ -297,15 +283,16 @@ function selectWeekends() {
   });
 }
 
-// 체크박스 상태 변경 시 시각적 피드백
+// 체크박스 상태 변경 시 시각적 피드백 (구형 브라우저 지원)
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
-      const wrapper = this.closest('.checkbox-wrapper');
+      const slot = this.closest('.schedule-slot');
+      
       if (this.checked) {
-        wrapper.classList.add('checked');
+        slot.classList.add('selected');
       } else {
-        wrapper.classList.remove('checked');
+        slot.classList.remove('selected');
       }
     });
   });
