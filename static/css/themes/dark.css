@@ -901,24 +901,40 @@ form label {
   margin-bottom: 1.5rem;
 }
 
-.profile-form .auth-links {
+.profile-form ~ .auth-links,
+.auth-card .auth-links {
   border-top: 1px solid var(--dark-border-color);
   padding-top: 1.5rem;
   margin-top: 1.5rem;
 }
 
-.profile-form .link-secondary {
+.profile-form ~ .auth-links .link-secondary,
+.auth-card .auth-links .link-secondary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: var(--dark-bg-accent);
-  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  background: var(--dark-accent-primary);
+  color: var(--dark-bg-primary) !important;
+  border-radius: 10px;
   transition: all 0.3s ease;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: 2px solid var(--dark-accent-primary);
+  max-width: 200px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(166, 176, 208, 0.2);
 }
 
-.profile-form .link-secondary:hover {
-  background: var(--dark-border-color);
+.profile-form ~ .auth-links .link-secondary:hover,
+.auth-card .auth-links .link-secondary:hover {
+  background: var(--dark-accent-hover);
+  border-color: var(--dark-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(166, 176, 208, 0.3);
+  color: var(--dark-bg-primary) !important;
 }
 
 /* 계정 정보 섹션 */
