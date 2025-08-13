@@ -22,14 +22,42 @@ def is_member(request, pk) -> bool:
         else:
             return False
 
-def team_list(request):
+def main_page(request):
+    """
+    통합 메인 화면
+    - 미로그인: 사이트 소개 + 로그인/회원가입 안내
+    - 로그인: 팀 목록 화면
+    """
     user = request.user
     if user.is_authenticated:
+        # 로그인 상태: 팀 목록 표시
         joined_teams = Team.objects.filter(members=user).order_by('id')
-        # page = request.GET.get('page',1)
-        # mypaginator = Paginator(joined_teams, 5)
-        # myteams = mypaginator.get_page(page)
-    return render(request, 'teams/team_list.html', {'teams': joined_teams})
+        return render(request, 'teams/main_authenticated.html', {
+            'teams': joined_teams
+        })
+    else:
+        # 미로그인 상태: 랜딩 페이지
+        return render(request, 'teams/main_landing.html')
+
+def team_list(request):
+    """
+    통합 메인 화면
+    - 미로그인: 사이트 소개 + 로그인/회원가입 안내
+    - 로그인: 팀 목록 화면
+    """
+    user = request.user
+    if user.is_authenticated:
+        # 로그인 상태: 팀 목록 표시
+        joined_teams = Team.objects.filter(members=user).order_by('id')
+        return render(request, 'teams/main_page.html', {
+            'teams': joined_teams,
+            'is_authenticated': True
+        })
+    else:
+        # 미로그인 상태: 랜딩 페이지
+        return render(request, 'teams/main_page.html', {
+            'is_authenticated': False
+        })
 
 
 def team_create(request):

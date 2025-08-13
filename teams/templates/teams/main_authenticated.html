@@ -1,0 +1,86 @@
+{% extends 'base_minimal.html' %}
+{% load static %}
+
+{% block contents %}
+<!-- 로그인된 사용자: 팀 목록 -->
+<section class="team-list-section">
+  <div class="team-list-container">
+    
+    <!-- Header with Actions -->
+    <div class="team-list-header">
+      <h1 class="page-title">내 팀</h1>
+      <div class="action-buttons">
+        <button
+          class="create-team-btn"
+          onclick="location.href='/teams/team_create/'"
+        >
+          팀 생성
+        </button>
+        <button
+          class="search-team-btn"
+          onclick="location.href='/teams/team_search/'"
+        >
+          팀 검색
+        </button>
+      </div>
+    </div>
+
+    <!-- Teams Grid -->
+    <div class="teams-grid">
+      {% for team in teams %}
+      <div class="team-card">
+        <div class="team-card-header">
+          <h3 class="team-name">{{ team.title }}</h3>
+          <div class="team-members-count">
+            <span class="current-count">{{ team.currentuser }}</span>
+            <span class="separator">/</span>
+            <span class="max-count">{{ team.maxuser }}</span>
+          </div>
+        </div>
+        
+        <div class="team-card-body">
+          {% if team.introduction %}
+          <p class="team-description">{{ team.introduction }}</p>
+          {% else %}
+          <p class="team-description empty">팀 소개가 없습니다</p>
+          {% endif %}
+        </div>
+        
+        <div class="team-card-footer">
+          <button
+            class="join-team-btn"
+            onclick="location.href='/teams/team_main_page/{{ team.id }}'"
+          >
+            팀 입장
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Empty State -->
+    {% if not teams %}
+    <div class="empty-teams">
+      <div class="empty-icon">🏢</div>
+      <h3>참가한 팀이 없습니다</h3>
+      <p>새로운 팀을 생성하거나 기존 팀에 참가해보세요</p>
+      <div class="empty-actions">
+        <button
+          class="create-team-btn"
+          onclick="location.href='/teams/team_create/'"
+        >
+          팀 생성하기
+        </button>
+        <button
+          class="search-team-btn"
+          onclick="location.href='/teams/team_search/'"
+        >
+          팀 검색하기
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
