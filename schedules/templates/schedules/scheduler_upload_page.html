@@ -1,997 +1,314 @@
-{% extends 'base_app.html' %} {% load static %} {% block contents %}
-{% comment %} Light theme styles loaded in base_app.html {% endcomment %}
-<section class="scheduleuploadsection">
-  <div class="changediv">
-    <form method="POST" action=".">
-      {% csrf_token %}
-      <a href="{% url 'schedules:scheduler_page' team.id %}">
-        <svg
-          width="30"
-          height="29"
-          viewBox="0 0 23 22"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M10.1525 21.5655L0.4061 12.0056C0.258427 11.8607 0.153579 11.7038 0.0915567 11.5348C0.0305187 11.3658 0 11.1848 0 10.9916C0 10.7985 0.0305187 10.6175 0.0915567 10.4485C0.153579 10.2795 0.258427 10.1226 0.4061 9.97772L10.1525 0.417827C10.4232 0.152274 10.7614 0.0132219 11.167 0.000668526C11.5736 -0.0109192 11.9246 0.128133 12.2199 0.417827C12.5152 0.683379 12.6693 1.01508 12.6821 1.41292C12.6939 1.81174 12.5522 2.15599 12.2568 2.44568L5.02087 9.54318H21.5233C21.9417 9.54318 22.2926 9.68174 22.5762 9.95889C22.8587 10.237 23 10.5812 23 10.9916C23 11.402 22.8587 11.7458 22.5762 12.023C22.2926 12.3011 21.9417 12.4401 21.5233 12.4401H5.02087L12.2568 19.5376C12.5276 19.8032 12.6693 20.1411 12.6821 20.5515C12.6939 20.9619 12.5522 21.2999 12.2568 21.5655C11.9861 21.8552 11.6415 22 11.2231 22C10.8047 22 10.4478 21.8552 10.1525 21.5655V21.5655Z"
-            fill="#A6B0D0"
-          />
-        </svg>
+{% extends 'base_app.html' %} 
+{% load static %} 
+
+{% block contents %}
+<section class="page-section schedule-upload-page">
+  <div class="content-card">
+    <div class="card-header">
+      <a href="{% url 'schedules:scheduler_page' team.id %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
       </a>
-      <input type="week" name="week" required />
-      <button type="submit" class="btn btn-primary">시간표 등록</button>
-      <div class="schedulesdiv">
-        <div class="timediv">
-          <table>
-            <tr>
-              <td>12:00 AM</td>
-            </tr>
-            <tr>
-              <td>01:00 AM</td>
-            </tr>
-            <tr>
-              <td>02:00 AM</td>
-            </tr>
-            <tr>
-              <td>03:00 AM</td>
-            </tr>
-            <tr>
-              <td>04:00 AM</td>
-            </tr>
-            <tr>
-              <td>05:00 AM</td>
-            </tr>
-            <tr>
-              <td>06:00 AM</td>
-            </tr>
-            <tr>
-              <td>07:00 AM</td>
-            </tr>
-            <tr>
-              <td>08:00 AM</td>
-            </tr>
-            <tr>
-              <td>09:00 AM</td>
-            </tr>
-            <tr>
-              <td>10:00 AM</td>
-            </tr>
-            <tr>
-              <td>11:00 AM</td>
-            </tr>
-            <tr>
-              <td>12:00 PM</td>
-            </tr>
-            <tr>
-              <td>01:00 PM</td>
-            </tr>
-            <tr>
-              <td>02:00 PM</td>
-            </tr>
-            <tr>
-              <td>03:00 PM</td>
-            </tr>
-            <tr>
-              <td>04:00 PM</td>
-            </tr>
-            <tr>
-              <td>05:00 PM</td>
-            </tr>
-            <tr>
-              <td>06:00 PM</td>
-            </tr>
-            <tr>
-              <td>07:00 PM</td>
-            </tr>
-            <tr>
-              <td>08:00 PM</td>
-            </tr>
-            <tr>
-              <td>09:00 PM</td>
-            </tr>
-            <tr>
-              <td>10:00 PM</td>
-            </tr>
-            <tr>
-              <td>11:00 PM</td>
-            </tr>
-            <tr>
-              <td>12:00 AM</td>
-            </tr>
-          </table>
+      <h2>스케줄 업로드</h2>
+      <p>나의 가능한 시간대를 선택하여 팀 스케줄에 등록하세요</p>
+    </div>
+
+    <div class="info-section">
+      <div class="phase-info-section">
+        <div class="phase-icon">
+          <i class="ri-calendar-upload-line"></i>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>월요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-1" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-1" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-1" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-1" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-1" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-1" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-1" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-1" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-1" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-1" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-1" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-1" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-1" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-1" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-1" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-1" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-1" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-1" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-1" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-1" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-1" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-1" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-1" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-1" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="phase-description">
+          <h4>개인 스케줄 등록</h4>
+          <p>가능한 시간대를 체크하면 팀원들과 함께 최적의 모임 시간을 찾을 수 있습니다.</p>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>화요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-2" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-2" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-2" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-2" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-2" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-2" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-2" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-2" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-2" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-2" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-2" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-2" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-2" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-2" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-2" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-2" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-2" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-2" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-2" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-2" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-2" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-2" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-2" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-2" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      </div>
+    </div>
+    
+    <form method="POST" action="." class="form-container">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="week">주차 선택</label>
+        <div class="input-wrapper">
+          <i class="ri-calendar-2-line"></i>
+          <input type="week" name="week" id="week" required>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>수요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-3" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-3" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-3" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-3" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-3" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-3" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-3" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-3" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-3" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-3" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-3" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-3" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-3" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-3" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-3" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-3" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-3" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-3" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-3" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-3" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-3" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-3" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-3" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-3" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="help-text">
+          <small>스케줄을 등록할 주차를 선택해주세요</small>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>목요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-4" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-4" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-4" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-4" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-4" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-4" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-4" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-4" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-4" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-4" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-4" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-4" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-4" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-4" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-4" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-4" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-4" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-4" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-4" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-4" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-4" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-4" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-4" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-4" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      </div>
+
+      <div class="schedule-grid-container">
+        <h4>가능한 시간대 선택</h4>
+        <p class="schedule-instruction">체크박스를 클릭하여 가능한 시간을 표시해주세요</p>
+        
+        <div class="schedule-grid-wrapper">
+          <div class="schedule-grid">
+            <!-- Time column header -->
+          <div class="time-column">
+            <div class="time-header">시간</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="time-slot">
+                {% if forloop.counter0 == 0 %}12:00 AM
+                {% elif forloop.counter0 < 12 %}{{ forloop.counter0|stringformat:"02d" }}:00 AM
+                {% elif forloop.counter0 == 12 %}12:00 PM
+                {% else %}{{ forloop.counter0|add:"-12"|stringformat:"02d" }}:00 PM
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Days columns -->
+          <div class="day-column">
+            <div class="day-header">월요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_1">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-1" 
+                         id="id_time_{{ forloop.counter0 }}_1"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">화요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_2">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-2" 
+                         id="id_time_{{ forloop.counter0 }}_2"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">수요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_3">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-3" 
+                         id="id_time_{{ forloop.counter0 }}_3"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">목요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_4">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-4" 
+                         id="id_time_{{ forloop.counter0 }}_4"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">금요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_5">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-5" 
+                         id="id_time_{{ forloop.counter0 }}_5"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">토요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_6">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-6" 
+                         id="id_time_{{ forloop.counter0 }}_6"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="day-column">
+            <div class="day-header">일요일</div>
+            {% for hour in "012345678901234567890123"|make_list %}
+              <div class="schedule-slot">
+                <label class="checkbox-wrapper" for="id_time_{{ forloop.counter0 }}_7">
+                  <input type="checkbox" 
+                         name="time_{{ forloop.counter0 }}-7" 
+                         id="id_time_{{ forloop.counter0 }}_7"
+                         class="schedule-checkbox" />
+                  <span class="checkmark">
+                    <i class="ri-check-line"></i>
+                  </span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+          </div>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>금요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-5" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-5" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-5" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-5" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-5" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-5" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-5" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-5" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-5" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-5" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-5" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-5" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-5" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-5" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-5" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-5" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-5" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-5" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-5" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-5" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-5" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-5" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-5" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-5" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <!-- Quick selection tools -->
+        <div class="selection-tools">
+          <h5>빠른 선택 도구</h5>
+          <div class="tools-grid">
+            <button type="button" class="tool-btn" onclick="selectAllSlots()">
+              <i class="ri-check-double-line"></i>
+              전체 선택
+            </button>
+            <button type="button" class="tool-btn" onclick="clearAllSlots()">
+              <i class="ri-close-line"></i>
+              전체 해제
+            </button>
+            <button type="button" class="tool-btn" onclick="selectWorkingHours()">
+              <i class="ri-briefcase-line"></i>
+              업무시간 (9-18시)
+            </button>
+            <button type="button" class="tool-btn" onclick="selectEveningHours()">
+              <i class="ri-moon-line"></i>
+              저녁시간 (18-22시)
+            </button>
+            <button type="button" class="tool-btn" onclick="selectWeekdays()">
+              <i class="ri-calendar-check-line"></i>
+              평일만
+            </button>
+            <button type="button" class="tool-btn" onclick="selectWeekends()">
+              <i class="ri-calendar-2-line"></i>
+              주말만
+            </button>
+          </div>
         </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>토요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-6" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-6" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-6" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-6" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-6" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-6" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-6" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-6" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-6" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-6" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-6" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-6" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-6" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-6" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-6" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-6" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-6" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-6" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-6" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-6" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-6" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-6" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-6" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-6" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="schedulediv">
-          <table>
-            <tbody>
-              <h3>일요일</h3>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_0-7" id="id_time_0" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_1-7" id="id_time_1" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_2-7" id="id_time_2" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_3-7" id="id_time_3" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_4-7" id="id_time_4" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_5-7" id="id_time_5" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_6-7" id="id_time_6" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_7-7" id="id_time_7" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_8-7" id="id_time_8" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_9-7" id="id_time_9" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_10-7" id="id_time_10" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_11-7" id="id_time_11" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_12-7" id="id_time_12" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_13-7" id="id_time_13" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_14-7" id="id_time_14" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_15-7" id="id_time_15" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_16-7" id="id_time_16" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_17-7" id="id_time_17" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_18-7" id="id_time_18" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_19-7" id="id_time_19" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_20-7" id="id_time_20" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_21-7" id="id_time_21" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_22-7" id="id_time_22" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" name="time_23-7" id="id_time_23" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="create-btn">
+          <i class="ri-upload-line"></i>
+          스케줄 업로드
+        </button>
+        <a href="{% url 'schedules:scheduler_page' team.id %}" class="cancel-btn">
+          <i class="ri-close-line"></i>
+          취소
+        </a>
       </div>
     </form>
   </div>
+
+  {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+          <i class="ri-information-line"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 </section>
 
+<script>
+// 빠른 선택 도구 JavaScript 함수들
+function selectAllSlots() {
+  document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    checkbox.checked = true;
+  });
+}
+
+function clearAllSlots() {
+  document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+}
+
+function selectWorkingHours() {
+  clearAllSlots();
+  // 9시부터 18시까지 (인덱스 9-17)
+  for (let hour = 9; hour <= 17; hour++) {
+    for (let day = 1; day <= 7; day++) {
+      const checkbox = document.getElementById(`id_time_${hour}_${day}`);
+      if (checkbox) checkbox.checked = true;
+    }
+  }
+}
+
+function selectEveningHours() {
+  clearAllSlots();
+  // 18시부터 22시까지 (인덱스 18-21)
+  for (let hour = 18; hour <= 21; hour++) {
+    for (let day = 1; day <= 7; day++) {
+      const checkbox = document.getElementById(`id_time_${hour}_${day}`);
+      if (checkbox) checkbox.checked = true;
+    }
+  }
+}
+
+function selectWeekdays() {
+  // 월요일(1)부터 금요일(5)까지
+  document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    const name = checkbox.name;
+    const dayMatch = name.match(/time_\d+-(\d+)/);
+    if (dayMatch) {
+      const day = parseInt(dayMatch[1]);
+      checkbox.checked = (day >= 1 && day <= 5);
+    }
+  });
+}
+
+function selectWeekends() {
+  // 토요일(6), 일요일(7)
+  document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    const name = checkbox.name;
+    const dayMatch = name.match(/time_\d+-(\d+)/);
+    if (dayMatch) {
+      const day = parseInt(dayMatch[1]);
+      checkbox.checked = (day === 6 || day === 7);
+    }
+  });
+}
+
+// 체크박스 상태 변경 시 시각적 피드백
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const wrapper = this.closest('.checkbox-wrapper');
+      if (this.checked) {
+        wrapper.classList.add('checked');
+      } else {
+        wrapper.classList.remove('checked');
+      }
+    });
+  });
+});
+</script>
 {% endblock %}
