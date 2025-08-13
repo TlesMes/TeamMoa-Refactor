@@ -145,7 +145,7 @@ def team_info_change(request, pk):
                 team.save()
                 return redirect(f'/teams/team_main_page/{pk}')
         else:
-            form = ChangeTeamInfoForm()
+            form = ChangeTeamInfoForm(instance=team)
         return render(request, 'teams/team_info_change.html', {'form':form, 'team':team})
 
 
