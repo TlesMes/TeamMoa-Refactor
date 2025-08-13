@@ -172,6 +172,10 @@ body {
   border-radius: 8px;
 }
 
+.member-item.leader {
+  background-color: #e8f4fd;
+}
+
 .member-name {
   font-weight: 600;
   color: var(--text-primary);
@@ -480,6 +484,15 @@ body {
 }
 
 .delete-btn:hover {
+  background: #c82333;
+}
+
+.editdiv .delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.editdiv .delete-btn:hover {
   background: #c82333;
 }
 
