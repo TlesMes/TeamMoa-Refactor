@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const slot = e.target.closest('.schedule-slot');
       
       // 시작점에서 끝났고 실제로 이동하지 않았다면 (단일 클릭)
-      if (slot === dragStartSlot && !hasMoved) {
+      if (slot === dragStartSlot) {
         // 시작점의 토글을 되돌림 (단일 클릭 무효화)
         toggleSlot(dragStartSlot);
       }
@@ -421,9 +421,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
       const slot = element?.closest('.schedule-slot');
       
-      // 시작점에서 끝났고 실제로 이동하지 않았다면 (단일 터치)
-      if (slot === dragStartSlot && !hasMoved) {
-        // 시작점의 토글을 되돌림 (단일 터치 무효화)
+      // 시작점에서 끝났다면 (단일 터치이든 드래그 후 복귀든)
+      if (slot === dragStartSlot) {
+        // 시작점의 토글을 되돌림
         toggleSlot(dragStartSlot);
       }
       
