@@ -327,16 +327,22 @@ body {
 .schedule-day-header {
   background-color: var(--accent-primary);
   color: white;
-  padding: 1rem;
+  padding: 0.875rem 0.5rem;
   text-align: center;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+  height: 50px; /* 고정 높이로 통일 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .time-slot,
 .schedule-slot {
   padding: 0.5rem;
-  min-height: 32px;
+  height: 36px; /* scheduler_upload_page와 동일한 높이 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -443,6 +449,11 @@ body:has(.schedule-grid-container) .content-card,
   font-weight: 600;
   font-size: 0.9rem;
   border-bottom: 1px solid var(--border-color);
+  height: 50px; /* schedule-day-header와 동일한 고정 높이 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .time-slot {
