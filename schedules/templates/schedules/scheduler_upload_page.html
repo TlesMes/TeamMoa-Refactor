@@ -60,7 +60,10 @@
 
           <!-- Days columns -->
           <div class="day-column">
-            <div class="day-header">월요일</div>
+            <div class="day-header" data-day="1">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(월)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_1">
                 <input type="checkbox" 
@@ -75,7 +78,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">화요일</div>
+            <div class="day-header" data-day="2">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(화)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_2">
                 <input type="checkbox" 
@@ -90,7 +96,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">수요일</div>
+            <div class="day-header" data-day="3">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(수)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_3">
                 <input type="checkbox" 
@@ -105,7 +114,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">목요일</div>
+            <div class="day-header" data-day="4">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(목)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_4">
                 <input type="checkbox" 
@@ -120,7 +132,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">금요일</div>
+            <div class="day-header" data-day="5">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(금)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_5">
                 <input type="checkbox" 
@@ -135,7 +150,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">토요일</div>
+            <div class="day-header" data-day="6">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(토)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_6">
                 <input type="checkbox" 
@@ -150,7 +168,10 @@
           </div>
 
           <div class="day-column">
-            <div class="day-header">일요일</div>
+            <div class="day-header" data-day="0">
+              <div class="date-line">-/-</div>
+              <div class="day-line">(일)</div>
+            </div>
             {% for hour in "012345678901234567890123"|make_list %}
               <label class="schedule-slot" for="id_time_{{ forloop.counter0 }}_7">
                 <input type="checkbox" 
@@ -299,8 +320,49 @@ let dragMode = null; // 'select' 또는 'deselect'
 let dragStartSlot = null; // 드래그 시작 슬롯
 let hasMoved = false; // 드래그 중 실제로 움직였는지 확인
 
+// 주차 선택 시 날짜 업데이트
+function updateWeekDates(weekValue) {
+  if (!weekValue) return;
+  
+  // YYYY-W## 형식을 파싱
+  const [year, week] = weekValue.split('-W');
+  
+  // 해당 주차의 월요일 계산
+  const jan1 = new Date(year, 0, 1);
+  const dayOfWeek = jan1.getDay() || 7; // 월요일 = 1, 일요일 = 7
+  const mondayOfFirstWeek = new Date(year, 0, 1 + (8 - dayOfWeek) % 7);
+  const mondayOfTargetWeek = new Date(mondayOfFirstWeek.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+  
+  // 각 요일의 날짜 계산 및 업데이트
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(mondayOfTargetWeek.getTime() + i * 24 * 60 * 60 * 1000);
+    const dayOfWeek = i === 6 ? 0 : i + 1; // 일요일은 0, 월~토는 1~6
+    
+    const header = document.querySelector(`[data-day="${dayOfWeek}"]`);
+    if (header) {
+      const dateLine = header.querySelector('.date-line');
+      if (dateLine) {
+        dateLine.textContent = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+      }
+    }
+  }
+}
+
 // 체크박스 상태 변경 시 시각적 피드백 (구형 브라우저 지원)
 document.addEventListener('DOMContentLoaded', function() {
+  const weekInput = document.getElementById('week');
+  
+  // 주차 입력 변경 시 날짜 업데이트
+  if (weekInput) {
+    weekInput.addEventListener('change', function() {
+      updateWeekDates(this.value);
+    });
+    
+    // 초기값이 있으면 업데이트
+    if (weekInput.value) {
+      updateWeekDates(weekInput.value);
+    }
+  }
   const scheduleGrid = document.querySelector('.schedule-grid');
   
   // 개별 클릭 처리
