@@ -2,6 +2,7 @@ from datetime import datetime
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
 from django.core.paginator import Paginator
+from django.core.exceptions import ValidationError
 from .models import DevPhase, Team, Team_User
 from .forms import AddPhaseForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
 import uuid
@@ -137,8 +138,9 @@ def team_info_change(request, pk):
         return HttpResponse('<script>alert("팀장이 아닙니다.")</script>'f'<script>location.href="/teams/team_main_page/{pk}"</script>')
     else:
         if request.method =='POST':
-            form = ChangeTeamInfoForm(request.POST)
+            form = ChangeTeamInfoForm(request.POST, instance=team)
             if form.is_valid():
+                # 폼 검증을 통과했으므로 안전하게 저장
                 team.title = form.cleaned_data['title']
                 team.maxuser = form.cleaned_data['maxuser']
                 team.introduction = form.cleaned_data['introduction']

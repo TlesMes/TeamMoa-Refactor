@@ -21,8 +21,7 @@
           <h3>{{ team.title }}</h3>
           <p class="team-code">팀 코드: {{ team.invitecode|default:"자동 생성됨" }}</p>
           <div class="team-stats">
-            <span><i class="ri-group-line"></i> {{ team.current_members|default:"0" }}/{{ team.maxuser }}명</span>
-            <span><i class="ri-calendar-line"></i> 생성일: {{ team.created_at|date:"Y.m.d" }}</span>
+            <span><i class="ri-group-line"></i> {{ team.currentuser|default:"0" }}/{{ team.maxuser }}명</span>
           </div>
         </div>
       </div>

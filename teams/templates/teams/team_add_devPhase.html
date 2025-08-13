@@ -5,14 +5,17 @@
 <section class="page-section">
   <div class="content-card">
     <div class="card-header">
+      <a href="{% url 'teams:team_main_page' team.id %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
       <h2>개발 단계 추가</h2>
-      <p>{{ team.title }} 팀의 새로운 개발 단계를 등록하세요</p>
+      <p>팀의 새로운 개발 단계를 등록하세요</p>
     </div>
 
     <div class="info-section">
       <div class="phase-info-section">
         <div class="phase-icon">
-          <i class="ri-roadmap-line"></i>
+          <i class="ri-calendar-todo-line"></i>
         </div>
         <div class="phase-description">
           <h4>개발 단계 등록</h4>
