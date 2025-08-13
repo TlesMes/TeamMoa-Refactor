@@ -515,3 +515,455 @@ form label {
 .searchdiv button:hover {
   background: var(--dark-accent-hover);
 }
+
+/* ==========================================================================
+   Authentication Pages (로그인, 회원가입, 패스워드 변경) - Dark Theme
+   ========================================================================== */
+
+.auth-section {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 50%, var(--dark-accent-primary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-container {
+  max-width: 480px;
+  width: 100%;
+}
+
+/* 헤더 섹션 */
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-header .logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-header .logo-icon {
+  background: rgba(166, 176, 208, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-right: 0.75rem;
+}
+
+.auth-header .logo-icon i {
+  font-size: 1.5rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-header .site-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--dark-text-primary);
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 0;
+  color: var(--dark-text-secondary);
+}
+
+/* 인증 카드 */
+.auth-card {
+  background: var(--dark-bg-secondary);
+  border: 1px solid var(--dark-border-color);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+/* 에러 메시지 */
+.error-message {
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff6b7a;
+}
+
+.error-message i {
+  font-size: 1.25rem;
+}
+
+/* 폼 스타일 */
+.auth-form {
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dark-text-muted);
+  font-size: 1.1rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input-wrapper input:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+.input-wrapper input:focus ~ i {
+  color: var(--dark-accent-light);
+}
+
+.input-wrapper input::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* 인증 버튼 */
+.auth-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--dark-accent-primary), var(--dark-accent-light));
+  color: var(--dark-bg-primary);
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: "GmarketSansMedium", sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 224, 130, 0.3);
+}
+
+.auth-btn i {
+  font-size: 1.2rem;
+}
+
+/* 링크 섹션 */
+.auth-links {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dark-border-color);
+}
+
+.link-secondary {
+  color: var(--dark-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.link-secondary span {
+  color: var(--dark-accent-light);
+  font-weight: 600;
+}
+
+.link-secondary:hover {
+  color: var(--dark-accent-hover);
+}
+
+.link-secondary:hover span {
+  color: var(--dark-accent-light);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .auth-section {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    padding: 2rem;
+  }
+  
+  .auth-title {
+    font-size: 1.75rem;
+  }
+  
+  .input-wrapper input {
+    padding: 0.875rem 0.875rem 0.875rem 2.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* 회원가입 폼 추가 스타일 */
+.signup-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.field-error {
+  color: #ff6b7a;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.field-error::before {
+  content: "⚠";
+  font-size: 0.9rem;
+}
+
+/* 텍스트 영역을 위한 특별 스타일 */
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-wrapper i {
+  top: 1rem;
+  transform: none;
+}
+
+.textarea-wrapper textarea {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.textarea-wrapper textarea:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+.textarea-wrapper textarea::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* Django 폼 필드 스타일링 */
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.auth-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+/* 패스워드 변경 페이지 추가 스타일 */
+.back-button {
+  margin-bottom: 1rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dark-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  background: var(--dark-bg-accent);
+  color: var(--dark-accent-light);
+}
+
+.back-link i {
+  font-size: 1.1rem;
+}
+
+.password-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* 도움말 섹션 */
+.password-help {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--dark-bg-accent);
+  border-radius: 12px;
+  border: 1px solid var(--dark-border-color);
+}
+
+.help-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--dark-accent-light);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.help-title i {
+  font-size: 1.1rem;
+}
+
+.help-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.help-list li {
+  padding: 0.5rem 0;
+  color: var(--dark-text-secondary);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-list li::before {
+  content: "✓";
+  color: var(--dark-accent-light);
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* 프로필 수정 페이지 추가 스타일 */
+.profile-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.profile-form .auth-links {
+  border-top: 1px solid var(--dark-border-color);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.profile-form .link-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--dark-bg-accent);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.profile-form .link-secondary:hover {
+  background: var(--dark-border-color);
+}
+
+/* 계정 정보 섹션 */
+.account-info {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--dark-bg-accent);
+  border-radius: 12px;
+  border: 1px solid var(--dark-border-color);
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--dark-accent-light);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--dark-border-color);
+}
+
+.info-title i {
+  font-size: 1.1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.info-item:not(:last-child) {
+  border-bottom: 1px solid var(--dark-border-light);
+}
+
+.info-label {
+  color: var(--dark-text-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  color: var(--dark-text-primary);
+  font-weight: 400;
+}
