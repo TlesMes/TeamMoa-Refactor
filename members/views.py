@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from members.forms import CreateTodoForm
 from members.models import Todo
-from teams.models import Team, Team_User
+from teams.models import Team, TeamUser
 from django.http import HttpResponseRedirect,HttpResponse
 # Create your views here.
 
@@ -23,7 +23,7 @@ def team_members_page(request, pk):
         return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     else:
         team = get_object_or_404(Team, pk=pk)
-        members = Team_User.objects.filter(Team=team)
+        members = TeamUser.objects.filter(team=team)
         todos = Todo.objects.filter(team = team)
         if request.method =='POST':
             form = CreateTodoForm(request.POST)
@@ -37,7 +37,7 @@ def team_members_page(request, pk):
 def member_add_Todo(request, pk, content):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
-    teamuser = Team_User.objects.get(Team=team,User=user)
+    teamuser = TeamUser.objects.get(team=team, user=user)
     todo = Todo()
     todo.content = content
     todo.team = team

@@ -2,7 +2,7 @@ from dataclasses import field
 import datetime
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import DevPhase, Team, Team_User
+from .models import DevPhase, Team, TeamUser
 
 class CreateTeamForm(forms.ModelForm):
     class Meta:

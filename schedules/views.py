@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
-from teams.models import Team, Team_User
+from teams.models import Team, TeamUser
 from .models import PersonalDaySchedule, TeamDaySchedule
 from datetime import datetime, date, timedelta
 from django.utils.dateparse import parse_datetime
@@ -48,7 +48,7 @@ def scheduler_page(request, pk):
 def scheduler_upload_page(request, pk):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
-    teamuser = Team_User.objects.get(Team=team,User=user)
+    teamuser = TeamUser.objects.get(team=team, user=user)
     if request.method =='POST':
         week=request.POST["week"]
         week_day = date.fromisoformat(week)

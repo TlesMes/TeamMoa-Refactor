@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
-from .models import DevPhase, Team, Team_User
+from .models import DevPhase, Team, TeamUser
 from .forms import AddPhaseForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
 import uuid
 import base64
@@ -114,7 +114,7 @@ def team_main_page(request, pk):
         return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     else:
         team = get_object_or_404(Team, pk=pk)
-        members = Team_User.objects.filter(Team=team)
+        members = TeamUser.objects.filter(team=team)
         phases = DevPhase.objects.filter(team=team).order_by('startdate')
         
         today_date = datetime.now().date()
