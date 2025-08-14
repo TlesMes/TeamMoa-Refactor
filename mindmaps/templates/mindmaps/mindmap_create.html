@@ -1,32 +1,46 @@
-{% extends 'base_minimal_alt.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/pages/mindmaps.css' %}" />
-<section class="schedulesection">
-  <div>
-    <a href="javascript:history.back();">
-      <svg
-        width="30"
-        height="29"
-        viewBox="0 0 23 22"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M10.1525 21.5655L0.4061 12.0056C0.258427 11.8607 0.153579 11.7038 0.0915567 11.5348C0.0305187 11.3658 0 11.1848 0 10.9916C0 10.7985 0.0305187 10.6175 0.0915567 10.4485C0.153579 10.2795 0.258427 10.1226 0.4061 9.97772L10.1525 0.417827C10.4232 0.152274 10.7614 0.0132219 11.167 0.000668526C11.5736 -0.0109192 11.9246 0.128133 12.2199 0.417827C12.5152 0.683379 12.6693 1.01508 12.6821 1.41292C12.6939 1.81174 12.5522 2.15599 12.2568 2.44568L5.02087 9.54318H21.5233C21.9417 9.54318 22.2926 9.68174 22.5762 9.95889C22.8587 10.237 23 10.5812 23 10.9916C23 11.402 22.8587 11.7458 22.5762 12.023C22.2926 12.3011 21.9417 12.4401 21.5233 12.4401H5.02087L12.2568 19.5376C12.5276 19.8032 12.6693 20.1411 12.6821 20.5515C12.6939 20.9619 12.5522 21.2999 12.2568 21.5655C11.9861 21.8552 11.6415 22 11.2231 22C10.8047 22 10.4478 21.8552 10.1525 21.5655V21.5655Z"
-          fill="#A6B0D0"
-        />
-      </svg>
-    </a>
-    <div class="changediv">
-      <form method="POST" action="{% url 'mindmaps:mindmap_create' team.id %}">
-        {% csrf_token %}
-        <table>
-          <h3>Title</h3>
-          {{form.title}}
-        </table>
-        <button type="submit" class="btn btn-primary">생성하기</button>
-      </form>
+{% extends 'base_minimal.html' %} 
+{% load static %} 
+
+{% block contents %}
+<section class="auth-section">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>새 마인드맵 만들기</h2>
+      <p>팀의 아이디어를 시각적으로 구조화하세요</p>
+    </div>
+    
+    <form method="POST" action="{% url 'mindmaps:mindmap_create' team.id %}" class="auth-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="id_title">마인드맵 제목</label>
+        <div class="input-wrapper">
+          <i class="ri-mind-map"></i>
+          {{ form.title }}
+        </div>
+        {% if form.title.errors %}
+          <div class="field-error">
+            {% for error in form.title.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="auth-btn">
+        <i class="ri-add-circle-line"></i>
+        마인드맵 생성하기
+      </button>
+    </form>
+    
+    <div class="auth-links">
+      <p>
+        <a href="javascript:history.back();">
+          <i class="ri-arrow-left-line"></i>
+          이전 페이지로 돌아가기
+        </a>
+      </p>
     </div>
   </div>
 </section>
-
 {% endblock %}

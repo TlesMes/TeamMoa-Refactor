@@ -1,94 +1,76 @@
-{% extends 'base_minimal_alt.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/pages/mindmaps.css' %}" />
-<section class="nodedetailsection">
-  <div class="detaildiv">
-    <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ node.mindmap.id }}">
-      <svg
-        width="30"
-        height="29"
-        viewBox="0 0 23 22"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M10.1525 21.5655L0.4061 12.0056C0.258427 11.8607 0.153579 11.7038 0.0915567 11.5348C0.0305187 11.3658 0 11.1848 0 10.9916C0 10.7985 0.0305187 10.6175 0.0915567 10.4485C0.153579 10.2795 0.258427 10.1226 0.4061 9.97772L10.1525 0.417827C10.4232 0.152274 10.7614 0.0132219 11.167 0.000668526C11.5736 -0.0109192 11.9246 0.128133 12.2199 0.417827C12.5152 0.683379 12.6693 1.01508 12.6821 1.41292C12.6939 1.81174 12.5522 2.15599 12.2568 2.44568L5.02087 9.54318H21.5233C21.9417 9.54318 22.2926 9.68174 22.5762 9.95889C22.8587 10.237 23 10.5812 23 10.9916C23 11.402 22.8587 11.7458 22.5762 12.023C22.2926 12.3011 21.9417 12.4401 21.5233 12.4401H5.02087L12.2568 19.5376C12.5276 19.8032 12.6693 20.1411 12.6821 20.5515C12.6939 20.9619 12.5522 21.2999 12.2568 21.5655C11.9861 21.8552 11.6415 22 11.2231 22C10.8047 22 10.4478 21.8552 10.1525 21.5655V21.5655Z"
-          fill="#A6B0D0"
-        />
-      </svg>
-    </a>
-    <div class="changediv">
-      <h2>{{node.title}}</h2>
-      <h3>{{node.content}}</h3>
-      <h4>
-        투표 : {{node.vote}}
-        <a href="/mindmaps/node_vote/{{ team.id }}/{{ node.id }}">
-          <svg
-            width="22"
-            height="20"
-            viewBox="0 0 48 42"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M2.00821 19.173C1.98195 18.8969 2.01884 18.6187 2.11655 18.3563C2.21425 18.0939 2.37063 17.8528 2.57576 17.6485C2.7809 17.4442 3.03031 17.281 3.30816 17.1694C3.58602 17.0578 3.88626 17.0001 4.18983 17H8.37237C8.95329 17 9.51043 17.2107 9.9212 17.5858C10.332 17.9609 10.5628 18.4696 10.5628 19V38C10.5628 38.5304 10.332 39.0391 9.9212 39.4142C9.51043 39.7893 8.95329 40 8.37237 40H6.00018C5.45196 40.0001 4.92362 39.8125 4.51951 39.4743C4.11539 39.136 3.86489 38.6717 3.81747 38.173L2.00821 19.173ZM17.1339 18.375C17.1339 17.539 17.7034 16.791 18.5303 16.435C20.3362 15.657 23.4126 14.094 24.8002 11.981C26.5887 9.257 26.926 4.33599 26.9808 3.20899C26.9884 3.05099 26.9841 2.89299 27.0071 2.73699C27.3038 0.783994 31.4316 3.06499 33.0142 5.477C33.8739 6.785 33.9834 8.504 33.8936 9.847C33.7961 11.283 33.3351 12.67 32.8828 14.048L31.919 16.985H43.8095C44.1479 16.985 44.4817 17.0566 44.7848 17.1941C45.0878 17.3317 45.3518 17.5315 45.5561 17.7779C45.7603 18.0243 45.8993 18.3105 45.962 18.6142C46.0248 18.9178 46.0096 19.2306 45.9177 19.528L40.0365 38.544C39.9067 38.9634 39.6304 39.3326 39.2496 39.5954C38.8689 39.8582 38.4045 40.0003 37.9272 40H19.3243C18.7434 40 18.1862 39.7893 17.7755 39.4142C17.3647 39.0391 17.1339 38.5304 17.1339 38V18.375Z"
-              fill="#E0E5F4"
-              stroke="#A6B0D0"
-              stroke-width="4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+{% extends 'base_app.html' %}
+{% load static %}
+
+{% block title %}{{ node.title }} - 노드 상세{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/node_detail.css' %}" />
+{% endblock %}
+
+{% block contents %}
+<section class="node-detail-page">
+  <div class="content-card">
+    <div class="node-detail-header">
+      <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ node.mindmap.id }}" class="node-detail-back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+      <div class="node-detail-header-content">
+        <h2>{{ node.title }}</h2>
+        <p>노드 상세 정보</p>
+      </div>
+      <div class="node-detail-header-actions">
+        <a href="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}" class="node-detail-action-btn node-detail-refresh-btn" title="새로고침">
+          <i class="ri-refresh-line"></i>
         </a>
-      </h4>
-      <hr />
-      <div class="scrolldiv">
+        <a href="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" class="node-detail-action-btn node-detail-delete-btn" title="노드 삭제"
+           onclick="return confirm('이 노드를 삭제하시겠습니까?');">
+          <i class="ri-delete-bin-line"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="node-detail-content">
+      <p class="node-detail-description">{{ node.content }}</p>
+      
+      <div class="node-detail-vote">
+        <span class="node-detail-vote-count">투표: {{ node.vote }}</span>
+        <a href="/mindmaps/node_vote/{{ team.id }}/{{ node.id }}" class="node-detail-vote-btn">
+          <i class="ri-thumb-up-line"></i>
+          투표하기
+        </a>
+      </div>
+    </div>
+
+    <div class="node-detail-comments-section">
+      <h3 class="node-detail-comments-title">댓글</h3>
+      
+      <div class="node-detail-comments-list">
         {% for comment in comments %}
-        <h5>
-          {{comment.user.nickname}} : {{comment.comment}}
-          <span>({{comment.commented_at|date:'Y-m-d, H:i:s'}})</span>
-        </h5>
+        <div class="node-detail-comment-item">
+          <div class="node-detail-comment-header">
+            <span class="node-detail-comment-author">{{ comment.user.nickname }}</span>
+            <span class="node-detail-comment-date">{{ comment.commented_at|date:'Y-m-d H:i' }}</span>
+          </div>
+          <p class="node-detail-comment-content">{{ comment.comment }}</p>
+        </div>
+        {% empty %}
+        <div class="node-detail-no-comments">
+          <i class="ri-chat-3-line"></i>
+          <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
+        </div>
         {% endfor %}
       </div>
-      <form
-        method="POST"
-        action="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}"
-      >
+
+      <form method="POST" action="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}" class="node-detail-comment-form">
         {% csrf_token %}
-        <input type="text" name="comment" placeholder="댓글을 작성해주세요" />
-        <button type="submit">작성하기</button>
+        <div class="form-group">
+          <input type="text" name="comment" placeholder="댓글을 작성해주세요" class="node-detail-comment-input" required />
+          <button type="submit" class="node-detail-submit-btn">
+            <i class="ri-send-plane-line"></i>
+            작성하기
+          </button>
+        </div>
       </form>
-      <div class="btndiv">
-        <a href="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}">
-          <svg
-            width="36"
-            height="35"
-            viewBox="0 0 36 35"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M4.40816 17.501C4.40712 20.5079 5.44637 23.424 7.35207 25.7615C9.25777 28.099 11.9144 29.7162 14.8775 30.3426C17.8407 30.9691 20.9307 30.5667 23.6308 29.2029C26.3309 27.8391 28.4773 25.5965 29.711 22.8502L33.7989 24.4982C32.1783 28.1833 29.3289 31.2023 25.7295 33.0477C22.1301 34.893 18.0004 35.4522 14.0345 34.6312C10.0686 33.8102 6.50845 31.659 3.95257 28.5393C1.3967 25.4197 0.000955884 21.5218 -3.57628e-07 17.501C-0.000172363 13.8485 1.15113 10.2875 3.29255 7.31706C5.43397 4.3466 8.45819 2.11558 11.9413 0.93666C15.4245 -0.242256 19.192 -0.309976 22.7159 0.742992C26.2398 1.79596 29.3434 3.91684 31.5918 6.80839V1.45917L36 1.45917V13.126L33.7959 15.3135L23.5102 15.3135L23.5102 10.9384L29.088 10.9384C27.633 8.43495 25.3861 6.4781 22.696 5.37153C20.0059 4.26497 17.023 4.07058 14.2102 4.81853C11.3974 5.56647 8.91204 7.21492 7.13969 9.50809C5.36735 11.8012 4.40717 14.6109 4.40816 17.501V17.501Z"
-              fill="#A6B0D0"
-            />
-          </svg>
-        </a>
-        <a href="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}">
-          <svg
-            width="28"
-            height="35"
-            viewBox="0 0 28 35"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M28 1.94444H21L19 0H9L7 1.94444H0V5.83333H28M2 31.1111C2 32.1425 2.42143 33.1317 3.17157 33.861C3.92172 34.5903 4.93913 35 6 35H22C23.0609 35 24.0783 34.5903 24.8284 33.861C25.5786 33.1317 26 32.1425 26 31.1111V7.77778H2V31.1111Z"
-              fill="#A6B0D0"
-            />
-          </svg>
-        </a>
-      </div>
     </div>
   </div>
 </section>
