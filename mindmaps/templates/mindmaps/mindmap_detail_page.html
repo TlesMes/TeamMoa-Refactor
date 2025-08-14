@@ -13,7 +13,7 @@
   min-height: calc(100vh - 120px);
 }
 
-.mindmap-header {
+.mindmap-detail-header {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -25,6 +25,27 @@
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+}
+
+.mindmap-detail-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.mindmap-detail-back-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
 }
 
 .refresh-btn {
@@ -124,7 +145,10 @@
 
 {% block contents %}
 <section class="mindmap-section">
-  <div class="mindmap-header">
+  <div class="mindmap-detail-header">
+    <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="mindmap-detail-back-btn">
+      <i class="ri-arrow-left-line"></i>
+    </a>
     <h2 class="mindmap-title">"{{ mindmap.title }}" 마인드맵</h2>
     <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}" class="refresh-btn">
       <i class="ri-refresh-line"></i>

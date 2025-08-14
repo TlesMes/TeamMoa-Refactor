@@ -51,7 +51,10 @@
 {% endblock %} {% block contents %} {% load static %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="post-write-section">
-  <div class="shares-header">
+  <div class="write-header">
+    <a href="{% url 'shares:post_list' team.id %}" class="write-back-btn">
+      <i class="ri-arrow-left-line"></i>
+    </a>
     <h1>공유 게시글 {% if edit %}수정{% else %}작성{% endif %}</h1>
   </div>
   
