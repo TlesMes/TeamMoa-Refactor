@@ -30,7 +30,7 @@ def scheduler_page(request, pk):
         
         teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
         if teamSchedules.exists():
-            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team})
+            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team, "selected_week" : week})
         else:
             for i in range(7):
                 teamSchedule = TeamDaySchedule()
@@ -38,7 +38,7 @@ def scheduler_page(request, pk):
                 teamSchedule.team = team
                 teamSchedule.save()
             teamSchedules = TeamDaySchedule.objects.filter(team=team, date__range=[date_mon,date_sun]).order_by('date')
-            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team})
+            return render(request, 'schedules/scheduler_page.html', {'schedules':teamSchedules,'team':team, "selected_week" : week})
     else:
         return render(request, 'schedules/scheduler_page.html',{'team':team})
         

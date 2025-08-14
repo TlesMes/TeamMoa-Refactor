@@ -18,7 +18,7 @@ body {
   align-items: center;
   width: 100%;
   height: 100vh;
-  background: #e7e9ed;
+  background: #2d3d57;
 }
 
 .header {
@@ -31,3 +31,4 @@ body {
   margin-left: 65px;
   float: left;
 }
+

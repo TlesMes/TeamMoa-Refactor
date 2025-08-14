@@ -23,7 +23,7 @@ def is_member(request, pk) -> bool:
 # Create your views here.
 def mindmap_list_page(request, pk):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
 
     user = request.user
     team = get_object_or_404(Team, pk=pk)
@@ -33,7 +33,7 @@ def mindmap_list_page(request, pk):
 
 def mindmap_detail_page(request, pk, mindmap_id):
     if not is_member(request, pk):
-        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/team_list"</script>')
+        return HttpResponse('<script>alert("팀원이 아닙니다.")</script>''<script>location.href="/teams/"</script>')
     
     user = request.user
     team = get_object_or_404(Team, pk=pk)
@@ -59,7 +59,15 @@ def mindmap_create(request, pk):
     return render(request, 'mindmaps/mindmap_create.html',{'form':form, 'team':team})
 
 def mindmap_delete(request, pk, mindmap_id):
-    pass
+    team = get_object_or_404(Team, pk=pk)
+    mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
+    
+    # 팀장만 마인드맵을 삭제할 수 있음
+    if request.user == team.host:
+        mindmap.delete()
+        return redirect('mindmaps:mindmap_list_page', pk=pk)
+    else:
+        return HttpResponse('<script>alert("팀장만 마인드맵을 삭제할 수 있습니다.")</script><script>history.back()</script>')
 
 def mindmap_create_node(request, pk, mindmap_id):
     team = get_object_or_404(Team, pk=pk)

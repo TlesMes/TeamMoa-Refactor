@@ -1,185 +1,100 @@
-<!DOCTYPE html>
-<html lang="ko">
-  <head>
-    <title>TeamMoa</title>
-    <style>
-      @font-face {
-        font-family: "GmarketSansMedium";
-        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
-          format("woff");
-        font-weight: normal;
-        font-style: normal;
-      }
+{% extends 'base_app.html' %}
+{% load static %}
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+{% block title %}{{ mindmap.title }} - 마인드맵{% endblock %}
 
-      body {
-        font-family: "GmarketSansMedium", sans-serif;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100vh;
-        background: #e7e9ed;
-      }
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/mindmap_detail.css' %}" />
+{% endblock %}
 
-      .header {
-        width: 100%;
-        align-items: center;
-      }
+{% block contents %}
+<section class="mindmap-section">
+  <div class="mindmap-detail-header">
+    <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="mindmap-detail-back-btn">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <h2 class="mindmap-title">"{{ mindmap.title }}" 마인드맵</h2>
+    <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}" class="refresh-btn">
+      <i class="ri-refresh-line"></i>
+      새로고침
+    </a>
+  </div>
 
-      .header > img {
-        margin-top: 32px;
-        margin-left: 65px;
-        float: left;
-      }
+  <canvas
+    id="mindmap"
+    width="800"
+    height="600"
+    class="mindmap-canvas"
+  ></canvas>
 
-      .backdiv {
-        position: absolute;
-        left: 70;
-        margin-right: 750px;
-        margin-bottom: 650px;
-      }
+  <form
+    method="POST"
+    action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
+    class="node-form"
+  >
+    {% csrf_token %}
+    <input type="number" name="posX" placeholder="X좌표" required />
+    <input type="number" name="posY" placeholder="Y좌표" required />
+    <input type="text" name="title" placeholder="제목" required />
+    <input type="text" name="content" placeholder="내용" />
+    <input type="text" name="parent" placeholder="연결할 노드" />
+    <button type="submit" class="create-node-btn">
+      <i class="ri-add-line"></i>
+      노드 생성
+    </button>
+  </form>
+</section>
 
-      a:hover path {
-        fill: #7f8bb1;
-      }
+<script>
+function loaded(){
+  const canvas = document.getElementById('mindmap');
+  const ctx = canvas.getContext('2d');
+  ctx.font = '16px GmarketSansMedium, sans-serif';
 
-      .mindmapsection {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 78vh;
+  {% for line in lines %}
+    ctx.beginPath();
+    ctx.moveTo({{line.from_node.posX}}+40,{{line.from_node.posY}});
+    ctx.lineTo({{line.to_node.posX}}+40,{{line.to_node.posY}});
+    ctx.strokeStyle = '#a6b0d0';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  {% endfor %}
+  
+  {% for node in nodes %}
+    // 노드 박스 그리기
+    ctx.strokeStyle = '#a6b0d0';
+    ctx.lineWidth = 2;
+    ctx.strokeRect({{node.posX}}-13,{{node.posY}}-35,100,60);
+    
+    // 노드 배경 채우기
+    ctx.fillStyle = '#a6b0d0';
+    ctx.fillRect({{node.posX}}-13,{{node.posY}}-35,100,60);
+    
+    // 노드 텍스트
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText('{{node.title}}', {{node.posX}}+37, {{node.posY}}-5);
+  {% endfor %}
+  
+  canvas.onclick = function(event){
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    {% for node in nodes %}
+      const minX = {{node.posX}}-13;
+      const maxX = {{node.posX}}+87;
+      const minY = {{node.posY}}-35;
+      const maxY = {{node.posY}}+25;
+      
+      if(minX < x && maxX > x && minY < y && maxY > y){
+        window.location.href = "/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}";
       }
+    {% endfor %}
+  }
+}
 
-      .mindmapsection h2 {
-        margin: 10px;
-        font-size: 24px;
-        color: #465173;
-      }
-
-      input {
-        margin-top: 15px;
-        border: none;
-        border-radius: 10px;
-        background-color: #fff;
-        padding: 10px;
-        width: 200px;
-        font-size: 18px;
-        color: #465173;
-      }
-
-      button {
-        display: inline-block;
-        margin-left: 10px;
-        padding: 8px 13px;
-        border: none;
-        border-radius: 10px;
-        background: #a6b0d0;
-        color: #fff;
-        font-size: 18px;
-        font-weight: 600;
-      }
-
-      button[type="submit"] {
-        padding: 8px 15px;
-        margin-left: 3px;
-      }
-
-      button:hover {
-        cursor: pointer;
-        background-color: #7f8bb1;
-      }
-    </style>
-    <script>
-      function loaded(){
-        const canvas = document.getElementById('mindmap');
-        const ctx = canvas.getContext('2d');
-        ctx.font = '20px bold serif';
-
-        {% for line in lines %}
-          ctx.beginPath();
-          ctx.moveTo({{line.from_node.posX}}+40,{{line.from_node.posY}});
-          ctx.lineTo({{line.to_node.posX}}+40,{{line.to_node.posY}});
-          ctx.stroke();
-          {% endfor %}
-          {% for node in nodes %}
-            ctx.strokeRect({{node.posX}}-13,{{node.posY}}-35,100,60);
-            ctx.fillStyle = "#a6b0d0";
-            ctx.fillRect({{node.posX}}-13,{{node.posY}}-35,100,60);
-            ctx.fillStyle = "#fff";
-            ctx.fillText("{{node.title}}",{{node.posX}},{{node.posY}});
-          {% endfor %}
-          canvas.onclick = function(event){
-              const x = event.clientX - ctx.canvas.offsetLeft;
-              const y = event.clientY - ctx.canvas.offsetTop;
-              {% for node in nodes %}
-                  minX={{node.posX}}-10;
-                  maxX={{node.posX}}+90;
-                  minY={{node.posY}}-30;
-                  maxY={{node.posY}}+30;
-                  if(minX<x && maxX>x && minY<y && maxY>y){
-                      window.location.href = "/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}"
-                  }
-              {% endfor %}
-          }
-      }
-    </script>
-  </head>
-  <body onload="loaded()">
-    <nav class="header">
-      <img src="../../../static/assets/img/LogoB.svg" alt="logo" />
-    </nav>
-    <section class="mindmapsection">
-      <div class="backdiv">
-        <a href="{% url 'mindmaps:mindmap_list_page' team.id %}">
-          <svg
-            width="30"
-            height="29"
-            viewBox="0 0 23 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.1525 21.5655L0.4061 12.0056C0.258427 11.8607 0.153579 11.7038 0.0915567 11.5348C0.0305187 11.3658 0 11.1848 0 10.9916C0 10.7985 0.0305187 10.6175 0.0915567 10.4485C0.153579 10.2795 0.258427 10.1226 0.4061 9.97772L10.1525 0.417827C10.4232 0.152274 10.7614 0.0132219 11.167 0.000668526C11.5736 -0.0109192 11.9246 0.128133 12.2199 0.417827C12.5152 0.683379 12.6693 1.01508 12.6821 1.41292C12.6939 1.81174 12.5522 2.15599 12.2568 2.44568L5.02087 9.54318H21.5233C21.9417 9.54318 22.2926 9.68174 22.5762 9.95889C22.8587 10.237 23 10.5812 23 10.9916C23 11.402 22.8587 11.7458 22.5762 12.023C22.2926 12.3011 21.9417 12.4401 21.5233 12.4401H5.02087L12.2568 19.5376C12.5276 19.8032 12.6693 20.1411 12.6821 20.5515C12.6939 20.9619 12.5522 21.2999 12.2568 21.5655C11.9861 21.8552 11.6415 22 11.2231 22C10.8047 22 10.4478 21.8552 10.1525 21.5655V21.5655Z"
-              fill="#A6B0D0"
-            />
-          </svg>
-        </a>
-      </div>
-      <h2>
-        "{{mindmap.title}}" 마인드맵
-        <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}">
-          <button>새로고침</button>
-        </a>
-      </h2>
-      <canvas
-        id="mindmap"
-        width="800"
-        height="600"
-        style="
-          border: 1px solid #a6b0d0;
-          border-radius: 10px;
-          background-color: #fff;
-        "
-      ></canvas>
-      <form
-        method="POST"
-        action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
-      >
-        {% csrf_token %}
-        <input type="number" name="posX" placeholder="X좌표" />
-        <input type="number" name="posY" placeholder="Y좌표" />
-        <input type="text" name="title" placeholder="제목" />
-        <input type="text" name="content" placeholder="내용" />
-        <input type="text" name="parent" placeholder="연결" />
-        <button type="submit">생성</button>
-      </form>
-    </section>
-  </body>
-</html>
+// DOM 로드 완료 후 실행
+document.addEventListener('DOMContentLoaded', loaded);
+</script>
+{% endblock %}

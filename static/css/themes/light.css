@@ -1,0 +1,2262 @@
+/* ==========================================================================
+   Light Theme - For base_app.html pages (밝은 테마)
+   ========================================================================== */
+
+/* Base light theme colors */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-accent: #f1f3f5;
+  
+  --text-primary: #2d3d57;
+  --text-secondary: #4b6b7c;
+  --text-muted: #8a98b4;
+  --text-light: #868686;
+  
+  --border-color: #d3daef;
+  --border-dark: #071540;
+  
+  --accent-primary: #a6b0d0;
+  --accent-hover: #7f8bb1;
+  --accent-light: #6285f6;
+}
+
+/* Light theme body defaults */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Team Main Page Styles (Light)
+   ========================================================================== */
+
+.mainsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px); /* navbar 높이 제외 */
+}
+
+/* Date and Phase Section */
+.datediv {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.datediv h2 {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.datediv span {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.phase-item {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-primary);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.phase-item img {
+  margin-right: 12px;
+  width: 16px;
+  height: 16px;
+}
+
+.phase-content {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.datediv button {
+  border: none;
+  background: transparent;
+}
+
+.deletebtn {
+  margin-top: 2px;
+  margin-left: 10px;
+  position: relative;
+  width: 12px;
+}
+
+.deletebtn:hover path {
+  fill: #929292;
+}
+
+/* Team Information Section */
+.teamdiv {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.team-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.team-info {
+  flex: 1;
+}
+
+.teamdiv h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.team-code {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.teamdiv h3 {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.team-members {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.member-item.leader {
+  background-color: #e8f4fd;
+}
+
+.member-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.member-role {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}
+
+.member-login {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+#copybtn {
+  border: none;
+  background: transparent;
+  position: relative;
+  width: 12px;
+}
+
+#copybtn:hover path {
+  fill: var(--accent-hover);
+}
+
+.logspan {
+  font-size: 17px;
+  color: var(--text-light);
+}
+
+.editdiv {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.editdiv button {
+  background: var(--accent-primary);
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 120px;
+  transition: background-color 0.2s ease;
+}
+
+.editdiv button:hover {
+  cursor: pointer;
+  background-color: var(--accent-hover);
+}
+
+.deletebtn {
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.deletebtn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Schedule Page Styles (Light)
+   ========================================================================== */
+
+.schedulesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px; /* 1400px에서 축소 */
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.schedule-header {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.week-selector {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.week-selector input[type="week"] {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+}
+
+.schedule-controls button {
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.schedule-controls button:hover {
+  background: var(--accent-hover);
+  cursor: pointer;
+}
+
+.schedule-grid {
+  display: flex;
+  gap: 1px;
+  background-color: var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: fit-content; /* 내용에 맞는 크기로 제한 */
+  margin: 0 auto; /* 중앙 정렬 */
+}
+
+.time-column {
+  background-color: var(--bg-secondary);
+  min-width: 80px;
+}
+
+.schedule-column {
+  flex: 1;
+  background-color: var(--bg-primary);
+  min-width: 80px; /* 날짜 표기 간소화로 너비 축소 */
+  max-width: 100px; /* 최대 너비 제한으로 공간 절약 */
+}
+
+.schedule-day-header {
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.schedule-day-header .date-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.schedule-day-header .day-line {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+  opacity: 0.9;
+}
+
+.time-slot,
+.schedule-slot {
+  padding: 0.5rem;
+  height: 36px; /* scheduler_upload_page와 동일한 높이 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+.time-slot {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  justify-content: flex-end;
+  padding-right: 1rem;
+}
+
+.schedule-slot {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease;
+}
+
+.schedule-slot:hover {
+  background-color: var(--bg-accent);
+}
+
+/* Availability intensity colors */
+.availability-0 { background-color: rgba(166, 176, 208, 0) !important; }
+.availability-1 { background-color: rgba(166, 176, 208, 0.2) !important; }
+.availability-2 { background-color: rgba(166, 176, 208, 0.4) !important; }
+.availability-3 { background-color: rgba(166, 176, 208, 0.6) !important; }
+.availability-4 { background-color: rgba(166, 176, 208, 0.8) !important; }
+.availability-5 { background-color: rgba(166, 176, 208, 1) !important; color: white !important; }
+
+/* ==========================================================================
+   Schedule Upload Page Styles (Light)
+   ========================================================================== */
+
+/* Schedule Upload 페이지 전용 넓은 카드 */
+body:has(.schedule-grid-container) .content-card,
+.schedule-upload-page .content-card {
+  max-width: fit-content;
+  width: auto;
+  min-width: 780px; /* 스케줄 그리드 최소 너비 + 패딩 */
+  margin: 0 auto;
+}
+
+.schedule-grid-container {
+  margin: 2rem 0;
+}
+
+.schedule-grid-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.schedule-grid-container h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.schedule-instruction {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* Schedule Grid Improvements */
+.schedule-grid {
+  display: flex;
+  gap: 1px;
+  background-color: var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  min-width: 720px; /* 시간컬럼(90) + 7일컬럼(90*7) = 720px */
+}
+
+.time-column,
+.day-column {
+  background-color: var(--bg-primary);
+}
+
+.time-column {
+  background-color: var(--bg-secondary);
+  min-width: 90px;
+  width: 90px;
+}
+
+.day-column {
+  flex: 1;
+  min-width: 80px; /* 요일 컬럼 최소 너비 축소 */
+  max-width: 90px; /* 최대 너비 제한 */
+}
+
+.time-header,
+.day-header {
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.time-header .date-line,
+.day-header .date-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.time-header .day-line,
+.day-header .day-line {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+  opacity: 0.9;
+}
+
+.time-slot {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  height: 36px; /* schedule-slot과 동일하게 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding-right: 0.75rem;
+}
+
+/* Schedule Slot - 전체 클릭 가능한 영역 */
+.schedule-slot {
+  background-color: var(--bg-primary);
+  height: 36px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.schedule-slot:hover {
+  background-color: var(--bg-accent);
+}
+
+/* 체크박스 숨기기 */
+.schedule-slot input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 슬롯 표시기 (체크 아이콘) */
+.slot-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.slot-indicator i {
+  font-size: 16px;
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+/* 선택된 상태 스타일링 */
+.schedule-slot:has(input[type="checkbox"]:checked) {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.schedule-slot:has(input[type="checkbox"]:checked) .slot-indicator i {
+  color: white;
+}
+
+.schedule-slot:has(input[type="checkbox"]:checked):hover {
+  background-color: var(--accent-hover);
+}
+
+/* :has 지원하지 않는 브라우저를 위한 대안 */
+.schedule-slot.selected {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.schedule-slot.selected .slot-indicator i {
+  color: white;
+}
+
+.schedule-slot.selected:hover {
+  background-color: var(--accent-hover);
+}
+
+/* 드래그 중 커서 및 선택 방지 */
+.schedule-grid.dragging {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Selection Tools */
+.selection-tools {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
+}
+
+.selection-tools h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.tool-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-btn:hover {
+  background-color: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.tool-btn i {
+  font-size: 1rem;
+}
+
+/* Form Styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(166, 176, 208, 0.1);
+}
+
+.help-text {
+  margin-top: 0.5rem;
+}
+
+.help-text small {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Phase Info Section */
+.phase-info-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background-color: var(--bg-accent);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.phase-icon {
+  background-color: var(--accent-primary);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phase-icon i {
+  font-size: 1.5rem;
+}
+
+.phase-description h4 {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.phase-description p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.875rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: var(--text-muted);
+  color: white;
+  text-decoration: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .schedule-grid {
+    overflow-x: auto;
+    min-width: 600px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .create-btn,
+  .form-actions .cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-grid {
+    min-width: 500px;
+  }
+  
+  .phase-info-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Mindmap Page Styles (Light)
+   ========================================================================== */
+
+.mindmapsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.mindmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.mindmap-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.create-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-btn:hover {
+  background: var(--accent-hover);
+}
+
+.mindmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mindmap-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mindmap-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.mindmap-title {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.mindmap-id {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+.mindmap-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.view-btn, .delete-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-btn {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.view-btn:hover {
+  background: var(--accent-hover);
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.editdiv .delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.editdiv .delete-btn:hover {
+  background: #c82333;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin: 0 0 2rem 0;
+}
+
+.empty-create-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.empty-create-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* ==========================================================================
+   Members Page Styles (Light) - Modern Card Layout
+   ========================================================================== */
+
+.members-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.team-header-card {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.team-title {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.team-code {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+.team-description {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.member-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.member-info {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.member-name {
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.member-username {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.member-profile {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+.member-todos {
+  min-height: 150px;
+}
+
+.todos-title {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.todo-item {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bg-accent);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-primary);
+}
+
+.todo-item.completed {
+  opacity: 0.7;
+  border-left-color: var(--text-muted);
+}
+
+.todo-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.todo-text {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  flex-grow: 1;
+}
+
+.todo-item.completed .todo-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.todo-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.todo-checkbox:checked {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.todo-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.todo-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.todo-delete-btn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.empty-todos {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.add-todo-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.add-todo-title {
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.add-todo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.add-todo-btn {
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: center;
+  min-width: 120px;
+}
+
+.add-todo-btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Members Page Responsive Design */
+@media (max-width: 768px) {
+  .members-section {
+    padding: 1rem;
+  }
+
+  .members-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .member-card {
+    padding: 1rem;
+  }
+
+  .team-header-card {
+    padding: 1.5rem;
+  }
+
+  .team-title {
+    font-size: 1.5rem;
+  }
+
+  .todo-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .todo-actions {
+    align-self: flex-end;
+  }
+}
+
+/* ==========================================================================
+   Shares Page Styles (Light)
+   ========================================================================== */
+
+.container {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.table th {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.table td {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--bg-accent);
+}
+
+.btn {
+  background-color: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
+.btn:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.search-button {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.search-button:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* ==========================================================================
+   Shares Board Page Styles (Light)
+   ========================================================================== */
+
+.sharessection {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.shares-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.shares-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.write-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.write-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.write-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.write-back-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.write-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.write-btn:hover {
+  background: var(--accent-hover);
+  color: white;
+  text-decoration: none;
+}
+
+.search-section {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-select {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  min-width: 120px;
+}
+
+.search-input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-btn:hover {
+  background: var(--accent-hover);
+}
+
+.posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.post-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.post-card.fixed {
+  border-left: 4px solid var(--accent-primary);
+  background-color: var(--bg-accent);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.post-title {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.post-id {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-left: 1rem;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.post-author {
+  font-weight: 500;
+}
+
+.post-date {
+  color: var(--text-muted);
+}
+
+.fixed-icon {
+  color: var(--accent-primary);
+  margin-right: 0.5rem;
+}
+
+/* Post Detail Page */
+.post-detail-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.post-detail-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.post-detail-header {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-detail-title {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.post-detail-meta {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.post-detail-body {
+  padding: 2rem;
+}
+
+.post-content {
+  color: var(--text-primary);
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+.attachment-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.attachment-link {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.attachment-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.post-action-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.edit-btn {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.edit-btn:hover {
+  background: var(--accent-hover);
+  color: white;
+  text-decoration: none;
+}
+
+.list-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.list-btn:hover {
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+/* Post Write Page */
+.post-write-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.write-form-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.write-form-header {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+}
+
+.write-form-header input[type="text"],
+.write-form-header input[name="title"] {
+  width: 100%;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 1rem;
+}
+
+.write-form-body {
+  padding: 1rem;
+}
+
+.content-editor {
+  min-height: 400px;
+}
+
+.content-editor textarea,
+.content-editor .note-editor {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.content-editor textarea {
+  width: 100% !important;
+  height: 400px !important;  /* 부모 컨테이너와 동일한 높이 */
+  min-height: 400px;
+  resize: vertical;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.write-form-footer {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.file-upload-section {
+  margin-bottom: 1rem;
+}
+
+.file-upload-section input[type="file"] {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-family: "GmarketSansMedium", sans-serif;
+  width: 100%;
+}
+
+.write-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.submit-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* Empty State */
+.posts-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.posts-empty h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.posts-empty p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Pagination */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.page-link {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.page-link.active {
+  background-color: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.page-link.disabled {
+  background-color: var(--bg-accent);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Common Light Theme Elements
+   ========================================================================== */
+
+button:hover {
+  cursor: pointer;
+}
+
+a {
+  color: var(--accent-light);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+input, textarea, select {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-light);
+  outline: none;
+}
+
+/* ==========================================================================
+   Light Theme Styles for Team Management Pages
+   ========================================================================== */
+
+.page-section {
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+  background: #f8fafc;
+}
+
+.content-card {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 24px 64px 16px 64px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+  position: relative;
+}
+
+.card-header h2 {
+  margin: 0 0 8px 0;
+  color: #1e293b;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.card-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Back button for light theme */
+.back-btn {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.back-btn i {
+  font-size: 20px;
+}
+
+/* Info section */
+.info-section {
+  padding: 20px 24px;
+  background: #f8fafc;
+}
+
+.phase-info-section,
+.team-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.phase-icon,
+.team-avatar {
+  width: 60px;
+  height: 60px;
+  background: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phase-icon i,
+.team-avatar i {
+  font-size: 28px;
+  color: white;
+}
+
+.phase-description,
+.current-team-info {
+  flex: 1;
+}
+
+.phase-description h4,
+.current-team-info h3 {
+  margin: 0 0 4px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.phase-description p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.team-code {
+  margin: 0 0 8px 0;
+  color: #94a3b8;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.team-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-stats span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.team-stats i {
+  color: #3b82f6;
+  font-size: 14px;
+}
+
+/* Form container */
+.form-container {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #374151;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 12px;
+  color: #9ca3af;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-wrapper i {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #9ca3af;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.textarea-wrapper textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  resize: vertical;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.textarea-wrapper textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Readonly styles */
+.input-wrapper.readonly {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.input-wrapper.readonly input {
+  background: transparent;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Date range group */
+.date-range-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Help text */
+.help-text {
+  margin-top: 4px;
+}
+
+.help-text small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* Field errors */
+.field-error {
+  margin-top: 4px;
+}
+
+.field-error span {
+  color: #dc2626;
+  font-size: 12px;
+  display: block;
+}
+
+/* Phase examples */
+.phase-examples {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.phase-examples h5 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.example-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.example-item i {
+  color: #3b82f6;
+  font-size: 16px;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.form-actions .create-btn {
+  flex: 1;
+}
+
+.create-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.create-btn i {
+  font-size: 16px;
+}
+
+.cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.cancel-btn i {
+  font-size: 16px;
+}
+
+/* Messages for light theme */
+.messages-container {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.message-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.message-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.message-info {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.message i {
+  font-size: 16px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .page-section {
+    padding: 1rem;
+  }
+  
+  .content-card {
+    margin: 0;
+    border-radius: 12px;
+  }
+  
+  .card-header {
+    padding: 20px 56px 16px 56px;
+  }
+  
+  .back-btn {
+    left: 16px;
+    top: 20px;
+  }
+  
+  .date-range-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .examples-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .create-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+  
+  .phase-info-section,
+  .team-profile-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .team-stats {
+    align-items: center;
+  }
+}

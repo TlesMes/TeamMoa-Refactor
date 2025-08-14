@@ -1,39 +1,118 @@
-{% extends 'base_minimal.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/signup.css' %}" />
-<section class="signupsection">
-  <form method="POST" action="{% url 'accounts:signup' %}">
-    {% csrf_token %}
+{% extends 'base_minimal.html' %}
+{% load static %}
 
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% for field in form %}
-        <div class="signupdiv">
-            <h2>{{ field.label }}</h2>
-            {{ field }}
-
-            {% for error in field.errors %}
-                <div class="invalid-feedback" style="display: block; color: red; font-size: 12px;">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endfor %}
+{% block contents %}
+<section class="auth-section">
+  <div class="auth-container">
     
-    <div class="signupbtn">
-      <button type="submit">회원가입</button>
+    <!-- 로고 및 헤더 -->
+    <div class="auth-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="ri-team-fill"></i>
+        </div>
+        <h1 class="site-title">팀모아</h1>
+      </div>
+      <h2 class="auth-title">회원가입</h2>
+      <p class="auth-subtitle">팀 협업의 새로운 시작</p>
     </div>
-  </form>
-  <div class="caption">
-    <a href="{% url 'accounts:login' %}">
-      이미 계정이 있으신가요? <span>로그인</span>
-    </a>
+
+    <!-- 회원가입 폼 -->
+    <div class="auth-card">
+      {% if form.non_field_errors %}
+        <div class="error-message">
+          <i class="ri-error-warning-line"></i>
+          <div>
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'accounts:signup' %}" class="auth-form signup-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          <div class="input-wrapper">
+            <i class="ri-user-line"></i>
+            {{ form.username }}
+          </div>
+          {% for error in form.username.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          <div class="input-wrapper">
+            <i class="ri-mail-line"></i>
+            {{ form.email }}
+          </div>
+          {% for error in form.email.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.nickname.id_for_label }}">{{ form.nickname.label }}</label>
+          <div class="input-wrapper">
+            <i class="ri-user-smile-line"></i>
+            {{ form.nickname }}
+          </div>
+          {% for error in form.nickname.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+          <div class="input-wrapper">
+            <i class="ri-lock-line"></i>
+            {{ form.password }}
+          </div>
+          {% for error in form.password.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+          <div class="input-wrapper">
+            <i class="ri-lock-2-line"></i>
+            {{ form.password2 }}
+          </div>
+          {% for error in form.password2.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.profile.id_for_label }}">{{ form.profile.label }}</label>
+          <div class="input-wrapper textarea-wrapper">
+            <i class="ri-file-text-line"></i>
+            {{ form.profile }}
+          </div>
+          {% for error in form.profile.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="auth-btn">
+          <i class="ri-user-add-line"></i>
+          회원가입
+        </button>
+      </form>
+
+      <!-- 링크 섹션 -->
+      <div class="auth-links">
+        <a href="{% url 'accounts:login' %}" class="link-secondary">
+          이미 계정이 있으신가요? <span>로그인</span>
+        </a>
+      </div>
+    </div>
+
   </div>
 </section>
-
 {% endblock %}

@@ -1,5 +1,5 @@
-{% extends "base1.html" %} {% load static %} {% block mobileView %}
-<meta name="viewport" content="width=800, user-scalable=yes" />
+{% extends "base_app.html" %} {% load static %} {% block mobileView %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 {% endblock %}
 
 <!--<script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -9,7 +9,7 @@
 <script src="{% static 'js/summernote/summernote.js' %}"></script>
 <link
   rel="stylesheet"
-  href="{% static 'css/summernote/summernote.css' %}"
+  href="{% static 'css/vendors/summernote/summernote.css' %}"
   type="text/css"
 />
 <script
@@ -49,136 +49,43 @@
 
 
 {% endblock %} {% block contents %} {% load static %}
-<style>
-  .container {
-    width:100%;
-  }
-
-  h4 {
-    font-size:17px;
-    font-weight: bold;
-    padding-bottom: 5px;
-  }
-
-  .row-mt-5{
-    display:inline-block;
-    align-items:center;
-    text-align:center;
-    margin-top:4%;
-    width:100%;
-  }
-
-  #form_title {
-    font-family: "GmarketSansMedium", sans-serif;
-    width:70%;
-    min-width: 70%;
-    max-width: 70%;
-    margin-bottom:0px;
-    height: 45px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-style:none;
-    background: #ededed;
-    padding-left:10px;
-  }
-
-  textarea{
-    font-family: "GmarketSansMedium", sans-serif;
-    margin-top:0px;
-    width:68.5%;
-    min-width:68.5%;
-    max-width:68.5%;
-    height:250px;
-    min-height:250px;
-    border-bottom-left-radius:10px;
-    border-bottom-right-radius:10px;
-    border:2px solid #000000;
-    padding-left:10px;
-    font-size:15px;
-    line-height:30px;
-  }
+{% comment %} Light theme styles loaded in base_app.html {% endcomment %}
+<section class="post-write-section">
+  <div class="write-header">
+    <a href="{% url 'shares:post_list' team.id %}" class="write-back-btn">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+    <h1>공유 게시글 {% if edit %}수정{% else %}작성{% endif %}</h1>
+  </div>
   
-  .card-footer{
-    width:68.5%;
-    height: 55px;
-    margin-top:10px;
-    margin-left:auto;
-    margin-right:auto;
-    background:#EDEDED;
-    padding-left: 10px;
-    text-align:left;
-  }
-  
-  [type=file] {
-    line-height:30px;
-  }
-
-  #Submit_ {
-    display:flex;
-    flex-direction:column;
-    align-items: end;
-  }
-
-  [type=submit] {
-    font-family: "GmarketSansMedium", sans-serif;
-    font-size: 14px;
-    line-height: 30px;
-    width:65px;
-    height:30px;
-    margin-top: 10px;
-    float:right;
-    background: #FFFFFF;
-    border-radius: 5px;
-  }
-</style>
-<div class="container">
-  <div class="row-mt-5">
-    <div class="col-12">
-      <h4>공유 게시글</h4>
-    </div>
-    <form action="" method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="card" style="width: 100%">
-        <!--제목,분류,작성일-->
-        <div class="card-header" style="padding: 0rem 0.8rem">
-          <div class="md-form_form-group" style="margin-top: 8.5px">
-            <div style="padding: 0 5.5px">{{ form.title }}</div>
-          </div>
-        </div>
-        <div>
-          <!--내용-->
-          {{ form.article }}
-        </div>
-      </div>
-
-      <div class="card-footer">
-        <div class="form-group">
-          <div class="col-sm-12">
-            {{ form.upload_files }}
-            
-          </div>
-        </div>
-            <small
-              id="help"
-              class="form-text text-muted"
-              style="margin-bottom: -15px"
-            >
-              [파일 업로드]&nbsp;<i class="fas fa-upload"></i>&nbsp;10MB 이하의
-              파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
-            </small>
-          <div id ="Submit_" class="text-right" style="margin-top: 10px">
-              {% if edit %}
-              <button type="submit" id="write" class="btn btn-sm">{{ edit }}</button>
-              {% else %}
-              <button type="submit" id="write" class="btn btn-sm">작성하기</button>
-              {% endif %}
-          </div>
+  <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="write-form-card">
+      <div class="write-form-header">
+        {{ form.title.as_widget }}
       </div>
       
-    </form>
-    
-  </div>
-</div>
+      <div class="write-form-body content-editor">
+        {{ form.article }}
+      </div>
+      
+      <div class="write-form-footer">
+        <div class="file-upload-section">
+          {{ form.upload_files }}
+          <small style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem; display: block;">
+            <i class="fas fa-upload"></i>&nbsp;파일 업로드: 10MB 이하의 파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
+          </small>
+        </div>
+        
+        <div class="write-actions">
+          <button type="submit" class="submit-btn">
+            {% if edit %}{{ edit }}{% else %}작성하기{% endif %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
 {% endblock %} {% block script %}
 <script type="text/javascript">
   var checkUnload = true;

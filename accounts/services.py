@@ -32,3 +32,25 @@ def register_user(form, current_site):
 
     # 3. with 블록이 예외 없이 성공적으로 끝나면, DB에 저장된 user가 최종 확정(commit)
     return user
+
+
+def store_return_url(request):
+    """
+    GET 요청시 이전 페이지를 세션에 안전하게 저장합니다.
+    같은 도메인인지 검증하여 Open Redirect 취약점을 방지합니다.
+    """
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        from urllib.parse import urlparse
+        parsed = urlparse(referer)
+        # 같은 도메인인지 검증 (도메인이 없거나 현재 호스트와 같은 경우만)
+        if not parsed.netloc or parsed.netloc == request.get_host():
+            request.session['return_url'] = referer
+
+
+def get_return_url(request, default_url='teams:main_page'):
+    """
+    세션에서 안전한 이전 페이지 URL을 가져오고 세션에서 제거합니다.
+    저장된 URL이 없으면 기본 URL을 반환합니다.
+    """
+    return request.session.pop('return_url', default_url)

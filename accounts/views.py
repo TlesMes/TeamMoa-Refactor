@@ -14,7 +14,7 @@ from accounts.forms import SignupForm
 # Create your views here.
 from . import services
 
-TEAM_LIST_URL_NAME = 'teams:team_list'
+TEAM_LIST_URL_NAME = 'teams:main_page'
 LOGIN_URL_NAME = 'accounts:login'
 HOME_URL_NAME = 'accounts:home'
 
@@ -88,29 +88,34 @@ def home(request):
 #유저 정보 변경
 @login_required
 def update(request):
-    if request.method == 'POST': #post방식이면 전달받은 내용 변경함
+    if request.method == 'GET':
+        services.store_return_url(request)
+        user_change_form = CustomUserChangeForm(instance=request.user)
+    
+    elif request.method == 'POST':
         user_change_form = CustomUserChangeForm(request.POST, instance=request.user)
         if user_change_form.is_valid():
             user_change_form.save()
-            return redirect(TEAM_LIST_URL_NAME)
+            return_url = services.get_return_url(request, TEAM_LIST_URL_NAME)
+            return redirect(return_url)
     
-    else: #post방식이 아니면 폼을 전달해서 변경사항을 받음
-        user_change_form = CustomUserChangeForm(instance = request.user) 
-    return render(request, 'accounts/update.html', {'user_change_form':user_change_form})
+    return render(request, 'accounts/update.html', {'user_change_form': user_change_form})
 
 
 #패스워드 변경
 @login_required
 def password(request):
-    if request.method == 'POST':
-        password_change_form = PasswordChangeForm(request.user, request.POST)
+    if request.method == 'GET':
+        services.store_return_url(request)
+        password_change_form = PasswordChangeForm(request.user)
     
+    elif request.method == 'POST':
+        password_change_form = PasswordChangeForm(request.user, request.POST)
         if password_change_form.is_valid():
             password_change_form.save()
-            return redirect(TEAM_LIST_URL_NAME)
-
-    else:
-        password_change_form = PasswordChangeForm(request.user)
-    return render(request, 'accounts/change_password.html',{'password_change_form':password_change_form})
+            return_url = services.get_return_url(request, TEAM_LIST_URL_NAME)
+            return redirect(return_url)
+    
+    return render(request, 'accounts/change_password.html', {'password_change_form': password_change_form})
 
 

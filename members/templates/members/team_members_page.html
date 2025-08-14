@@ -1,92 +1,95 @@
 {% extends 'base_app.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/member.css' %}" />
-<section class="membersection">
-  <div class="changediv">
-    <div class="teamdiv">
-      <h2>{{ team.title }} <span>(#{{team.invitecode}})</span></h2>
-      <h3>{{team.introduction}}</h3>
-    </div>
-    <div class="scrolldiv">
-      {% if request.user.is_authenticated %} {% for member in members %}
-      <div class="tododiv">
-        <h2>
-          {{member.User.nickname}} <span>({{member.User.username}})</span>
-        </h2>
-        <h3>{{member.User.profile}}</h3>
-        <hr />
-        {% for todo in todos %} {% if todo.owner == member %} {%if not todo.is_completed %}
-        <h4>
-          {{todo.content}} {% if todo.owner.User == request.user %}
-          <input
-            type="checkbox"
-            onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'"
-          />
-          <button
-            class="btn btn-primary"
-            onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'
-          >
-            <svg
-              width="14"
-              height="18"
-              viewBox="0 0 14 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
-                fill="#CCCCCC"
-              />
-            </svg>
-          </button>
-          {% endif %}
-        </h4>
-        {% else %}
-        <h5>
-          {{todo.content}}{% if todo.owner.User == request.user %}
-          <input
-            type="checkbox"
-            onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'"
-            checked="on"
-          />
-          <button
-            class="btn btn-primary"
-            onclick='location.href ="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}"'
-          >
-            <svg
-              width="14"
-              height="18"
-              viewBox="0 0 14 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
-                fill="#CCCCCC"
-              />
-            </svg>
-          </button>
-          {% endif %}
-        </h5>
-        {% endif %}
-        <br />
-        {% endif %} {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    <div class="plusdiv">
-      <form
-        method="POST"
-        action="{% url 'members:team_members_page' team.id %}"
-      >
-        {% csrf_token %}
-        <table>
-          {{form.content}}
-        </table>
-        <button type="submit" class="btn btn-primary">등록하기</button>
-      </form>
-    </div>
-    {% endif %}
+
+<section class="members-section">
+  <!-- Team Header Card -->
+  <div class="team-header-card">
+    <h1 class="team-title">{{ team.title }} <span class="team-code">#{{ team.invitecode }}</span></h1>
+    <p class="team-description">{{ team.introduction }}</p>
   </div>
+
+  {% if request.user.is_authenticated %}
+  <!-- Members Grid -->
+  <div class="members-grid">
+    {% for member in members %}
+    <div class="member-card">
+      <!-- Member Info -->
+      <div class="member-info">
+        <h2 class="member-name">{{ member.User.nickname }}</h2>
+        <p class="member-username">@{{ member.User.username }}</p>
+        {% if member.User.profile %}
+        <p class="member-profile">{{ member.User.profile }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Todo Section -->
+      <div class="member-todos">
+        <h3 class="todos-title">할 일</h3>
+        {% for todo in todos %}
+          {% if todo.owner == member %}
+            <div class="todo-item {% if todo.is_completed %}completed{% endif %}">
+              <div class="todo-content">
+                <span class="todo-text">{{ todo.content }}</span>
+                {% if todo.owner.User == request.user %}
+                <div class="todo-actions">
+                  <input
+                    type="checkbox"
+                    class="todo-checkbox"
+                    onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'"
+                    {% if todo.is_completed %}checked{% endif %}
+                  />
+                  <button
+                    type="button"
+                    class="todo-delete-btn"
+                    onclick="location.href='/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}'"
+                    title="삭제"
+                  >
+                    <svg
+                      width="14"
+                      height="18"
+                      viewBox="0 0 14 18"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        <!-- Empty state for todos -->
+        {% if not todos or not member.todo_set.exists %}
+        <div class="empty-todos">
+          <p>할 일이 없습니다</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Add Todo Card -->
+  <div class="add-todo-card">
+    <h2 class="add-todo-title">새 할 일 추가</h2>
+    <form
+      method="POST"
+      action="{% url 'members:team_members_page' team.id %}"
+      class="add-todo-form"
+    >
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.content }}
+      </div>
+      <button type="submit" class="add-todo-btn">할 일 등록</button>
+    </form>
+  </div>
+  {% endif %}
 </section>
 
 {% endblock %}

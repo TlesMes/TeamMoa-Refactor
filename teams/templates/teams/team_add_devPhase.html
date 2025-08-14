@@ -1,40 +1,134 @@
-{% extends 'base_minimal_alt.html' %} {% load static %} {% block contents %}
-<link rel="stylesheet" href="{% static 'css/devphase.css' %}" />
-<section class="devphasesection">
-  <div>
-    <a href="{% url 'teams:team_main_page' team.id %}">
-      <svg
-        width="30"
-        height="29"
-        viewBox="0 0 23 22"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M10.1525 21.5655L0.4061 12.0056C0.258427 11.8607 0.153579 11.7038 0.0915567 11.5348C0.0305187 11.3658 0 11.1848 0 10.9916C0 10.7985 0.0305187 10.6175 0.0915567 10.4485C0.153579 10.2795 0.258427 10.1226 0.4061 9.97772L10.1525 0.417827C10.4232 0.152274 10.7614 0.0132219 11.167 0.000668526C11.5736 -0.0109192 11.9246 0.128133 12.2199 0.417827C12.5152 0.683379 12.6693 1.01508 12.6821 1.41292C12.6939 1.81174 12.5522 2.15599 12.2568 2.44568L5.02087 9.54318H21.5233C21.9417 9.54318 22.2926 9.68174 22.5762 9.95889C22.8587 10.237 23 10.5812 23 10.9916C23 11.402 22.8587 11.7458 22.5762 12.023C22.2926 12.3011 21.9417 12.4401 21.5233 12.4401H5.02087L12.2568 19.5376C12.5276 19.8032 12.6693 20.1411 12.6821 20.5515C12.6939 20.9619 12.5522 21.2999 12.2568 21.5655C11.9861 21.8552 11.6415 22 11.2231 22C10.8047 22 10.4478 21.8552 10.1525 21.5655V21.5655Z"
-          fill="#A6B0D0"
-        />
-      </svg>
-    </a>
-    <div class="changediv">
-      <form method="POST" action=".">
-        {% csrf_token %}
-        <table>
-          <h3>시작일</h3>
-          {{form.startdate}}
-          <h3>종료일</h3>
-          {{form.enddate}}
-          <h3>내용</h3>
-          {{form.content}}
-        </table>
-        <button
-          class="btn btn-primary"
-          onclick="location.href='/teams/team_add_devPhase/'"
-        >
-          추가하기
-        </button>
-      </form>
+{% extends 'base_app.html' %} 
+{% load static %} 
+
+{% block contents %}
+<section class="page-section">
+  <div class="content-card">
+    <div class="card-header">
+      <a href="{% url 'teams:team_main_page' team.id %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+      <h2>개발 단계 추가</h2>
+      <p>팀의 새로운 개발 단계를 등록하세요</p>
     </div>
+
+    <div class="info-section">
+      <div class="phase-info-section">
+        <div class="phase-icon">
+          <i class="ri-calendar-todo-line"></i>
+        </div>
+        <div class="phase-description">
+          <h4>개발 단계 등록</h4>
+          <p>프로젝트의 진행 상황을 체계적으로 관리할 수 있습니다. 각 단계별로 기간과 목표를 설정해보세요.</p>
+        </div>
+      </div>
+    </div>
+    
+    <form method="POST" action="." class="form-container">
+      {% csrf_token %}
+      
+      <div class="date-range-group">
+        <div class="form-group">
+          <label for="id_startdate">시작일</label>
+          <div class="input-wrapper">
+            <i class="ri-calendar-line"></i>
+            {{ form.startdate }}
+          </div>
+          {% if form.startdate.errors %}
+            <div class="field-error">
+              {% for error in form.startdate.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_enddate">종료일</label>
+          <div class="input-wrapper">
+            <i class="ri-calendar-check-line"></i>
+            {{ form.enddate }}
+          </div>
+          {% if form.enddate.errors %}
+            <div class="field-error">
+              {% for error in form.enddate.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_content">개발 단계 내용</label>
+        <div class="textarea-wrapper">
+          <i class="ri-file-text-line"></i>
+          {{ form.content }}
+        </div>
+        {% if form.content.errors %}
+          <div class="field-error">
+            {% for error in form.content.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="help-text">
+          <small>이 단계에서 달성하고자 하는 목표나 주요 작업 내용을 작성해주세요</small>
+        </div>
+      </div>
+
+      <div class="phase-examples">
+        <h5>개발 단계 예시</h5>
+        <div class="examples-grid">
+          <div class="example-item">
+            <i class="ri-lightbulb-line"></i>
+            <span>기획 및 설계</span>
+          </div>
+          <div class="example-item">
+            <i class="ri-code-line"></i>
+            <span>프론트엔드 개발</span>
+          </div>
+          <div class="example-item">
+            <i class="ri-server-line"></i>
+            <span>백엔드 API 구현</span>
+          </div>
+          <div class="example-item">
+            <i class="ri-bug-line"></i>
+            <span>테스트 및 버그 수정</span>
+          </div>
+          <div class="example-item">
+            <i class="ri-rocket-line"></i>
+            <span>배포 및 운영</span>
+          </div>
+          <div class="example-item">
+            <i class="ri-tools-line"></i>
+            <span>유지보수</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="create-btn">
+          <i class="ri-add-line"></i>
+          개발 단계 추가
+        </button>
+        <a href="{% url 'teams:team_main_page' team.id %}" class="cancel-btn">
+          <i class="ri-close-line"></i>
+          취소
+        </a>
+      </div>
+    </form>
   </div>
+
+  {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+          <i class="ri-information-line"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 </section>
 {% endblock %}
