@@ -54,9 +54,6 @@ class TeamUser(models.Model):
     team = models.ForeignKey('Team', on_delete=models.CASCADE)
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
 
-    todo = models.TextField(null=True, blank=True)  # todolist 모델을 새로 만들어서 연결할 듯
-    # schedule = models.ForeignKey('schedules.WeekSchedule', on_delete=models.CASCADE)  # 유저-팀간의 스케줄, 스케줄 쪽에서 foreignkey로 갖고 있음
-
     def __str__(self):  # admin에서 표시될 user 필드 정보 설정
         return self.user.nickname
 
