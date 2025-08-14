@@ -24,7 +24,7 @@ def team_members_page(request, pk):
     else:
         team = get_object_or_404(Team, pk=pk)
         members = TeamUser.objects.filter(team=team)
-        todos = Todo.objects.filter(team = team)
+        todos = Todo.objects.filter(owner__team=team)
         if request.method =='POST':
             form = CreateTodoForm(request.POST)
             if form.is_valid():
@@ -40,7 +40,6 @@ def member_add_Todo(request, pk, content):
     teamuser = TeamUser.objects.get(team=team, user=user)
     todo = Todo()
     todo.content = content
-    todo.team = team
     todo.owner = teamuser
     todo.save()
     
