@@ -13,7 +13,6 @@
     {% for mindmap in mindmaps %}
     <div class="mindmap-card">
       <h3 class="mindmap-title">{{ mindmap.title }}</h3>
-      <p class="mindmap-id">#{{ mindmap.id }}</p>
       <div class="mindmap-actions">
         <button class="view-btn" onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'">
           보기
