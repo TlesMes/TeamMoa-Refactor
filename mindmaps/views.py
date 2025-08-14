@@ -2,10 +2,10 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,redirect,get_object_or_404
 from django.core.paginator import Paginator
 
-from teams.models import Team_User
+from teams.models import TeamUser
 from .forms import CreateMindmapForm
 from teams.models import Team
-from .models import Comment, Mindmap, Node, Node_Node, Node_User
+from .models import Comment, Mindmap, Node, NodeConnection, NodeUser
 from accounts.models import User
 import logging
 def is_member(request, pk) -> bool:
@@ -39,7 +39,7 @@ def mindmap_detail_page(request, pk, mindmap_id):
     team = get_object_or_404(Team, pk=pk)
     mindmap = Mindmap.objects.get(pk=mindmap_id)
     nodes = Node.objects.filter(mindmap=mindmap)
-    lines = Node_Node.objects.filter(mindmap=mindmap)
+    lines = NodeConnection.objects.filter(mindmap=mindmap)
     return render(request, 'mindmaps/mindmap_detail_page.html',{'nodes':nodes,'team':team,'mindmap':mindmap, 'lines':lines})
     
 
@@ -80,13 +80,13 @@ def mindmap_create_node(request, pk, mindmap_id):
         node.content = request.POST["content"]
         node.mindmap = mindmap
         node.save()
-        members=Team_User.objects.filter(Team=team)
+        members=TeamUser.objects.filter(team=team)
         for member in members:
-            node.user.add(member.User)
+            node.user.add(member.user)
         parent=request.POST["parent"]
         if parent != "":
             parentnode = Node.objects.get(title=parent,mindmap=mindmap)
-            Node_Node.objects.create(from_node=node,to_node=parentnode,mindmap=mindmap)
+            NodeConnection.objects.create(from_node=node,to_node=parentnode,mindmap=mindmap)
 
     return redirect(f'/mindmaps/mindmap_detail_page/{pk}/{mindmap_id}')
 
@@ -117,7 +117,7 @@ def node_vote(request, pk, node_id):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
     node = Node.objects.get(pk=node_id)
-    nodeuser = Node_User.objects.get(Node=node, User=user)
+    nodeuser = NodeUser.objects.get(node=node, user=user)
     comments = Comment.objects.filter(node=node)
     if nodeuser.voted:
         node.vote = node.vote - 1

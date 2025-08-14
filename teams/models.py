@@ -10,10 +10,10 @@ class Team(models.Model):
     maxuser = models.PositiveIntegerField()
     currentuser = models.PositiveIntegerField()
     
-    members = models.ManyToManyField('accounts.User', related_name='joined_teams', through = "Team_User")
+    members = models.ManyToManyField('accounts.User', related_name='joined_teams', through="TeamUser")
     host = models.ForeignKey('accounts.User', on_delete=models.CASCADE) #호스트 유저 지정 
     
-    dev_phase = models.DateTimeField
+    # dev_phase는 별도 DevPhase 모델로 관리됨
 
     invitecode = models.CharField(max_length=16)
     teampasswd = models.TextField()
@@ -26,7 +26,7 @@ class Team(models.Model):
     def get_current_member_count(self):
         """현재 팀의 실제 팀원 수를 반환"""
         if self.pk:
-            return Team_User.objects.filter(Team=self).count()
+            return TeamUser.objects.filter(team=self).count()
         return 0
     
     def clean(self):
@@ -50,15 +50,15 @@ class Team(models.Model):
     def __str__(self):
         return self.title
 
-class Team_User(models.Model):
-    Team = models.ForeignKey('Team',on_delete = models.CASCADE)
-    User = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
+class TeamUser(models.Model):
+    team = models.ForeignKey('Team', on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
 
-    Todo = models.TextField(null=True, blank=True) # todolist 모델을 새로 만들어서 연결할 듯
-    # schedule = models.ForeignKey('schedules.WeekSchedule',on_delete = models.CASCADE) #유저-팀간의 스케줄, 스케줄 쪽에서 foreignkey로 갖고 있음
+    todo = models.TextField(null=True, blank=True)  # todolist 모델을 새로 만들어서 연결할 듯
+    # schedule = models.ForeignKey('schedules.WeekSchedule', on_delete=models.CASCADE)  # 유저-팀간의 스케줄, 스케줄 쪽에서 foreignkey로 갖고 있음
 
     def __str__(self):  # admin에서 표시될 user 필드 정보 설정
-        return self.User.nickname
+        return self.user.nickname
 
 class DevPhase(models.Model):
     team = models.ForeignKey('Team',on_delete = models.CASCADE)

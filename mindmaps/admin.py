@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Comment, Mindmap, Node, Node_Node, Node_User
+from .models import Comment, Mindmap, Node, NodeConnection, NodeUser
 # Register your models here.
 
 admin.site.register(Mindmap)
 admin.site.register(Node)
-admin.site.register(Node_User)
-admin.site.register(Node_Node)
+admin.site.register(NodeUser)
+admin.site.register(NodeConnection)
 admin.site.register(Comment)

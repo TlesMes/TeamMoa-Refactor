@@ -49,7 +49,7 @@ class PersonalDaySchedule(models.Model):
     # #해당 day스케줄이 어느 요일인지 (날짜로 바꿀수도?)
     # dayoftheweek = models.PositiveIntegerField(choices=dayoftheweek_choices)
     date = models.DateField()
-    owner = models.ForeignKey('teams.Team_User',on_delete = models.CASCADE) #어떤 유저의 시간표인지
+    owner = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE)  # 어떤 유저의 시간표인지
     #시간대별 가능 여부를 저장한 bool필드
     time_0 = models.BooleanField(default=False)
     time_1 = models.BooleanField(default=False)

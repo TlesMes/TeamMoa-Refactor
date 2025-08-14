@@ -11,7 +11,7 @@ import os
 from django.http import HttpResponse, Http404
 import mimetypes
 import logging
-from teams.models import Team, Team_User
+from teams.models import Team, TeamUser
 
 #로그인 확인 임포트
 #404 임포트
