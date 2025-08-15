@@ -10,6 +10,8 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('activate/<str:uid64>/<str:token>',views.activate, name='activate'),
+    path('resend-activation/', views.resend_activation_email, name='resend_activation'),
+    path('test-signup-success/', views.test_signup_success, name='test_signup_success'),  # 테스트용
     path('update/', views.update, name='update'),
     path('password/', views.password, name='password'),
 ]

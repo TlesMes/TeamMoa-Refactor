@@ -20,18 +20,23 @@ def register_user(form, current_site):
         user = form.save()
 
         # 2. 이메일을 전송
-        message = render_to_string('accounts/user_activate_email.html', {
-            'user': user,
-            'domain': current_site.domain,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode('utf-8'),
-            'token': account_activation_token.make_token(user),
-        })
-        mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
-        email_message = EmailMessage(mail_subject, message, to=[user.email])
-        email_message.send()
+        send_activation_email(user, current_site)
 
     # 3. with 블록이 예외 없이 성공적으로 끝나면, DB에 저장된 user가 최종 확정(commit)
     return user
+
+
+def send_activation_email(user, current_site):
+    """인증 메일 전송 (재사용 가능한 함수)"""
+    message = render_to_string('accounts/user_activate_email.html', {
+        'user': user,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    })
+    mail_subject = "[TeamMoa] 회원가입 인증 메일입니다."
+    email_message = EmailMessage(mail_subject, message, to=[user.email])
+    email_message.send()
 
 
 def store_return_url(request):
