@@ -1,79 +1,59 @@
 from django.db import models
+from datetime import timedelta
 
 # Create your models here.
 
-
-#팀에 시간대별로 몇명이 가용시간인지
-class TeamDaySchedule(models.Model):
-
-    
-    date = models.DateField()
-    team = models.ForeignKey('teams.Team',on_delete = models.CASCADE) #어떤 팀의 시간표인지
-
-    time_0 = models.PositiveIntegerField(default=0)
-    time_1 = models.PositiveIntegerField(default=0)
-    time_2 = models.PositiveIntegerField(default=0)
-    time_3 = models.PositiveIntegerField(default=0)
-    time_4 = models.PositiveIntegerField(default=0)
-    time_5 = models.PositiveIntegerField(default=0)
-    time_6 = models.PositiveIntegerField(default=0)
-    time_7 = models.PositiveIntegerField(default=0)
-    time_8 = models.PositiveIntegerField(default=0)
-    time_9 = models.PositiveIntegerField(default=0)
-    time_10 = models.PositiveIntegerField(default=0)
-    time_11 = models.PositiveIntegerField(default=0)
-    time_12 = models.PositiveIntegerField(default=0)
-    time_13 = models.PositiveIntegerField(default=0)
-    time_14 = models.PositiveIntegerField(default=0)
-    time_15 = models.PositiveIntegerField(default=0)
-    time_16 = models.PositiveIntegerField(default=0)
-    time_17 = models.PositiveIntegerField(default=0)
-    time_18 = models.PositiveIntegerField(default=0)
-    time_19 = models.PositiveIntegerField(default=0)
-    time_20 = models.PositiveIntegerField(default=0)
-    time_21 = models.PositiveIntegerField(default=0)
-    time_22 = models.PositiveIntegerField(default=0)
-    time_23 = models.PositiveIntegerField(default=0)
-
-#개인별로 가능한 시간대가 언제인지
 class PersonalDaySchedule(models.Model):
-    # dayoftheweek_choices=(
-    #     (1,'일'),
-    #     (2,'월'),
-    #     (3,'화'),
-    #     (4,'수'),
-    #     (5,'목'),
-    #     (6,'금'),
-    #     (7,'토'),
-    # )
-    # #해당 day스케줄이 어느 요일인지 (날짜로 바꿀수도?)
-    # dayoftheweek = models.PositiveIntegerField(choices=dayoftheweek_choices)
+    """개인별 날짜별 가능한 시간대 저장"""
     date = models.DateField()
-    owner = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE)  # 어떤 유저의 시간표인지
-    #시간대별 가능 여부를 저장한 bool필드
-    time_0 = models.BooleanField(default=False)
-    time_1 = models.BooleanField(default=False)
-    time_2 = models.BooleanField(default=False)
-    time_3 = models.BooleanField(default=False)
-    time_4 = models.BooleanField(default=False)
-    time_5 = models.BooleanField(default=False)
-    time_6 = models.BooleanField(default=False)
-    time_7 = models.BooleanField(default=False)
-    time_8 = models.BooleanField(default=False)
-    time_9 = models.BooleanField(default=False)
-    time_10 = models.BooleanField(default=False)
-    time_11 = models.BooleanField(default=False)
-    time_12 = models.BooleanField(default=False)
-    time_13 = models.BooleanField(default=False)
-    time_14 = models.BooleanField(default=False)
-    time_15 = models.BooleanField(default=False)
-    time_16 = models.BooleanField(default=False)
-    time_17 = models.BooleanField(default=False)
-    time_18 = models.BooleanField(default=False)
-    time_19 = models.BooleanField(default=False)
-    time_20 = models.BooleanField(default=False)
-    time_21 = models.BooleanField(default=False)
-    time_22 = models.BooleanField(default=False)
-    time_23 = models.BooleanField(default=False)
+    owner = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE)
+    available_hours = models.JSONField(default=list)  # [0, 9, 14, 18] 형태로 가능한 시간 저장
+    
+    class Meta:
+        unique_together = ['date', 'owner']  # 같은 날짜에 중복 스케줄 방지
+    
+    def __str__(self):
+        return f"{self.owner.user.nickname} - {self.date}"
+    
+    @classmethod
+    def get_team_availability(cls, team, start_date, end_date):
+        """팀의 주간 가용성 실시간 계산 (SQLite 호환)"""
+        # 전체 기간의 스케줄을 한 번에 가져오기 (성능 최적화)
+        schedules = cls.objects.filter(
+            owner__team=team, 
+            date__range=[start_date, end_date]
+        ).select_related('owner')
+        
+        # 날짜별로 그룹화
+        schedules_by_date = {}
+        for schedule in schedules:
+            if schedule.date not in schedules_by_date:
+                schedules_by_date[schedule.date] = []
+            schedules_by_date[schedule.date].append(schedule)
+        
+        # 결과 생성
+        result = []
+        current_date = start_date
+        while current_date <= end_date:
+            day_schedules = schedules_by_date.get(current_date, [])
+            day_availability = {}
+            
+            for hour in range(24):
+                # SQLite 호환: Python에서 직접 처리
+                count = sum(1 for schedule in day_schedules 
+                           if hour in schedule.available_hours)
+                day_availability[hour] = count
+                
+            result.append({
+                'date': current_date,
+                'availability': day_availability
+            })
+            current_date += timedelta(days=1)
+            
+        return result
+    
+    def is_available_at(self, hour):
+        """특정 시간에 가능한지 확인"""
+        return hour in self.available_hours
 
 

@@ -1,4 +1,7 @@
-{% extends 'base_app.html' %} {% load static %} {% block contents %}
+{% extends 'base_app.html' %} 
+{% load static %} 
+{% load schedule_extras %}
+{% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="schedulesection">
   <div class="schedule-header">
@@ -35,30 +38,13 @@
         <div class="date-line">{{schedule.date|date:"n/j"}}</div>
         <div class="day-line">({{schedule.date|date:"D"}})</div>
       </div>
-      <div class="schedule-slot availability-{{schedule.time_0}}">{{schedule.time_0}}</div>
-      <div class="schedule-slot availability-{{schedule.time_1}}">{{schedule.time_1}}</div>
-      <div class="schedule-slot availability-{{schedule.time_2}}">{{schedule.time_2}}</div>
-      <div class="schedule-slot availability-{{schedule.time_3}}">{{schedule.time_3}}</div>
-      <div class="schedule-slot availability-{{schedule.time_4}}">{{schedule.time_4}}</div>
-      <div class="schedule-slot availability-{{schedule.time_5}}">{{schedule.time_5}}</div>
-      <div class="schedule-slot availability-{{schedule.time_6}}">{{schedule.time_6}}</div>
-      <div class="schedule-slot availability-{{schedule.time_7}}">{{schedule.time_7}}</div>
-      <div class="schedule-slot availability-{{schedule.time_8}}">{{schedule.time_8}}</div>
-      <div class="schedule-slot availability-{{schedule.time_9}}">{{schedule.time_9}}</div>
-      <div class="schedule-slot availability-{{schedule.time_10}}">{{schedule.time_10}}</div>
-      <div class="schedule-slot availability-{{schedule.time_11}}">{{schedule.time_11}}</div>
-      <div class="schedule-slot availability-{{schedule.time_12}}">{{schedule.time_12}}</div>
-      <div class="schedule-slot availability-{{schedule.time_13}}">{{schedule.time_13}}</div>
-      <div class="schedule-slot availability-{{schedule.time_14}}">{{schedule.time_14}}</div>
-      <div class="schedule-slot availability-{{schedule.time_15}}">{{schedule.time_15}}</div>
-      <div class="schedule-slot availability-{{schedule.time_16}}">{{schedule.time_16}}</div>
-      <div class="schedule-slot availability-{{schedule.time_17}}">{{schedule.time_17}}</div>
-      <div class="schedule-slot availability-{{schedule.time_18}}">{{schedule.time_18}}</div>
-      <div class="schedule-slot availability-{{schedule.time_19}}">{{schedule.time_19}}</div>
-      <div class="schedule-slot availability-{{schedule.time_20}}">{{schedule.time_20}}</div>
-      <div class="schedule-slot availability-{{schedule.time_21}}">{{schedule.time_21}}</div>
-      <div class="schedule-slot availability-{{schedule.time_22}}">{{schedule.time_22}}</div>
-      <div class="schedule-slot availability-{{schedule.time_23}}">{{schedule.time_23}}</div>
+      {% for hour in "012345678901234567890123"|make_list %}
+        {% with hour_int=forloop.counter0 %}
+          <div class="schedule-slot availability-{{schedule.availability|lookup:hour_int}}">
+            {{schedule.availability|lookup:hour_int}}
+          </div>
+        {% endwith %}
+      {% endfor %}
     </div>
     {% endfor %}
   </div>
