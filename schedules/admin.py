@@ -1,13 +1,11 @@
 from django.contrib import admin
 
-from schedules.models import PersonalDaySchedule, TeamDaySchedule
+from schedules.models import PersonalDaySchedule
 
 # Register your models here.
-class PDscheduleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'date', 'owner']
+class PersonalDayScheduleAdmin(admin.ModelAdmin):
+    list_display = ['id', 'date', 'owner', 'available_hours']
+    list_filter = ['date', 'owner__team']
+    search_fields = ['owner__user__nickname']
 
-class TDscheduleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'date', 'team']
-
-admin.site.register(PersonalDaySchedule, PDscheduleAdmin)
-admin.site.register(TeamDaySchedule, TDscheduleAdmin)
+admin.site.register(PersonalDaySchedule, PersonalDayScheduleAdmin)
