@@ -117,7 +117,18 @@ def node_vote(request, pk, node_id):
     user = request.user
     team = get_object_or_404(Team, pk=pk)
     node = Node.objects.get(pk=node_id)
-    nodeuser = NodeUser.objects.get(node=node, user=user)
+    
+    # 중복 NodeUser 처리를 위한 안전한 조회
+    try:
+        nodeuser = NodeUser.objects.get(node=node, user=user)
+    except NodeUser.MultipleObjectsReturned:
+        # 중복이 있으면 첫 번째 것을 사용하고 나머지는 삭제
+        nodeuser = NodeUser.objects.filter(node=node, user=user).first()
+        NodeUser.objects.filter(node=node, user=user).exclude(pk=nodeuser.pk).delete()
+    except NodeUser.DoesNotExist:
+        # NodeUser가 없으면 생성
+        nodeuser = NodeUser.objects.create(node=node, user=user, voted=False)
+    
     comments = Comment.objects.filter(node=node)
     if nodeuser.voted:
         node.vote = node.vote - 1
