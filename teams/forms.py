@@ -90,3 +90,14 @@ class AddPhaseForm(forms.ModelForm):
                 'class' : 'form-control'
             })
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        startdate = cleaned_data.get('startdate')
+        enddate = cleaned_data.get('enddate')
+        
+        if startdate and enddate:
+            if startdate >= enddate:
+                raise ValidationError('시작일은 종료일보다 이전이어야 합니다.')
+        
+        return cleaned_data
