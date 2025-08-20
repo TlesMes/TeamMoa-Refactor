@@ -14,7 +14,7 @@ import codecs
 def is_member(request, pk) -> bool:
     user = request.user
     if not user.is_authenticated:
-        return redirect('/accounts/login')
+        return redirect('/accounts/login/')
 
     if user.is_authenticated:
         team = get_object_or_404(Team, pk=pk)
@@ -68,7 +68,7 @@ def team_create(request):
 def team_search(request):
     user = request.user
     if not user.is_authenticated:
-        return redirect('/accounts/login')
+        return redirect('/accounts/login/')
     
     if request.method =='POST':
         form = SearchTeamForm(request.POST)
@@ -76,7 +76,7 @@ def team_search(request):
             code=form.cleaned_data['invitecode']
             team = get_object_or_404(Team, invitecode=code)
             
-            return redirect(f"/teams/team_join/{team.id}")   ##team id 넣어서 리다이렉트
+            return redirect(f"/teams/team_join/{team.id}/")   ##team id 넣어서 리다이렉트
     else:
         form = SearchTeamForm()
     return render(request, 'teams/team_search.html', {'form':form})
@@ -87,7 +87,7 @@ def team_join(request, pk):
     team = get_object_or_404(Team, pk=pk)
 
     if not user.is_authenticated:
-        return redirect('/accounts/login')
+        return redirect('/accounts/login/')
 
     if request.method =='POST':
         form = JoinTeamForm(request.POST)
