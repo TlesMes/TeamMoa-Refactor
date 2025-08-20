@@ -62,10 +62,10 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # email
 # 메일을 보내는 호스트 서버
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = env('EMAIL_HOST')
 
 # ENAIL_HOST에 정의된 SMTP 서버가 사용하는 포트 (587: TLS/STARTTLS용 포트)
-EMAIL_PORT = '587'
+EMAIL_PORT = env('EMAIL_PORT')
 
 #  발신할 이메일 주소 '~@gmail.com'
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
@@ -110,8 +110,16 @@ MEDIA_ROOT= os.path.join(BASE_DIR,'media/')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': env('DB_ENGINE', default='django.db.backends.mysql'),
+        'NAME': env('DB_NAME', default='teammoa_db'),
+        'USER': env('DB_USER', default='teammoa_user'),
+        'PASSWORD': env('DB_PASSWORD', default=''),
+        'HOST': env('DB_HOST', default='localhost'),
+        'PORT': env('DB_PORT', default='3306'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
