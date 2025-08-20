@@ -28,6 +28,15 @@ class CreateTeamForm(forms.ModelForm):
             'teampasswd': '비밀번호',
             'introduction': '팀 소개',
         }
+    
+    def clean_maxuser(self):
+        maxuser = self.cleaned_data.get('maxuser')
+        if maxuser is not None:
+            if maxuser < 1:
+                raise ValidationError('팀 인원수는 1명 이상이어야 합니다.')
+            if maxuser > 100:
+                raise ValidationError('팀 인원수는 100명을 초과할 수 없습니다.')
+        return maxuser
 
 
 class SearchTeamForm(forms.ModelForm):
