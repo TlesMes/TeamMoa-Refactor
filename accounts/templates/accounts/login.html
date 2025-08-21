@@ -33,7 +33,7 @@
           <label for="username">사용자명</label>
           <div class="input-wrapper">
             <i class="ri-user-line"></i>
-            <input type="text" name="username" id="username" autocomplete="username" required>
+            <input type="text" name="username" id="username" value="{{ username|default:'' }}" autocomplete="username" required>
           </div>
         </div>
 
