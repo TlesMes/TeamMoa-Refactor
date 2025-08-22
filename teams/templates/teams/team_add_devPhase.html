@@ -119,16 +119,5 @@
       </div>
     </form>
   </div>
-
-  {% if messages %}
-    <div class="messages-container">
-      {% for message in messages %}
-        <div class="message message-{{ message.tags }}">
-          <i class="ri-information-line"></i>
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
 </section>
 {% endblock %}
