@@ -68,6 +68,16 @@
       </nav>
     </div>
   </header>
+  
+  <!-- Django Messages를 토스트로 처리 -->
+  {% if messages %}
+    <div id="django-messages" style="display: none;">
+      {% for message in messages %}
+        <div class="django-message" data-level="{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
   {% block contents %} {% endblock %}
   <script src="{% static 'js/common/scripts.js' %}"></script>
 </body>
