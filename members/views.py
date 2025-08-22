@@ -9,13 +9,11 @@ def is_member(request, pk) -> bool:
     user = request.user
     if not user.is_authenticated:
         return redirect('/accounts/login')
-
-    if user.is_authenticated:
-        team = get_object_or_404(Team, pk=pk)
-        if user in team.members.all():
-            return True
-        else:
-            return False
+    team = get_object_or_404(Team, pk=pk)
+    if user in team.members.all():
+        return True
+    else:
+        return False
 
 
 def team_members_page(request, pk):

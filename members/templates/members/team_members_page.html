@@ -14,10 +14,10 @@
     <div class="member-card">
       <!-- Member Info -->
       <div class="member-info">
-        <h2 class="member-name">{{ member.User.nickname }}</h2>
-        <p class="member-username">@{{ member.User.username }}</p>
-        {% if member.User.profile %}
-        <p class="member-profile">{{ member.User.profile }}</p>
+        <h2 class="member-name">{{ member.user.nickname }}</h2>
+        <p class="member-username">@{{ member.user.username }}</p>
+        {% if member.user.profile %}
+        <p class="member-profile">{{ member.user.profile }}</p>
         {% endif %}
       </div>
 
@@ -29,7 +29,7 @@
             <div class="todo-item {% if todo.is_completed %}completed{% endif %}">
               <div class="todo-content">
                 <span class="todo-text">{{ todo.content }}</span>
-                {% if todo.owner.User == request.user %}
+                {% if todo.owner.user == request.user %}
                 <div class="todo-actions">
                   <input
                     type="checkbox"
@@ -64,7 +64,7 @@
         {% endfor %}
         
         <!-- Empty state for todos -->
-        {% if not todos or not member.todo_set.exists %}
+        {% if not member.todo_set.exists %}
         <div class="empty-todos">
           <p>할 일이 없습니다</p>
         </div>

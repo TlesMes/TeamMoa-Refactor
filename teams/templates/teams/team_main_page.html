@@ -81,13 +81,13 @@
           <span class="member-login">{{ team.host.last_login|date:'Y-m-d, H:i:s' }}</span>
         </div>
         {% for member in members %}
-        {% if member.User != team.host %}
+        {% if member.user != team.host %}
         <div class="member-item">
           <div>
-            <span class="member-name">{{member.User.nickname}}</span>
+            <span class="member-name">{{member.user.nickname}}</span>
             <span class="member-role">팀원</span>
           </div>
-          <span class="member-login">{{member.User.last_login|date:'Y-m-d, H:i:s'}}</span>
+          <span class="member-login">{{member.user.last_login|date:'Y-m-d, H:i:s'}}</span>
         </div>
         {% endif %}
         {% endfor %}
