@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, UpdateView, DeleteView
+from django.views import View
 from django.views.generic.detail import DetailView
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -252,13 +253,13 @@ class TeamDeleteDevPhaseView(TeamHostRequiredMixin, DeleteView):
 team_delete_devPhase = TeamDeleteDevPhaseView.as_view()
 
 
-class TeamDisbandView(TeamHostRequiredMixin, DeleteView):
-    model = Team
-    success_url = reverse_lazy('teams:main_page')
-    
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, '팀이 성공적으로 해체되었습니다.')
-        return super().delete(request, *args, **kwargs)
+class TeamDisbandView(TeamHostRequiredMixin, View):
+    def post(self, request, pk):
+        team = get_object_or_404(Team, pk=pk)
+        team_title = team.title
+        team.delete()
+        messages.success(request, f'"{team_title}" 팀이 성공적으로 해체되었습니다.')
+        return redirect('teams:main_page')
 
 
 team_disband = TeamDisbandView.as_view()

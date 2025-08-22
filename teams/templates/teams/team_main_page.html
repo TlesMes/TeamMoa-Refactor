@@ -66,9 +66,7 @@
         <a href="{% url 'teams:team_info_change' team.id %}">
           <button class="plusbtn2">팀 정보 수정</button>
         </a>
-        <a href="{% url 'teams:team_disband' team.id %}">
-          <button class="delete-btn">팀 해산</button>
-        </a>
+        <button class="delete-btn" onclick="openDisbandModal()">팀 해산</button>
         {% endif %}
       </div>
     </div>
@@ -96,6 +94,141 @@
       </div>
     </div>
   </div>
+
+  <!-- 팀 해산 확인 모달 -->
+  <div id="disbandModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>팀 해산 확인</h3>
+        <button class="modal-close" onclick="closeDisbandModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="warning-message">
+          <i class="ri-alert-line"></i>
+          <p><strong>{{ team.title }}</strong> 팀을 정말로 해산하시겠습니까?</p>
+          <p class="warning-text">해산된 팀은 복구할 수 없습니다.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <form method="POST" action="{% url 'teams:team_disband' team.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">해산</button>
+          <button type="button" class="btn btn-secondary" onclick="closeDisbandModal()">취소</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal {
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px 0 24px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+    }
+
+    .warning-message {
+      text-align: center;
+    }
+
+    .warning-message i {
+      font-size: 48px;
+      color: #f59e0b;
+      margin-bottom: 16px;
+    }
+
+    .warning-message p {
+      margin: 8px 0;
+      color: #333;
+    }
+
+    .warning-text {
+      color: #666 !important;
+      font-size: 14px;
+    }
+
+    .modal-footer {
+      padding: 0 24px 24px 24px;
+    }
+
+    .modal-footer form {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+
+    .btn-secondary {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #4b5563;
+    }
+  </style>
+
   <script>
     const copyClipboard = () => {
       const text = document.getElementById("copycode").textContent;
@@ -110,6 +243,22 @@
 
     const button = document.getElementById("copybtn");
     button.addEventListener("click", copyClipboard);
+
+    // 모달 제어 함수들
+    function openDisbandModal() {
+      document.getElementById("disbandModal").style.display = "flex";
+    }
+
+    function closeDisbandModal() {
+      document.getElementById("disbandModal").style.display = "none";
+    }
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById("disbandModal").addEventListener("click", function(e) {
+      if (e.target === this) {
+        closeDisbandModal();
+      }
+    });
   </script>
   {% endif %}
 </section>
