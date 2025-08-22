@@ -89,7 +89,13 @@ class LoginView(TemplateView):
         # 이미 로그인된 사용자는 메인 페이지로 리다이렉트
         if request.user.is_authenticated:
             return redirect(MAIN_URL_NAME)
-        return super().dispatch(request, *args, **kwargs)
+        
+        # 캐시 방지 헤더 설정
+        response = super().dispatch(request, *args, **kwargs)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     
     def post(self, request, *args, **kwargs):
         username = request.POST.get("username")
