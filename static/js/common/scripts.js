@@ -164,6 +164,94 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
+    // Django Messages를 토스트로 표시
+    function showDjangoMessages() {
+        const messagesContainer = document.getElementById('django-messages');
+        if (messagesContainer) {
+            const messages = messagesContainer.querySelectorAll('.django-message');
+            messages.forEach((messageElement, index) => {
+                const message = messageElement.textContent;
+                const level = messageElement.getAttribute('data-level');
+                
+                // 각 메시지를 순차적으로 표시 (0.5초 간격)
+                setTimeout(() => {
+                    showDjangoToast(message, level);
+                }, index * 500);
+            });
+        }
+    }
+    
+    // Django Messages 전용 토스트 함수
+    function showDjangoToast(message, level = 'info') {
+        // 기존 토스트 제거
+        const existingToast = document.querySelector('.django-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // 레벨별 색상 및 아이콘 설정
+        const levelConfig = {
+            'success': { bg: '#10b981', icon: 'ri-check-line' },
+            'error': { bg: '#ef4444', icon: 'ri-error-warning-line' },
+            'warning': { bg: '#f59e0b', icon: 'ri-alert-line' },
+            'info': { bg: '#3b82f6', icon: 'ri-information-line' }
+        };
+        
+        const config = levelConfig[level] || levelConfig['info'];
+        
+        // 토스트 엘리먼트 생성
+        const toast = document.createElement('div');
+        toast.className = 'django-toast';
+        toast.innerHTML = `
+            <i class="${config.icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        // 토스트 스타일
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: ${config.bg};
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // 애니메이션으로 표시
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // 4초 후 제거
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+    
+    // 페이지 로드 시 Django Messages 표시
+    showDjangoMessages();
+    
     // 버튼 클릭 이벤트들
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
