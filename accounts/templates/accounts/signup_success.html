@@ -1,4 +1,4 @@
-{% extends 'base_minimal.html' %}
+{% extends 'base_minimal_alt.html' %}
 {% load static %}
 
 {% block title %}회원가입 성공 - TeamMoa{% endblock %}
@@ -104,12 +104,18 @@
 
 <style>
 .success-page {
-  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  margin: 0;
+  z-index: 1000;
 }
 
 .success-container {
