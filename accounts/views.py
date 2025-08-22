@@ -1,5 +1,8 @@
 from django.shortcuts import redirect, render
 from django.contrib import auth
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import FormView, TemplateView, RedirectView
+from django.urls import reverse_lazy, reverse
 from .models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_decode
@@ -15,117 +18,196 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from django.http import JsonResponse
-# Create your views here.
 from . import services
 
-TEAM_LIST_URL_NAME = 'teams:main_page'
+MAIN_URL_NAME = 'teams:main_page'
 LOGIN_URL_NAME = 'accounts:login'
 HOME_URL_NAME = 'accounts:home'
 
-def signup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            try:
-                current_site = get_current_site(request)
-                services.register_user(
-                    form,
-                    current_site=current_site,
-                )
-                return render(request, 'accounts/signup_success.html')
 
-            except (SMTPRecipientsRefused) as e:
-                error_message = "유효하지 않은 이메일 주소입니다."
-                form.add_error(None, error_message)
-    else:
-        form = SignupForm()
-
-    return render(request, "accounts/signup.html", {"form": form})
+class SignupSuccessView(TemplateView):
+    template_name = 'accounts/signup_success.html'
 
 
+signup_success = SignupSuccessView.as_view()
 
-def activate(request, uid64, token):
-    uid = force_str(urlsafe_base64_decode(uid64))
-    user = User.objects.get(pk=uid)
-
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        auth.login(request, user)
-        return redirect(TEAM_LIST_URL_NAME)
-    else:
-        return HttpResponse('비정상적인 접근입니다.')
-
-
-def login(request):
-    # 이미 로그인 된 사용자가 로그인 페이지에 접근 시 패스
-    if request.user.is_authenticated:
-        return redirect(TEAM_LIST_URL_NAME)
+class SignupView(FormView):
+    """
+    회원가입 뷰
+    - 유저객체를 생성하지만, FormView
+    -> 단순 객체 생성 이상의 로직(인증 토큰, 이메일 전송)을 포함
+    -> Form을 사용해 데이터만 받고, sevices 사용
+    """
+    template_name = 'accounts/signup.html'
+    form_class = SignupForm
+    success_url = reverse_lazy('accounts:signup_success')
     
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        # 해당 user가 있으면 username, 없으면 None
-        user = auth.authenticate(request, username=username, password=password)
+    def form_valid(self, form):
+        try:
+            current_site = get_current_site(self.request)
+            services.register_user(
+                form,
+                current_site=current_site,
+            )
+            return super().form_valid(form)
+        except SMTPRecipientsRefused:
+            form.add_error(None, "유효하지 않은 이메일 주소입니다.")
+            return self.form_invalid(form)
 
+
+signup = SignupView.as_view()
+
+
+
+class ActivateView(TemplateView):
+    def get(self, request, uid64, token, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(uid64))
+            user = User.objects.get(pk=uid)
+            
+            if user is not None and account_activation_token.check_token(user, token):
+                user.is_active = True
+                user.save()
+                auth.login(request, user)
+                messages.success(request, '계정이 성공적으로 활성화되었습니다!')
+                return redirect(MAIN_URL_NAME)
+            else:
+                messages.error(request, '잘못된 인증 링크입니다.')
+                return redirect(LOGIN_URL_NAME)
+        except (User.DoesNotExist, ValueError, TypeError):
+            messages.error(request, '유효하지 않은 인증 정보입니다.')
+            return redirect(LOGIN_URL_NAME)
+
+
+activate = ActivateView.as_view()
+
+
+class LoginView(TemplateView):
+    template_name = 'accounts/login.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        # 이미 로그인된 사용자는 메인 페이지로 리다이렉트
+        if request.user.is_authenticated:
+            return redirect(MAIN_URL_NAME)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        
+        if not username or not password:
+            return self.render_to_response({
+                'error': '아이디와 비밀번호를 모두 입력해주세요.'
+            })
+        
+        user = auth.authenticate(request, username=username, password=password)
+        
         if user is not None:
             auth.login(request, user)
             request.session.set_expiry(0)
-            return redirect(TEAM_LIST_URL_NAME)
+            # 로그인 성공 시 환영 메시지
+            messages.success(request, f'{user.nickname}님, 환영합니다!')
+            return redirect(MAIN_URL_NAME)
         else:
-            return render(request, 'accounts/login.html', {'error': '아이디 또는 비밀번호가 올바르지 않습니다.'})
-    else:
-        return render(request, 'accounts/login.html')
+            print("로그인 실패")
+            return self.render_to_response({
+                'error': '아이디 또는 비밀번호가 올바르지 않습니다.',
+                'username': username  # 실패 시 username 유지
+            })
 
 
-def logout(request):
-    auth.logout(request)
-    return redirect(HOME_URL_NAME) #로그아웃 후 이동할 페이지, 메인나오면 바꿔줄것
+login = LoginView.as_view()
 
 
-def home(request):
-    if request.user.is_authenticated:
-        return redirect(TEAM_LIST_URL_NAME)
-    return redirect(LOGIN_URL_NAME)
+class LogoutView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse(HOME_URL_NAME)
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            username = request.user.nickname or request.user.username
+            auth.logout(request)
+            messages.info(request, f'{username}님, 안전하게 로그아웃되었습니다.')
+        return super().get(request, *args, **kwargs)
 
 
-#유저 정보 변경
-@login_required
-def update(request):
-    if request.method == 'GET':
+logout = LogoutView.as_view()
+
+
+class HomeView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return reverse(MAIN_URL_NAME)
+        return reverse(LOGIN_URL_NAME)
+
+
+home = HomeView.as_view()
+
+
+class UserUpdateView(LoginRequiredMixin, FormView):
+    template_name = 'accounts/update.html'
+    form_class = CustomUserChangeForm
+    login_url = '/accounts/login/'
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.request.user
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_change_form'] = context['form']
+        return context
+    
+    def get(self, request, *args, **kwargs):
         services.store_return_url(request)
-        user_change_form = CustomUserChangeForm(instance=request.user)
+        return super().get(request, *args, **kwargs)
     
-    elif request.method == 'POST':
-        user_change_form = CustomUserChangeForm(request.POST, instance=request.user)
-        if user_change_form.is_valid():
-            user_change_form.save()
-            return_url = services.get_return_url(request, TEAM_LIST_URL_NAME)
-            return redirect(return_url)
-    
-    return render(request, 'accounts/update.html', {'user_change_form': user_change_form})
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, '회원정보가 성공적으로 수정되었습니다.')
+        return_url = services.get_return_url(self.request, MAIN_URL_NAME)
+        return redirect(return_url)
 
 
-#패스워드 변경
-@login_required
-def password(request):
-    if request.method == 'GET':
+update = UserUpdateView.as_view()
+
+
+class PasswordChangeView(LoginRequiredMixin, FormView):
+    template_name = 'accounts/change_password.html'
+    form_class = PasswordChangeForm
+    login_url = '/accounts/login/'
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['password_change_form'] = context['form']
+        return context
+    
+    def get(self, request, *args, **kwargs):
         services.store_return_url(request)
-        password_change_form = PasswordChangeForm(request.user)
+        return super().get(request, *args, **kwargs)
     
-    elif request.method == 'POST':
-        password_change_form = PasswordChangeForm(request.user, request.POST)
-        if password_change_form.is_valid():
-            password_change_form.save()
-            return_url = services.get_return_url(request, TEAM_LIST_URL_NAME)
-            return redirect(return_url)
-    
-    return render(request, 'accounts/change_password.html', {'password_change_form': password_change_form})
+    def form_valid(self, form):
+        form.save()
+        # 비밀번호 변경 후 재로그인 필요
+        auth.update_session_auth_hash(self.request, form.user)
+        messages.success(self.request, '비밀번호가 성공적으로 변경되었습니다.')
+        return_url = services.get_return_url(self.request, MAIN_URL_NAME)
+        return redirect(return_url)
 
 
-def resend_activation_email(request):
-    """인증 메일 재전송 기능"""
-    if request.method == 'POST':
+password = PasswordChangeView.as_view()
+
+
+class ResendActivationEmailView(TemplateView):
+    template_name = 'accounts/resend_activation.html'
+    
+    def post(self, request, *args, **kwargs):
         email_or_username = request.POST.get('email_or_username', '').strip()
         
         # AJAX 요청인지 확인
@@ -133,10 +215,7 @@ def resend_activation_email(request):
         
         if not email_or_username:
             message = '이메일 또는 사용자명을 입력해주세요.'
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'message': message})
-            messages.error(request, message)
-            return render(request, 'accounts/resend_activation.html')
+            return self._handle_response(is_ajax, 'error', message)
         
         try:
             # 이메일 또는 사용자명으로 사용자 찾기
@@ -145,26 +224,18 @@ def resend_activation_email(request):
             else:
                 user = User.objects.get(username=email_or_username, is_active=False)
             
-            # 마지막 전송 시간 체크 (스팸 방지 - 5분 제한)
-            last_sent_key = f'activation_email_sent_{user.id}'
-            last_sent = request.session.get(last_sent_key)
-            
-            if last_sent:
-                last_sent_time = timezone.datetime.fromisoformat(last_sent)
-                if timezone.now() - last_sent_time < timedelta(minutes=5):
-                    remaining_time = 5 - (timezone.now() - last_sent_time).seconds // 60
-                    message = f'인증 메일은 5분마다 한 번씩만 전송할 수 있습니다. {remaining_time}분 후에 다시 시도해주세요.'
-                    if is_ajax:
-                        return JsonResponse({'status': 'warning', 'message': message})
-                    messages.warning(request, message)
-                    return render(request, 'accounts/resend_activation.html')
+            # 스팸 방지 체크
+            if self._is_rate_limited(request, user.id):
+                remaining_time = self._get_remaining_time(request, user.id)
+                message = f'인증 메일은 5분마다 한 번씩만 전송할 수 있습니다. {remaining_time}분 후에 다시 시도해주세요.'
+                return self._handle_response(is_ajax, 'warning', message)
             
             # 메일 재전송
             current_site = get_current_site(request)
             services.send_activation_email(user, current_site)
             
             # 전송 시간 기록
-            request.session[last_sent_key] = timezone.now().isoformat()
+            self._record_send_time(request, user.id)
             
             message = f'{user.email}로 인증 메일을 재전송했습니다.'
             if is_ajax:
@@ -174,35 +245,70 @@ def resend_activation_email(request):
             
         except User.DoesNotExist:
             message = '해당 정보로 가입된 미인증 계정을 찾을 수 없습니다.'
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'message': message})
-            messages.error(request, message)
+            return self._handle_response(is_ajax, 'error', message)
         except SMTPRecipientsRefused:
             message = '유효하지 않은 이메일 주소입니다.'
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'message': message})
-            messages.error(request, message)
-        except Exception as e:
+            return self._handle_response(is_ajax, 'error', message)
+        except Exception:
             message = '메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'message': message})
-            messages.error(request, message)
+            return self._handle_response(is_ajax, 'error', message)
     
-    return render(request, 'accounts/resend_activation.html')
+    def _handle_response(self, is_ajax, status, message):
+        """응답 처리 헬퍼 메서드"""
+        if is_ajax:
+            return JsonResponse({'status': status, 'message': message})
+        
+        if status == 'error':
+            messages.error(self.request, message)
+        elif status == 'warning':
+            messages.warning(self.request, message)
+        
+        return self.render_to_response({})
+    
+    def _is_rate_limited(self, request, user_id):
+        """스팸 방지 체크"""
+        last_sent_key = f'activation_email_sent_{user_id}'
+        last_sent = request.session.get(last_sent_key)
+        
+        if not last_sent:
+            return False
+        
+        last_sent_time = timezone.datetime.fromisoformat(last_sent)
+        return timezone.now() - last_sent_time < timedelta(minutes=5)
+    
+    def _get_remaining_time(self, request, user_id):
+        """남은 대기 시간 계산"""
+        last_sent_key = f'activation_email_sent_{user_id}'
+        last_sent = request.session.get(last_sent_key)
+        last_sent_time = timezone.datetime.fromisoformat(last_sent)
+        return 5 - (timezone.now() - last_sent_time).seconds // 60
+    
+    def _record_send_time(self, request, user_id):
+        """전송 시간 기록"""
+        last_sent_key = f'activation_email_sent_{user_id}'
+        request.session[last_sent_key] = timezone.now().isoformat()
 
 
-def test_signup_success(request):
-    """테스트용 회원가입 성공 페이지"""
-    # 테스트용 미인증 사용자가 없으면 생성
-    if not User.objects.filter(username='testuser', is_active=False).exists():
-        User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            is_active=False  # 미인증 상태
-        )
-        print("테스트용 사용자 생성: testuser / test@example.com")
+resend_activation_email = ResendActivationEmailView.as_view()
+
+
+class TestSignupSuccessView(TemplateView):
+    template_name = 'accounts/signup_success.html'
     
-    return render(request, 'accounts/signup_success.html')
+    def get(self, request, *args, **kwargs):
+        # 테스트용 미인증 사용자가 없으면 생성
+        if not User.objects.filter(username='testuser', is_active=False).exists():
+            User.objects.create_user(
+                username='testuser',
+                email='test@example.com',
+                password='testpass123',
+                is_active=False  # 미인증 상태
+            )
+            print("테스트용 사용자 생성: testuser / test@example.com")
+        
+        return super().get(request, *args, **kwargs)
+
+
+test_signup_success = TestSignupSuccessView.as_view()
 
 
