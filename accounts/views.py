@@ -121,13 +121,11 @@ login = LoginView.as_view()
 
 class LogoutView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        return reverse(HOME_URL_NAME)
+        return reverse(MAIN_URL_NAME)
     
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            username = request.user.nickname or request.user.username
             auth.logout(request)
-            messages.info(request, f'{username}님, 안전하게 로그아웃되었습니다.')
         return super().get(request, *args, **kwargs)
 
 
@@ -194,7 +192,7 @@ class PasswordChangeView(LoginRequiredMixin, FormView):
     
     def form_valid(self, form):
         form.save()
-        # 비밀번호 변경 후 재로그인 필요
+        # 비밀번호 변경 후 재로그인 필요없도록 유지
         auth.update_session_auth_hash(self.request, form.user)
         messages.success(self.request, '비밀번호가 성공적으로 변경되었습니다.')
         return_url = services.get_return_url(self.request, MAIN_URL_NAME)
