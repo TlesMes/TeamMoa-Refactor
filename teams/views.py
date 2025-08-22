@@ -48,6 +48,7 @@ class TeamHostRequiredMixin:
         
         return super().dispatch(request, *args, **kwargs)
 
+
 class MainPageView(TemplateView):
     """
     통합 메인 화면
@@ -132,7 +133,7 @@ class TeamJoinView(LoginRequiredMixin, FormView):
         
         if team.teampasswd != passwd:
             messages.error(self.request, '패스워드가 다릅니다.')
-            return redirect('teams:main_page')
+            return self.form_invalid(form)
         
         if team.maxuser == team.currentuser:
             messages.error(self.request, '팀 최대인원을 초과했습니다.')
