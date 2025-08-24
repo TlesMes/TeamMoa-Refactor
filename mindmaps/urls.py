@@ -12,6 +12,6 @@ urlpatterns = [
     path('mindmap_delete_node/<int:pk>/<int:node_id>', views.mindmap_delete_node, name='mindmap_delete_node'),
     path('mindmap_empower/<int:pk>/<int:mindmap_id>/<int:user_id>', views.mindmap_empower, name='mindmap_empower'),
     path('node_detail_page/<int:pk>/<int:node_id>', views.node_detail_page, name='node_detail_page'),
-    path('node_add_comment/<int:pk>/<int:node_id>', views.node_add_comment, name='node_add_comment'),
-    path('node_vote/<int:pk>/<int:node_id>', views.node_vote, name='node_vote'),
+    path('node_vote/<int:pk>/<int:node_id>', views.node_vote, name='node_vote'),  # 하위 호환성
+    path('node_recommend/<int:pk>/<int:node_id>', views.node_recommend, name='node_recommend'),  # 새 이름
 ]
