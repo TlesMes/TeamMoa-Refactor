@@ -103,10 +103,7 @@ class MindmapCreateNodeView(TeamMemberRequiredMixin, TemplateView):
                 mindmap=mindmap
             )
             
-            # 팀 멤버를 노드에 자동 추가
-            members = TeamUser.objects.filter(team=team)
-            for member in members:
-                node.user.add(member.user)
+            # 팀 멤버 자동 추가 제거 - JSON 기반 추천 시스템으로 대체
             
             # 부모 노드 연결 (선택사항)
             parent_title = request.POST.get("parent")
@@ -176,43 +173,29 @@ class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
         return redirect('mindmaps:node_detail_page', pk=self.kwargs['pk'], node_id=node.id)
 
 
-class NodeVoteView(TeamMemberRequiredMixin, View):
+class NodeRecommendView(TeamMemberRequiredMixin, View):
     def post(self, request, pk, node_id, *args, **kwargs):
         node = get_object_or_404(Node, pk=node_id)
+        user_id = request.user.id
         
-        try:
-            # 기존 투표 확인
-            nodeuser = NodeUser.objects.get(node=node, user=request.user)
-            
-            # 투표 상태 토글
-            if nodeuser.vote:
-                nodeuser.vote = False
-                vote_action = "취소"
-            else:
-                nodeuser.vote = True  
-                vote_action = "추가"
-            nodeuser.save()
-            
-        except NodeUser.DoesNotExist:
-            # 투표 기록이 없으면 새로 생성 (투표)
-            NodeUser.objects.create(node=node, user=request.user, vote=True)
-            vote_action = "추가"
-            
-        except NodeUser.MultipleObjectsReturned:
-            # 중복 데이터 처리
-            nodeuser = NodeUser.objects.filter(node=node, user=request.user).first()
-            NodeUser.objects.filter(node=node, user=request.user).exclude(pk=nodeuser.pk).delete()
-            logging.warning(f'NodeUser 중복 제거: node_id={node_id}, user_id={request.user.id}')
-            
-            # 투표 상태 토글
-            nodeuser.vote = not nodeuser.vote
-            nodeuser.save()
-            vote_action = "추가" if nodeuser.vote else "취소"
+        # 추천자 목록 초기화 (혹시 None인 경우)
+        if node.recommended_users is None:
+            node.recommended_users = []
         
-        # 현재 득표수 계산
-        current_votes = NodeUser.objects.filter(node=node, vote=True).count()
+        if user_id in node.recommended_users:
+            # 추천 취소
+            node.recommended_users.remove(user_id)
+            node.recommendation_count = max(0, node.recommendation_count - 1)
+            action = "취소"
+        else:
+            # 추천 추가
+            node.recommended_users.append(user_id)
+            node.recommendation_count += 1
+            action = "추가"
         
-        messages.success(request, f'투표가 {vote_action}되었습니다. (현재: {current_votes}표)')
+        node.save()
+        
+        messages.success(request, f'추천이 {action}되었습니다. (현재: {node.recommendation_count}개)')
         return redirect('mindmaps:node_detail_page', pk=pk, node_id=node_id)
 
 
@@ -232,4 +215,5 @@ mindmap_create_node = MindmapCreateNodeView.as_view()
 mindmap_delete_node = MindmapDeleteNodeView.as_view()
 mindmap_empower = MindmapEmpowerView.as_view()
 node_detail_page = NodeDetailPageView.as_view()
-node_vote = NodeVoteView.as_view()
+node_vote = NodeRecommendView.as_view()  # 하위 호환성 유지
+node_recommend = NodeRecommendView.as_view()  # 새 이름
