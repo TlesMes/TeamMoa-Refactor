@@ -106,7 +106,7 @@
   border-left: 4px solid var(--accent-primary);
 }
 
-.node-detail-vote {
+.node-detail-recommend {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -115,12 +115,12 @@
   border-radius: 8px;
 }
 
-.node-detail-vote-count {
+.node-detail-recommend-count {
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.node-detail-vote-btn {
+.node-detail-recommend-btn {
   background: var(--accent-primary);
   color: white;
   padding: 0.5rem 1rem;
@@ -133,7 +133,7 @@
   transition: all 0.2s;
 }
 
-.node-detail-vote-btn:hover {
+.node-detail-recommend-btn:hover {
   background: var(--accent-hover);
 }
 

@@ -16,9 +16,7 @@ class Node(models.Model):
     title = models.CharField(max_length=64) 
     content = models.TextField()
     mindmap = models.ForeignKey('Mindmap',on_delete = models.CASCADE)
-    vote = models.PositiveSmallIntegerField(default=0)  # 기존 필드 유지
     next = models.ManyToManyField('self', symmetrical=True, blank=True, through="NodeConnection")
-    user = models.ManyToManyField('accounts.User', related_name='nodes', through="NodeUser")
     
     # 새로운 JSON 기반 추천 시스템
     recommended_users = models.JSONField(default=list, blank=True)  # [user_id1, user_id2, ...]
@@ -26,10 +24,6 @@ class Node(models.Model):
 
     def __str__(self):
         return self.content
-class NodeUser(models.Model):
-    node = models.ForeignKey('Node', on_delete=models.CASCADE)
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
-    voted = models.BooleanField(default=False)
     
 class Comment(models.Model):
     comment = models.TextField(null=True, blank=True)
