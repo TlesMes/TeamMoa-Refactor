@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from teams.models import TeamUser, Team
 from .forms import CreateMindmapForm
-from .models import Comment, Mindmap, Node, NodeConnection, NodeUser
+from .models import Comment, Mindmap, Node, NodeConnection
 from accounts.models import User
 from common.mixins import TeamMemberRequiredMixin, TeamHostRequiredMixin
 import logging
