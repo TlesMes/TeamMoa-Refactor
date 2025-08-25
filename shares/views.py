@@ -1,7 +1,7 @@
-from django.shortcuts import render
-from django.views.generic import ListView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView, ListView
+from django.views import View
 from .models import Post
-from django.shortcuts import render,redirect,get_object_or_404
 from .forms import PostWriteForm
 from accounts.models import User
 from django.contrib import messages
@@ -12,170 +12,198 @@ from django.http import HttpResponse, Http404
 import mimetypes
 import logging
 from teams.models import Team, TeamUser
+from common.mixins import TeamMemberRequiredMixin
+from django.core.exceptions import PermissionDenied
 
-#로그인 확인 임포트
-#404 임포트
-class PostListView(ListView):
+# URL 패턴 상수
+LOGIN_PAGE = 'accounts:login'
+POST_LIST_PAGE = 'shares:post_list'
+POST_DETAIL_PAGE = 'shares:post_detail_view'
+MAIN_PAGE = 'teams:main_page'
+
+
+class PostAuthorRequiredMixin:
+    """게시글 작성자 또는 관리자만 접근 가능한 Mixin"""
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs.get('post_id'))
+        if post.writer != request.user and request.user.level != '0':
+            messages.error(request, "본인 게시글이 아닙니다.")
+            return redirect(POST_LIST_PAGE, kwargs.get('pk'))
+        return super().dispatch(request, *args, **kwargs)
+
+
+class PostListView(TeamMemberRequiredMixin, ListView):
     model = Post
     paginate_by = 10
     template_name = 'shares/post_list.html'
     context_object_name = 'post_list'
-   # print("PostList id",Post.isTeams)
-    def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs["pk"])
     
-        post_list = Post.objects.filter(isTeams=team.id).order_by('-id')
-
-        
-        return post_list
+    def get_team(self):
+        if not hasattr(self, '_team'):
+            self._team = get_object_or_404(Team, pk=self.kwargs["pk"])
+        return self._team
+    
+    def get_queryset(self):
+        team = self.get_team()
+        return Post.objects.filter(isTeams=team.id).order_by('-id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        paginator = context['paginator']
-        page_numbers_range = 5
-        max_index =len(paginator.page_range)
-        team = Team.objects.get(pk=self.kwargs["pk"])
-
-        context['team_id'] = team.id
-
-        #print("THIS IS CONTEXT TEAMID ",context)
-        #post_fixed = Post.objects.filter(isTeams = team.id)
-        #context['post_fixed'] = post_fixed
-        #teamid = Post.objects.get(pk=team.id)
-        #print("PRINT",context_object_name)
-        #post_team = Post.objects.get(isTeams = )
-
-        page = self.request.GET.get('page')
-        current_page = int(page) if page else 1
-
-        start_index = int((current_page - 1) / page_numbers_range) * page_numbers_range
-        end_index = start_index + page_numbers_range
-        if end_index >= max_index:
-            end_index = max_index
-
-        page_range = paginator.page_range[start_index:end_index]
-        context['page_range'] = page_range
-        context['team'] = team
+        team = self.get_team()
+        context.update({
+            'team': team,
+            'team_id': team.id
+        })
         return context
 
-def post_detail_view(request, pk, post_id):
-    user =request.user
-    team = get_object_or_404(Team, pk=pk)
-    postid =Post.objects.filter(id=post_id)
-    #print(postid)
-    if not user.is_authenticated:
-        post_auth = False
-        return redirect('/accounts/login')
-
-
-    if user.is_authenticated:
-        post = get_object_or_404(Post, pk=post_id)
-
-
-        if request.user == post.writer:
-            post_auth = True
-        else:
-            post_auth = False
-
-        context = {
+class PostDetailView(TeamMemberRequiredMixin, TemplateView):
+    template_name = 'shares/post_detail1.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        team = get_object_or_404(Team, pk=kwargs['pk'])
+        post = get_object_or_404(Post, pk=kwargs['post_id'])
+        
+        post_auth = self.request.user == post.writer
+        
+        context.update({
             'post': post,
             'post_auth': post_auth,
-            'team' : team
-        }
-    return render(request, 'shares/post_detail1.html', context)
+            'team': team
+        })
+        return context
 
-def post_write_view(request,pk):
-    user = request.user
-    team = get_object_or_404(Team, pk=pk)
-    team_number = pk
-    print("Thsis request method", request.method)
-    if not user.is_authenticated:
-        post_auth = False
-        #print("2")
-        return redirect('/accounts/login')
 
-    if request.method =="POST":
-        form = PostWriteForm(request.POST,request.FILES)
-        user_id = User.objects.get(username =user.username)
-        #print("form .isteam", form.isTeams)
-        #print("team_number", team_number)
-        #form.isTeams = team_number
+post_detail_view = PostDetailView.as_view()
 
+class PostWriteView(TeamMemberRequiredMixin, TemplateView):
+    template_name = 'shares/post_write_renew.html'
+    
+    def get_team(self):
+        if not hasattr(self, '_team'):
+            self._team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        return self._team
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form': PostWriteForm(),
+            'pk': self.kwargs['pk'],
+            'team': self.get_team()
+        })
+        return context
+    
+    def post(self, request, pk):
+        form = PostWriteForm(request.POST, request.FILES)
+        team = self.get_team()
+        
         if form.is_valid():
-
-            post=form.save(commit=False)
-            messages.success(request, '성공적으로 등록되었습니다.')
-            #print("포스트 내용 입니다",post.article)
-            #print("포스트 제목 입니다", post.title)
-
-            post.writer = user_id
-            post.isTeams_id = team_number
-        #post.isTeams
-            if request.FILES:
-                if 'upload_files' in request.FILES.keys():
-                    post.filename = request.FILES['upload_files'].name
+            post = form.save(commit=False)
+            post.writer = request.user
+            post.isTeams_id = pk
+            
+            if request.FILES and 'upload_files' in request.FILES:
+                post.filename = request.FILES['upload_files'].name
+            
             post.save()
-            return redirect('shares:post_list', pk)
+            messages.success(request, '성공적으로 등록되었습니다.')
+            return redirect(POST_LIST_PAGE, pk)
+        
+        return render(request, self.template_name, {
+            'form': form, 
+            'pk': pk, 
+            'team': team
+        })
 
-    else:
-        #print( "team_number:", team_number )
-        form = PostWriteForm()
+
+post_write_view = PostWriteView.as_view()
 
 
-    return render(request, "shares/post_write_renew.html", {'form': form, 'pk':pk, 'team':team})
-
-
-def post_edit_view(request, pk, post_id):
-    post = Post.objects.get(id=post_id)
-    team = get_object_or_404(Team, pk=pk)
-    if request.method == "POST":
-        #로그인
-            form = PostWriteForm(request.POST, instance=post)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.save()
-                messages.success(request, "수정되었습니다.")
-                return redirect('/shares/' + str(pk))
-    else:
-        post = Post.objects.get(id=post_id)
-        if post.writer == request.user or request.user.level == '0':
-            form = PostWriteForm(instance=post)
-            context = {
-                'form': form,
-                'edit': '수정하기',
-                'team' : team
+class PostEditView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, TemplateView):
+    template_name = 'shares/post_write_renew.html'
+    
+    def get_objects(self):
+        if not hasattr(self, '_objects'):
+            self._objects = {
+                'post': get_object_or_404(Post, id=self.kwargs['post_id']),
+                'team': get_object_or_404(Team, pk=self.kwargs['pk'])
             }
-            return render(request, "shares/post_write_renew.html", context)
-        else:
-            messages.error(request, "본인 게시글이 아닙니다.")
-            return redirect('/shares/' + str(pk))
+        return self._objects
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        objects = self.get_objects()
+        context.update({
+            'form': PostWriteForm(instance=objects['post']),
+            'edit': '수정하기',
+            'team': objects['team']
+        })
+        return context
+    
+    def post(self, request, pk, post_id):
+        objects = self.get_objects()
+        form = PostWriteForm(request.POST, instance=objects['post'])
+        
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, "수정되었습니다.")
+            return redirect(POST_LIST_PAGE, pk)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'edit': '수정하기',
+            'team': objects['team']
+        })
 
-def post_delete_view(request, pk, post_id):
-    team = get_object_or_404(Team, pk=pk)
-    post = Post.objects.get(id=post_id)
-    teamno=post.isTeams_id
-    if post.writer == request.user or request.user.level == '0':
+
+post_edit_view = PostEditView.as_view()
+
+class PostDeleteView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, View):
+    def get(self, request, pk, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        post_title = post.title
+        team_id = post.isTeams_id
+        
         post.delete()
-        messages.success(request, "삭제되었습니다.")
-        return redirect(f'/shares/{teamno}/')
-    else:
-        messages.error(request, "본인 게시글이 아닙니다.")
-        return redirect(f'/shares/{teamno}' )
+        messages.success(request, f'게시글 "{post_title}"이 삭제되었습니다.')
+        return redirect(POST_LIST_PAGE, team_id)
 
 
-def post_download_view(request, post_id):
-    try:
-        post = Post.objects.get(pk=post_id)
-    except Post.DoesNotExist:
-        return HttpResponse('<script>alert("File Does not exist.")</script>''<script>location.href="/shares/post_list"</script>')
-    #post = get_object_or_404(Post, pk = pk)
-    url = post.upload_files.url[1:]
-    file_url= urllib.parse.unquote(url)
-    #print(file_url)
-    if os.path.exists(file_url):
-        with open(file_url,'rb')as fh:
-            quote_file_url = urllib.parse.quote(post.filename.encode('utf-8'))
-            response = HttpResponse(fh.read(), content_type=mimetypes.guess_type(file_url)[0])
-            response['Content-Disposition'] = 'attachment;filename*=UTF-8\'\'%s' % quote_file_url
-            return response
-        raise Http404
+post_delete_view = PostDeleteView.as_view()
+
+
+class PostDownloadView(TeamMemberRequiredMixin, TemplateView):
+    def get(self, request, post_id, *args, **kwargs):
+        try:
+            post = get_object_or_404(Post, pk=post_id)
+        except Http404:
+            messages.error(request, '파일이 존재하지 않습니다.')
+            return redirect(MAIN_PAGE)
+        
+        # 업로드 파일이 없는 경우
+        if not post.upload_files:
+            messages.error(request, '다운로드할 파일이 없습니다.')
+            return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+        
+        try:
+            url = post.upload_files.url[1:]
+            file_url = urllib.parse.unquote(url)
+            
+            if os.path.exists(file_url):
+                with open(file_url, 'rb') as fh:
+                    quote_file_url = urllib.parse.quote(post.filename.encode('utf-8'))
+                    response = HttpResponse(fh.read(), content_type=mimetypes.guess_type(file_url)[0])
+                    response['Content-Disposition'] = 'attachment;filename*=UTF-8\'\'%s' % quote_file_url
+                    return response
+            else:
+                messages.error(request, '서버에서 파일을 찾을 수 없습니다.')
+                return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+                
+        except Exception as e:
+            logging.error(f'파일 다운로드 오류: {e}')
+            messages.error(request, '파일 다운로드 중 오류가 발생했습니다.')
+            return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+
+
+post_download_view = PostDownloadView.as_view()
