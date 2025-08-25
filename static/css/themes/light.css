@@ -1066,12 +1066,15 @@ body:has(.schedule-grid-container) .content-card,
   padding: 0.75rem;
   background-color: var(--bg-accent);
   border-radius: 8px;
-  border-left: 3px solid var(--accent-primary);
+  border-left: 4px solid var(--accent-primary);
+  border: 1px solid rgba(166, 176, 208, 0.3);
+  transition: all 0.3s ease;
 }
 
 .todo-item.completed {
-  opacity: 0.7;
-  border-left-color: var(--text-muted);
+  background-color: rgba(46, 204, 113, 0.1);
+  border-left: 4px solid #2ecc71;
+  border-color: rgba(46, 204, 113, 0.3);
 }
 
 .todo-content {
@@ -1088,8 +1091,9 @@ body:has(.schedule-grid-container) .content-card,
 }
 
 .todo-item.completed .todo-text {
-  color: var(--text-muted);
+  color: #27ae60;
   text-decoration: line-through;
+  font-weight: 500;
 }
 
 .todo-actions {
@@ -1111,8 +1115,8 @@ body:has(.schedule-grid-container) .content-card,
 }
 
 .todo-checkbox:checked {
-  background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background-color: #2ecc71;
+  border-color: #2ecc71;
 }
 
 .todo-checkbox:checked::after {
