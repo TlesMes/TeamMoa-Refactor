@@ -7,6 +7,9 @@ from teams.models import Team, TeamUser
 from django.http import HttpResponseRedirect, HttpResponse
 from common.mixins import TeamMemberRequiredMixin
 
+# URL 패턴 상수
+TEAM_MEMBERS_PAGE = 'members:team_members_page'
+
 class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'members/team_members_page.html'
     
@@ -29,7 +32,7 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
         form = CreateTodoForm(request.POST)
         if form.is_valid():
             self.member_add_todo(request, pk, form.cleaned_data['content'])
-        return redirect('members:team_members_page', pk=pk)
+        return redirect(TEAM_MEMBERS_PAGE, pk=pk)
     
     def member_add_todo(self, request, pk, content):
         user = request.user
@@ -48,14 +51,14 @@ class MemberCompleteTodoView(TeamMemberRequiredMixin, View):
         todo = get_object_or_404(Todo, pk=todo_id)
         todo.is_completed = not todo.is_completed
         todo.save()
-        return redirect('members:team_members_page', pk=pk)
+        return redirect(TEAM_MEMBERS_PAGE, pk=pk)
 
 
 class MemberDeleteTodoView(TeamMemberRequiredMixin, View):
     def get(self, request, pk, todo_id):
         todo = get_object_or_404(Todo, pk=todo_id)
         todo.delete()
-        return redirect('members:team_members_page', pk=pk)
+        return redirect(TEAM_MEMBERS_PAGE, pk=pk)
 
 
 member_complete_Todo = MemberCompleteTodoView.as_view()

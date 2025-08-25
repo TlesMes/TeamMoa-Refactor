@@ -20,9 +20,9 @@ from datetime import timedelta
 from django.http import JsonResponse
 from . import services
 
-MAIN_URL_NAME = 'teams:main_page'
-LOGIN_URL_NAME = 'accounts:login'
-HOME_URL_NAME = 'accounts:home'
+MAIN_PAGE = 'teams:main_page'
+LOGIN_PAGE = 'accounts:login'
+HOME_PAGE = 'accounts:home'
 
 
 class SignupSuccessView(TemplateView):
@@ -70,13 +70,13 @@ class ActivateView(TemplateView):
                 user.save()
                 auth.login(request, user)
                 messages.success(request, '계정이 성공적으로 활성화되었습니다!')
-                return redirect(MAIN_URL_NAME)
+                return redirect(MAIN_PAGE)
             else:
                 messages.error(request, '잘못된 인증 링크입니다.')
-                return redirect(LOGIN_URL_NAME)
+                return redirect(LOGIN_PAGE)
         except (User.DoesNotExist, ValueError, TypeError):
             messages.error(request, '유효하지 않은 인증 정보입니다.')
-            return redirect(LOGIN_URL_NAME)
+            return redirect(LOGIN_PAGE)
 
 
 activate = ActivateView.as_view()
@@ -88,7 +88,7 @@ class LoginView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         # 이미 로그인된 사용자는 메인 페이지로 리다이렉트
         if request.user.is_authenticated:
-            return redirect(MAIN_URL_NAME)
+            return redirect(MAIN_PAGE)
         
         # 캐시 방지 헤더 설정
         response = super().dispatch(request, *args, **kwargs)
@@ -113,7 +113,7 @@ class LoginView(TemplateView):
             request.session.set_expiry(0)
             # 로그인 성공 시 환영 메시지
             messages.success(request, f'{user.nickname}님, 환영합니다!')
-            return redirect(MAIN_URL_NAME)
+            return redirect(MAIN_PAGE)
         else:
             print("로그인 실패")
             return self.render_to_response({
@@ -127,7 +127,7 @@ login = LoginView.as_view()
 
 class LogoutView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        return reverse(MAIN_URL_NAME)
+        return reverse(MAIN_PAGE)
     
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -141,8 +141,8 @@ logout = LogoutView.as_view()
 class HomeView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         if self.request.user.is_authenticated:
-            return reverse(MAIN_URL_NAME)
-        return reverse(LOGIN_URL_NAME)
+            return reverse(MAIN_PAGE)
+        return reverse(LOGIN_PAGE)
 
 
 home = HomeView.as_view()
@@ -170,7 +170,7 @@ class UserUpdateView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         form.save()
         messages.success(self.request, '회원정보가 성공적으로 수정되었습니다.')
-        return_url = services.get_return_url(self.request, MAIN_URL_NAME)
+        return_url = services.get_return_url(self.request, MAIN_PAGE)
         return redirect(return_url)
 
 
@@ -201,7 +201,7 @@ class PasswordChangeView(LoginRequiredMixin, FormView):
         # 비밀번호 변경 후 재로그인 필요없도록 유지
         auth.update_session_auth_hash(self.request, form.user)
         messages.success(self.request, '비밀번호가 성공적으로 변경되었습니다.')
-        return_url = services.get_return_url(self.request, MAIN_URL_NAME)
+        return_url = services.get_return_url(self.request, MAIN_PAGE)
         return redirect(return_url)
 
 
