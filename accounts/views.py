@@ -20,6 +20,7 @@ from datetime import timedelta
 from django.http import JsonResponse
 from . import services
 
+# URL 패턴 상수
 MAIN_PAGE = 'teams:main_page'
 LOGIN_PAGE = 'accounts:login'
 HOME_PAGE = 'accounts:home'
