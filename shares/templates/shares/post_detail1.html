@@ -32,7 +32,7 @@
     <button class="post-action-btn edit-btn" onclick="location.href='/shares/{{ team.id }}/edit/{{post.id}}'">
       수정
     </button>
-    <button class="post-action-btn delete-btn" onclick="showDeleteModal()">
+    <button class="post-action-btn delete-btn" id="delete-post-btn" data-delete-url="{% url 'shares:post_delete' pk=team.id post_id=post.id %}" data-post-title="{{ post.title }}">
       삭제
     </button>
     {% endif %}
@@ -42,26 +42,6 @@
   </div>
 </section>
 
-<!-- 게시글 삭제 확인 모달 -->
-<div id="deleteModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>게시글 삭제 확인</h3>
-      <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="warning-message">
-        <i class="ri-alert-line"></i>
-        <p><strong>{{ post.title }}</strong> 게시글을 정말로 삭제하시겠습니까?</p>
-        <p class="warning-text">삭제된 게시글은 복구할 수 없습니다.</p>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <a href="{% url 'shares:post_delete' pk=team.id post_id=post.id %}" class="btn btn-danger">삭제</a>
-      <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
-    </div>
-  </div>
-</div>
 
 <style>
   .modal {
@@ -172,25 +152,26 @@
 </style>
 
 <script type="text/javascript">
-  $(document).ready(function () {
-    $("img").css("width", "100%");
+  document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+      img.style.width = '100%';
+    });
   });
 
   // 모달 제어 함수들
-  function showDeleteModal() {
-    document.getElementById("deleteModal").style.display = "flex";
+  // 게시글 삭제 버튼 이벤트
+  const deletePostBtn = document.getElementById('delete-post-btn');
+  if (deletePostBtn) {
+    deletePostBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const deleteUrl = this.dataset.deleteUrl;
+      const postTitle = this.dataset.postTitle;
+      showConfirmModal(`"${postTitle}" 게시글을 정말로 삭제하시겠습니까?\n삭제된 게시글은 복구할 수 없습니다.`, () => {
+        window.location.href = deleteUrl;
+      });
+    });
   }
-
-  function closeDeleteModal() {
-    document.getElementById("deleteModal").style.display = "none";
-  }
-
-  // 모달 외부 클릭 시 닫기
-  document.getElementById("deleteModal").addEventListener("click", function(e) {
-    if (e.target === this) {
-      closeDeleteModal();
-    }
-  });
 </script>
 
 {% endblock %}

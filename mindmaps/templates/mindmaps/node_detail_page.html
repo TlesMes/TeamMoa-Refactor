@@ -22,8 +22,7 @@
         <a href="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}" class="node-detail-action-btn node-detail-refresh-btn" title="새로고침">
           <i class="ri-refresh-line"></i>
         </a>
-        <a href="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" class="node-detail-action-btn node-detail-delete-btn" title="노드 삭제"
-           onclick="return confirm('이 노드를 삭제하시겠습니까?');">
+        <a href="#" class="node-detail-action-btn node-detail-delete-btn" title="노드 삭제" id="delete-node-btn" data-delete-url="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}">
           <i class="ri-delete-bin-line"></i>
         </a>
       </div>
@@ -74,5 +73,20 @@
     </div>
   </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteNodeBtn = document.getElementById('delete-node-btn');
+    if (deleteNodeBtn) {
+        deleteNodeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = this.dataset.deleteUrl;
+            showConfirmModal('이 노드를 삭제하시겠습니까?', () => {
+                window.location.href = deleteUrl;
+            });
+        });
+    }
+});
+</script>
 
 {% endblock %}

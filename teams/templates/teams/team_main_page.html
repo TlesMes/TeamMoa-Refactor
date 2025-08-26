@@ -66,7 +66,7 @@
         <a href="{% url 'teams:team_info_change' team.id %}">
           <button class="plusbtn2">팀 정보 수정</button>
         </a>
-        <button class="delete-btn" onclick="openDisbandModal()">팀 해산</button>
+        <button class="delete-btn" id="disband-team-btn" data-team-title="{{ team.title }}">팀 해산</button>
         {% endif %}
       </div>
     </div>
@@ -95,29 +95,10 @@
     </div>
   </div>
 
-  <!-- 팀 해산 확인 모달 -->
-  <div id="disbandModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>팀 해산 확인</h3>
-        <button class="modal-close" onclick="closeDisbandModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="warning-message">
-          <i class="ri-alert-line"></i>
-          <p><strong>{{ team.title }}</strong> 팀을 정말로 해산하시겠습니까?</p>
-          <p class="warning-text">해산된 팀은 복구할 수 없습니다.</p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <form method="POST" action="{% url 'teams:team_disband' team.id %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">해산</button>
-          <button type="button" class="btn btn-secondary" onclick="closeDisbandModal()">취소</button>
-        </form>
-      </div>
-    </div>
-  </div>
+  <!-- 팀 해산을 위한 숨겨진 폼 -->
+  <form id="disband-form" method="POST" action="{% url 'teams:team_disband' team.id %}" style="display: none;">
+    {% csrf_token %}
+  </form>
 
   <style>
     .modal {
@@ -238,27 +219,23 @@
       textarea.select();
       document.execCommand("copy");
       textarea.remove();
-      alert("팀코드가 복사되었습니다");
+      showToast("팀코드가 복사되었습니다");
     };
 
     const button = document.getElementById("copybtn");
     button.addEventListener("click", copyClipboard);
 
-    // 모달 제어 함수들
-    function openDisbandModal() {
-      document.getElementById("disbandModal").style.display = "flex";
+    // 팀 해산 버튼 이벤트
+    const disbandTeamBtn = document.getElementById('disband-team-btn');
+    if (disbandTeamBtn) {
+      disbandTeamBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const teamTitle = this.dataset.teamTitle;
+        showConfirmModal(`"${teamTitle}" 팀을 정말로 해산하시겠습니까?\n해산된 팀은 복구할 수 없습니다.`, () => {
+          document.getElementById('disband-form').submit();
+        });
+      });
     }
-
-    function closeDisbandModal() {
-      document.getElementById("disbandModal").style.display = "none";
-    }
-
-    // 모달 외부 클릭 시 닫기
-    document.getElementById("disbandModal").addEventListener("click", function(e) {
-      if (e.target === this) {
-        closeDisbandModal();
-      }
-    });
   </script>
   {% endif %}
 </section>
