@@ -4,7 +4,7 @@ from django.views import View
 from members.forms import CreateTodoForm
 from members.models import Todo
 from teams.models import Team, TeamUser
-from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib import messages
 from common.mixins import TeamMemberRequiredMixin
 
 # URL 패턴 상수
@@ -47,10 +47,15 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
 team_members_page = TeamMembersPageView.as_view()
 
 class MemberCompleteTodoView(TeamMemberRequiredMixin, View):
-    def get(self, request, pk, todo_id):
+    def post(self, request, pk, todo_id):
+        team = get_object_or_404(Team, pk=pk)
         todo = get_object_or_404(Todo, pk=todo_id)
+        
         todo.is_completed = not todo.is_completed
         todo.save()
+        
+        status = "완료" if todo.is_completed else "미완료"
+        messages.success(request, f'할 일 상태가 "{status}"로 변경되었습니다.')
         return redirect(TEAM_MEMBERS_PAGE, pk=pk)
 
 
@@ -59,10 +64,9 @@ class MemberDeleteTodoView(TeamMemberRequiredMixin, View):
         team = get_object_or_404(Team, pk=pk)
         todo = get_object_or_404(Todo, pk=todo_id)
         
-        todo_title = todo.title
         todo.delete()
         
-        messages.success(request, f'할 일 "{todo_title}"이 삭제되었습니다.')
+        messages.success(request, f'할 일이 삭제되었습니다.')
         return redirect(TEAM_MEMBERS_PAGE, pk=pk)
 
 
