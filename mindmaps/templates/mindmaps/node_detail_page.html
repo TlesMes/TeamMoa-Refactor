@@ -33,10 +33,13 @@
       
       <div class="node-detail-recommend">
         <span class="node-detail-recommend-count">추천: {{ node.recommendation_count }}</span>
-        <a href="/mindmaps/node_recommend/{{ team.id }}/{{ node.id }}" class="node-detail-recommend-btn">
-          <i class="ri-thumb-up-line"></i>
-          추천하기
-        </a>
+        <form method="POST" action="/mindmaps/node_recommend/{{ team.id }}/{{ node.id }}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="node-detail-recommend-btn">
+            <i class="ri-thumb-up-line"></i>
+            추천하기
+          </button>
+        </form>
       </div>
     </div>
 
@@ -74,6 +77,11 @@
   </div>
 </section>
 
+<!-- 노드 삭제를 위한 숨겨진 폼 -->
+<form id="delete-node-form" method="POST" action="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" style="display: none;">
+  {% csrf_token %}
+</form>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const deleteNodeBtn = document.getElementById('delete-node-btn');
@@ -82,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const deleteUrl = this.dataset.deleteUrl;
             showConfirmModal('이 노드를 삭제하시겠습니까?', () => {
-                window.location.href = deleteUrl;
+                document.getElementById('delete-node-form').submit();
             });
         });
     }

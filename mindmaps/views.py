@@ -72,13 +72,16 @@ class MindmapCreateView(TeamMemberRequiredMixin, FormView):
         return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
 
 
-class MindmapDeleteView(TeamHostRequiredMixin, DeleteView):
-    model = Mindmap
-    pk_url_kwarg = 'mindmap_id'
-    
-    def get_success_url(self):
-        messages.success(self.request, '마인드맵이 성공적으로 삭제되었습니다.')
-        return reverse('mindmaps:mindmap_list_page', kwargs={'pk': self.kwargs['pk']})
+class MindmapDeleteView(TeamHostRequiredMixin, View):
+    def post(self, request, pk, mindmap_id):
+        team = get_object_or_404(Team, pk=pk)
+        mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
+        
+        mindmap_title = mindmap.title
+        mindmap.delete()
+        
+        messages.success(request, f'마인드맵 "{mindmap_title}"이 성공적으로 삭제되었습니다.')
+        return redirect('mindmaps:mindmap_list_page', pk=pk)
 
 
 class MindmapCreateNodeView(TeamMemberRequiredMixin, TemplateView):
@@ -125,17 +128,17 @@ class MindmapCreateNodeView(TeamMemberRequiredMixin, TemplateView):
         return redirect('mindmaps:mindmap_detail_page', pk=pk, mindmap_id=mindmap_id)
 
 
-class MindmapDeleteNodeView(TeamMemberRequiredMixin, DeleteView):
-    model = Node
-    pk_url_kwarg = 'node_id'
-    
-    def get_success_url(self):
-        node = self.get_object()
-        messages.success(self.request, f'노드 "{node.title}"이 성공적으로 삭제되었습니다.')
-        return reverse('mindmaps:mindmap_detail_page', kwargs={
-            'pk': self.kwargs['pk'], 
-            'mindmap_id': node.mindmap.id
-        })
+class MindmapDeleteNodeView(TeamMemberRequiredMixin, View):
+    def post(self, request, pk, node_id):
+        team = get_object_or_404(Team, pk=pk)
+        node = get_object_or_404(Node, pk=node_id)
+        
+        mindmap_id = node.mindmap.id
+        node_title = node.title
+        node.delete()
+        
+        messages.success(request, f'노드 "{node_title}"이 성공적으로 삭제되었습니다.')
+        return redirect('mindmaps:mindmap_detail_page', pk=pk, mindmap_id=mindmap_id)
 
 
 class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
