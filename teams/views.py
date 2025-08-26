@@ -207,18 +207,16 @@ class TeamAddDevPhaseView(TeamHostRequiredMixin, FormView):
 
 team_add_devPhase = TeamAddDevPhaseView.as_view()
 
-class TeamDeleteDevPhaseView(TeamHostRequiredMixin, DeleteView):
-    model = DevPhase
-    
-    def get_object(self):
-        return get_object_or_404(DevPhase, pk=self.kwargs['phase_id'])
-    
-    def get_success_url(self):
-        messages.success(self.request, '개발 단계가 성공적으로 삭제되었습니다.')
-        return reverse('teams:team_main_page', kwargs={'pk': self.kwargs['pk']})
-    
-    def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+class TeamDeleteDevPhaseView(TeamHostRequiredMixin, View):
+    def post(self, request, pk, phase_id):
+        team = get_object_or_404(Team, pk=pk)
+        phase = get_object_or_404(DevPhase, pk=phase_id)
+        
+        phase_content = phase.content
+        phase.delete()
+        
+        messages.success(request, f'개발 단계 "{phase_content}"가 성공적으로 삭제되었습니다.')
+        return redirect('teams:team_main_page', pk=pk)
 
 
 team_delete_devPhase = TeamDeleteDevPhaseView.as_view()

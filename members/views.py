@@ -55,9 +55,14 @@ class MemberCompleteTodoView(TeamMemberRequiredMixin, View):
 
 
 class MemberDeleteTodoView(TeamMemberRequiredMixin, View):
-    def get(self, request, pk, todo_id):
+    def post(self, request, pk, todo_id):
+        team = get_object_or_404(Team, pk=pk)
         todo = get_object_or_404(Todo, pk=todo_id)
+        
+        todo_title = todo.title
         todo.delete()
+        
+        messages.success(request, f'할 일 "{todo_title}"이 삭제되었습니다.')
         return redirect(TEAM_MEMBERS_PAGE, pk=pk)
 
 

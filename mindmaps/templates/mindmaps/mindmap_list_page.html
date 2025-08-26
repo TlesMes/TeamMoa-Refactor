@@ -56,7 +56,24 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const deleteUrl = this.dataset.deleteUrl;
             showConfirmModal('정말로 이 마인드맵을 삭제하시겠습니까?', () => {
-                window.location.href = deleteUrl;
+                // 동적 POST 폼 생성
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = deleteUrl;
+                form.style.display = 'none';
+                
+                // CSRF 토큰 추가 (Django에서 제공)
+                const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || 
+                                  '{{ csrf_token }}';
+                
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'csrfmiddlewaretoken';
+                hiddenField.value = csrfToken;
+                form.appendChild(hiddenField);
+                
+                document.body.appendChild(form);
+                form.submit();
             });
         });
     });

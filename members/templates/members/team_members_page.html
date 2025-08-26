@@ -37,12 +37,14 @@
                     onclick="location.href='/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}'"
                     {% if todo.is_completed %}checked{% endif %}
                   />
-                  <button
-                    type="button"
-                    class="todo-delete-btn"
-                    onclick="location.href='/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}'"
-                    title="삭제"
-                  >
+                  <form method="POST" action="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}" style="display: inline;">
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="todo-delete-btn"
+                      title="삭제"
+                      onclick="return confirm('이 할 일을 삭제하시겠습니까?')"
+                    >
                     <svg
                       width="14"
                       height="18"
@@ -56,6 +58,7 @@
                       />
                     </svg>
                   </button>
+                  </form>
                 </div>
                 {% endif %}
               </div>
