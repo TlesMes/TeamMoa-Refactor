@@ -252,26 +252,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // 페이지 로드 시 Django Messages 표시
     showDjangoMessages();
     
-    // 버튼 클릭 이벤트들
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            const buttonText = this.textContent.trim();
-            showToast(`"${buttonText}" 버튼이 클릭되었습니다.`);
-        });
-    });
     
-    // 네비게이션 링크 클릭 이벤트 (SPA처럼 동작하도록)
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const href = this.getAttribute('href');
-            const text = this.textContent.trim();
-            showToast(`"${text}" 페이지로 이동합니다.`);
-            
-            // 실제 페이지 이동은 여기서 구현
-            window.location.href = href;
-        });
-    });
 });
