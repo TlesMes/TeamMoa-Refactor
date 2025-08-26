@@ -32,8 +32,7 @@
     <button class="post-action-btn edit-btn" onclick="location.href='/shares/{{ team.id }}/edit/{{post.id}}'">
       수정
     </button>
-    <button class="post-action-btn delete-btn" 
-            onclick="if(confirm('정말로 이 게시글을 삭제하시겠습니까?')) location.href='/shares/{{ team.id }}/delete/{{ post.id }}'">
+    <button class="post-action-btn delete-btn" onclick="showDeleteModal()">
       삭제
     </button>
     {% endif %}
@@ -43,14 +42,155 @@
   </div>
 </section>
 
+<!-- 게시글 삭제 확인 모달 -->
+<div id="deleteModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>게시글 삭제 확인</h3>
+      <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-message">
+        <i class="ri-alert-line"></i>
+        <p><strong>{{ post.title }}</strong> 게시글을 정말로 삭제하시겠습니까?</p>
+        <p class="warning-text">삭제된 게시글은 복구할 수 없습니다.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="{% url 'shares:post_delete' pk=team.id post_id=post.id %}" class="btn btn-danger">삭제</a>
+      <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal {
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 0 24px;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #333;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+  }
+
+  .modal-close:hover {
+    color: #000;
+  }
+
+  .modal-body {
+    padding: 20px 24px;
+  }
+
+  .warning-message {
+    text-align: center;
+  }
+
+  .warning-message i {
+    font-size: 48px;
+    color: #e74c3c;
+    margin-bottom: 16px;
+  }
+
+  .warning-message p {
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .warning-text {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .modal-footer {
+    padding: 0 24px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background-color: #c0392b;
+    color: white;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #7f8c8d;
+  }
+</style>
+
 <script type="text/javascript">
   $(document).ready(function () {
     $("img").css("width", "100%");
   });
 
-  function delete_modal() {
-    location.replace("/shares/{{ post.id }}/delete/");
+  // 모달 제어 함수들
+  function showDeleteModal() {
+    document.getElementById("deleteModal").style.display = "flex";
   }
+
+  function closeDeleteModal() {
+    document.getElementById("deleteModal").style.display = "none";
+  }
+
+  // 모달 외부 클릭 시 닫기
+  document.getElementById("deleteModal").addEventListener("click", function(e) {
+    if (e.target === this) {
+      closeDeleteModal();
+    }
+  });
 </script>
 
 {% endblock %}
