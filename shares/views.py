@@ -64,6 +64,7 @@ class PostDetailView(TeamMemberRequiredMixin, TemplateView):
         team = get_object_or_404(Team, pk=kwargs['pk'])
         post = get_object_or_404(Post, pk=kwargs['post_id'])
         
+        # 작성자 본인인가를 템플릿에 전달
         post_auth = self.request.user == post.writer
         
         context.update({
