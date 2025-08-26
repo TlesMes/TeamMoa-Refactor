@@ -14,11 +14,11 @@
     <div class="mindmap-card">
       <h3 class="mindmap-title">{{ mindmap.title }}</h3>
       <div class="mindmap-actions">
-        <button class="view-btn" onclick="location.href='/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}'">
+        <button class="view-btn view-mindmap-btn" data-view-url="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}">
           보기
         </button>
         {% if request.user == team.host %}
-        <button class="delete-btn" onclick="if(confirm('정말로 이 마인드맵을 삭제하시겠습니까?')) location.href='/mindmaps/mindmap_delete/{{ team.id }}/{{ mindmap.id }}'">
+        <button class="delete-btn delete-mindmap-btn" data-delete-url="/mindmaps/mindmap_delete/{{ team.id }}/{{ mindmap.id }}">
           삭제
         </button>
         {% endif %}
@@ -37,5 +37,30 @@
   </div>
   {% endif %}
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 마인드맵 보기 버튼 이벤트
+    const viewBtns = document.querySelectorAll('.view-mindmap-btn');
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const viewUrl = this.dataset.viewUrl;
+            window.location.href = viewUrl;
+        });
+    });
+
+    // 마인드맵 삭제 버튼 이벤트
+    const deleteBtns = document.querySelectorAll('.delete-mindmap-btn');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = this.dataset.deleteUrl;
+            showConfirmModal('정말로 이 마인드맵을 삭제하시겠습니까?', () => {
+                window.location.href = deleteUrl;
+            });
+        });
+    });
+});
+</script>
 
 {% endblock %}
