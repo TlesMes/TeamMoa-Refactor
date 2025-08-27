@@ -3,6 +3,609 @@
    ======================================== */
 
 /* ==========================================================================
+   MILESTONE TIMELINE STYLES
+   ========================================================================== */
+
+/* Timeline Page Layout */
+.timeline-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.timeline-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.timeline-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.timeline-title-section h2 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: #2c3e50;
+}
+
+.timeline-title-section p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.timeline-container {
+  display: flex;
+  height: 600px; /* 높이 증가 */
+  min-height: 600px; /* 최소 높이 보장 */
+  background: white;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+.timeline-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 20px;
+}
+
+.timeline-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.timeline-btn {
+  padding: 8px 16px;
+  border: 2px solid #e9ecef;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeline-btn:hover {
+  border-color: #007bff;
+  background: #f8f9fa;
+}
+
+.timeline-btn.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.timeline-legend {
+  display: flex;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.legend-color.critical { background: #dc3545; }
+.legend-color.high { background: #fd7e14; }
+.legend-color.medium { background: #ffc107; }
+.legend-color.low { background: #007bff; }
+
+.timeline-chart {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 좌측 고정 영역: 마일스톤 정보 */
+.milestone-info-fixed {
+  width: 250px;
+  background: #e9ecef;
+  border-right: 2px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.milestone-info-header {
+  padding: 20px;
+  background: #dee2e6;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  font-size: 16px;
+  color: #495057;
+  height: 60px; /* 고정 높이 설정 */
+  box-sizing: border-box;
+}
+
+.milestone-info-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.milestone-info-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.milestone-info-item {
+  padding: 15px 20px;
+  margin: 10px 15px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+  transition: background-color 0.2s ease;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.milestone-info-item:hover {
+  background: #f8f9fa;
+}
+
+.empty-milestone-info {
+  padding: 40px 15px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* 우측 스크롤 영역: 타임라인 */
+.timeline-scroll-area {
+  flex: 1;
+  overflow-x: auto; /* auto 대신 scroll로 강제 표시 */
+  overflow-y: hidden;
+  background: #f0f0f0; /* 디버깅용 배경색 */
+}
+
+.timeline-scroll-area::-webkit-scrollbar {
+  height: 12px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.timeline-scroll-content {
+  width: 4800px;
+  min-width: 4800px;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+  background: #f8f9fa;
+}
+
+.timeline-dates-header {
+  background: #e9ecef;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  padding: 15px 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+  height: 50px;
+  align-items: center;
+}
+
+.timeline-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #dee2e6;
+  height: 100%;
+  font-weight: 600;
+  padding: 0 10px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.timeline-month:first-child {
+  border-left: 2px solid #dee2e6;
+}
+
+.timeline-month:last-child {
+  border-right: none;
+}
+
+.timeline-content {
+  flex: 1;
+  position: relative;
+  background: #f8f9fa;
+}
+
+.milestone-timeline-row {
+  height: 80px;
+  border-bottom: 1px solid #f1f3f4;
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.milestone-timeline-row:hover {
+  background: #f8f9fa;
+}
+
+.empty-timeline {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  width: 100%;
+}
+
+.milestone-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.milestone-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.priority {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.priority.priority-critical { background: #dc3545; }
+.priority.priority-high { background: #fd7e14; }
+.priority.priority-medium { background: #ffc107; color: #000; }
+.priority.priority-low { background: #007bff; }
+.priority.priority-minimal { background: #6c757d; }
+
+.progress {
+  color: #666;
+  font-weight: 500;
+}
+
+
+.empty-timeline i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-timeline p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.milestone-bar {
+  position: absolute;
+  height: 40px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 5px 15px;
+  font-size: 12px;
+  color: #333;
+  border: 2px solid #007bff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.milestone-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  background: rgba(255,255,255,1);
+}
+
+
+.month-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #8c9399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-label {
+  background: rgba(255,255,255,0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  transform: rotate(-90deg);
+}
+
+/* 우측 헤더 높이 맞춤용 빈 영역 */
+.timeline-header-spacer {
+  height: 60px; /* milestone-info-header와 동일한 높이 */
+  flex-shrink: 0;
+  background: #dee2e6; /* milestone-info-header와 동일한 배경색 */
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 월별 헤더 */
+.month-header {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+  /* border-right: 1px solid rgba(0, 0, 0, 0.1); */
+  box-sizing: border-box;
+}
+
+.month-header:last-child {
+  border-right: none;
+}
+
+/* 마일스톤 타임라인 아이템 높이 정렬 */
+.milestone-timeline-item {
+  position: relative;
+  height: 80px;
+  margin: 10px 0;
+}
+
+.milestone-bar.dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  z-index: 100;
+}
+
+.milestone-bar.priority-critical { border-color: #dc3545; }
+.milestone-bar.priority-high { border-color: #fd7e14; }
+.milestone-bar.priority-medium { border-color: #ffc107; }
+.milestone-bar.priority-low { border-color: #007bff; }
+.milestone-bar.priority-minimal { border-color: #6c757d; }
+
+.milestone-bar.completed {
+  opacity: 0.8;
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.milestone-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 15px;
+  color: #fff;
+  font-size: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.milestone-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.milestone-dates {
+  font-size: 10px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.milestone-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.3);
+  border-radius: inherit;
+  transition: width 0.3s ease;
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.3);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.milestone-bar:hover .resize-handle {
+  opacity: 1;
+}
+
+.resize-handle.left {
+  left: 0;
+}
+
+.resize-handle.right {
+  right: 0;
+}
+
+.milestone-marker {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -15px;
+  font-size: 20px;
+  color: #666;
+}
+
+.milestone-marker.completed {
+  color: #28a745;
+}
+
+.empty-timeline {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-timeline i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-timeline p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .timeline-container {
+    padding: 10px;
+  }
+  
+  .milestone-info {
+    width: 200px;
+  }
+  
+  .timeline-legend {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .milestone-row {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+  }
+  
+  .milestone-info {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .milestone-timeline {
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
    TEAM MAIN PAGE STYLES
    ========================================================================== */
 
@@ -142,6 +745,27 @@
 
 .plusbtn2 {
   margin-right: 90px;
+}
+
+.timeline-btn {
+  border: none;
+  background: #007bff;
+  color: white;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 10px;
+}
+
+.timeline-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
 .editdiv button:hover {

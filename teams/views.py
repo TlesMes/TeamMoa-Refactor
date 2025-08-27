@@ -1,5 +1,6 @@
 from datetime import datetime
-from django.http import HttpResponseRedirect, HttpResponse
+import json
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
@@ -198,6 +199,26 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
 
 team_add_milestone = TeamAddMilestoneView.as_view()
 
+
+class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
+    template_name = 'teams/team_milestone_timeline.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        
+        # 팀의 모든 마일스톤을 날짜순으로 정렬
+        milestones = Milestone.objects.filter(team=team).order_by('startdate', 'enddate')
+        
+        context.update({
+            'team': team,
+            'milestones': milestones,
+        })
+        return context
+
+
+team_milestone_timeline = TeamMilestoneTimelineView.as_view()
+
 class TeamDeleteMilestoneView(TeamHostRequiredMixin, View):
     def post(self, request, pk, milestone_id):
         team = get_object_or_404(Team, pk=pk)
@@ -211,6 +232,93 @@ class TeamDeleteMilestoneView(TeamHostRequiredMixin, View):
 
 
 team_delete_milestone = TeamDeleteMilestoneView.as_view()
+
+
+class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
+    """AJAX를 통한 마일스톤 업데이트"""
+    
+    def post(self, request, pk, milestone_id):
+        try:
+            team = get_object_or_404(Team, pk=pk)
+            milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
+            
+            # JSON 데이터 파싱
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.POST
+            
+            # 업데이트할 필드들 처리
+            updated_fields = []
+            
+            if 'startdate' in data:
+                milestone.startdate = data['startdate']
+                updated_fields.append('시작일')
+                
+            if 'enddate' in data:
+                milestone.enddate = data['enddate']
+                updated_fields.append('종료일')
+                
+            if 'progress_percentage' in data:
+                progress = int(data['progress_percentage'])
+                if 0 <= progress <= 100:
+                    milestone.progress_percentage = progress
+                    updated_fields.append('진행률')
+                    
+                    # 진행률이 100%이면 완료 처리
+                    if progress == 100 and not milestone.is_completed:
+                        milestone.is_completed = True
+                        milestone.completed_date = datetime.now()
+                        updated_fields.append('완료 상태')
+                    elif progress < 100 and milestone.is_completed:
+                        milestone.is_completed = False
+                        milestone.completed_date = None
+                        updated_fields.append('완료 상태')
+            
+            # 데이터 검증
+            if hasattr(milestone, 'startdate') and hasattr(milestone, 'enddate'):
+                if milestone.startdate > milestone.enddate:
+                    return JsonResponse({
+                        'success': False,
+                        'message': '시작일은 종료일보다 이전이어야 합니다.'
+                    }, status=400)
+            
+            # 저장
+            milestone.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f"마일스톤 {', '.join(updated_fields)}이(가) 업데이트되었습니다.",
+                'milestone': {
+                    'id': milestone.id,
+                    'title': milestone.title,
+                    'startdate': milestone.startdate.isoformat() if milestone.startdate else None,
+                    'enddate': milestone.enddate.isoformat() if milestone.enddate else None,
+                    'progress_percentage': milestone.progress_percentage,
+                    'is_completed': milestone.is_completed,
+                }
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': '잘못된 JSON 형식입니다.'
+            }, status=400)
+            
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'잘못된 값입니다: {str(e)}'
+            }, status=400)
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'업데이트 중 오류가 발생했습니다: {str(e)}'
+            }, status=500)
+
+
+milestone_update_ajax = MilestoneUpdateAjaxView.as_view()
 
 
 class TeamDisbandView(TeamHostRequiredMixin, View):
