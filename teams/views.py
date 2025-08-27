@@ -12,6 +12,7 @@ from django.views import View
 from django.views.generic.detail import DetailView
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.db import models
 from .models import Milestone, Team, TeamUser
 from .forms import AddMilestoneForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
 from common.mixins import TeamMemberRequiredMixin, TeamHostRequiredMixin
@@ -133,17 +134,40 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = self.get_object()
+        today_date = datetime.now().date()
         
         context['members'] = TeamUser.objects.filter(team=team)
-        context['milestones'] = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
-        context['today_date'] = datetime.now().date()
+        milestones = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
+        context['milestones'] = milestones
+        context['today_date'] = today_date
+        
+        # 마일스톤 통계 계산 (새로운 상태 기준)
+        not_started_count = 0
+        in_progress_count = 0
+        completed_count = 0
+        overdue_count = 0
+        
+        for milestone in milestones:
+            status = milestone.get_status(today_date)
+            if status == 'not_started':
+                not_started_count += 1
+            elif status == 'in_progress':
+                in_progress_count += 1
+            elif status == 'completed':
+                completed_count += 1
+            elif status == 'overdue':
+                overdue_count += 1
+        
+        context['active_milestones_count'] = in_progress_count + not_started_count  # 진행 중 + 시작 전
+        context['completed_milestones_count'] = completed_count
+        context['overdue_milestones_count'] = overdue_count
         
         # 오늘 진행 중인 마일스톤 찾기
         today_milestone = '진행 중인 마일스톤이 없습니다.'
-        active_milestones = [m for m in context['milestones'] if not m.is_completed and m.startdate <= context['today_date'] <= m.enddate]
+        active_milestones = [m for m in milestones if m.get_status(today_date) == 'in_progress']
         if active_milestones:
             milestone = active_milestones[0]
-            left = milestone.enddate - context['today_date']
+            left = milestone.enddate - today_date
             today_milestone = f'{milestone.title}, {left.days}일 남았습니다'
         
         context['today_milestone'] = today_milestone

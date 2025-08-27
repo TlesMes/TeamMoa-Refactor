@@ -5,56 +5,48 @@
     <h2>
       {{today_date|date:'오늘은 Y년 m월 d일'}}, <span>{{today_milestone}}</span>
     </h2>
-    <div class="milestone-list">
-      {% for milestone in milestones %}
-      <div class="milestone-item {% if milestone.is_completed %}completed{% endif %} priority-{{ milestone.priority }}">
-        <div class="milestone-status">
-          {% if milestone.is_completed %}
-            <i class="ri-checkbox-circle-fill"></i>
-          {% else %}
-            <i class="ri-checkbox-blank-circle-line"></i>
+    <!-- 마일스톤 요약 섹션 -->
+    <div class="milestone-summary">
+      {% if milestones %}
+        <div class="milestone-stats">
+          <div class="stat-item">
+            <span class="stat-number">{{ milestones|length }}</span>
+            <span class="stat-label">전체</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ active_milestones_count }}</span>
+            <span class="stat-label">진행 중</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ completed_milestones_count }}</span>
+            <span class="stat-label">완료됨</span>
+          </div>
+          {% if overdue_milestones_count > 0 %}
+          <div class="stat-item stat-overdue">
+            <span class="stat-number">{{ overdue_milestones_count }}</span>
+            <span class="stat-label">지연됨</span>
+          </div>
           {% endif %}
         </div>
-        <div class="milestone-content">
-          <h4>{{ milestone.title }}</h4>
-          <p>{{ milestone.description }}</p>
-          <div class="milestone-meta">
-            <span class="priority priority-{{ milestone.priority }}">
-              {% if milestone.priority == 'critical' %}매우 중요
-              {% elif milestone.priority == 'high' %}중요
-              {% elif milestone.priority == 'medium' %}보통
-              {% elif milestone.priority == 'low' %}낮음
-              {% else %}미미
-              {% endif %}
-            </span>
-            <span class="dates">{{ milestone.startdate|date:'Y-m-d' }} ~ {{ milestone.enddate|date:'Y-m-d' }}</span>
-          </div>
+        
+        <div class="milestone-actions">
+          <a href="{% url 'teams:team_milestone_timeline' team.id %}" class="timeline-link">
+            <i class="ri-timeline-view"></i>
+            <span>마일스톤 타임라인에서 보기</span>
+            <i class="ri-arrow-right-line"></i>
+          </a>
         </div>
-        {% if team.host == request.user %}
-        <form method="POST" action="{% url 'teams:team_delete_milestone' team.id milestone.id %}" style="display: inline;">
-          {% csrf_token %}
-          <button
-            type="submit"
-            class="deletebtn"
-            onclick="return confirm('이 마일스톤을 삭제하시겠습니까?')"
-          >
-            <svg
-              width="14"
-              height="18"
-              viewBox="0 0 14 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
-                fill="#CCCCCC"
-              />
-            </svg>
-          </button>
-        </form>
-        {% endif %}
-      </div>
-      {% endfor %}
+      {% else %}
+        <div class="no-milestones">
+          <i class="ri-calendar-todo-line"></i>
+          <p>아직 등록된 마일스톤이 없습니다</p>
+          {% if request.user == team.host %}
+          <a href="{% url 'teams:team_add_milestone' team.id %}" class="add-milestone-link">
+            첫 번째 마일스톤 추가하기
+          </a>
+          {% endif %}
+        </div>
+      {% endif %}
     </div>
   </div>
   <div class="teamdiv">

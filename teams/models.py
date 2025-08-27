@@ -79,3 +79,36 @@ class Milestone(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_status(self, today_date=None):
+        """마일스톤의 현재 상태를 반환 (날짜 + 진행률 기준)"""
+        if today_date is None:
+            from datetime import date
+            today_date = date.today()
+        
+        # 100% 완료된 경우
+        if self.progress_percentage >= 100:
+            return 'completed'
+        
+        # 아직 시작 전
+        if today_date < self.startdate:
+            return 'not_started'
+        
+        # 종료일이 지났지만 100% 미완료
+        if today_date > self.enddate:
+            return 'overdue'
+        
+        # 진행 기간 내에 있고 진행 중
+        return 'in_progress'
+    
+    @property
+    def status_display(self):
+        """상태를 한국어로 표시"""
+        status = self.get_status()
+        status_map = {
+            'not_started': '시작 전',
+            'in_progress': '진행 중',
+            'completed': '완료됨',
+            'overdue': '지연됨'
+        }
+        return status_map.get(status, '알 수 없음')
