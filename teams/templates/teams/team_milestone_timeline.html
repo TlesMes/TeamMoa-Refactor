@@ -457,6 +457,73 @@ document.addEventListener('DOMContentLoaded', function() {
             location.reload();
         });
     }
+    
+    // 오늘 날짜 마커 추가
+    function addTodayMarker() {
+        const today = new Date();
+        const todayPixel = dateToPixel(today);
+        
+        const todayMarker = document.createElement('div');
+        todayMarker.className = 'today-marker';
+        todayMarker.style.cssText = `
+            position: absolute;
+            left: ${todayPixel}px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #ff4444;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+        `;
+        
+        // 오늘 날짜 레이블
+        const todayLabel = document.createElement('div');
+        todayLabel.className = 'today-label';
+        todayLabel.textContent = '오늘';
+        todayLabel.style.cssText = `
+            position: absolute;
+            left: ${todayPixel + 8}px;
+            top: 10px;
+            background: #ff4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 101;
+            pointer-events: none;
+            white-space: nowrap;
+        `;
+        
+        scrollContent.appendChild(todayMarker);
+        scrollContent.appendChild(todayLabel);
+        
+        console.log(`오늘 날짜 마커 추가: ${todayPixel}px`);
+    }
+    
+    // 페이지 로드 시 현재 날짜 위치로 스크롤
+    function scrollToCurrentDate() {
+        const today = new Date();
+        const todayPixel = dateToPixel(today);
+        const scrollContainer = document.querySelector('.timeline-scroll-area');
+        
+        // 타임라인 컨테이너 너비의 절반을 빼서 현재 날짜가 중앙에 오도록 조정
+        const containerWidth = scrollContainer.clientWidth;
+        const scrollPosition = Math.max(0, todayPixel - (containerWidth / 2));
+        
+        // 부드러운 스크롤 효과
+        scrollContainer.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+        });
+        
+        console.log(`오늘 날짜 (${today.toDateString()})로 스크롤: ${scrollPosition}px`);
+    }
+    
+    // 오늘 날짜 마커 추가 및 스크롤 실행
+    addTodayMarker();
+    setTimeout(scrollToCurrentDate, 100);
 });
 </script>
 
