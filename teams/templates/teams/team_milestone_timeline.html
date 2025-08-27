@@ -1,5 +1,6 @@
 {% extends 'base_app.html' %}
 {% load static %}
+{% csrf_token %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/teams.css' %}" />
@@ -55,20 +56,8 @@
     <div class="timeline-scroll-area">
       <div class="timeline-scroll-content">
         <!-- 헤더 높이 맞춤용 빈 영역 -->
-        <div class="timeline-header-spacer">
-          <!-- 월별 헤더 표시 -->
-          <div class="month-header" style="left: 0px; width: 400px;">1월</div>
-          <div class="month-header" style="left: 400px; width: 400px;">2월</div>
-          <div class="month-header" style="left: 800px; width: 400px;">3월</div>
-          <div class="month-header" style="left: 1200px; width: 400px;">4월</div>
-          <div class="month-header" style="left: 1600px; width: 400px;">5월</div>
-          <div class="month-header" style="left: 2000px; width: 400px;">6월</div>
-          <div class="month-header" style="left: 2400px; width: 400px;">7월</div>
-          <div class="month-header" style="left: 2800px; width: 400px;">8월</div>
-          <div class="month-header" style="left: 3200px; width: 400px;">9월</div>
-          <div class="month-header" style="left: 3600px; width: 400px;">10월</div>
-          <div class="month-header" style="left: 4000px; width: 400px;">11월</div>
-          <div class="month-header" style="left: 4400px; width: 400px;">12월</div>
+        <div class="timeline-header-spacer" id="monthHeaders">
+          <!-- JavaScript로 동적 생성 -->
         </div>
         
         <!-- 마일스톤 타임라인 -->
@@ -91,18 +80,7 @@
         </div>
         {% endfor %}
         
-        <!-- 월별 구분선 -->
-        <div class="month-marker" style="left: 400px;"></div>
-        <div class="month-marker" style="left: 800px;"></div>
-        <div class="month-marker" style="left: 1200px;"></div>
-        <div class="month-marker" style="left: 1600px;"></div>
-        <div class="month-marker" style="left: 2000px;"></div>
-        <div class="month-marker" style="left: 2400px;"></div>
-        <div class="month-marker" style="left: 2800px;"></div>
-        <div class="month-marker" style="left: 3200px;"></div>
-        <div class="month-marker" style="left: 3600px;"></div>
-        <div class="month-marker" style="left: 4000px;"></div>
-        <div class="month-marker" style="left: 4400px;"></div>
+        <!-- 월별 구분선 - JavaScript로 동적 생성 -->
         
         <!-- 일별 구분선 (디버깅용) -->
       </div>
@@ -129,54 +107,269 @@
 </div>
 
 <script>
-// 간단한 마일스톤 배치 스크립트
+// 월별 실제 일수 기반 타임라인 시스템
 document.addEventListener('DOMContentLoaded', function() {
     const scrollContent = document.querySelector('.timeline-scroll-content');
+    const monthHeaders = document.getElementById('monthHeaders');
+    const currentYear = new Date().getFullYear();
+    const dayWidth = 12; // 일당 픽셀 너비
+    
+    // 각 월의 일수 계산 (윤년 고려)
+    function getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+    
+    // 월별 일수 배열과 누적 위치 계산
+    const monthDays = [];
+    const monthOffsets = [];
+    let totalOffset = 0;
+    
+    for (let month = 0; month < 12; month++) {
+        monthOffsets[month] = totalOffset;
+        const daysInMonth = getDaysInMonth(currentYear, month);
+        monthDays[month] = daysInMonth;
+        totalOffset += daysInMonth * dayWidth;
+    }
+    
+    const totalWidth = totalOffset;
+    console.log('월별 일수:', monthDays);
+    console.log('월별 시작 위치:', monthOffsets);
+    console.log('총 타임라인 너비:', totalWidth);
+    
+    // 월별 헤더 동적 생성
+    for (let month = 0; month < 12; month++) {
+        const monthHeader = document.createElement('div');
+        monthHeader.className = 'month-header';
+        monthHeader.textContent = `${month + 1}월`;
+        monthHeader.style.cssText = `
+            position: absolute;
+            left: ${monthOffsets[month]}px;
+            width: ${monthDays[month] * dayWidth}px;
+        `;
+        monthHeaders.appendChild(monthHeader);
+    }
+    
+    // 월별 구분선 동적 생성
+    for (let month = 1; month < 12; month++) { // 1월부터 시작 (0월 제외)
+        const monthMarker = document.createElement('div');
+        monthMarker.className = 'month-marker';
+        monthMarker.style.cssText = `
+            position: absolute;
+            left: ${monthOffsets[month]}px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #8c9399;
+            pointer-events: none;
+        `;
+        scrollContent.appendChild(monthMarker);
+    }
     
     // 일별 구분선 생성 (디버깅용)
     for (let month = 0; month < 12; month++) {
-        for (let day = 1; day <= 31; day++) {
-            const dayPos = (month * 400) + ((day - 1) * 13);
-            if (dayPos < 4800) { // 전체 너비 내에서만
-                const dayMarker = document.createElement('div');
-                dayMarker.className = 'day-marker';
-                dayMarker.style.cssText = `
-                    position: absolute;
-                    left: ${dayPos}px;
-                    top: 0;
-                    bottom: 0;
-                    width: 1px;
-                    background: rgba(200, 200, 200, 0.3);
-                    pointer-events: none;
-                `;
-                scrollContent.appendChild(dayMarker);
-            }
+        for (let day = 1; day <= monthDays[month]; day++) {
+            const dayPos = monthOffsets[month] + ((day - 1) * dayWidth);
+            const dayMarker = document.createElement('div');
+            dayMarker.className = 'day-marker';
+            dayMarker.style.cssText = `
+                position: absolute;
+                left: ${dayPos}px;
+                top: 0;
+                bottom: 0;
+                width: 1px;
+                background: rgba(200, 200, 200, 0.3);
+                pointer-events: none;
+            `;
+            scrollContent.appendChild(dayMarker);
         }
     }
     
+    // 타임라인 컨테이너 너비 설정
+    scrollContent.style.width = totalWidth + 'px';
+    
     const milestoneItems = document.querySelectorAll('.milestone-timeline-item');
+    
+    // 날짜 <-> 픽셀 변환 함수들 (새로운 월별 오프셋 기반)
+    function dateToPixel(date) {
+        const month = date.getMonth();
+        const day = date.getDate();
+        return monthOffsets[month] + ((day - 1) * dayWidth);
+    }
+    
+    function pixelToDate(pixel) {
+        // 어느 월에 속하는지 찾기
+        let month = 0;
+        for (let m = 0; m < 12; m++) {
+            if (pixel >= monthOffsets[m] && (m === 11 || pixel < monthOffsets[m + 1])) {
+                month = m;
+                break;
+            }
+        }
+        
+        // 해당 월 내에서의 일수 계산
+        const dayInMonth = Math.floor((pixel - monthOffsets[month]) / dayWidth) + 1;
+        const validDay = Math.min(Math.max(dayInMonth, 1), monthDays[month]);
+        
+        return new Date(currentYear, month, validDay);
+    }
+    
+    function formatDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
     
     milestoneItems.forEach(item => {
         const startDate = new Date(item.dataset.start);
         const endDate = new Date(item.dataset.end);
         const milestoneBar = item.querySelector('.milestone-bar');
+        const milestoneId = item.dataset.milestoneId;
         
-        // 사이즈 계산 (간단하게 1월 = 400px 기준)
-        const startMonth = startDate.getMonth(); // 0~11
-        const endMonth = endDate.getMonth();
-        const startDay = startDate.getDate();
-        const endDay = endDate.getDate();
-        
-        const startPos = (startMonth * 400) + ((startDay - 1) * 13); // startDay-1로 수정
-        const endPos = (endMonth * 400) + (endDay * 13); // endDay는 그대로 (끝나는 날까지 포함)
-        const width = endPos - startPos
+        // 초기 위치 계산  
+        const startPos = dateToPixel(startDate);
+        // 종료일의 다음 날 시작 위치까지 포함하여 계산
+        const nextDay = new Date(endDate);
+        nextDay.setDate(endDate.getDate() + 1);
+        const endPos = dateToPixel(nextDay);
+        const width = endPos - startPos; // 전체 너비
         
         // 마일스톤 바 위치 설정
         milestoneBar.style.position = 'absolute';
         milestoneBar.style.left = startPos + 'px';
         milestoneBar.style.width = width + 'px';
         milestoneBar.style.top = '20px';
+        milestoneBar.style.cursor = 'move';
+        
+        // 드래그 기능 추가
+        let isDragging = false;
+        let dragType = null; // 'move', 'resize-start', 'resize-end'
+        let startX = 0;
+        let originalLeft = 0;
+        let originalWidth = 0;
+        
+        // 마우스 다운 이벤트
+        milestoneBar.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX;
+            originalLeft = parseInt(milestoneBar.style.left);
+            originalWidth = parseInt(milestoneBar.style.width);
+            
+            const rect = milestoneBar.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            
+            // 드래그 타입 결정 (양쪽 끝 20px는 리사이즈, 나머지는 이동)
+            if (mouseX < 20) {
+                dragType = 'resize-start';
+                milestoneBar.style.cursor = 'w-resize';
+            } else if (mouseX > rect.width - 20) {
+                dragType = 'resize-end';
+                milestoneBar.style.cursor = 'e-resize';
+            } else {
+                dragType = 'move';
+                milestoneBar.style.cursor = 'grabbing';
+            }
+            
+            // 드래그 중 시각적 피드백
+            milestoneBar.style.opacity = '0.8';
+            milestoneBar.style.zIndex = '1000';
+        });
+        
+        // 마우스 이동 이벤트
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const scrollContainer = document.querySelector('.timeline-scroll-area');
+            const scrollOffset = scrollContainer.scrollLeft;
+            
+            if (dragType === 'move') {
+                // 전체 이동
+                const newLeft = Math.max(0, Math.min(totalWidth, originalLeft + deltaX));
+                milestoneBar.style.left = newLeft + 'px';
+                
+            } else if (dragType === 'resize-start') {
+                // 시작점 리사이즈
+                const newLeft = Math.max(0, originalLeft + deltaX);
+                const newWidth = Math.max(dayWidth, originalWidth - deltaX); // 최소 1일
+                milestoneBar.style.left = newLeft + 'px';
+                milestoneBar.style.width = newWidth + 'px';
+                
+            } else if (dragType === 'resize-end') {
+                // 종료점 리사이즈
+                const newWidth = Math.max(dayWidth, originalWidth + deltaX); // 최소 1일
+                milestoneBar.style.width = newWidth + 'px';
+            }
+        });
+        
+        // 마우스 업 이벤트
+        document.addEventListener('mouseup', function(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            milestoneBar.style.opacity = '1';
+            milestoneBar.style.zIndex = 'auto';
+            milestoneBar.style.cursor = 'move';
+            
+            // 새로운 날짜 계산
+            const newLeft = parseInt(milestoneBar.style.left);
+            const newWidth = parseInt(milestoneBar.style.width);
+            const newRight = newLeft + newWidth; // 전체 너비
+            
+            const newStartDate = pixelToDate(newLeft);
+            // 종료일은 실제 마지막 날짜로 계산 (다음 날 시작점에서 -1일)
+            const nextDayDate = pixelToDate(newRight);
+            const newEndDate = new Date(nextDayDate);
+            newEndDate.setDate(nextDayDate.getDate() - 1);
+            
+            // 서버에 업데이트 전송
+            console.log('드래그 완료 - 새로운 날짜:', {
+                startdate: formatDate(newStartDate),
+                enddate: formatDate(newEndDate)
+            });
+            updateMilestone(milestoneId, {
+                startdate: formatDate(newStartDate),
+                enddate: formatDate(newEndDate)
+            });
+        });
     });
+    
+    // 마일스톤 업데이트 AJAX 함수
+    function updateMilestone(milestoneId, data) {
+        console.log('AJAX 요청 시작:', {
+            url: `/teams/{{ team.id }}/milestone/${milestoneId}/update/`,
+            data: data
+        });
+        fetch(`/teams/{{ team.id }}/milestone/${milestoneId}/update/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('마일스톤 업데이트 성공:', result.message);
+                // 좌측 정보 패널의 날짜 정보도 업데이트
+                const infoItem = document.querySelector(`[data-milestone-id="${milestoneId}"]`);
+                if (infoItem) {
+                    const dateRange = infoItem.querySelector('.date-range');
+                    const newStart = new Date(result.milestone.startdate);
+                    const newEnd = new Date(result.milestone.enddate);
+                    dateRange.textContent = `${(newStart.getMonth()+1).toString().padStart(2,'0')}/${newStart.getDate().toString().padStart(2,'0')} - ${(newEnd.getMonth()+1).toString().padStart(2,'0')}/${newEnd.getDate().toString().padStart(2,'0')}`;
+                }
+            } else {
+                console.error('업데이트 실패:', result.message);
+                alert('마일스톤 업데이트에 실패했습니다: ' + result.message);
+                location.reload(); // 실패시 페이지 새로고침
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('마일스톤 업데이트 중 오류가 발생했습니다.');
+            location.reload();
+        });
+    }
 });
 </script>
 

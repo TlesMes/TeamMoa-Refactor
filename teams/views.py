@@ -180,21 +180,53 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
         context['team'] = get_object_or_404(Team, pk=self.kwargs['pk'])
         return context
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        kwargs['team'] = team
+        return kwargs
+    
     def form_valid(self, form):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         
-        # 새 마일스톤 생성
-        Milestone.objects.create(
-            team=team,
-            title=form.cleaned_data['title'],
-            description=form.cleaned_data['description'],
-            startdate=form.cleaned_data['startdate'],
-            enddate=form.cleaned_data['enddate'],
-            priority=form.cleaned_data['priority']
-        )
+        try:
+            # 새 마일스톤 생성
+            Milestone.objects.create(
+                team=team,
+                title=form.cleaned_data['title'],
+                description=form.cleaned_data['description'],
+                startdate=form.cleaned_data['startdate'],
+                enddate=form.cleaned_data['enddate'],
+                priority=form.cleaned_data['priority']
+            )
+            messages.success(self.request, '마일스톤이 성공적으로 추가되었습니다.')
+            return super().form_valid(form)
+            
+        except Exception as e:
+            # DB 저장 실패시 사용자 친화적 메시지
+            messages.error(self.request, f'마일스톤 저장에 실패했습니다: {str(e)}')
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        # 폼 검증 실패시 구체적 오류 메시지
+        error_messages = []
+        for field, errors in form.errors.items():
+            for error in errors:
+                if field == 'startdate':
+                    error_messages.append(f'시작일 오류: {error}')
+                elif field == 'enddate':
+                    error_messages.append(f'종료일 오류: {error}')
+                elif field == 'title':
+                    error_messages.append(f'제목 오류: {error}')
+                elif field == '__all__':
+                    error_messages.append(error)
+                else:
+                    error_messages.append(f'{field}: {error}')
         
-        messages.success(self.request, '마일스톤이 성공적으로 추가되었습니다.')
-        return super().form_valid(form)
+        if error_messages:
+            messages.error(self.request, ' / '.join(error_messages))
+        
+        return super().form_invalid(form)
 
 
 team_add_milestone = TeamAddMilestoneView.as_view()
