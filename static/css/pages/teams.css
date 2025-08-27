@@ -1408,3 +1408,204 @@
 .teamsearchsection a:active {
   text-decoration: none;
 }
+
+/* ==========================================================================
+   MILESTONE SUMMARY STYLES (Main Page)
+   ========================================================================== */
+
+.milestone-summary {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 마일스톤 통계 */
+.milestone-stats {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+/* 지연된 마일스톤 스타일 */
+.stat-overdue .stat-number {
+  color: #dc3545;
+}
+
+.stat-overdue .stat-label {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* 오늘 관련 마일스톤 */
+.today-milestones {
+  margin-bottom: 20px;
+}
+
+.today-milestones h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.today-milestones h4 i {
+  color: #007bff;
+  font-size: 18px;
+}
+
+.milestone-brief {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid #dee2e6;
+  background: #f8f9fa;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.milestone-brief:hover {
+  background: #e9ecef;
+}
+
+.milestone-brief.priority-critical {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+
+.milestone-brief.priority-high {
+  border-left-color: #fd7e14;
+  background: #fff8f0;
+}
+
+.milestone-brief.priority-medium {
+  border-left-color: #ffc107;
+  background: #fffbf0;
+}
+
+.milestone-brief.priority-low {
+  border-left-color: #28a745;
+  background: #f0fff4;
+}
+
+.milestone-brief .milestone-status i {
+  font-size: 16px;
+  color: #28a745;
+}
+
+.milestone-brief .milestone-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.milestone-title {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.milestone-dates {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* 마일스톤 액션 */
+.milestone-actions {
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.timeline-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.timeline-link:hover {
+  background: #0056b3;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.timeline-link i:first-child {
+  font-size: 18px;
+}
+
+.timeline-link i:last-child {
+  font-size: 14px;
+}
+
+/* 빈 마일스톤 상태 */
+.milestone-summary .no-milestones {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.milestone-summary .no-milestones i {
+  font-size: 48px;
+  color: #dee2e6;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.milestone-summary .no-milestones p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.add-milestone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.add-milestone-link:hover {
+  background: #1e7e34;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
