@@ -1,4 +1,5 @@
 {% extends 'base_app.html' %} {% load static %} {% block contents %}
+
 <section class="mainsection">
   {% if request.user.is_authenticated %}
   <div class="datediv">
@@ -8,23 +9,56 @@
     <!-- 마일스톤 요약 섹션 -->
     <div class="milestone-summary">
       {% if milestones %}
-        <div class="milestone-stats">
-          <div class="stat-item">
-            <span class="stat-number">{{ milestones|length }}</span>
-            <span class="stat-label">전체</span>
+        <div class="milestone-cards">
+          <div class="milestone-card card-total">
+            <div class="card-icon">
+              <i class="ri-bookmark-line"></i>
+            </div>
+            <div class="card-content">
+              <span class="card-number">{{ milestones|length }}</span>
+              <span class="card-label">전체</span>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-number">{{ active_milestones_count }}</span>
-            <span class="stat-label">진행 중</span>
+          
+          <div class="milestone-card card-not-started">
+            <div class="card-icon">
+              <i class="ri-pause-circle-line"></i>
+            </div>
+            <div class="card-content">
+              <span class="card-number">{{ not_started_count }}</span>
+              <span class="card-label">시작 전</span>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-number">{{ completed_milestones_count }}</span>
-            <span class="stat-label">완료됨</span>
+          
+          <div class="milestone-card card-in-progress">
+            <div class="card-icon">
+              <i class="ri-play-circle-line"></i>
+            </div>
+            <div class="card-content">
+              <span class="card-number">{{ in_progress_count }}</span>
+              <span class="card-label">진행 중</span>
+            </div>
           </div>
-          {% if overdue_milestones_count > 0 %}
-          <div class="stat-item stat-overdue">
-            <span class="stat-number">{{ overdue_milestones_count }}</span>
-            <span class="stat-label">지연됨</span>
+          
+          <div class="milestone-card card-completed">
+            <div class="card-icon">
+              <i class="ri-checkbox-circle-line"></i>
+            </div>
+            <div class="card-content">
+              <span class="card-number">{{ completed_count }}</span>
+              <span class="card-label">완료됨</span>
+            </div>
+          </div>
+          
+          {% if overdue_count > 0 %}
+          <div class="milestone-card card-overdue">
+            <div class="card-icon">
+              <i class="ri-error-warning-line"></i>
+            </div>
+            <div class="card-content">
+              <span class="card-number">{{ overdue_count }}</span>
+              <span class="card-label">지연됨</span>
+            </div>
           </div>
           {% endif %}
         </div>

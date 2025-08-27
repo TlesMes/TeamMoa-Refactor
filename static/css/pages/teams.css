@@ -1421,43 +1421,140 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* 마일스톤 통계 */
-.milestone-stats {
-  display: flex;
-  gap: 30px;
-  margin-bottom: 20px;
-  padding: 15px 0;
-  border-bottom: 1px solid #e9ecef;
+/* 마일스톤 카드 */
+.milestone-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
-.stat-item {
+.milestone-card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.milestone-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.card-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  gap: 4px;
+  flex: 1;
 }
 
-.stat-number {
-  font-size: 24px;
+.card-number {
+  font-size: 28px;
   font-weight: 700;
-  color: #2c3e50;
   line-height: 1;
 }
 
-.stat-label {
-  font-size: 12px;
-  color: #6c757d;
-  margin-top: 4px;
+.card-label {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
-/* 지연된 마일스톤 스타일 */
-.stat-overdue .stat-number {
-  color: #dc3545;
+/* 전체 카드 */
+.card-total .card-icon {
+  background: #f8f9fa;
+  color: #495057;
 }
 
-.stat-overdue .stat-label {
-  color: #dc3545;
+.card-total .card-number {
+  color: #495057;
+}
+
+/* 시작 전 카드 */
+.card-not-started .card-icon {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.card-not-started .card-number {
+  color: #1976d2;
+}
+
+/* 진행 중 카드 */
+.card-in-progress .card-icon {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.card-in-progress .card-number {
+  color: #2e7d32;
+}
+
+/* 완료됨 카드 */
+.card-completed .card-icon {
+  background: #e8f5e8;
+  color: #388e3c;
+}
+
+.card-completed .card-number {
+  color: #388e3c;
+}
+
+/* 지연됨 카드 */
+.card-overdue .card-icon {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.card-overdue .card-number {
+  color: #d32f2f;
+}
+
+.card-overdue .card-label {
+  color: #d32f2f;
   font-weight: 600;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .milestone-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .milestone-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .card-number {
+    font-size: 24px;
+  }
+  
+  .card-label {
+    font-size: 12px;
+  }
 }
 
 /* 오늘 관련 마일스톤 */

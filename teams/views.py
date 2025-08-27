@@ -158,7 +158,14 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
             elif status == 'overdue':
                 overdue_count += 1
         
-        context['active_milestones_count'] = in_progress_count + not_started_count  # 진행 중 + 시작 전
+        # 각 상태별 개수를 개별적으로 전달
+        context['not_started_count'] = not_started_count
+        context['in_progress_count'] = in_progress_count
+        context['completed_count'] = completed_count
+        context['overdue_count'] = overdue_count
+        
+        # 기존 변수들도 유지 (호환성)
+        context['active_milestones_count'] = in_progress_count + not_started_count
         context['completed_milestones_count'] = completed_count
         context['overdue_milestones_count'] = overdue_count
         

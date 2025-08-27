@@ -2264,3 +2264,218 @@ input:focus, textarea:focus, select:focus {
     align-items: center;
   }
 }
+
+/* ==========================================================================
+   TEAM MAIN PAGE - Milestone Cards (메인 페이지 마일스톤 카드)
+   ========================================================================== */
+
+.mainsection .milestone-summary {
+  background: var(--bg-primary);
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.mainsection .milestone-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.mainsection .milestone-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.mainsection .milestone-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: var(--accent-primary);
+}
+
+.mainsection .card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.mainsection .card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.mainsection .card-number {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.mainsection .card-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
+/* 상태별 카드 색상 */
+.mainsection .card-total .card-icon {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.mainsection .card-not-started .card-icon {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.mainsection .card-not-started .card-number {
+  color: #1976d2;
+}
+
+.mainsection .card-in-progress .card-icon {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.mainsection .card-in-progress .card-number {
+  color: #2e7d32;
+}
+
+.mainsection .card-completed .card-icon {
+  background: #e8f5e8;
+  color: #388e3c;
+}
+
+.mainsection .card-completed .card-number {
+  color: #388e3c;
+}
+
+.mainsection .card-overdue .card-icon {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.mainsection .card-overdue .card-number {
+  color: #d32f2f;
+}
+
+.mainsection .card-overdue .card-label {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+/* 타임라인 링크 */
+.mainsection .milestone-actions {
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.mainsection .timeline-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--accent-light);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.mainsection .timeline-link:hover {
+  background: #4d70f4;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.mainsection .timeline-link i:first-child {
+  font-size: 18px;
+}
+
+.mainsection .timeline-link i:last-child {
+  font-size: 14px;
+}
+
+/* 빈 마일스톤 상태 */
+.mainsection .no-milestones {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.mainsection .no-milestones i {
+  font-size: 48px;
+  color: var(--border-color);
+  display: block;
+  margin-bottom: 15px;
+}
+
+.mainsection .no-milestones p {
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.mainsection .add-milestone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.mainsection .add-milestone-link:hover {
+  background: #1e7e34;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .mainsection .milestone-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .mainsection .milestone-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .mainsection .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .mainsection .card-number {
+    font-size: 24px;
+  }
+  
+  .mainsection .card-label {
+    font-size: 12px;
+  }
+}
