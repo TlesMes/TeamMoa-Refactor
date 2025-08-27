@@ -161,14 +161,15 @@ class PostEditView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, TemplateVie
 post_edit_view = PostEditView.as_view()
 
 class PostDeleteView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, View):
-    def get(self, request, pk, post_id):
+    def post(self, request, pk, post_id):
+        team = get_object_or_404(Team, pk=pk)
         post = get_object_or_404(Post, id=post_id)
-        post_title = post.title
-        team_id = post.isTeams_id
         
+        post_title = post.title
         post.delete()
+        
         messages.success(request, f'게시글 "{post_title}"이 삭제되었습니다.')
-        return redirect(POST_LIST_PAGE, team_id)
+        return redirect(POST_LIST_PAGE, pk)
 
 
 post_delete_view = PostDeleteView.as_view()
