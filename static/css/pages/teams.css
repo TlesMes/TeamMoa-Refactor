@@ -1168,73 +1168,6 @@
   font-weight: 600;
 }
 
-/* ==========================================================================
-   DEV PHASE STYLES
-   ========================================================================== */
-
-.devphasesection {
-  font-family: "GmarketSansMedium", sans-serif;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 83vh;
-}
-
-.devphasesection > div {
-  position: relative;
-}
-
-.devphasesection .changediv {
-  margin-top: 30px;
-}
-
-.devphasesection h3 {
-  font-size: 21px;
-  color: #a6b0d0;
-}
-
-.devphasesection input {
-  margin-top: 10px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 10px;
-  background-color: #fff;
-  padding: 15px;
-  width: 480px;
-  font-size: 20px;
-  color: #465173;
-  font-family: "GmarketSansMedium", sans-serif;
-  font-weight: normal;
-}
-
-.devphasesection textarea {
-  margin-top: 10px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 10px;
-  background-color: #fff;
-  padding: 15px;
-  width: 480px;
-  font-size: 20px;
-  color: #465173;
-  font-family: "GmarketSansMedium", sans-serif;
-  font-weight: normal;
-}
-
-.devphasesection button {
-  display: block;
-  margin: auto;
-  margin-top: 20px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
-  background: #a6b0d0;
-  color: #fff;
-  font-size: 22px;
-  font-weight: 600;
-}
 
 /* ==========================================================================
    SHARED TEAM STYLES
@@ -1245,8 +1178,7 @@
 .teamlistsection button:hover,
 .teamjoinsection button:hover,
 .teamsearchsection button:hover,
-.infosection button:hover,
-.devphasesection button:hover {
+.infosection button:hover {
   cursor: pointer;
   background-color: #7f8bb1;
 }
@@ -1255,14 +1187,12 @@
 .teamcreatesection a:hover,
 .teamsearchsection a:hover,
 .infosection a:hover path,
-.teamjoinsection a:hover path,
-.devphasesection a:hover path {
+.teamjoinsection a:hover path {
   color: #7f8bb1;
 }
 
 .infosection a:hover path,
-.teamjoinsection a:hover path,
-.devphasesection a:hover path {
+.teamjoinsection a:hover path {
   fill: #7f8bb1;
 }
 
