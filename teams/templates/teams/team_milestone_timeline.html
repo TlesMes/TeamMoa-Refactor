@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const startPos = (startMonth * 400) + ((startDay - 1) * 13); // startDay-1로 수정
         const endPos = (endMonth * 400) + (endDay * 13); // endDay는 그대로 (끝나는 날까지 포함)
-        const width = Math.max(endPos - startPos, 13); // 최소 1일(13px)
+        const width = endPos - startPos
         
         // 마일스톤 바 위치 설정
         milestoneBar.style.position = 'absolute';
