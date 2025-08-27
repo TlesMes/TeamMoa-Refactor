@@ -75,6 +75,10 @@ class ChangeTeamInfoForm(forms.ModelForm):
     
 
 class AddMilestoneForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.team = kwargs.pop('team', None)
+        super().__init__(*args, **kwargs)
+    
     class Meta:
         model = Milestone
         fields = ['title', 'description', 'startdate', 'enddate', 'priority']
@@ -113,9 +117,27 @@ class AddMilestoneForm(forms.ModelForm):
         cleaned_data = super().clean()
         startdate = cleaned_data.get('startdate')
         enddate = cleaned_data.get('enddate')
+        title = cleaned_data.get('title')
         
+        # 날짜 검증
         if startdate and enddate:
             if startdate >= enddate:
                 raise ValidationError('시작일은 종료일보다 이전이어야 합니다.')
+            
+            # 너무 긴 기간 검증 (1년 이상)
+            duration = (enddate - startdate).days
+            if duration > 365:
+                raise ValidationError('마일스톤 기간은 1년을 초과할 수 없습니다.')
+            elif duration == 0:
+                raise ValidationError('마일스톤은 최소 1일 이상이어야 합니다.')
+        
+        # 제목 길이 검증
+        if title and len(title.strip()) < 2:
+            raise ValidationError('마일스톤 제목은 최소 2글자 이상 입력해주세요.')
+            
+        # 제목 중복 검증 (같은 팀 내에서)
+        if title and self.team:
+            if Milestone.objects.filter(team=self.team, title=title.strip()).exists():
+                raise ValidationError('같은 이름의 마일스톤이 이미 존재합니다.')
         
         return cleaned_data
