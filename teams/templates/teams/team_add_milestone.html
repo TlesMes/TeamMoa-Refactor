@@ -8,8 +8,8 @@
       <a href="{% url 'teams:team_main_page' team.id %}" class="back-btn">
         <i class="ri-arrow-left-line"></i>
       </a>
-      <h2>개발 단계 추가</h2>
-      <p>팀의 새로운 개발 단계를 등록하세요</p>
+      <h2>마일스톤 추가</h2>
+      <p>팀의 새로운 마일스톤을 등록하세요</p>
     </div>
 
     <div class="info-section">
@@ -18,8 +18,8 @@
           <i class="ri-calendar-todo-line"></i>
         </div>
         <div class="phase-description">
-          <h4>개발 단계 등록</h4>
-          <p>프로젝트의 진행 상황을 체계적으로 관리할 수 있습니다. 각 단계별로 기간과 목표를 설정해보세요.</p>
+          <h4>마일스톤 등록</h4>
+          <p>프로젝트의 주요 목표를 체계적으로 관리할 수 있습니다. 우선순위와 진행률을 설정해보세요.</p>
         </div>
       </div>
     </div>
@@ -60,49 +60,79 @@
       </div>
 
       <div class="form-group">
-        <label for="id_content">개발 단계 내용</label>
+        <label for="id_title">마일스톤 제목</label>
+        <div class="input-wrapper">
+          <i class="ri-flag-line"></i>
+          {{ form.title }}
+        </div>
+        {% if form.title.errors %}
+          <div class="field-error">
+            {% for error in form.title.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description">마일스톤 설명</label>
         <div class="textarea-wrapper">
           <i class="ri-file-text-line"></i>
-          {{ form.content }}
+          {{ form.description }}
         </div>
-        {% if form.content.errors %}
+        {% if form.description.errors %}
           <div class="field-error">
-            {% for error in form.content.errors %}
+            {% for error in form.description.errors %}
               <span>{{ error }}</span>
             {% endfor %}
           </div>
         {% endif %}
         <div class="help-text">
-          <small>이 단계에서 달성하고자 하는 목표나 주요 작업 내용을 작성해주세요</small>
+          <small>이 마일스톤에서 달성하고자 하는 목표나 주요 작업 내용을 작성해주세요</small>
         </div>
       </div>
 
-      <div class="phase-examples">
-        <h5>개발 단계 예시</h5>
+      <div class="form-group">
+        <label for="id_priority">우선순위</label>
+        <div class="input-wrapper">
+          <i class="ri-star-line"></i>
+          {{ form.priority }}
+        </div>
+        {% if form.priority.errors %}
+          <div class="field-error">
+            {% for error in form.priority.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="milestone-examples">
+        <h5>마일스톤 예시</h5>
         <div class="examples-grid">
           <div class="example-item">
             <i class="ri-lightbulb-line"></i>
-            <span>기획 및 설계</span>
+            <span>MVP 개발 완료</span>
           </div>
           <div class="example-item">
-            <i class="ri-code-line"></i>
-            <span>프론트엔드 개발</span>
+            <i class="ri-user-line"></i>
+            <span>사용자 인증 시스템 구현</span>
           </div>
           <div class="example-item">
-            <i class="ri-server-line"></i>
-            <span>백엔드 API 구현</span>
+            <i class="ri-database-line"></i>
+            <span>데이터베이스 설계 완료</span>
           </div>
           <div class="example-item">
             <i class="ri-bug-line"></i>
-            <span>테스트 및 버그 수정</span>
+            <span>베타 테스트 진행</span>
           </div>
           <div class="example-item">
             <i class="ri-rocket-line"></i>
-            <span>배포 및 운영</span>
+            <span>서비스 공개 런칭</span>
           </div>
           <div class="example-item">
-            <i class="ri-tools-line"></i>
-            <span>유지보수</span>
+            <i class="ri-award-line"></i>
+            <span>목표 사용자 수 달성</span>
           </div>
         </div>
       </div>
@@ -110,7 +140,7 @@
       <div class="form-actions">
         <button type="submit" class="create-btn">
           <i class="ri-add-line"></i>
-          개발 단계 추가
+          마일스톤 추가
         </button>
         <a href="{% url 'teams:team_main_page' team.id %}" class="cancel-btn">
           <i class="ri-close-line"></i>

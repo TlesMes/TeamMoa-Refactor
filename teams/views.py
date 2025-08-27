@@ -11,8 +11,8 @@ from django.views import View
 from django.views.generic.detail import DetailView
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-from .models import DevPhase, Team, TeamUser
-from .forms import AddPhaseForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
+from .models import Milestone, Team, TeamUser
+from .forms import AddMilestoneForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
 from common.mixins import TeamMemberRequiredMixin, TeamHostRequiredMixin
 import uuid
 import base64
@@ -134,18 +134,18 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
         team = self.get_object()
         
         context['members'] = TeamUser.objects.filter(team=team)
-        context['phases'] = DevPhase.objects.filter(team=team).order_by('startdate')
+        context['milestones'] = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
         context['today_date'] = datetime.now().date()
         
-        # 오늘 진행 중인 일정 찾기
-        today_phase = '일정이 없습니다.'
-        for phase in context['phases']:
-            if phase.startdate <= context['today_date'] < phase.enddate:
-                left = phase.enddate - context['today_date']
-                today_phase = f'{phase.content}, {left.days}일 남았습니다'
-                break
+        # 오늘 진행 중인 마일스톤 찾기
+        today_milestone = '진행 중인 마일스톤이 없습니다.'
+        active_milestones = [m for m in context['milestones'] if not m.is_completed and m.startdate <= context['today_date'] <= m.enddate]
+        if active_milestones:
+            milestone = active_milestones[0]
+            left = milestone.enddate - context['today_date']
+            today_milestone = f'{milestone.title}, {left.days}일 남았습니다'
         
-        context['today_phase'] = today_phase
+        context['today_milestone'] = today_milestone
         return context
 
 
@@ -167,9 +167,9 @@ team_info_change = TeamInfoChangeView.as_view()
 
 
 
-class TeamAddDevPhaseView(TeamHostRequiredMixin, FormView):
-    template_name = 'teams/team_add_devPhase.html'
-    form_class = AddPhaseForm
+class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
+    template_name = 'teams/team_add_milestone.html'
+    form_class = AddMilestoneForm
     
     def get_success_url(self):
         return reverse('teams:team_main_page', kwargs={'pk': self.kwargs['pk']})
@@ -181,45 +181,36 @@ class TeamAddDevPhaseView(TeamHostRequiredMixin, FormView):
     
     def form_valid(self, form):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        start = form.cleaned_data['startdate']
-        end = form.cleaned_data['enddate']
         
-        # 기간 중복 검사
-        existing_phases = DevPhase.objects.filter(team=team)
-        for phase in existing_phases:
-            if (phase.startdate < start < phase.enddate or 
-                phase.startdate < end < phase.enddate or
-                start <= phase.startdate < end):
-                messages.error(self.request, '개발 기간이 중복됩니다.')
-                return self.form_invalid(form)
-        
-        # 새 개발 단계 생성
-        DevPhase.objects.create(
+        # 새 마일스톤 생성
+        Milestone.objects.create(
             team=team,
-            content=form.cleaned_data['content'],
-            startdate=start,
-            enddate=end
+            title=form.cleaned_data['title'],
+            description=form.cleaned_data['description'],
+            startdate=form.cleaned_data['startdate'],
+            enddate=form.cleaned_data['enddate'],
+            priority=form.cleaned_data['priority']
         )
         
-        messages.success(self.request, '개발 단계가 성공적으로 추가되었습니다.')
+        messages.success(self.request, '마일스톤이 성공적으로 추가되었습니다.')
         return super().form_valid(form)
 
 
-team_add_devPhase = TeamAddDevPhaseView.as_view()
+team_add_milestone = TeamAddMilestoneView.as_view()
 
-class TeamDeleteDevPhaseView(TeamHostRequiredMixin, View):
-    def post(self, request, pk, phase_id):
+class TeamDeleteMilestoneView(TeamHostRequiredMixin, View):
+    def post(self, request, pk, milestone_id):
         team = get_object_or_404(Team, pk=pk)
-        phase = get_object_or_404(DevPhase, pk=phase_id)
+        milestone = get_object_or_404(Milestone, pk=milestone_id)
         
-        phase_content = phase.content
-        phase.delete()
+        milestone_title = milestone.title
+        milestone.delete()
         
-        messages.success(request, f'개발 단계 "{phase_content}"가 성공적으로 삭제되었습니다.')
+        messages.success(request, f'마일스톤 "{milestone_title}"가 성공적으로 삭제되었습니다.')
         return redirect('teams:team_main_page', pk=pk)
 
 
-team_delete_devPhase = TeamDeleteDevPhaseView.as_view()
+team_delete_milestone = TeamDeleteMilestoneView.as_view()
 
 
 class TeamDisbandView(TeamHostRequiredMixin, View):

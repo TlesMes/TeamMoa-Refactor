@@ -641,6 +641,137 @@
   fill: #7f8bb1;
 }
 
+/* ==========================================================================
+   MILESTONE STYLES
+   ========================================================================== */
+
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  border-radius: 10px;
+  background: #fff;
+  border-left: 4px solid #ddd;
+  transition: all 0.2s ease;
+}
+
+.milestone-item:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.milestone-item.completed {
+  background: #f8fff8;
+  border-left-color: #28a745;
+  opacity: 0.8;
+}
+
+/* Priority colors */
+.milestone-item.priority-critical {
+  border-left-color: #dc3545;
+}
+
+.milestone-item.priority-high {
+  border-left-color: #fd7e14;
+}
+
+.milestone-item.priority-medium {
+  border-left-color: #ffc107;
+}
+
+.milestone-item.priority-low {
+  border-left-color: #007bff;
+}
+
+.milestone-item.priority-minimal {
+  border-left-color: #6c757d;
+}
+
+.milestone-status {
+  margin-right: 15px;
+  font-size: 20px;
+  color: #28a745;
+}
+
+.milestone-status i {
+  color: #6c757d;
+}
+
+.milestone-item.completed .milestone-status i {
+  color: #28a745;
+}
+
+.milestone-content {
+  flex: 1;
+}
+
+.milestone-content h4 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.milestone-content p {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.milestone-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 12px;
+}
+
+.priority {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priority.priority-critical {
+  background: #fee;
+  color: #dc3545;
+}
+
+.priority.priority-high {
+  background: #fff3cd;
+  color: #fd7e14;
+}
+
+.priority.priority-medium {
+  background: #fff9db;
+  color: #ffc107;
+}
+
+.priority.priority-low {
+  background: #e7f3ff;
+  color: #007bff;
+}
+
+.priority.priority-minimal {
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.dates {
+  color: #8a98b4;
+  font-weight: 500;
+}
+
 /* Common link states */
 .teamcreatesection a:visited,
 .teamcreatesection a:hover,

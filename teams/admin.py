@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DevPhase, Team, TeamUser
+from .models import Milestone, Team, TeamUser
 # Register your models here.
 
 class TeamAdmin(admin.ModelAdmin):
@@ -22,4 +22,4 @@ class TeamAdmin(admin.ModelAdmin):
 admin.site.register(Team,TeamAdmin)
 
 admin.site.register(TeamUser)
-admin.site.register(DevPhase)
+admin.site.register(Milestone)
