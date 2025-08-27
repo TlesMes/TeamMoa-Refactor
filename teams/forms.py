@@ -2,7 +2,7 @@ from dataclasses import field
 import datetime
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import DevPhase, Team, TeamUser
+from .models import Milestone, Team, TeamUser
 
 class CreateTeamForm(forms.ModelForm):
     class Meta:
@@ -74,21 +74,39 @@ class ChangeTeamInfoForm(forms.ModelForm):
         return maxuser
     
 
-class AddPhaseForm(forms.ModelForm):
+class AddMilestoneForm(forms.ModelForm):
     class Meta:
-        model = DevPhase
-        fields = ['startdate','enddate','content']
+        model = Milestone
+        fields = ['title', 'description', 'startdate', 'enddate', 'priority']
         widgets = {
-            'startdate' : forms.DateTimeInput(
-            attrs={
-                'type': 'date',
-                'class' : 'form-control'
-            }),
-            'enddate' : forms.DateTimeInput(
-            attrs={
-                'type': 'date',
-                'class' : 'form-control'
-            })
+            'title': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': '마일스톤 제목'
+                }
+            ),
+            'description': forms.Textarea(
+                attrs={
+                    'class': 'form-control', 
+                    'rows': 3,
+                    'placeholder': '마일스톤 설명'
+                }
+            ),
+            'startdate': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control'
+                }
+            ),
+            'enddate': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control'
+                }
+            ),
+            'priority': forms.Select(
+                attrs={'class': 'form-control'}
+            )
         }
     
     def clean(self):

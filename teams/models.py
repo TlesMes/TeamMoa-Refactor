@@ -13,7 +13,7 @@ class Team(models.Model):
     members = models.ManyToManyField('accounts.User', related_name='joined_teams', through="TeamUser")
     host = models.ForeignKey('accounts.User', on_delete=models.CASCADE) #호스트 유저 지정 
     
-    # dev_phase는 별도 DevPhase 모델로 관리됨
+    # milestone은 별도 Milestone 모델로 관리됨
 
     invitecode = models.CharField(max_length=16)
     teampasswd = models.TextField()
@@ -57,11 +57,25 @@ class TeamUser(models.Model):
     def __str__(self):  # admin에서 표시될 user 필드 정보 설정
         return self.user.nickname
 
-class DevPhase(models.Model):
-    team = models.ForeignKey('Team',on_delete = models.CASCADE)
-    content = models.TextField()
+class Milestone(models.Model):
+    team = models.ForeignKey('Team', on_delete=models.CASCADE)
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
     startdate = models.DateField()
     enddate = models.DateField()
+    is_completed = models.BooleanField(default=False)
+    completed_date = models.DateTimeField(null=True, blank=True)
+    progress_percentage = models.IntegerField(default=0)
+    priority = models.CharField(max_length=20, choices=[
+        ('critical', '매우 중요'),
+        ('high', '중요'), 
+        ('medium', '보통'),
+        ('low', '낮음'),
+        ('minimal', '미미')
+    ], default='medium')
+
+    class Meta:
+        ordering = ['-priority', 'enddate']
 
     def __str__(self):
-        return self.content
+        return self.title

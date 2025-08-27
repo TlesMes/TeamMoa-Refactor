@@ -3,22 +3,40 @@
   {% if request.user.is_authenticated %}
   <div class="datediv">
     <h2>
-      {{today_date|date:'오늘은 Y년 m월 d일'}}, <span>{{today_phase}}</span>
+      {{today_date|date:'오늘은 Y년 m월 d일'}}, <span>{{today_milestone}}</span>
     </h2>
-    <div class="phase-list">
-      {% for phase in phases %}
-      <div class="phase-item">
-        <img src="../../../static/assets/img/Check.svg" alt="Check" />
-        <div class="phase-content">
-          {{phase.content}} : {{phase.startdate|date:'Y-m-d'}} ~ {{phase.enddate|date:'Y-m-d'}}
+    <div class="milestone-list">
+      {% for milestone in milestones %}
+      <div class="milestone-item {% if milestone.is_completed %}completed{% endif %} priority-{{ milestone.priority }}">
+        <div class="milestone-status">
+          {% if milestone.is_completed %}
+            <i class="ri-checkbox-circle-fill"></i>
+          {% else %}
+            <i class="ri-checkbox-blank-circle-line"></i>
+          {% endif %}
+        </div>
+        <div class="milestone-content">
+          <h4>{{ milestone.title }}</h4>
+          <p>{{ milestone.description }}</p>
+          <div class="milestone-meta">
+            <span class="priority priority-{{ milestone.priority }}">
+              {% if milestone.priority == 'critical' %}매우 중요
+              {% elif milestone.priority == 'high' %}중요
+              {% elif milestone.priority == 'medium' %}보통
+              {% elif milestone.priority == 'low' %}낮음
+              {% else %}미미
+              {% endif %}
+            </span>
+            <span class="dates">{{ milestone.startdate|date:'Y-m-d' }} ~ {{ milestone.enddate|date:'Y-m-d' }}</span>
+          </div>
         </div>
         {% if team.host == request.user %}
-        <form method="POST" action="/teams/team_delete_devPhase/{{ team.id }}/{{ phase.id }}" style="display: inline;">
+        <form method="POST" action="{% url 'teams:team_delete_milestone' team.id milestone.id %}" style="display: inline;">
           {% csrf_token %}
           <button
             type="submit"
             class="deletebtn"
-            onclick="return confirm('이 개발단계를 삭제하시겠습니까?')"
+            onclick="return confirm('이 마일스톤을 삭제하시겠습니까?')"
           >
             <svg
               width="14"
@@ -64,7 +82,7 @@
       </div>
       <div class="editdiv">
         {% if request.user == team.host %}
-        <a href="{% url 'teams:team_add_devPhase' team.id %}">
+        <a href="{% url 'teams:team_add_milestone' team.id %}">
           <button class="plusbtn">개발 단계 추가</button>
         </a>
         <a href="{% url 'teams:team_info_change' team.id %}">
