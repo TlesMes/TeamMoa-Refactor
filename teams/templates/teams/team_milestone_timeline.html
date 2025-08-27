@@ -217,6 +217,30 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
     
+    // 날짜를 디스플레이용으로 포맷팅
+    function formatDateForDisplay(date) {
+        return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
+    
+    // 픽셀 위치를 가장 가까운 일(day) 단위로 스냅
+    function snapToDay(pixel) {
+        // 어느 월에 속하는지 찾기
+        let month = 0;
+        for (let m = 0; m < 12; m++) {
+            if (pixel >= monthOffsets[m] && (m === 11 || pixel < monthOffsets[m + 1])) {
+                month = m;
+                break;
+            }
+        }
+        
+        // 해당 월 내에서의 일수 계산하고 반올림
+        const pixelInMonth = pixel - monthOffsets[month];
+        const dayInMonth = Math.round(pixelInMonth / dayWidth);
+        const validDay = Math.min(Math.max(dayInMonth, 0), monthDays[month] - 1);
+        
+        return monthOffsets[month] + (validDay * dayWidth);
+    }
+    
     milestoneItems.forEach(item => {
         const startDate = new Date(item.dataset.start);
         const endDate = new Date(item.dataset.end);
@@ -273,6 +297,23 @@ document.addEventListener('DOMContentLoaded', function() {
             milestoneBar.style.zIndex = '1000';
         });
         
+        // 날짜 툴팁 요소 생성
+        const tooltip = document.createElement('div');
+        tooltip.className = 'date-tooltip';
+        tooltip.style.cssText = `
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+            white-space: nowrap;
+        `;
+        document.body.appendChild(tooltip);
+
         // 마우스 이동 이벤트
         document.addEventListener('mousemove', function(e) {
             if (!isDragging) return;
@@ -281,22 +322,57 @@ document.addEventListener('DOMContentLoaded', function() {
             const scrollContainer = document.querySelector('.timeline-scroll-area');
             const scrollOffset = scrollContainer.scrollLeft;
             
+            let newLeft, newWidth;
+            
             if (dragType === 'move') {
-                // 전체 이동
-                const newLeft = Math.max(0, Math.min(totalWidth, originalLeft + deltaX));
+                // 전체 이동 - 스냅 적용
+                const rawLeft = originalLeft + deltaX;
+                const snappedPixel = snapToDay(rawLeft);
+                newLeft = Math.max(0, Math.min(totalWidth - parseInt(milestoneBar.style.width), snappedPixel));
                 milestoneBar.style.left = newLeft + 'px';
+                
+                // 툴팁 업데이트 (시작일과 종료일)
+                const snappedDate = pixelToDate(newLeft);
+                const endPixel = newLeft + parseInt(milestoneBar.style.width);
+                const endDate = new Date(pixelToDate(endPixel));
+                endDate.setDate(endDate.getDate() - 1);
+                
+                tooltip.textContent = `${formatDateForDisplay(snappedDate)} - ${formatDateForDisplay(endDate)}`;
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY - 30) + 'px';
+                tooltip.style.display = 'block';
                 
             } else if (dragType === 'resize-start') {
-                // 시작점 리사이즈
-                const newLeft = Math.max(0, originalLeft + deltaX);
-                const newWidth = Math.max(dayWidth, originalWidth - deltaX); // 최소 1일
+                // 시작점 리사이즈 - 스냅 적용
+                const rawLeft = originalLeft + deltaX;
+                const snappedLeft = snapToDay(rawLeft);
+                newLeft = Math.max(0, snappedLeft);
+                newWidth = Math.max(dayWidth, (originalLeft + originalWidth) - newLeft);
                 milestoneBar.style.left = newLeft + 'px';
                 milestoneBar.style.width = newWidth + 'px';
                 
+                // 툴팁 업데이트 (새 시작일)
+                const snappedDate = pixelToDate(newLeft);
+                tooltip.textContent = `시작: ${formatDateForDisplay(snappedDate)}`;
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY - 30) + 'px';
+                tooltip.style.display = 'block';
+                
             } else if (dragType === 'resize-end') {
-                // 종료점 리사이즈
-                const newWidth = Math.max(dayWidth, originalWidth + deltaX); // 최소 1일
+                // 종료점 리사이즈 - 스냅 적용
+                const rawRight = originalLeft + originalWidth + deltaX;
+                const snappedRight = snapToDay(rawRight);
+                newWidth = Math.max(dayWidth, snappedRight - originalLeft);
                 milestoneBar.style.width = newWidth + 'px';
+                
+                // 툴팁 업데이트 (새 종료일)
+                const endPixel = originalLeft + newWidth;
+                const endDate = new Date(pixelToDate(endPixel));
+                endDate.setDate(endDate.getDate() - 1);
+                tooltip.textContent = `종료: ${formatDateForDisplay(endDate)}`;
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY - 30) + 'px';
+                tooltip.style.display = 'block';
             }
         });
         
@@ -308,6 +384,9 @@ document.addEventListener('DOMContentLoaded', function() {
             milestoneBar.style.opacity = '1';
             milestoneBar.style.zIndex = 'auto';
             milestoneBar.style.cursor = 'move';
+            
+            // 툴팁 숨기기
+            tooltip.style.display = 'none';
             
             // 새로운 날짜 계산
             const newLeft = parseInt(milestoneBar.style.left);
@@ -335,19 +414,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // 마일스톤 업데이트 AJAX 함수
     function updateMilestone(milestoneId, data) {
         console.log('AJAX 요청 시작:', {
-            url: `/teams/{{ team.id }}/milestone/${milestoneId}/update/`,
+            url: `/teams/team/{{ team.id }}/milestone/${milestoneId}/update/`,
             data: data
         });
-        fetch(`/teams/{{ team.id }}/milestone/${milestoneId}/update/`, {
+        fetch(`/teams/team/{{ team.id }}/milestone/${milestoneId}/update/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}'
+                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('응답 상태:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(result => {
+            console.log('서버 응답:', result);
             if (result.success) {
                 console.log('마일스톤 업데이트 성공:', result.message);
                 // 좌측 정보 패널의 날짜 정보도 업데이트
@@ -365,8 +451,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('마일스톤 업데이트 중 오류가 발생했습니다.');
+            console.error('네트워크 또는 파싱 에러:', error);
+            console.error('에러 스택:', error.stack);
+            alert(`마일스톤 업데이트 중 오류가 발생했습니다: ${error.message}`);
             location.reload();
         });
     }
