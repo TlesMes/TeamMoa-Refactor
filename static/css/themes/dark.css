@@ -375,11 +375,10 @@ body {
 }
 
 /* ==========================================================================
-   Info Change & Dev Phase Styles (Dark)
+   Info Change Styles (Dark)
    ========================================================================== */
 
-.infosection,
-.devphasesection {
+.infosection {
   font-family: "GmarketSansMedium", sans-serif;
   display: flex;
   flex-direction: column;
@@ -391,8 +390,7 @@ body {
   color: var(--dark-text-primary);
 }
 
-.infosection > div,
-.devphasesection > div {
+.infosection > div {
   position: relative;
 }
 
@@ -400,16 +398,14 @@ body {
   margin-top: 30px;
 }
 
-.infosection label,
-.devphasesection label {
+.infosection label {
   color: var(--dark-text-muted);
   display: block;
   margin-bottom: 5px;
 }
 
 .infosection input,
-.infosection textarea,
-.devphasesection input {
+.infosection textarea {
   margin-top: 10px;
   margin-bottom: 20px;
   border: none;
@@ -423,8 +419,7 @@ body {
   font-weight: normal;
 }
 
-.infosection button,
-.devphasesection button {
+.infosection button {
   display: block;
   margin: auto;
   margin-top: 30px;
@@ -437,8 +432,7 @@ body {
   font-weight: 600;
 }
 
-.infosection button:hover,
-.devphasesection button:hover {
+.infosection button:hover {
   cursor: pointer;
   background-color: var(--dark-accent-hover);
 }
