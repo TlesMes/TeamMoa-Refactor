@@ -460,7 +460,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 오늘 날짜 마커 추가
     function addTodayMarker() {
+        // 로컬 시간대의 오늘 날짜 (시간 정보 제거 후 다음날로)
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        today.setDate(today.getDate() + 1); // 다음날로 설정
         const todayPixel = dateToPixel(today);
         
         const todayMarker = document.createElement('div');
@@ -471,10 +474,10 @@ document.addEventListener('DOMContentLoaded', function() {
             top: 0;
             bottom: 0;
             width: 3px;
-            background: #ff4444;
+            background: #10b981;
             z-index: 100;
             pointer-events: none;
-            box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
         `;
         
         // 오늘 날짜 레이블
@@ -485,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
             position: absolute;
             left: ${todayPixel + 8}px;
             top: 10px;
-            background: #ff4444;
+            background: #10b981;
             color: white;
             padding: 4px 8px;
             border-radius: 12px;
@@ -499,12 +502,16 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollContent.appendChild(todayMarker);
         scrollContent.appendChild(todayLabel);
         
+        console.log(`오늘 날짜: ${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')}`);
         console.log(`오늘 날짜 마커 추가: ${todayPixel}px`);
     }
     
     // 페이지 로드 시 현재 날짜 위치로 스크롤
     function scrollToCurrentDate() {
+        // 로컬 시간대의 오늘 날짜 (시간 정보 제거 후 다음날로)
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        today.setDate(today.getDate() + 1); // 다음날로 설정
         const todayPixel = dateToPixel(today);
         const scrollContainer = document.querySelector('.timeline-scroll-area');
         
