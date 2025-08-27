@@ -284,12 +284,24 @@ class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
             updated_fields = []
             
             if 'startdate' in data:
-                milestone.startdate = data['startdate']
-                updated_fields.append('시작일')
+                try:
+                    milestone.startdate = datetime.strptime(data['startdate'], '%Y-%m-%d').date()
+                    updated_fields.append('시작일')
+                except ValueError:
+                    return JsonResponse({
+                        'success': False,
+                        'message': '시작일 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)'
+                    }, status=400)
                 
             if 'enddate' in data:
-                milestone.enddate = data['enddate']
-                updated_fields.append('종료일')
+                try:
+                    milestone.enddate = datetime.strptime(data['enddate'], '%Y-%m-%d').date()
+                    updated_fields.append('종료일')
+                except ValueError:
+                    return JsonResponse({
+                        'success': False,
+                        'message': '종료일 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)'
+                    }, status=400)
                 
             if 'progress_percentage' in data:
                 progress = int(data['progress_percentage'])
