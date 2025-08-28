@@ -424,6 +424,18 @@
   background: #fee2e2;
 }
 
+/* Permission-based visual feedback */
+.todo-card.no-drag-permission,
+.assigned-todo.no-drag-permission {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.todo-card.no-drag-permission:hover,
+.assigned-todo.no-drag-permission:hover {
+  transform: none;
+  box-shadow: none;
+}
 
 /* Responsive Design */
 @media (max-width: 1024px) {
@@ -593,35 +605,100 @@ document.addEventListener('DOMContentLoaded', function() {
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   let draggedTodo = null;
   
+  // 권한 정보
+  const currentUserId = {{ request.user.id }};
+  const isHost = {{ is_host|yesno:"true,false" }};
+  const memberPermissions = {
+    {% for member_data in members_data %}
+    {{ member_data.member.id }}: {
+      userId: {{ member_data.member.user.id }},
+      isCurrentUser: {{ member_data.member.user.id }} === currentUserId
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  };
+  
+  // 권한 체크 함수들
+  function canAssignToMember(memberId) {
+    // 팀장은 모든 멤버에게 할당 가능
+    if (isHost) return true;
+    
+    // 일반 멤버는 자신에게만 할당 가능
+    return memberPermissions[memberId] && memberPermissions[memberId].isCurrentUser;
+  }
+  
+  function canMoveTodo(todoElement) {
+    // 팀장은 모든 할일 조작 가능
+    if (isHost) return true;
+    
+    // 미할당 할일은 누구나 자신에게 할당 가능
+    if (todoElement.classList.contains('todo-card')) return true;
+    
+    // 할당된 할일은 본인 것만 조작 가능
+    if (todoElement.classList.contains('assigned-todo')) {
+      const memberCard = todoElement.closest('.member-card');
+      if (memberCard) {
+        const memberId = memberCard.dataset.memberId;
+        return memberPermissions[memberId] && memberPermissions[memberId].isCurrentUser;
+      }
+    }
+    
+    return false;
+  }
+  
   // Drag & Drop for Todo Cards
   const todoCards = document.querySelectorAll('.draggable');
   const memberCards = document.querySelectorAll('.member-card.drop-zone');
   const todoBoard = document.getElementById('todo-board');
   const todosLists = document.querySelectorAll('.todos-list');
   
+  // 초기 권한 기반 시각적 피드백 설정
+  todoCards.forEach(card => {
+    if (!canMoveTodo(card)) {
+      card.classList.add('no-drag-permission');
+      card.setAttribute('draggable', 'false');
+    }
+  });
+  
   // Drag start - for both unassigned and assigned todos
   todoCards.forEach(card => {
     card.addEventListener('dragstart', function(e) {
+      // 권한 체크 - 드래그할 수 없는 경우 막기
+      if (!canMoveTodo(this)) {
+        e.preventDefault();
+        return;
+      }
+      
       draggedTodo = this;
       this.classList.add('dragging');
       
-      // Add visual feedback based on source
+      // Add visual feedback based on source and permissions
       if (this.classList.contains('todo-card')) {
-        // From todo board - highlight only member drop zones (not todo board itself)
+        // From todo board - highlight only allowed member drop zones
         memberCards.forEach(member => {
-          member.classList.add('drop-zone-active');
+          const memberId = member.dataset.memberId;
+          if (canAssignToMember(memberId)) {
+            member.classList.add('drop-zone-active');
+          }
         });
       } else if (this.classList.contains('assigned-todo')) {
-        // From assigned todos - highlight todo board and other member zones (exclude current member)
-        todoBoard.classList.add('drop-zone-active');
+        // From assigned todos - highlight allowed destinations only
         
-        // Find current member (source of drag)
+        // 할 일 보드로 되돌리기는 본인 할일이거나 팀장만 가능
         const currentMemberCard = this.closest('.member-card');
+        const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
         
+        if (isHost || (currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
+          todoBoard.classList.add('drop-zone-active');
+        }
+        
+        // 다른 멤버에게 재할당 - 권한에 따라
         memberCards.forEach(member => {
-          // Don't highlight the member card that contains this todo
+          // 현재 멤버 카드는 제외
           if (member !== currentMemberCard) {
-            member.classList.add('drop-zone-active');
+            const memberId = member.dataset.memberId;
+            if (canAssignToMember(memberId)) {
+              member.classList.add('drop-zone-active');
+            }
           }
         });
       }
@@ -645,7 +722,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Drop zones - Member cards
   memberCards.forEach(member => {
     member.addEventListener('dragover', function(e) {
-      e.preventDefault();
+      // 권한이 있는 드롭 존만 허용
+      const memberId = this.dataset.memberId;
+      if (draggedTodo && canAssignToMember(memberId)) {
+        e.preventDefault();
+      }
     });
     
     member.addEventListener('drop', function(e) {
@@ -654,6 +735,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (draggedTodo) {
         const todoId = draggedTodo.dataset.todoId;
         const memberId = this.dataset.memberId;
+        
+        // 권한 체크
+        if (!canAssignToMember(memberId)) {
+          console.log('Permission denied - cannot assign to this member');
+          return;
+        }
         
         // Check if dropping on the same member (avoid unnecessary Ajax)
         const currentMemberCard = draggedTodo.closest('.member-card');
@@ -669,7 +756,15 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Drop zone - Todo Board (for returning assigned todos)
   todoBoard.addEventListener('dragover', function(e) {
-    e.preventDefault();
+    // 권한이 있는 경우만 드롭 허용
+    if (draggedTodo && draggedTodo.classList.contains('assigned-todo')) {
+      const currentMemberCard = draggedTodo.closest('.member-card');
+      const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
+      
+      if (isHost || (currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
+        e.preventDefault();
+      }
+    }
   });
   
   todoBoard.addEventListener('drop', function(e) {
@@ -684,6 +779,15 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Only process assigned todos being returned to board
       if (draggedTodo.classList.contains('assigned-todo')) {
+        // 권한 체크
+        const currentMemberCard = draggedTodo.closest('.member-card');
+        const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
+        
+        if (!isHost && !(currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
+          console.log('Permission denied - cannot return this todo to board');
+          return;
+        }
+        
         const todoId = draggedTodo.dataset.todoId;
         returnTodoToBoard(todoId);
       }
