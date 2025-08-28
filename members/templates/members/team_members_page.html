@@ -609,15 +609,22 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Add visual feedback based on source
       if (this.classList.contains('todo-card')) {
-        // From todo board - highlight member drop zones
+        // From todo board - highlight only member drop zones (not todo board itself)
         memberCards.forEach(member => {
           member.classList.add('drop-zone-active');
         });
       } else if (this.classList.contains('assigned-todo')) {
-        // From assigned todos - highlight todo board and other member zones
+        // From assigned todos - highlight todo board and other member zones (exclude current member)
         todoBoard.classList.add('drop-zone-active');
+        
+        // Find current member (source of drag)
+        const currentMemberCard = this.closest('.member-card');
+        
         memberCards.forEach(member => {
-          member.classList.add('drop-zone-active');
+          // Don't highlight the member card that contains this todo
+          if (member !== currentMemberCard) {
+            member.classList.add('drop-zone-active');
+          }
         });
       }
     });
@@ -650,6 +657,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const todoId = draggedTodo.dataset.todoId;
         const memberId = this.dataset.memberId;
         
+        // Check if dropping on the same member (avoid unnecessary Ajax)
+        const currentMemberCard = draggedTodo.closest('.member-card');
+        if (currentMemberCard && currentMemberCard === this) {
+          console.log('Same member drop - no action needed');
+          return; // Don't send Ajax request
+        }
+        
         assignTodoToMember(todoId, memberId);
       }
     });
@@ -663,9 +677,18 @@ document.addEventListener('DOMContentLoaded', function() {
   todoBoard.addEventListener('drop', function(e) {
     e.preventDefault();
     
-    if (draggedTodo && draggedTodo.classList.contains('assigned-todo')) {
-      const todoId = draggedTodo.dataset.todoId;
-      returnTodoToBoard(todoId);
+    if (draggedTodo) {
+      // Check if already on todo board (avoid unnecessary Ajax)
+      if (draggedTodo.classList.contains('todo-card')) {
+        console.log('Already on todo board - no action needed');
+        return; // Don't send Ajax request
+      }
+      
+      // Only process assigned todos being returned to board
+      if (draggedTodo.classList.contains('assigned-todo')) {
+        const todoId = draggedTodo.dataset.todoId;
+        returnTodoToBoard(todoId);
+      }
     }
   });
   
