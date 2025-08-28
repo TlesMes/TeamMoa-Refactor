@@ -715,15 +715,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert('할일 할당 중 오류가 발생했습니다.');
-      }
+      // Always reload to show Django messages
+      window.location.reload();
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('할일 할당 중 오류가 발생했습니다.');
+      // Reload to show error messages from Django
+      window.location.reload();
     });
   }
   
@@ -740,18 +738,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert('할일 완료 처리 중 오류가 발생했습니다.');
-        // Revert checkbox state
-        event.target.checked = !event.target.checked;
-      }
+      // Always reload to show Django messages
+      window.location.reload();
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('할일 완료 처리 중 오류가 발생했습니다.');
-      event.target.checked = !event.target.checked;
+      // Reload to show error messages from Django
+      window.location.reload();
     });
   }
   
@@ -769,15 +762,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert('할일 되돌리기 중 오류가 발생했습니다.');
-      }
+      // Always reload to show Django messages
+      window.location.reload();
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('할일 되돌리기 중 오류가 발생했습니다.');
+      // Reload to show error messages from Django
+      window.location.reload();
     });
   }
   

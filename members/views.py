@@ -178,6 +178,11 @@ class AssignTodoView(TeamMemberRequiredMixin, View):
                 messages.error(request, '권한이 없습니다.')
                 return JsonResponse({'success': False})
             
+            # 권한 체크: 팀장이 아닌데, 다른 팀원에게 작업 할당
+            if not (team.host == request.user or member.user == request.user):
+                messages.error(request, '권한이 없습니다.')
+                return JsonResponse({'success': False})
+
             # 할당 처리
             todo.assignee = member
             todo.status = 'in_progress'
