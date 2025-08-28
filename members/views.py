@@ -21,17 +21,29 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
         team = get_object_or_404(Team, pk=kwargs['pk'])
         members = TeamUser.objects.filter(team=team)
         todos = Todo.objects.filter(team=team)
-        todos_unassigned = Todo.objects.filter(team=team, status='todo', assignee__isnull=True)
+        todos_unassigned = todos.filter(assignee__isnull=True)
         form = CreateTodoForm()
         
         # 현재 사용자가 팀장인지 확인
         is_host = team.host == self.request.user
         
+        # 효율적인 데이터 구조화 - 멤버별 할일 그룹핑
+        members_data = []
+        for member in members:
+            member_todos = todos.filter(assignee=member)
+            members_data.append({
+                'member': member,
+                'todos': member_todos,
+                'todo_count': member_todos.count(),
+                'completed_count': member_todos.filter(status='done').count(),
+            })
+        
         context.update({
             'team': team,
-            'members': members,
-            'todos': todos,
+            'members': members,  # 기존 호환성을 위해 유지
+            'todos': todos,      # 기존 호환성을 위해 유지
             'todos_unassigned': todos_unassigned,
+            'members_data': members_data,  # 새로운 구조화된 데이터
             'form': form,
             'is_host': is_host
         })

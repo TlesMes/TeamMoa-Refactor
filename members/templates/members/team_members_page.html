@@ -519,18 +519,18 @@
 
   <!-- Members Grid -->
   <div class="members-grid">
-    {% for member in members %}
-    <div class="member-card drop-zone" data-member-id="{{ member.id }}">
+    {% for member_data in members_data %}
+    <div class="member-card drop-zone" data-member-id="{{ member_data.member.id }}">
       <!-- Member Info -->
       <div class="member-info">
         <div class="member-avatar">
-          {{ member.user.nickname|first }}
+          {{ member_data.member.user.nickname|first }}
         </div>
         <div class="member-details">
-          <h2 class="member-name">{{ member.user.nickname }}</h2>
-          <p class="member-username">@{{ member.user.username }}</p>
-          {% if member.user.profile %}
-          <p class="member-profile">{{ member.user.profile }}</p>
+          <h2 class="member-name">{{ member_data.member.user.nickname }}</h2>
+          <p class="member-username">@{{ member_data.member.user.username }}</p>
+          {% if member_data.member.user.profile %}
+          <p class="member-profile">{{ member_data.member.user.profile }}</p>
           {% endif %}
         </div>
       </div>
@@ -540,14 +540,13 @@
         <div class="todos-header">
           <h3 class="todos-title">할당된 작업</h3>
           <span class="assigned-count">
-            {{ todos|length|add:0 }}개
+            {{ member_data.todo_count }}개
           </span>
         </div>
         
         <div class="todos-list">
-          {% for todo in todos %}
-            {% if todo.assignee == member %}
-              <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" draggable="true">
+          {% for todo in member_data.todos %}
+            <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" draggable="true">
                 <div class="todo-text">{{ todo.content }}</div>
                 <div class="todo-actions">
                   {% if todo.assignee.user == request.user or is_host %}
@@ -575,8 +574,7 @@
                     </button>
                   {% endif %}
                 </div>
-              </div>
-            {% endif %}
+            </div>
           {% endfor %}
           
         </div>
