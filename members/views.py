@@ -89,46 +89,6 @@ member_complete_Todo = MemberCompleteTodoView.as_view()
 member_delete_Todo = MemberDeleteTodoView.as_view()
 
 
-# 칸반 보드 뷰
-class KanbanBoardView(TeamMemberRequiredMixin, TemplateView):
-    template_name = 'members/kanban_board.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=kwargs['pk'])
-        
-        # 상태별로 할일 분류
-        todos_todo = Todo.objects.filter(team=team, status='todo').order_by('order', 'created_at')
-        todos_in_progress = Todo.objects.filter(team=team, status='in_progress').order_by('order', 'created_at')
-        todos_done = Todo.objects.filter(team=team, status='done').order_by('-completed_at')
-        
-        # 현재 사용자의 팀 멤버 객체
-        current_teamuser = TeamUser.objects.get(team=team, user=self.request.user)
-        is_host = team.host == self.request.user
-        
-        context.update({
-            'team': team,
-            'todos_todo': todos_todo,
-            'todos_in_progress': todos_in_progress,
-            'todos_done': todos_done,
-            'current_teamuser': current_teamuser,
-            'is_host': is_host,
-            'form': CreateTodoForm()
-        })
-        return context
-    
-    def post(self, request, pk):
-        """새 할일 추가"""
-        form = CreateTodoForm(request.POST)
-        if form.is_valid():
-            team = get_object_or_404(Team, pk=pk)
-            todo = Todo()
-            todo.content = form.cleaned_data['content']
-            todo.team = team
-            todo.status = 'todo'
-            todo.save()
-            messages.success(request, '새 할 일이 추가되었습니다.')
-        return redirect('members:kanban_board', pk=pk)
 
 
 # Ajax API 뷰들
@@ -196,7 +156,6 @@ class MoveTodoView(TeamMemberRequiredMixin, View):
         return status_map.get(status, status)
 
 
-kanban_board = KanbanBoardView.as_view()
 move_todo = MoveTodoView.as_view()
 
 
@@ -216,20 +175,23 @@ class AssignTodoView(TeamMemberRequiredMixin, View):
             
             # 권한 체크: 팀장이거나 미할당 할일만
             if not (team.host == request.user or todo.assignee is None):
-                return JsonResponse({'success': False, 'error': '권한이 없습니다.'})
+                messages.error(request, '권한이 없습니다.')
+                return JsonResponse({'success': False})
             
             # 할당 처리
             todo.assignee = member
             todo.status = 'in_progress'
             todo.save()
             
+            messages.success(request, f'{todo.content}이(가) {member.user.nickname}님에게 할당되었습니다.')
+            
             return JsonResponse({
-                'success': True,
-                'message': f'{todo.content}이(가) {member.user.nickname}님에게 할당되었습니다.'
+                'success': True
             })
             
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            messages.error(request, '할일 할당 중 오류가 발생했습니다.')
+            return JsonResponse({'success': False})
 
 
 class CompleteTodoView(TeamMemberRequiredMixin, View):
@@ -246,28 +208,29 @@ class CompleteTodoView(TeamMemberRequiredMixin, View):
             
             # 권한 체크: 팀장이거나 자신에게 할당된 할일
             if not (team.host == request.user or todo.assignee == current_teamuser):
-                return JsonResponse({'success': False, 'error': '권한이 없습니다.'})
+                messages.error(request, '권한이 없습니다.')
+                return JsonResponse({'success': False})
             
             # 완료 상태 토글
             if todo.status == 'done':
                 todo.status = 'in_progress'
                 todo.completed_at = None
-                message = '미완료로 변경되었습니다.'
+                messages.success(request, '미완료로 변경되었습니다.')
             else:
                 todo.status = 'done'
                 todo.completed_at = timezone.now()
-                message = '완료되었습니다.'
+                messages.success(request, '완료되었습니다.')
             
             todo.save()
             
             return JsonResponse({
                 'success': True,
-                'message': message,
                 'new_status': todo.status
             })
             
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            messages.error(request, '할일 완료 처리 중 오류가 발생했습니다.')
+            return JsonResponse({'success': False})
 
 
 class ReturnToBoardView(TeamMemberRequiredMixin, View):
@@ -284,7 +247,8 @@ class ReturnToBoardView(TeamMemberRequiredMixin, View):
             
             # 권한 체크: 팀장이거나 자신에게 할당된 할일
             if not (team.host == request.user or todo.assignee == current_teamuser):
-                return JsonResponse({'success': False, 'error': '권한이 없습니다.'})
+                messages.error(request, '권한이 없습니다.')
+                return JsonResponse({'success': False})
             
             # 할당 해제 및 상태 초기화
             todo.assignee = None
@@ -292,13 +256,15 @@ class ReturnToBoardView(TeamMemberRequiredMixin, View):
             todo.completed_at = None
             todo.save()
             
+            messages.success(request, '할일이 보드로 되돌려졌습니다.')
+            
             return JsonResponse({
-                'success': True,
-                'message': '할 일이 보드로 되돌려졌습니다.'
+                'success': True
             })
             
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            messages.error(request, '할일 되돌리기 중 오류가 발생했습니다.')
+            return JsonResponse({'success': False})
 
 
 assign_todo = AssignTodoView.as_view()

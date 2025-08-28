@@ -8,8 +8,6 @@ urlpatterns = [
     path('member_complete_Todo/<int:pk>/<int:todo_id>', views.member_complete_Todo, name = 'member_complete_Todo'),
     path('member_delete_Todo/<int:pk>/<int:todo_id>', views.member_delete_Todo, name = 'member_delete_Todo'),
     
-    # 칸반 보드
-    path('<int:pk>/kanban/', views.kanban_board, name='kanban_board'),
     
     # Ajax API
     path('api/<int:pk>/move-todo/', views.move_todo, name='move_todo'),

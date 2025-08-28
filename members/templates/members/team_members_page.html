@@ -469,11 +469,6 @@
       <h1 class="team-title">{{ team.title }} <span class="team-code">#{{ team.invitecode }}</span></h1>
       <p class="team-description">{{ team.introduction }}</p>
     </div>
-    <div class="header-actions">
-      <a href="{% url 'members:kanban_board' team.id %}" class="btn btn-primary">
-        📋 칸반 보드
-      </a>
-    </div>
   </div>
 
   {% if request.user.is_authenticated %}
@@ -569,7 +564,11 @@
                     {% endif %}
                     
                     <!-- Delete Button -->
-                    <button class="delete-btn" onclick="deleteTodo({{ todo.id }})" title="삭제">×</button>
+                    <button class="delete-btn" onclick="deleteTodo({{ todo.id }})" title="삭제">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+                      </svg>
+                    </button>
                   {% endif %}
                 </div>
               </div>
@@ -665,15 +664,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        showMessage(data.message, 'success');
-        setTimeout(() => window.location.reload(), 1000);
+        window.location.reload();
       } else {
-        showMessage(data.error, 'error');
+        alert('할일 할당 중 오류가 발생했습니다.');
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      showMessage('오류가 발생했습니다.', 'error');
+      alert('할일 할당 중 오류가 발생했습니다.');
     });
   }
   
@@ -691,24 +689,16 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        showMessage(data.message, 'success');
-        
-        // Update UI without reload
-        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
-        if (data.new_status === 'done') {
-          todoElement.classList.add('completed');
-        } else {
-          todoElement.classList.remove('completed');
-        }
+        window.location.reload();
       } else {
-        showMessage(data.error, 'error');
+        alert('할일 완료 처리 중 오류가 발생했습니다.');
         // Revert checkbox state
         event.target.checked = !event.target.checked;
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      showMessage('오류가 발생했습니다.', 'error');
+      alert('할일 완료 처리 중 오류가 발생했습니다.');
       event.target.checked = !event.target.checked;
     });
   }
@@ -728,15 +718,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        showMessage(data.message, 'success');
-        setTimeout(() => window.location.reload(), 1000);
+        window.location.reload();
       } else {
-        showMessage(data.error, 'error');
+        alert('할일 되돌리기 중 오류가 발생했습니다.');
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      showMessage('오류가 발생했습니다.', 'error');
+      alert('할일 되돌리기 중 오류가 발생했습니다.');
     });
   };
   
@@ -757,42 +746,6 @@ document.addEventListener('DOMContentLoaded', function() {
       form.submit();
     }
   };
-  
-  function showMessage(message, type) {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      color: white;
-      z-index: 1000;
-      font-weight: 500;
-      background: ${type === 'success' ? '#10b981' : '#ef4444'};
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      animation: slideIn 0.3s ease;
-    `;
-    
-    // Add slide-in animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.style.animation = 'slideIn 0.3s ease reverse';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
 });
 </script>
 
