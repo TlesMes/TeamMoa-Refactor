@@ -14,31 +14,6 @@ import json
 # URL 패턴 상수
 TEAM_MEMBERS_PAGE = 'members:team_members_page'
 
-# 성능 최적화: 공통 TeamUser 쿼리 중복 제거 Mixin
-class OptimizedTeamUserMixin:
-    """TeamUser 조회를 캐싱하여 중복 쿼리를 방지하는 Mixin"""
-    
-    def get_current_teamuser(self, team, user):
-        """현재 사용자의 TeamUser 객체를 캐싱하여 반환"""
-        cache_key = f'_teamuser_{team.id}_{user.id}'
-        if not hasattr(self, cache_key):
-            teamuser = TeamUser.objects.select_related('user').get(
-                team=team, user=user
-            )
-            setattr(self, cache_key, teamuser)
-        return getattr(self, cache_key)
-    
-    def get_optimized_team_context(self, pk, user):
-        """팀 관련 기본 데이터를 최적화된 쿼리로 조회"""
-        team = get_object_or_404(Team, pk=pk)
-        current_teamuser = self.get_current_teamuser(team, user)
-        is_host = team.host == user
-        
-        return {
-            'team': team,
-            'current_teamuser': current_teamuser,
-            'is_host': is_host
-        }
 
 class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'members/team_members_page.html'
@@ -142,7 +117,7 @@ member_delete_Todo = MemberDeleteTodoView.as_view()
 
 
 # Ajax API 뷰들
-class MoveTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
+class MoveTodoView(TeamMemberRequiredMixin, View):
     """드래그&드롭으로 할일 상태 변경"""
     
     def post(self, request, pk):
@@ -152,10 +127,10 @@ class MoveTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             new_status = data.get('new_status')
             new_order = data.get('new_order', 0)
             
-            # 🚀 최적화: 캐싱된 팀 컨텍스트 사용
-            team_context = self.get_optimized_team_context(pk, request.user)
-            team = team_context['team']
-            current_teamuser = team_context['current_teamuser']
+            team = get_object_or_404(Team, pk=pk)
+            current_teamuser = TeamUser.objects.select_related('user').get(
+                team=team, user=request.user
+            )
             todo = get_object_or_404(Todo, pk=todo_id, team=team)
             
             # 권한 체크
@@ -212,7 +187,7 @@ move_todo = MoveTodoView.as_view()
 
 
 # 새로운 Ajax API 뷰들
-class AssignTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
+class AssignTodoView(TeamMemberRequiredMixin, View):
     """드래그&드롭으로 할일을 팀원에게 할당"""
     
     def post(self, request, pk):
@@ -221,10 +196,8 @@ class AssignTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             todo_id = data.get('todo_id')
             member_id = data.get('member_id')
             
-            # 🚀 최적화: 캐싱된 팀 컨텍스트 사용
-            team_context = self.get_optimized_team_context(pk, request.user)
-            team = team_context['team']
-            is_host = team_context['is_host']
+            team = get_object_or_404(Team, pk=pk)
+            is_host = team.host == request.user
             
             todo = get_object_or_404(Todo, pk=todo_id, team=team)
             member = get_object_or_404(TeamUser, pk=member_id, team=team)
@@ -255,7 +228,7 @@ class AssignTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             return JsonResponse({'success': False})
 
 
-class CompleteTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
+class CompleteTodoView(TeamMemberRequiredMixin, View):
     """체크박스로 할일 완료/미완료 토글"""
     
     def post(self, request, pk):
@@ -263,11 +236,11 @@ class CompleteTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             data = json.loads(request.body)
             todo_id = data.get('todo_id')
             
-            # 🚀 최적화: 캐싱된 팀 컨텍스트 사용 (CompleteTodoView)
-            team_context = self.get_optimized_team_context(pk, request.user)
-            team = team_context['team']
-            current_teamuser = team_context['current_teamuser']
-            is_host = team_context['is_host']
+            team = get_object_or_404(Team, pk=pk)
+            current_teamuser = TeamUser.objects.select_related('user').get(
+                team=team, user=request.user
+            )
+            is_host = team.host == request.user
             
             todo = get_object_or_404(Todo, pk=todo_id, team=team)
             
@@ -298,7 +271,7 @@ class CompleteTodoView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             return JsonResponse({'success': False})
 
 
-class ReturnToBoardView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
+class ReturnToBoardView(TeamMemberRequiredMixin, View):
     """할일을 다시 Todo 보드로 되돌리기"""
     
     def post(self, request, pk):
@@ -306,11 +279,11 @@ class ReturnToBoardView(OptimizedTeamUserMixin, TeamMemberRequiredMixin, View):
             data = json.loads(request.body)
             todo_id = data.get('todo_id')
             
-            # 🚀 최적화: 캐싱된 팀 컨텍스트 사용 (ReturnToBoardView)
-            team_context = self.get_optimized_team_context(pk, request.user)
-            team = team_context['team']
-            current_teamuser = team_context['current_teamuser']
-            is_host = team_context['is_host']
+            team = get_object_or_404(Team, pk=pk)
+            current_teamuser = TeamUser.objects.select_related('user').get(
+                team=team, user=request.user
+            )
+            is_host = team.host == request.user
             
             todo = get_object_or_404(Todo, pk=todo_id, team=team)
             
