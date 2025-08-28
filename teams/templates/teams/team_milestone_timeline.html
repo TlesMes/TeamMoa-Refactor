@@ -34,6 +34,9 @@
         {% for milestone in milestones %}
         <div class="milestone-info-item" data-milestone-id="{{ milestone.id }}">
           <div class="milestone-title">{{ milestone.title }}</div>
+          <button class="delete-btn" onclick="deleteMilestone({{ milestone.id }}, '{{ milestone.title }}')" title="마일스톤 삭제">
+            <i class="ri-delete-bin-line"></i>
+          </button>
           <div class="milestone-dates">
             <span class="date-range">{{ milestone.startdate|date:'m/d' }} - {{ milestone.enddate|date:'m/d' }}</span>
           </div>
@@ -105,6 +108,7 @@
     </div>
   </div>
 </div>
+
 
 <script>
 // 월별 실제 일수 기반 타임라인 시스템
@@ -532,6 +536,34 @@ document.addEventListener('DOMContentLoaded', function() {
     addTodayMarker();
     setTimeout(scrollToCurrentDate, 100);
 });
+
+// 마일스톤 삭제 함수
+function deleteMilestone(milestoneId, milestoneName) {
+    showConfirmModal(
+        `정말로 '<strong>${milestoneName}</strong>' 마일스톤을 삭제하시겠습니까?<br><small style="color: #6b7280;">이 작업은 되돌릴 수 없습니다.</small>`,
+        () => {
+            fetch(`/teams/team/{{ team.id }}/milestone/${milestoneId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('삭제 요청 실패');
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                location.reload();
+            });
+        }
+    );
+}
 </script>
 
 {% endblock %}

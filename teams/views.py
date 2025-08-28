@@ -281,19 +281,6 @@ class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
 
 team_milestone_timeline = TeamMilestoneTimelineView.as_view()
 
-class TeamDeleteMilestoneView(TeamHostRequiredMixin, View):
-    def post(self, request, pk, milestone_id):
-        team = get_object_or_404(Team, pk=pk)
-        milestone = get_object_or_404(Milestone, pk=milestone_id)
-        
-        milestone_title = milestone.title
-        milestone.delete()
-        
-        messages.success(request, f'마일스톤 "{milestone_title}"가 성공적으로 삭제되었습니다.')
-        return redirect('teams:team_main_page', pk=pk)
-
-
-team_delete_milestone = TeamDeleteMilestoneView.as_view()
 
 
 class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
@@ -393,6 +380,24 @@ class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
 
 
 milestone_update_ajax = MilestoneUpdateAjaxView.as_view()
+
+
+class MilestoneDeleteAjaxView(TeamMemberRequiredMixin, View):
+    def post(self, request, pk, milestone_id):
+        try:
+            milestone = get_object_or_404(Milestone, pk=milestone_id, team_id=pk)
+            milestone_title = milestone.title
+            milestone.delete()
+            
+            messages.success(request, f'"{milestone_title}" 마일스톤이 삭제되었습니다.')
+            return HttpResponse(status=200)
+            
+        except Exception as e:
+            messages.error(request, f'마일스톤 삭제 중 오류가 발생했습니다: {str(e)}')
+            return HttpResponse(status=500)
+
+
+milestone_delete_ajax = MilestoneDeleteAjaxView.as_view()
 
 
 class TeamDisbandView(TeamHostRequiredMixin, View):

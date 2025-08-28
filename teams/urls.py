@@ -13,6 +13,6 @@ urlpatterns = [
     path('team_add_milestone/<int:pk>/', views.team_add_milestone, name='team_add_milestone'),
     path('team_milestone_timeline/<int:pk>/', views.team_milestone_timeline, name='team_milestone_timeline'),
     path('team/<int:pk>/milestone/<int:milestone_id>/update/', views.milestone_update_ajax, name='milestone_update_ajax'),
-    path('team_delete_milestone/<int:pk>/<int:milestone_id>/', views.team_delete_milestone, name='team_delete_milestone'),
+    path('team/<int:pk>/milestone/<int:milestone_id>/delete/', views.milestone_delete_ajax, name='milestone_delete_ajax'),
     path('team_disband/<int:pk>/', views.team_disband, name='team_disband')
 ]
