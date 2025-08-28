@@ -1,101 +1,799 @@
-{% extends 'base_app.html' %} {% load static %} {% block contents %}
+{% extends 'base_app.html' %} 
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Team Header */
+.team-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-actions {
+  flex-shrink: 0;
+}
+
+.header-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.header-actions .btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* Todo Board Section */
+.todo-board-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.todo-count {
+  background: #3b82f6;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.todo-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  min-height: 100px;
+}
+
+.todo-card {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.todo-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.todo-card.dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+  transform: rotate(2deg);
+  z-index: 1000;
+}
+
+.todo-content {
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.todo-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.todo-date {
+  opacity: 0.7;
+}
+
+.todo-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.todo-card:hover .todo-delete-btn {
+  opacity: 1;
+}
+
+.todo-delete-btn:hover {
+  background: #fee2e2;
+}
+
+.empty-todos {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Compact Add Todo Form */
+.add-todo-compact {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.compact-form .input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.compact-form input[type="text"] {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.compact-form input[type="text"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.compact-form input[type="text"]::placeholder {
+  color: #64748b;
+}
+
+.add-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 44px;
+}
+
+.add-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Members Grid */
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.member-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 200px;
+}
+
+.member-card.drop-zone-active {
+  border-color: #3b82f6;
+  background: #dbeafe;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.member-details {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.member-username {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.member-profile {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 4px 0 0 0;
+  opacity: 0.8;
+}
+
+/* Member Todos */
+.todos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.todos-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.assigned-count {
+  background: #10b981;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.todos-list {
+  min-height: 80px;
+  position: relative;
+}
+
+.assigned-todo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+}
+
+.assigned-todo:hover {
+  background: #f1f5f9;
+}
+
+.assigned-todo.completed {
+  opacity: 0.6;
+}
+
+.assigned-todo.completed .todo-text {
+  text-decoration: line-through;
+}
+
+.todo-text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Custom Checkbox */
+.checkbox-label {
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5e1;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label input:checked + .checkmark {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.checkbox-label input:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: -1px;
+  left: 2px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.return-btn, .delete-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.return-btn {
+  color: #f59e0b;
+}
+
+.return-btn:hover {
+  background: #fef3c7;
+}
+
+.delete-btn {
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+}
+
+/* Drop Hint */
+.drop-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  text-align: center;
+  color: #3b82f6;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.member-card.drop-zone-active .drop-hint {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .todo-board {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+  
+  .members-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-header-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .header-actions {
+    align-self: stretch;
+  }
+  
+  .header-actions .btn {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .todo-board {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+</style>
+{% endblock %}
+
+{% block contents %}
 
 <section class="members-section">
   <!-- Team Header Card -->
   <div class="team-header-card">
-    <h1 class="team-title">{{ team.title }} <span class="team-code">#{{ team.invitecode }}</span></h1>
-    <p class="team-description">{{ team.introduction }}</p>
+    <div class="header-content">
+      <h1 class="team-title">{{ team.title }} <span class="team-code">#{{ team.invitecode }}</span></h1>
+      <p class="team-description">{{ team.introduction }}</p>
+    </div>
+    <div class="header-actions">
+      <a href="{% url 'members:kanban_board' team.id %}" class="btn btn-primary">
+        📋 칸반 보드
+      </a>
+    </div>
   </div>
 
   {% if request.user.is_authenticated %}
+  
+  <!-- Todo Board Section -->
+  <div class="todo-board-section">
+    <div class="section-header">
+      <h2 class="section-title">📋 할 일 목록</h2>
+      <span class="todo-count">{{ todos_unassigned.count }}개</span>
+    </div>
+    <div class="todo-board" id="todo-board">
+      {% for todo in todos_unassigned %}
+        <div class="todo-card draggable" data-todo-id="{{ todo.id }}" draggable="true">
+          <div class="todo-content">{{ todo.content }}</div>
+          <div class="todo-meta">
+            <span class="todo-date">{{ todo.created_at|date:"m/d" }}</span>
+            {% if is_host or request.user == todo.owner %}
+            <button class="todo-delete-btn" onclick="deleteTodo({{ todo.id }})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+              </svg>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-todos">
+          <p>아직 할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Compact Add Todo Form -->
+  <div class="add-todo-compact">
+    <form method="POST" action="{% url 'members:team_members_page' team.id %}" class="compact-form">
+      {% csrf_token %}
+      <div class="input-group">
+        {{ form.content }}
+        <button type="submit" class="add-btn">+</button>
+      </div>
+    </form>
+  </div>
+
   <!-- Members Grid -->
   <div class="members-grid">
     {% for member in members %}
-    <div class="member-card">
+    <div class="member-card drop-zone" data-member-id="{{ member.id }}">
       <!-- Member Info -->
       <div class="member-info">
-        <h2 class="member-name">{{ member.user.nickname }}</h2>
-        <p class="member-username">@{{ member.user.username }}</p>
-        {% if member.user.profile %}
-        <p class="member-profile">{{ member.user.profile }}</p>
-        {% endif %}
+        <div class="member-avatar">
+          {{ member.user.nickname|first }}
+        </div>
+        <div class="member-details">
+          <h2 class="member-name">{{ member.user.nickname }}</h2>
+          <p class="member-username">@{{ member.user.username }}</p>
+          {% if member.user.profile %}
+          <p class="member-profile">{{ member.user.profile }}</p>
+          {% endif %}
+        </div>
       </div>
 
-      <!-- Todo Section -->
+      <!-- Assigned Todos -->
       <div class="member-todos">
-        <h3 class="todos-title">할 일</h3>
-        {% for todo in todos %}
-          {% if todo.owner == member %}
-            <div class="todo-item {% if todo.is_completed %}completed{% endif %}">
-              <div class="todo-content">
-                <span class="todo-text">{{ todo.content }}</span>
-                {% if todo.owner.user == request.user %}
-                <div class="todo-actions">
-                  <form method="POST" action="/members/member_complete_Todo/{{ team.id }}/{{ todo.id }}" style="display: inline;">
-                    {% csrf_token %}
-                    <input
-                      type="checkbox"
-                      class="todo-checkbox"
-                      onchange="this.form.submit()"
-                      {% if todo.is_completed %}checked{% endif %}
-                    />
-                  </form>
-                  <form method="POST" action="/members/member_delete_Todo/{{ team.id }}/{{ todo.id }}" style="display: inline;">
-                    {% csrf_token %}
-                    <button
-                      type="button"
-                      class="todo-delete-btn"
-                      title="삭제"
-                      onclick="if(showConfirmModal) showConfirmModal('이 할 일을 삭제하시겠습니까?', () => this.form.submit()); else if(confirm('이 할 일을 삭제하시겠습니까?')) this.form.submit();"
-                    >
-                    <svg
-                      width="14"
-                      height="18"
-                      viewBox="0 0 14 18"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </button>
-                  </form>
-                </div>
-                {% endif %}
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-        
-        <!-- Empty state for todos -->
-        {% if not member.todo_set.exists %}
-        <div class="empty-todos">
-          <p>할 일이 없습니다</p>
+        <div class="todos-header">
+          <h3 class="todos-title">할당된 작업</h3>
+          <span class="assigned-count">
+            {{ todos|length|add:0 }}개
+          </span>
         </div>
-        {% endif %}
+        
+        <div class="todos-list">
+          {% for todo in todos %}
+            {% if todo.assignee == member %}
+              <div class="assigned-todo {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}">
+                <div class="todo-text">{{ todo.content }}</div>
+                <div class="todo-actions">
+                  {% if todo.assignee.user == request.user or is_host %}
+                    <!-- Complete/Uncomplete Checkbox -->
+                    <label class="checkbox-label">
+                      <input type="checkbox" 
+                             class="complete-checkbox" 
+                             data-todo-id="{{ todo.id }}"
+                             {% if todo.status == 'done' %}checked{% endif %}>
+                      <span class="checkmark"></span>
+                    </label>
+                    
+                    <!-- Return to Todo Board (팀장 또는 본인만) -->
+                    {% if is_host or todo.assignee.user == request.user %}
+                    <button class="return-btn" onclick="returnToBoard({{ todo.id }})" title="할 일 보드로 되돌리기">
+                      ↶
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Delete Button -->
+                    <button class="delete-btn" onclick="deleteTodo({{ todo.id }})" title="삭제">×</button>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+          
+          <!-- Drop Zone Hint -->
+          <div class="drop-hint">
+            <p>할 일을 여기로 드래그하세요</p>
+          </div>
+        </div>
       </div>
     </div>
     {% endfor %}
   </div>
 
-  <!-- Add Todo Card -->
-  <div class="add-todo-card">
-    <h2 class="add-todo-title">새 할 일 추가</h2>
-    <form
-      method="POST"
-      action="{% url 'members:team_members_page' team.id %}"
-      class="add-todo-form"
-    >
-      {% csrf_token %}
-      <div class="form-group">
-        {{ form.content }}
-      </div>
-      <button type="submit" class="add-todo-btn">할 일 등록</button>
-    </form>
-  </div>
   {% endif %}
 </section>
+
+
+<!-- JavaScript for Drag & Drop -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  let draggedTodo = null;
+  
+  // Drag & Drop for Todo Cards
+  const todoCards = document.querySelectorAll('.todo-card.draggable');
+  const memberCards = document.querySelectorAll('.member-card.drop-zone');
+  
+  // Drag start
+  todoCards.forEach(card => {
+    card.addEventListener('dragstart', function(e) {
+      draggedTodo = this;
+      this.classList.add('dragging');
+      
+      // Add visual feedback to drop zones
+      memberCards.forEach(member => {
+        member.classList.add('drop-zone-active');
+      });
+    });
+    
+    card.addEventListener('dragend', function(e) {
+      this.classList.remove('dragging');
+      draggedTodo = null;
+      
+      // Remove visual feedback
+      memberCards.forEach(member => {
+        member.classList.remove('drop-zone-active');
+      });
+    });
+  });
+  
+  // Drop zones
+  memberCards.forEach(member => {
+    member.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    
+    member.addEventListener('drop', function(e) {
+      e.preventDefault();
+      
+      if (draggedTodo) {
+        const todoId = draggedTodo.dataset.todoId;
+        const memberId = this.dataset.memberId;
+        
+        assignTodoToMember(todoId, memberId);
+      }
+    });
+  });
+  
+  // Complete Todo Checkboxes
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('complete-checkbox')) {
+      const todoId = e.target.dataset.todoId;
+      toggleTodoComplete(todoId);
+    }
+  });
+  
+  // API Functions
+  function assignTodoToMember(todoId, memberId) {
+    fetch(`/members/api/{{ team.id }}/assign-todo/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        todo_id: todoId,
+        member_id: memberId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showMessage(data.message, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showMessage(data.error, 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('오류가 발생했습니다.', 'error');
+    });
+  }
+  
+  function toggleTodoComplete(todoId) {
+    fetch(`/members/api/{{ team.id }}/complete-todo/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        todo_id: todoId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showMessage(data.message, 'success');
+        
+        // Update UI without reload
+        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+        if (data.new_status === 'done') {
+          todoElement.classList.add('completed');
+        } else {
+          todoElement.classList.remove('completed');
+        }
+      } else {
+        showMessage(data.error, 'error');
+        // Revert checkbox state
+        event.target.checked = !event.target.checked;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('오류가 발생했습니다.', 'error');
+      event.target.checked = !event.target.checked;
+    });
+  }
+  
+  // Global functions for onclick handlers
+  window.returnToBoard = function(todoId) {
+    fetch(`/members/api/{{ team.id }}/return-to-board/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        todo_id: todoId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showMessage(data.message, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showMessage(data.error, 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('오류가 발생했습니다.', 'error');
+    });
+  };
+  
+  window.deleteTodo = function(todoId) {
+    if (confirm('이 할 일을 삭제하시겠습니까?')) {
+      // Use existing delete endpoint
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/members/member_delete_Todo/{{ team.id }}/${todoId}`;
+      
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrfmiddlewaretoken';
+      csrfInput.value = csrfToken;
+      
+      form.appendChild(csrfInput);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+  
+  function showMessage(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 1000;
+      font-weight: 500;
+      background: ${type === 'success' ? '#10b981' : '#ef4444'};
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease;
+    `;
+    
+    // Add slide-in animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'slideIn 0.3s ease reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+});
+</script>
 
 {% endblock %}
