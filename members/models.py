@@ -11,7 +11,7 @@ class Todo(models.Model):
     
     content = models.TextField(default="", null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
-    assignee = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE, null=True, blank=True)
+    assignee = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE, null=True, blank=True, related_name='todo_set')
     team = models.ForeignKey('teams.Team', on_delete=models.CASCADE, default=1)
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
