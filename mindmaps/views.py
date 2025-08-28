@@ -22,7 +22,8 @@ class MindmapListPageView(TeamMemberRequiredMixin, ListView):
     
     def get_queryset(self):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        return Mindmap.objects.filter(team=team).order_by('-id')
+        # 🚀 최적화: 마인드맵과 관련 팀 정보 사전 로딩
+        return Mindmap.objects.filter(team=team).select_related('team').order_by('-id')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,8 +42,9 @@ class MindmapDetailPageView(TeamMemberRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         mindmap = self.get_object()
-        nodes = Node.objects.filter(mindmap=mindmap).order_by('id')
-        lines = NodeConnection.objects.filter(mindmap=mindmap).order_by('id')
+        # 🚀 최적화: 노드와 연결선을 한번에 조회하여 개별 쿼리 방지
+        nodes = Node.objects.filter(mindmap=mindmap).select_related('mindmap').order_by('id')
+        lines = NodeConnection.objects.filter(mindmap=mindmap).select_related('mindmap').order_by('id')
         
         context.update({
             'team': team,
@@ -151,7 +153,8 @@ class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         node = self.get_object()
-        comments = Comment.objects.filter(node=node).order_by('-id')
+        # 🚀 최적화: 댓글과 관련 노드/작성자 정보 사전 로딩
+        comments = Comment.objects.filter(node=node).select_related('node', 'user').order_by('-id')
         
         context.update({
             'team': team,

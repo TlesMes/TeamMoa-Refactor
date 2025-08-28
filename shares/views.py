@@ -45,7 +45,8 @@ class PostListView(TeamMemberRequiredMixin, ListView):
     
     def get_queryset(self):
         team = self.get_team()
-        return Post.objects.filter(isTeams=team.id).order_by('-id')
+        # 🚀 최적화: 게시글과 작성자 정보 사전 로딩
+        return Post.objects.filter(isTeams=team.id).select_related('writer').order_by('-id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
