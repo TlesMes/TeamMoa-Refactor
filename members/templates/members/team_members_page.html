@@ -82,6 +82,16 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   min-height: 100px;
+  border: 2px dashed #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.todo-board.drop-zone-active {
+  border-color: #3b82f6;
+  background: #eff6ff;
 }
 
 .todo-card {
@@ -301,6 +311,15 @@
 .todos-list {
   min-height: 80px;
   position: relative;
+  border: 1px dashed transparent;
+  border-radius: 8px;
+  padding: 8px;
+  transition: all 0.3s ease;
+}
+
+.todos-list.drop-zone-active {
+  border-color: #3b82f6;
+  background: #eff6ff;
 }
 
 .assigned-todo {
@@ -310,6 +329,7 @@
   gap: 8px;
   padding: 8px 12px;
   background: #f8fafc;
+  border: 2px solid #e2e8f0;
   border-radius: 6px;
   margin-bottom: 6px;
   transition: all 0.2s ease;
@@ -317,6 +337,8 @@
 
 .assigned-todo:hover {
   background: #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
 }
 
 .assigned-todo.completed {
@@ -402,24 +424,6 @@
   background: #fee2e2;
 }
 
-/* Drop Hint */
-.drop-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  text-align: center;
-  color: #3b82f6;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.member-card.drop-zone-active .drop-hint {
-  opacity: 1;
-}
 
 /* Responsive Design */
 @media (max-width: 1024px) {
@@ -543,7 +547,7 @@
         <div class="todos-list">
           {% for todo in todos %}
             {% if todo.assignee == member %}
-              <div class="assigned-todo {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}">
+              <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" draggable="true">
                 <div class="todo-text">{{ todo.content }}</div>
                 <div class="todo-actions">
                   {% if todo.assignee.user == request.user or is_host %}
@@ -575,10 +579,6 @@
             {% endif %}
           {% endfor %}
           
-          <!-- Drop Zone Hint -->
-          <div class="drop-hint">
-            <p>할 일을 여기로 드래그하세요</p>
-          </div>
         </div>
       </div>
     </div>
@@ -596,33 +596,48 @@ document.addEventListener('DOMContentLoaded', function() {
   let draggedTodo = null;
   
   // Drag & Drop for Todo Cards
-  const todoCards = document.querySelectorAll('.todo-card.draggable');
+  const todoCards = document.querySelectorAll('.draggable');
   const memberCards = document.querySelectorAll('.member-card.drop-zone');
+  const todoBoard = document.getElementById('todo-board');
+  const todosLists = document.querySelectorAll('.todos-list');
   
-  // Drag start
+  // Drag start - for both unassigned and assigned todos
   todoCards.forEach(card => {
     card.addEventListener('dragstart', function(e) {
       draggedTodo = this;
       this.classList.add('dragging');
       
-      // Add visual feedback to drop zones
-      memberCards.forEach(member => {
-        member.classList.add('drop-zone-active');
-      });
+      // Add visual feedback based on source
+      if (this.classList.contains('todo-card')) {
+        // From todo board - highlight member drop zones
+        memberCards.forEach(member => {
+          member.classList.add('drop-zone-active');
+        });
+      } else if (this.classList.contains('assigned-todo')) {
+        // From assigned todos - highlight todo board and other member zones
+        todoBoard.classList.add('drop-zone-active');
+        memberCards.forEach(member => {
+          member.classList.add('drop-zone-active');
+        });
+      }
     });
     
     card.addEventListener('dragend', function(e) {
       this.classList.remove('dragging');
       draggedTodo = null;
       
-      // Remove visual feedback
+      // Remove all visual feedback
       memberCards.forEach(member => {
         member.classList.remove('drop-zone-active');
       });
+      todosLists.forEach(list => {
+        list.classList.remove('drop-zone-active');
+      });
+      todoBoard.classList.remove('drop-zone-active');
     });
   });
   
-  // Drop zones
+  // Drop zones - Member cards
   memberCards.forEach(member => {
     member.addEventListener('dragover', function(e) {
       e.preventDefault();
@@ -638,6 +653,20 @@ document.addEventListener('DOMContentLoaded', function() {
         assignTodoToMember(todoId, memberId);
       }
     });
+  });
+  
+  // Drop zone - Todo Board (for returning assigned todos)
+  todoBoard.addEventListener('dragover', function(e) {
+    e.preventDefault();
+  });
+  
+  todoBoard.addEventListener('drop', function(e) {
+    e.preventDefault();
+    
+    if (draggedTodo && draggedTodo.classList.contains('assigned-todo')) {
+      const todoId = draggedTodo.dataset.todoId;
+      returnTodoToBoard(todoId);
+    }
   });
   
   // Complete Todo Checkboxes
@@ -703,8 +732,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Global functions for onclick handlers
-  window.returnToBoard = function(todoId) {
+  // Return todo to board function (used by both drag&drop and button)
+  function returnTodoToBoard(todoId) {
     fetch(`/members/api/{{ team.id }}/return-to-board/`, {
       method: 'POST',
       headers: {
@@ -727,7 +756,10 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error:', error);
       alert('할일 되돌리기 중 오류가 발생했습니다.');
     });
-  };
+  }
+  
+  // Global functions for onclick handlers
+  window.returnToBoard = returnTodoToBoard;
   
   window.deleteTodo = function(todoId) {
     if (confirm('이 할 일을 삭제하시겠습니까?')) {
