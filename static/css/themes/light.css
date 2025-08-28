@@ -2391,19 +2391,22 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  background: var(--accent-light);
+  padding: 10px 16px;
+  background: #64b5f6;
   color: white;
   text-decoration: none;
+  border: 1px solid #64b5f6;
   border-radius: 6px;
   transition: all 0.2s ease;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .mainsection .timeline-link:hover {
-  background: #4d70f4;
+  background: #42a5f5;
   text-decoration: none;
   color: white;
+  border-color: #42a5f5;
   transform: translateY(-1px);
 }
 
