@@ -53,9 +53,13 @@
 
       <!-- 링크 섹션 -->
       <div class="auth-links">
-        <a href="{% url 'accounts:signup' %}" class="link-secondary">
-          아직 회원이 아니신가요? <span>회원가입</span>
-        </a>
+        <div class="auth-switch">
+          <span class="switch-text">아직 회원이 아니신가요?</span>
+          <a href="{% url 'accounts:signup' %}" class="switch-btn">
+            <i class="ri-user-add-line"></i>
+            회원가입
+          </a>
+        </div>
       </div>
     </div>
 

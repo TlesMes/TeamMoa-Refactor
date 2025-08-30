@@ -56,6 +56,17 @@ class JoinTeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['teampasswd']
+        widgets = {
+            'teampasswd': forms.PasswordInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': '팀 비밀번호를 입력하세요'
+                }
+            )
+        }
+        labels = {
+            'teampasswd': '팀 비밀번호'
+        }
 
 class ChangeTeamInfoForm(forms.ModelForm):
     class Meta:

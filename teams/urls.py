@@ -7,7 +7,10 @@ urlpatterns = [
     path('', views.main_page, name='main_page'),
     path('team_create/', views.team_create, name='team_create'),
     path('team_search/', views.team_search, name='team_search'),
-    path('team_join/<int:pk>/', views.team_join, name='team_join'),
+    # AJAX 엔드포인트
+    path('ajax/team-verify/', views.team_verify_code, name='team_verify_code'),
+    path('ajax/team-join/', views.team_join_process, name='team_join_process'),
+    # 기존 team_join/<int:pk>/ URL 제거됨 - 보안상 이유로
     path('team_info_change/<int:pk>/', views.team_info_change, name='team_info_change'),
     path('team_main_page/<int:pk>/', views.team_main_page, name='team_main_page'),
     path('team_add_milestone/<int:pk>/', views.team_add_milestone, name='team_add_milestone'),

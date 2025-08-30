@@ -4,46 +4,307 @@
 {% block contents %}
 <section class="auth-section">
   <div class="auth-card">
-    <div class="auth-header">
-      <h2>팀 검색하기</h2>
-      <p>팀 코드를 입력하여 기존 팀에 가입하세요</p>
-    </div>
     
-    <form method="POST" action="." class="auth-form">
-      {% csrf_token %}
+    <!-- Step 1: 팀 코드 입력 -->
+    <div id="step-1" class="team-join-step active">
+      <div class="auth-header">
+        <h2>팀 검색하기</h2>
+        <p>팀 코드를 입력하여 기존 팀에 가입하세요</p>
+      </div>
       
-      <div class="form-group">
-        <label for="id_team_code">팀 코드</label>
-        <div class="input-wrapper">
-          <i class="ri-qr-code-line"></i>
-          {% for field in form %}
-            {{ field }}
-            {% if field.errors %}
-              <div class="field-error">
-                {% for error in field.errors %}
-                  <span>{{ error }}</span>
-                {% endfor %}
-              </div>
-            {% endif %}
-          {% endfor %}
+      <form id="team-search-form" class="auth-form" method="post" action="javascript:void(0);">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="id_invitecode">팀 코드</label>
+          <div class="input-wrapper">
+            <i class="ri-qr-code-line"></i>
+            <input type="text" name="invitecode" id="id_invitecode" class="form-control" 
+                   placeholder="팀 코드를 입력하세요" required>
+          </div>
+          <div id="code-error" class="field-error" style="display: none;"></div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="search-btn">
+          <i class="ri-search-line"></i>
+          <span class="btn-text">팀 검색하기</span>
+          <span class="btn-loading" style="display: none;">
+            <i class="ri-loader-4-line spinning"></i>
+            검색 중...
+          </span>
+        </button>
+      </form>
+      
+      <div class="auth-links">
+        <p>
+          팀이 없으신가요? 
+          <a href="{% url 'teams:team_create' %}">새 팀 만들기</a>
+        </p>
+        <p>
+          <a href="{% url 'teams:main_page' %}">팀 목록 보기</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Step 2: 팀 정보 표시 및 비밀번호 입력 -->
+    <div id="step-2" class="team-join-step" style="display: none;">
+      <div class="auth-header">
+        <h2>팀 정보 확인</h2>
+        <p>아래 팀에 가입하시겠습니까?</p>
+      </div>
+
+      <!-- 팀 정보 카드 -->
+      <div class="team-info-card" id="team-info-display">
+        <div class="team-detail">
+          <div class="team-detail-item">
+            <i class="ri-team-line"></i>
+            <span class="detail-label">팀명</span>
+            <span class="detail-value" id="display-team-title"></span>
+          </div>
+          
+          <div class="team-detail-item">
+            <i class="ri-group-line"></i>
+            <span class="detail-label">현재 인원</span>
+            <span class="detail-value" id="display-team-members"></span>
+          </div>
+
+          <div class="team-detail-item">
+            <i class="ri-user-line"></i>
+            <span class="detail-label">팀장</span>
+            <span class="detail-value" id="display-team-host"></span>
+          </div>
+
+          <div class="team-detail-item" id="team-intro-item" style="display: none;">
+            <i class="ri-file-text-line"></i>
+            <span class="detail-label">팀 소개</span>
+            <span class="detail-value" id="display-team-intro"></span>
+          </div>
         </div>
       </div>
 
-      <button type="submit" class="auth-btn">
-        <i class="ri-search-line"></i>
-        팀 검색하기
-      </button>
-    </form>
-    
-    <div class="auth-links">
-      <p>
-        팀이 없으신가요? 
-        <a href="{% url 'teams:team_create' %}">새 팀 만들기</a>
-      </p>
-      <p>
-        <a href="{% url 'teams:main_page' %}">팀 목록 보기</a>
-      </p>
+      <!-- 비밀번호 입력 폼 -->
+      <form id="team-join-form" class="auth-form">
+        {% csrf_token %}
+        <input type="hidden" id="team-id" name="team_id">
+        
+        <div class="form-group">
+          <label for="id_teampasswd">팀 비밀번호</label>
+          <div class="input-wrapper">
+            <i class="ri-lock-line"></i>
+            <input type="password" name="teampasswd" id="id_teampasswd" class="form-control"
+                   placeholder="팀 비밀번호를 입력하세요" required>
+          </div>
+          <div class="help-text">
+            <small>팀장에게 받은 비밀번호를 입력해주세요</small>
+          </div>
+          <div id="password-error" class="field-error" style="display: none;"></div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="join-btn">
+          <i class="ri-user-add-line"></i>
+          <span class="btn-text">팀에 가입하기</span>
+          <span class="btn-loading" style="display: none;">
+            <i class="ri-loader-4-line spinning"></i>
+            가입 중...
+          </span>
+        </button>
+      </form>
+
+      <div class="auth-links">
+        <button type="button" class="link-secondary" id="back-to-search">
+          <i class="ri-arrow-left-line"></i>
+          다른 팀 검색하기
+        </button>
+      </div>
     </div>
+
+    <!-- Step 3: 가입 완료 -->
+    <div id="step-3" class="team-join-step" style="display: none;">
+      <div class="auth-header">
+        <h2>가입 완료!</h2>
+        <p>팀에 성공적으로 가입되었습니다</p>
+      </div>
+
+      <div class="success-message">
+        <div class="success-icon">
+          <i class="ri-check-double-line"></i>
+        </div>
+        <div class="success-content">
+          <h3 id="success-team-name"></h3>
+          <p>팀 활동을 시작해보세요!</p>
+        </div>
+      </div>
+
+      <div class="auth-links">
+        <a href="{% url 'teams:main_page' %}" class="auth-btn">
+          <i class="ri-home-line"></i>
+          팀 목록으로 이동
+        </a>
+      </div>
+    </div>
+
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CSRF 토큰 가져오기
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+    
+    // 단계 전환 함수
+    function switchStep(fromStep, toStep) {
+        const fromElement = document.getElementById(`step-${fromStep}`);
+        const toElement = document.getElementById(`step-${toStep}`);
+        
+        // 현재 단계 fade out
+        fromElement.classList.add('fade-out');
+        fromElement.classList.remove('active');
+        
+        setTimeout(() => {
+            fromElement.style.display = 'none';
+            toElement.style.display = 'block';
+            
+            setTimeout(() => {
+                toElement.classList.add('active');
+            }, 10);
+        }, 200);
+    }
+    
+    // 에러 메시지 표시
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 5000);
+    }
+    
+    // 로딩 상태 토글
+    function toggleLoading(buttonId, isLoading) {
+        const button = document.getElementById(buttonId);
+        if (isLoading) {
+            button.classList.add('loading');
+            button.disabled = true;
+        } else {
+            button.classList.remove('loading');
+            button.disabled = false;
+        }
+    }
+    
+    // Step 1: 팀 코드 검증
+    document.getElementById('team-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const inviteCode = formData.get('invitecode').trim();
+        
+        if (!inviteCode) {
+            showError('code-error', '팀 코드를 입력해주세요.');
+            return;
+        }
+        
+        toggleLoading('search-btn', true);
+        
+        fetch("{% url 'teams:team_verify_code' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            toggleLoading('search-btn', false);
+            
+            if (data.success) {
+                // 팀 정보를 Step 2에 표시
+                document.getElementById('display-team-title').textContent = data.team.title;
+                document.getElementById('display-team-members').textContent = 
+                    `${data.team.current_members} / ${data.team.maxuser}명`;
+                document.getElementById('display-team-host').textContent = data.team.host_name;
+                document.getElementById('team-id').value = data.team.id;
+                
+                // 팀 소개 표시 (있는 경우)
+                if (data.team.introduction) {
+                    document.getElementById('display-team-intro').textContent = data.team.introduction;
+                    document.getElementById('team-intro-item').style.display = 'flex';
+                } else {
+                    document.getElementById('team-intro-item').style.display = 'none';
+                }
+                
+                // Step 2로 전환
+                switchStep(1, 2);
+            } else {
+                showError('code-error', data.error);
+            }
+        })
+        .catch(error => {
+            toggleLoading('search-btn', false);
+            showError('code-error', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        });
+    });
+    
+    // Step 2: 팀 가입 처리
+    document.getElementById('team-join-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const password = formData.get('teampasswd').trim();
+        
+        if (!password) {
+            showError('password-error', '팀 비밀번호를 입력해주세요.');
+            return;
+        }
+        
+        toggleLoading('join-btn', true);
+        
+        fetch("{% url 'teams:team_join_process' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            toggleLoading('join-btn', false);
+            
+            if (data.success) {
+                // 성공 메시지 표시
+                document.getElementById('success-team-name').textContent = data.team_name;
+                
+                // Step 3로 전환
+                switchStep(2, 3);
+                
+                // 토스트 알림 표시 (common scripts 함수 활용)
+                if (typeof showToast !== 'undefined') {
+                    showToast(data.message);
+                }
+            } else {
+                showError('password-error', data.error);
+            }
+        })
+        .catch(error => {
+            toggleLoading('join-btn', false);
+            showError('password-error', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        });
+    });
+    
+    // 뒤로가기 버튼
+    document.getElementById('back-to-search').addEventListener('click', function() {
+        // 입력 필드 초기화
+        document.getElementById('team-search-form').reset();
+        document.getElementById('team-join-form').reset();
+        
+        // Step 1로 돌아가기
+        switchStep(2, 1);
+    });
+});
+</script>
 {% endblock %}

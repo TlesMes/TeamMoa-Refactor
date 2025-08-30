@@ -67,22 +67,160 @@ class TeamCreateView(LoginRequiredMixin, FormView):
 team_create = TeamCreateView.as_view()
 
 
-class TeamSearchView(LoginRequiredMixin, FormView):
+class TeamSearchView(LoginRequiredMixin, TemplateView):
+    """
+    통합 팀 가입 페이지 - AJAX 방식으로만 처리
+    더 이상 POST form을 직접 처리하지 않음
+    """
     template_name = 'teams/team_search.html'
-    form_class = SearchTeamForm
     login_url = '/accounts/login/'
     
-    def form_valid(self, form):
-        code = form.cleaned_data['invitecode']
-        try:
-            team = get_object_or_404(Team, invitecode=code)
-            return redirect('teams:team_join', pk=team.id)
-        except:
-            messages.error(self.request, '유효하지 않은 초대 코드입니다.')
-            return self.form_invalid(form)
+    def get(self, request, *args, **kwargs):
+        # URL에 파라미터가 있으면 깨끗한 URL로 리다이렉트
+        if request.GET:
+            messages.warning(
+                request, 
+                '보안을 위해 페이지 내 검색 기능을 이용해주세요.'
+            )
+            return redirect('teams:team_search')
+        return super().get(request, *args, **kwargs)
 
 
 team_search = TeamSearchView.as_view()
+
+
+class TeamVerifyCodeView(LoginRequiredMixin, View):
+    """
+    AJAX 엔드포인트: 팀 코드 검증 및 팀 정보 반환
+    """
+    login_url = '/accounts/login/'
+    
+    def post(self, request):
+        try:
+            invite_code = request.POST.get('invitecode', '').strip()
+            
+            if not invite_code:
+                return JsonResponse({
+                    'success': False,
+                    'error': '팀 코드를 입력해주세요.'
+                })
+            
+            try:
+                team = Team.objects.get(invitecode=invite_code)
+            except Team.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': '유효하지 않은 팀 코드입니다.'
+                })
+            
+            # 현재 사용자가 이미 팀 멤버인지 확인
+            if TeamUser.objects.filter(team=team, user=request.user).exists():
+                return JsonResponse({
+                    'success': False,
+                    'error': '이미 가입된 팀입니다.'
+                })
+            
+            # 팀 인원이 가득 찼는지 확인
+            current_member_count = team.get_current_member_count()
+            if current_member_count >= team.maxuser:
+                return JsonResponse({
+                    'success': False,
+                    'error': '팀 최대인원을 초과했습니다.'
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'team': {
+                    'id': team.id,
+                    'title': team.title,
+                    'current_members': current_member_count,
+                    'maxuser': team.maxuser,
+                    'host_name': team.host.nickname if team.host.nickname else team.host.username,
+                    'introduction': team.introduction if team.introduction else None
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': '서버 오류가 발생했습니다. 다시 시도해주세요.'
+            })
+
+
+team_verify_code = TeamVerifyCodeView.as_view()
+
+
+class TeamJoinProcessView(LoginRequiredMixin, View):
+    """
+    AJAX 엔드포인트: 팀 비밀번호 검증 및 최종 가입 처리
+    """
+    login_url = '/accounts/login/'
+    
+    def post(self, request):
+        try:
+            team_id = request.POST.get('team_id')
+            team_password = request.POST.get('teampasswd', '').strip()
+            
+            if not team_id or not team_password:
+                return JsonResponse({
+                    'success': False,
+                    'error': '필수 정보가 누락되었습니다.'
+                })
+            
+            try:
+                team = Team.objects.get(id=team_id)
+            except Team.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': '존재하지 않는 팀입니다.'
+                })
+            
+            # 비밀번호 확인
+            if team.teampasswd != team_password:
+                return JsonResponse({
+                    'success': False,
+                    'error': '팀 비밀번호가 올바르지 않습니다.'
+                })
+            
+            # 다시 한번 중복 가입 체크
+            if TeamUser.objects.filter(team=team, user=request.user).exists():
+                return JsonResponse({
+                    'success': False,
+                    'error': '이미 가입된 팀입니다.'
+                })
+            
+            # 다시 한번 인원 체크
+            current_member_count = team.get_current_member_count()
+            if current_member_count >= team.maxuser:
+                return JsonResponse({
+                    'success': False,
+                    'error': '팀 최대인원을 초과했습니다.'
+                })
+            
+            # 팀 가입 처리
+            TeamUser.objects.create(
+                team=team,
+                user=request.user
+            )
+            
+            # 현재 인원수 업데이트 (기존 로직 유지)
+            team.currentuser = team.get_current_member_count()
+            team.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'{team.title} 팀에 성공적으로 가입했습니다!',
+                'team_name': team.title
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': '서버 오류가 발생했습니다. 다시 시도해주세요.'
+            })
+
+
+team_join_process = TeamJoinProcessView.as_view()
 
 
 class TeamJoinView(LoginRequiredMixin, FormView):
