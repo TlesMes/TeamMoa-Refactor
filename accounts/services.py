@@ -172,23 +172,3 @@ class AuthService:
         request.session[last_sent_key] = timezone.now().isoformat()
 
 
-# 하위 호환성을 위한 함수형 래퍼들 (점진적 마이그레이션용)
-def register_user(form, current_site):
-    """하위 호환성을 위한 래퍼 함수"""
-    service = AuthService()
-    return service.register_user(form, current_site)
-
-def send_activation_email(user, current_site):
-    """하위 호환성을 위한 래퍼 함수"""
-    service = AuthService()
-    return service.send_activation_email(user, current_site)
-
-def store_return_url(request):
-    """하위 호환성을 위한 래퍼 함수"""
-    service = AuthService()
-    return service.store_return_url(request)
-
-def get_return_url(request, default_url='teams:main_page'):
-    """하위 호환성을 위한 래퍼 함수"""
-    service = AuthService()
-    return service.get_return_url(request, default_url)
