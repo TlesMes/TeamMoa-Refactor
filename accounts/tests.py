@@ -23,7 +23,7 @@ class AccountFlowTest(TestCase):
         }
 
         # 2. 실행 1단계: 가상 클라이언트로 회원가입(POST) 요청을 보냄
-        # 이 요청으로 views.signup -> services.register_user -> forms.SignupForm.save()가 순서대로 호출됩니다.
+        # 이 요청으로 views.signup -> AuthService.register_user -> forms.SignupForm.save()가 순서대로 호출됩니다.
         signup_url = reverse('accounts:signup')
         self.client.post(signup_url, signup_data)
 
