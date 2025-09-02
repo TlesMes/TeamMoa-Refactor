@@ -22,8 +22,11 @@ staticfiles/
 .idea/
 *.sublime-project
 *.sublime-workspace
-*.md
-!README.md
+
+# 특정 임시 파일들만 제외하도록 변경
+temp.md
+draft.md
+notes.md
 
 
 # OS
@@ -33,4 +36,20 @@ Thumbs.db
 # 환경변수
 .env
 *.env
+!.env.example
 local_settings.py
+
+# 테스트 및 커버리지
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# 로그 파일
+*.log
+logs/
+
+# 임시 파일
+*.tmp
+*.bak
+*~
