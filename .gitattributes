@@ -2,3 +2,5 @@
 static/js/summernote/summernote.js linguist-vendored
 static/css/summernote/summernote.css linguist-vendored
 static/js/lang/summernote-ko-KR.js linguist-vendored
+
+*.css linguist-vendored
