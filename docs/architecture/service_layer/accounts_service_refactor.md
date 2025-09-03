@@ -13,7 +13,7 @@ Accounts 앱의 모든 비즈니스 로직을 서비스 레이어로 완전 전�
 
 ### 🆕 새로 서비스화된 기능 (5개)
 
-#### 1. **로그인 처리** - `login_user()`
+#### 1. **로그인 처리** - `authenticate_user()` (수정됨)
 **AS-IS**: 뷰에서 직접 처리
 ```python
 # LoginView.post()
@@ -24,20 +24,23 @@ if user is not None:
     messages.success(request, f'{user.nickname}님, 환영합니다!')
 ```
 
-**TO-BE**: 서비스로 분리
+**TO-BE**: 서비스와 뷰 역할 분리 (2025.09.02 수정)
 ```python
-# AuthService.login_user()
-def login_user(self, request, username, password):
+# AuthService.authenticate_user() - 순수 비즈니스 로직만
+def authenticate_user(self, username, password):
     if not username or not password:
         raise ValueError('아이디와 비밀번호를 모두 입력해주세요.')
     
-    user = auth.authenticate(request, username=username, password=password)
+    user = auth.authenticate(username=username, password=password)
     if user is not None:
-        auth.login(request, user)
-        request.session.set_expiry(0)
         return user
     else:
         raise ValueError('아이디 또는 비밀번호가 올바르지 않습니다.')
+
+# LoginView.post() - HTTP 처리는 뷰에서
+user = self.auth_service.authenticate_user(username, password)
+auth.login(request, user)          # HTTP 세션 처리
+request.session.set_expiry(0)      # HTTP 세션 설정
 ```
 
 #### 2. **계정 활성화** - `activate_account()`
@@ -87,19 +90,23 @@ def resend_activation_email(self, request, email_or_username, current_site):
     # 스팸 방지, 사용자 조회, 메일 발송, 시간 기록 등
 ```
 
-#### 4. **로그아웃** - `logout_user()`
+#### 4. **로그아웃 처리** (2025.09.02 수정)
 **AS-IS**: 뷰에서 직접 처리
 ```python
 if request.user.is_authenticated:
     auth.logout(request)
 ```
 
-**TO-BE**: 서비스로 일관성 확보
+**TO-BE**: HTTP 처리는 뷰에서 계속 담당 (서비스 불필요)
 ```python
-def logout_user(self, request):
+# LogoutView.get() - 단순한 HTTP 세션 해제이므로 뷰에서 직접
+def get(self, request, *args, **kwargs):
     if request.user.is_authenticated:
-        auth.logout(request)
+        auth.logout(request)  # HTTP 세션 처리는 뷰 담당
+    return super().get(request, *args, **kwargs)
 ```
+
+**변경 이유**: `auth.logout()`은 순수한 HTTP 세션 조작이므로 별도 비즈니스 로직 불필요
 
 #### 5. **테스트 사용자 생성** - `create_test_user()`
 **AS-IS**: 뷰에서 직접 DB 쿼리

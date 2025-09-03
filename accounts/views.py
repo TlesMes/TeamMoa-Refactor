@@ -94,6 +94,7 @@ class LoginView(TemplateView):
             return redirect(MAIN_PAGE)
         
         # 캐시 방지 헤더 설정
+        # 로그인 상태로 뒤로가기 등 로그인 시도를 다시 할 수 없도록
         response = super().dispatch(request, *args, **kwargs)
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Pragma'] = 'no-cache'
@@ -105,7 +106,10 @@ class LoginView(TemplateView):
         password = request.POST.get("password")
         
         try:
-            user = self.auth_service.login_user(request, username, password)
+            user = self.auth_service.authenticate_user(username, password)
+            # HTTP 처리는 뷰에서 담당
+            auth.login(request, user)
+            request.session.set_expiry(0)  # 브라우저 종료시 세션 만료
             messages.success(request, f'{user.nickname}님, 환영합니다!')
             return redirect(MAIN_PAGE)
         except ValueError as e:
@@ -127,7 +131,9 @@ class LogoutView(RedirectView):
         return reverse(MAIN_PAGE)
     
     def get(self, request, *args, **kwargs):
-        self.auth_service.logout_user(request)
+        # HTTP 세션 처리는 뷰에서 직접
+        if request.user.is_authenticated:
+            auth.logout(request)
         return super().get(request, *args, **kwargs)
 
 

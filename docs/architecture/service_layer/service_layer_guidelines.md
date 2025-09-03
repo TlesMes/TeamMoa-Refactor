@@ -40,8 +40,8 @@ Model Layer   ─────────────────────►
 class AuthService:
     """인증 관련 비즈니스 로직"""
     
-    def login_user(self, username, password):
-        """사용자 로그인 처리"""
+    def authenticate_user(self, username, password):
+        """사용자 인증 처리"""
         # 입력값 검증
         if not username or not password:
             raise ValueError('아이디와 비밀번호를 모두 입력해주세요.')
@@ -64,7 +64,7 @@ class LoginView(TemplateView):
         password = request.POST.get("password")
         
         try:
-            user = self.auth_service.login_user(username, password)  # 서비스 호출
+            user = self.auth_service.authenticate_user(username, password)  # 서비스 호출
             auth.login(request, user)  # HTTP 관련 처리는 뷰에서
             messages.success(request, f'{user.nickname}님, 환영합니다!')
             return redirect('main')
@@ -269,12 +269,12 @@ class AuthServiceTest(TestCase):
             password='testpass123'
         )
     
-    def test_login_user_success(self):
-        """로그인 성공 케이스"""
+    def test_authenticate_user_success(self):
+        """인증 성공 케이스"""
         with patch('accounts.services.auth.authenticate') as mock_auth:
             mock_auth.return_value = self.user
             
-            result = self.auth_service.login_user('testuser', 'testpass123')
+            result = self.auth_service.authenticate_user('testuser', 'testpass123')
             
             self.assertEqual(result, self.user)
             mock_auth.assert_called_once_with(
@@ -282,20 +282,20 @@ class AuthServiceTest(TestCase):
                 password='testpass123'
             )
     
-    def test_login_user_invalid_credentials(self):
-        """로그인 실패 케이스"""
+    def test_authenticate_user_invalid_credentials(self):
+        """인증 실패 케이스"""
         with patch('accounts.services.auth.authenticate') as mock_auth:
             mock_auth.return_value = None
             
             with self.assertRaises(ValueError) as context:
-                self.auth_service.login_user('testuser', 'wrongpass')
+                self.auth_service.authenticate_user('testuser', 'wrongpass')
             
             self.assertIn('올바르지 않습니다', str(context.exception))
     
-    def test_login_user_empty_input(self):
+    def test_authenticate_user_empty_input(self):
         """빈 입력값 검증"""
         with self.assertRaises(ValueError) as context:
-            self.auth_service.login_user('', 'password')
+            self.auth_service.authenticate_user('', 'password')
         
         self.assertIn('모두 입력해주세요', str(context.exception))
 ```
@@ -412,7 +412,7 @@ def login_user(self, request, username, password):
     return user
 
 # ✅ GOOD: 서비스는 순수 비즈니스 로직만
-def login_user(self, username, password):
+def authenticate_user(self, username, password):
     user = auth.authenticate(username=username, password=password)
     if not user:
         raise ValueError('로그인 정보가 올바르지 않습니다.')

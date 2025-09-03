@@ -67,18 +67,16 @@ class AuthService:
         """
         return request.session.pop('return_url', default_url)
 
-    def login_user(self, request, username, password):
+    def authenticate_user(self, username, password):
         """
-        사용자 로그인을 처리합니다.
-        성공시 로그인된 사용자를, 실패시 None을 반환합니다.
+        사용자 인증을 처리합니다.
+        성공시 인증된 사용자를, 실패시 ValueError를 발생시킵니다.
         """
         if not username or not password:
             raise ValueError('아이디와 비밀번호를 모두 입력해주세요.')
         
-        user = auth.authenticate(request, username=username, password=password)
+        user = auth.authenticate(username=username, password=password)
         if user is not None:
-            auth.login(request, user)
-            request.session.set_expiry(0)  # 브라우저 종료시 세션 만료
             return user
         else:
             raise ValueError('아이디 또는 비밀번호가 올바르지 않습니다.')
@@ -101,10 +99,6 @@ class AuthService:
         except (User.DoesNotExist, ValueError, TypeError):
             raise ValueError('유효하지 않은 인증 정보입니다.')
 
-    def logout_user(self, request):
-        """사용자 로그아웃을 처리합니다."""
-        if request.user.is_authenticated:
-            auth.logout(request)
 
     def resend_activation_email(self, request, email_or_username, current_site):
         """
