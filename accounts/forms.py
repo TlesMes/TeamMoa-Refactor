@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django import forms
 from .models import User
 import re # 이메일 유효성 검사를 위해 re 모듈 추가
@@ -56,9 +56,26 @@ class SignupForm(forms.ModelForm):
             user.save()
         return user
 
-#닉네임, 프로필 변경 폼
+# 닉네임, 프로필 변경 폼
 class CustomUserChangeForm(UserChangeForm):
     password = None
     class Meta:
         model = get_user_model()
         fields = ['nickname', 'profile']
+
+
+# 비밀번호 변경 폼 - 한글 메시지로 커스터마이징
+class CustomPasswordChangeForm(PasswordChangeForm):
+    error_messages = dict(PasswordChangeForm.error_messages, **{
+        'password_incorrect': "현재 비밀번호가 올바르지 않습니다. 다시 입력해주세요.",
+    })
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].label = "현재 비밀번호"
+        self.fields['new_password1'].label = "새 비밀번호"
+        self.fields['new_password2'].label = "새 비밀번호 확인"
+        
+        # 도움말 텍스트도 한글로
+        self.fields['new_password1'].help_text = None
+        self.fields['new_password2'].help_text = "확인을 위해 새 비밀번호를 다시 입력해주세요."

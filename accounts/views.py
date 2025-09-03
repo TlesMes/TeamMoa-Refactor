@@ -12,8 +12,7 @@ from django.http import HttpResponse
 from smtplib import SMTPRecipientsRefused
 from .forms import CustomUserChangeForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
-from accounts.forms import SignupForm
+from accounts.forms import SignupForm, CustomPasswordChangeForm
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
@@ -185,7 +184,7 @@ update = UserUpdateView.as_view()
 
 class PasswordChangeView(LoginRequiredMixin, FormView):
     template_name = 'accounts/change_password.html'
-    form_class = PasswordChangeForm
+    form_class = CustomPasswordChangeForm
     login_url = '/accounts/login/'
     
     def __init__(self, *args, **kwargs):
