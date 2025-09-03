@@ -14,10 +14,8 @@ from django.contrib import messages
 from django.db import models
 from .models import Milestone, Team, TeamUser
 from .forms import AddMilestoneForm, ChangeTeamInfoForm, CreateTeamForm, JoinTeamForm, SearchTeamForm
+from .services import TeamService, MilestoneService
 from common.mixins import TeamMemberRequiredMixin, TeamHostRequiredMixin
-import uuid
-import base64
-import codecs
 
 
 class MainPageView(TemplateView):
@@ -26,6 +24,10 @@ class MainPageView(TemplateView):
     - 미로그인: 사이트 소개 + 로그인/회원가입 안내
     - 로그인: 팀 목록 화면
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+    
     def get_template_names(self):
         if self.request.user.is_authenticated:
             return ['teams/main_authenticated.html']
@@ -34,7 +36,7 @@ class MainPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            context['teams'] = Team.objects.filter(members=self.request.user).order_by('id')
+            context['teams'] = self.team_service.get_user_teams(self.request.user)
         return context
 
 
@@ -47,21 +49,24 @@ class TeamCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('teams:main_page')
     login_url = '/accounts/login/'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+    
     def form_valid(self, form):
-        team = Team()
-        team.title = form.cleaned_data['title']
-        team.maxuser = form.cleaned_data['maxuser']
-        team.teampasswd = form.cleaned_data['teampasswd']
-        team.introduction = form.cleaned_data['introduction']
-        team.host = self.request.user
-        team.currentuser = 1
-        team.invitecode = base64.urlsafe_b64encode(
-                        codecs.encode(uuid.uuid4().bytes, "base64").rstrip()
-                        ).decode()[:16]
-        team.save()
-        team.members.add(self.request.user)
-        messages.success(self.request, '팀이 성공적으로 생성되었습니다.')
-        return super().form_valid(form)
+        try:
+            team = self.team_service.create_team(
+                host_user=self.request.user,
+                title=form.cleaned_data['title'],
+                maxuser=form.cleaned_data['maxuser'],
+                teampasswd=form.cleaned_data['teampasswd'],
+                introduction=form.cleaned_data['introduction']
+            )
+            messages.success(self.request, '팀이 성공적으로 생성되었습니다.')
+            return super().form_valid(form)
+        except ValueError as e:
+            messages.error(self.request, str(e))
+            return self.form_invalid(form)
 
 
 team_create = TeamCreateView.as_view()
@@ -95,51 +100,26 @@ class TeamVerifyCodeView(LoginRequiredMixin, View):
     """
     login_url = '/accounts/login/'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+    
     def post(self, request):
         try:
             invite_code = request.POST.get('invitecode', '').strip()
             
-            if not invite_code:
-                return JsonResponse({
-                    'success': False,
-                    'error': '팀 코드를 입력해주세요.'
-                })
-            
-            try:
-                team = Team.objects.get(invitecode=invite_code)
-            except Team.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'error': '유효하지 않은 팀 코드입니다.'
-                })
-            
-            # 현재 사용자가 이미 팀 멤버인지 확인
-            if TeamUser.objects.filter(team=team, user=request.user).exists():
-                return JsonResponse({
-                    'success': False,
-                    'error': '이미 가입된 팀입니다.'
-                })
-            
-            # 팀 인원이 가득 찼는지 확인
-            current_member_count = team.get_current_member_count()
-            if current_member_count >= team.maxuser:
-                return JsonResponse({
-                    'success': False,
-                    'error': '팀 최대인원을 초과했습니다.'
-                })
+            team_info = self.team_service.verify_team_code(invite_code, request.user)
             
             return JsonResponse({
                 'success': True,
-                'team': {
-                    'id': team.id,
-                    'title': team.title,
-                    'current_members': current_member_count,
-                    'maxuser': team.maxuser,
-                    'host_name': team.host.nickname if team.host.nickname else team.host.username,
-                    'introduction': team.introduction if team.introduction else None
-                }
+                'team': team_info
             })
             
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
         except Exception as e:
             return JsonResponse({
                 'success': False,
@@ -156,56 +136,20 @@ class TeamJoinProcessView(LoginRequiredMixin, View):
     """
     login_url = '/accounts/login/'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+    
     def post(self, request):
         try:
             team_id = request.POST.get('team_id')
             team_password = request.POST.get('teampasswd', '').strip()
             
-            if not team_id or not team_password:
-                return JsonResponse({
-                    'success': False,
-                    'error': '필수 정보가 누락되었습니다.'
-                })
-            
-            try:
-                team = Team.objects.get(id=team_id)
-            except Team.DoesNotExist:
-                return JsonResponse({
-                    'success': False,
-                    'error': '존재하지 않는 팀입니다.'
-                })
-            
-            # 비밀번호 확인
-            if team.teampasswd != team_password:
-                return JsonResponse({
-                    'success': False,
-                    'error': '팀 비밀번호가 올바르지 않습니다.'
-                })
-            
-            # 다시 한번 중복 가입 체크
-            if TeamUser.objects.filter(team=team, user=request.user).exists():
-                return JsonResponse({
-                    'success': False,
-                    'error': '이미 가입된 팀입니다.'
-                })
-            
-            # 다시 한번 인원 체크
-            current_member_count = team.get_current_member_count()
-            if current_member_count >= team.maxuser:
-                return JsonResponse({
-                    'success': False,
-                    'error': '팀 최대인원을 초과했습니다.'
-                })
-            
-            # 팀 가입 처리
-            TeamUser.objects.create(
-                team=team,
-                user=request.user
+            team = self.team_service.join_team(
+                user=request.user,
+                team_id=team_id,
+                password=team_password
             )
-            
-            # 현재 인원수 업데이트 (기존 로직 유지)
-            team.currentuser = team.get_current_member_count()
-            team.save()
             
             return JsonResponse({
                 'success': True,
@@ -213,6 +157,11 @@ class TeamJoinProcessView(LoginRequiredMixin, View):
                 'team_name': team.title
             })
             
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
         except Exception as e:
             return JsonResponse({
                 'success': False,
@@ -268,53 +217,24 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
     template_name = 'teams/team_main_page.html'
     context_object_name = 'team'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+        self.milestone_service = MilestoneService()
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = self.get_object()
         today_date = datetime.now().date()
         
         context['members'] = TeamUser.objects.filter(team=team)
-        milestones = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
-        context['milestones'] = milestones
+        context['milestones'] = self.milestone_service.get_team_milestones(team)
         context['today_date'] = today_date
         
-        # 마일스톤 통계 계산 (새로운 상태 기준)
-        not_started_count = 0
-        in_progress_count = 0
-        completed_count = 0
-        overdue_count = 0
+        # 서비스에서 통계 계산
+        stats = self.team_service.get_team_statistics(team)
+        context.update(stats)
         
-        for milestone in milestones:
-            status = milestone.get_status(today_date)
-            if status == 'not_started':
-                not_started_count += 1
-            elif status == 'in_progress':
-                in_progress_count += 1
-            elif status == 'completed':
-                completed_count += 1
-            elif status == 'overdue':
-                overdue_count += 1
-        
-        # 각 상태별 개수를 개별적으로 전달
-        context['not_started_count'] = not_started_count
-        context['in_progress_count'] = in_progress_count
-        context['completed_count'] = completed_count
-        context['overdue_count'] = overdue_count
-        
-        # 기존 변수들도 유지 (호환성)
-        context['active_milestones_count'] = in_progress_count + not_started_count
-        context['completed_milestones_count'] = completed_count
-        context['overdue_milestones_count'] = overdue_count
-        
-        # 오늘 진행 중인 마일스톤 찾기
-        today_milestone = '진행 중인 마일스톤이 없습니다.'
-        active_milestones = [m for m in milestones if m.get_status(today_date) == 'in_progress']
-        if active_milestones:
-            milestone = active_milestones[0]
-            left = milestone.enddate - today_date
-            today_milestone = f'{milestone.title}, {left.days}일 남았습니다'
-        
-        context['today_milestone'] = today_milestone
         return context
 
 
@@ -340,6 +260,10 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
     template_name = 'teams/team_add_milestone.html'
     form_class = AddMilestoneForm
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.milestone_service = MilestoneService()
+    
     def get_success_url(self):
         return reverse('teams:team_main_page', kwargs={'pk': self.kwargs['pk']})
     
@@ -358,8 +282,7 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         
         try:
-            # 새 마일스톤 생성
-            Milestone.objects.create(
+            self.milestone_service.create_milestone(
                 team=team,
                 title=form.cleaned_data['title'],
                 description=form.cleaned_data['description'],
@@ -370,8 +293,10 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
             messages.success(self.request, '마일스톤이 성공적으로 추가되었습니다.')
             return super().form_valid(form)
             
+        except ValueError as e:
+            messages.error(self.request, str(e))
+            return self.form_invalid(form)
         except Exception as e:
-            # DB 저장 실패시 사용자 친화적 메시지
             messages.error(self.request, f'마일스톤 저장에 실패했습니다: {str(e)}')
             return self.form_invalid(form)
     
@@ -403,16 +328,19 @@ team_add_milestone = TeamAddMilestoneView.as_view()
 class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'teams/team_milestone_timeline.html'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.milestone_service = MilestoneService()
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         
-        # 팀의 모든 마일스톤을 날짜순으로 정렬
-        milestones = Milestone.objects.filter(team=team).order_by('startdate', 'enddate')
-        
         context.update({
             'team': team,
-            'milestones': milestones,
+            'milestones': self.milestone_service.get_team_milestones(
+                team, order_by=['startdate', 'enddate']
+            ),
         })
         return context
 
@@ -424,10 +352,13 @@ team_milestone_timeline = TeamMilestoneTimelineView.as_view()
 class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
     """AJAX를 통한 마일스톤 업데이트"""
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.milestone_service = MilestoneService()
+    
     def post(self, request, pk, milestone_id):
         try:
             team = get_object_or_404(Team, pk=pk)
-            milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
             
             # JSON 데이터 파싱
             if request.content_type == 'application/json':
@@ -435,55 +366,11 @@ class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
             else:
                 data = request.POST
             
-            # 업데이트할 필드들 처리
-            updated_fields = []
-            
-            if 'startdate' in data:
-                try:
-                    milestone.startdate = datetime.strptime(data['startdate'], '%Y-%m-%d').date()
-                    updated_fields.append('시작일')
-                except ValueError:
-                    return JsonResponse({
-                        'success': False,
-                        'message': '시작일 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)'
-                    }, status=400)
-                
-            if 'enddate' in data:
-                try:
-                    milestone.enddate = datetime.strptime(data['enddate'], '%Y-%m-%d').date()
-                    updated_fields.append('종료일')
-                except ValueError:
-                    return JsonResponse({
-                        'success': False,
-                        'message': '종료일 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)'
-                    }, status=400)
-                
-            if 'progress_percentage' in data:
-                progress = int(data['progress_percentage'])
-                if 0 <= progress <= 100:
-                    milestone.progress_percentage = progress
-                    updated_fields.append('진행률')
-                    
-                    # 진행률이 100%이면 완료 처리
-                    if progress == 100 and not milestone.is_completed:
-                        milestone.is_completed = True
-                        milestone.completed_date = datetime.now()
-                        updated_fields.append('완료 상태')
-                    elif progress < 100 and milestone.is_completed:
-                        milestone.is_completed = False
-                        milestone.completed_date = None
-                        updated_fields.append('완료 상태')
-            
-            # 데이터 검증
-            if hasattr(milestone, 'startdate') and hasattr(milestone, 'enddate'):
-                if milestone.startdate > milestone.enddate:
-                    return JsonResponse({
-                        'success': False,
-                        'message': '시작일은 종료일보다 이전이어야 합니다.'
-                    }, status=400)
-            
-            # 저장
-            milestone.save()
+            milestone, updated_fields = self.milestone_service.update_milestone(
+                milestone_id=milestone_id,
+                team=team,
+                **data
+            )
             
             return JsonResponse({
                 'success': True,
@@ -507,7 +394,7 @@ class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
         except ValueError as e:
             return JsonResponse({
                 'success': False,
-                'message': f'잘못된 값입니다: {str(e)}'
+                'message': str(e)
             }, status=400)
             
         except Exception as e:
@@ -521,11 +408,14 @@ milestone_update_ajax = MilestoneUpdateAjaxView.as_view()
 
 
 class MilestoneDeleteAjaxView(TeamMemberRequiredMixin, View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.milestone_service = MilestoneService()
+        
     def post(self, request, pk, milestone_id):
         try:
-            milestone = get_object_or_404(Milestone, pk=milestone_id, team_id=pk)
-            milestone_title = milestone.title
-            milestone.delete()
+            team = get_object_or_404(Team, pk=pk)
+            milestone_title = self.milestone_service.delete_milestone(milestone_id, team)
             
             messages.success(request, f'"{milestone_title}" 마일스톤이 삭제되었습니다.')
             return HttpResponse(status=200)
@@ -539,12 +429,18 @@ milestone_delete_ajax = MilestoneDeleteAjaxView.as_view()
 
 
 class TeamDisbandView(TeamHostRequiredMixin, View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+        
     def post(self, request, pk):
-        team = get_object_or_404(Team, pk=pk)
-        team_title = team.title
-        team.delete()
-        messages.success(request, f'"{team_title}" 팀이 성공적으로 해체되었습니다.')
-        return redirect('teams:main_page')
+        try:
+            team_title = self.team_service.disband_team(pk, request.user)
+            messages.success(request, f'"{team_title}" 팀이 성공적으로 해체되었습니다.')
+            return redirect('teams:main_page')
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('teams:team_main_page', pk=pk)
 
 
 team_disband = TeamDisbandView.as_view()
