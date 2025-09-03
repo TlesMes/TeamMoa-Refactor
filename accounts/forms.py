@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django import forms
 from .models import User
@@ -25,10 +25,35 @@ class SignupForm(forms.ModelForm):
         self.fields = {k: self.fields[k] for k in new_order if k in self.fields}
 
     def clean_password2(self):
-        cd = self.cleaned_data
-        if cd.get('password') != cd.get('password2'):
+        password1 = self.cleaned_data.get('password')
+        password2 = self.cleaned_data.get('password2')
+        
+        # 1. 비밀번호 일치 검사
+        if password1 != password2:
             raise forms.ValidationError('비밀번호가 일치하지 않습니다.')
-        return cd.get('password2')
+        
+        # 2. Django AUTH_PASSWORD_VALIDATORS 검증 추가
+        if password1:
+            try:
+                password_validation.validate_password(password1, self.instance)
+            except forms.ValidationError as error:
+                # Django 검증 에러를 한글로 변환
+                korean_messages = []
+                for message in error.messages:
+                    if 'password is too short' in message or 'must contain at least' in message:
+                        korean_messages.append('비밀번호는 최소 8자 이상이어야 합니다.')
+                    elif 'password is too common' in message or 'common password' in message:
+                        korean_messages.append('너무 일반적인 비밀번호입니다.')
+                    elif 'password is entirely numeric' in message or 'entirely numeric' in message:
+                        korean_messages.append('비밀번호가 모두 숫자로만 구성되어 있습니다.')
+                    elif 'similar to the' in message or 'too similar' in message:
+                        korean_messages.append('비밀번호가 개인 정보와 너무 유사합니다.')
+                    else:
+                        korean_messages.append(str(message))
+                
+                raise forms.ValidationError(korean_messages)
+        
+        return password2
 
     def clean_username(self):
         # username (로그인 ID) 중복 검사
