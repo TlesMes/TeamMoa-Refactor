@@ -228,11 +228,12 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
         today_date = datetime.now().date()
         
         context['members'] = TeamUser.objects.filter(team=team)
-        context['milestones'] = self.milestone_service.get_team_milestones(team)
+        milestones = self.milestone_service.get_team_milestones(team)
+        context['milestones'] = milestones
         context['today_date'] = today_date
         
-        # 서비스에서 통계 계산
-        stats = self.team_service.get_team_statistics(team)
+        # QuerySet 재사용하여 통계 계산 (중복 쿼리 방지)
+        stats = self.team_service.get_team_statistics(team, milestones=milestones)
         context.update(stats)
         
         return context

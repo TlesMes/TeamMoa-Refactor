@@ -156,15 +156,20 @@ class TeamService:
         """사용자가 가입한 모든 팀을 반환합니다."""
         return Team.objects.filter(members=user).order_by('id')
     
-    def get_team_statistics(self, team):
+    def get_team_statistics(self, team, milestones=None):
         """
         팀의 마일스톤 통계를 계산합니다.
+        
+        Args:
+            team: 대상 팀
+            milestones: 이미 조회된 마일스톤 QuerySet (선택적)
         
         Returns:
             dict: 마일스톤 상태별 통계 정보
         """
         today_date = date.today()
-        milestones = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
+        if milestones is None:
+            milestones = Milestone.objects.filter(team=team).order_by('priority', 'enddate')
         
         # 상태별 카운트
         stats = {
