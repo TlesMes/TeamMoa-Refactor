@@ -11,9 +11,6 @@ class ScheduleService:
     ERROR_MESSAGES = {
         'INVALID_DATE': '유효하지 않은 날짜 형식입니다.',
         'INVALID_WEEK': '주간을 선택해주세요.',
-        'NO_PERMISSION': '권한이 없습니다.',
-        'TEAM_USER_NOT_FOUND': '팀 멤버 정보를 찾을 수 없습니다.',
-        'INVALID_SCHEDULE_DATA': '잘못된 스케줄 데이터입니다.',
     }
     
     def save_personal_schedule(self, team_user, week_start, schedule_data):
@@ -21,29 +18,9 @@ class ScheduleService:
         if not isinstance(week_start, date):
             raise ValueError(self.ERROR_MESSAGES['INVALID_DATE'])
         
-        if not self.can_edit_schedule(team_user.user, team_user.team):
-            raise ValueError(self.ERROR_MESSAGES['NO_PERMISSION'])
-        
+        # 팀 멤버십 검증은 TeamMemberRequiredMixin에서 이미 수행됨
         return self._bulk_process_weekly_schedule(team_user, week_start, schedule_data)
     
-    def get_personal_schedule(self, team_user, start_date, end_date):
-        """개인 스케줄을 조회합니다. (미사용)"""
-        return PersonalDaySchedule.objects.filter(
-            owner=team_user,
-            date__range=[start_date, end_date]
-        ).order_by('date')
-    
-    def delete_personal_schedule(self, team_user, target_date):
-        """특정 날짜의 개인 스케줄을 삭제합니다. (미사용)"""
-        if not self.can_edit_schedule(team_user.user, team_user.team):
-            raise ValueError(self.ERROR_MESSAGES['NO_PERMISSION'])
-        
-        deleted_count, _ = PersonalDaySchedule.objects.filter(
-            owner=team_user,
-            date=target_date
-        ).delete()
-        
-        return deleted_count > 0
     
     def get_team_availability(self, team, start_date, end_date):
         """팀의 주간 가용성을 실시간 계산합니다. (기존 모델 메서드에서 이동)"""
@@ -81,67 +58,6 @@ class ScheduleService:
             
         return result
     
-    def get_team_schedule_summary(self, team, week_start):
-        """팀의 주간 스케줄 요약을 반환합니다. (미사용)"""
-        week_end = week_start + timedelta(days=6)
-        availability = self.get_team_availability(team, week_start, week_end)
-        
-        # 요약 통계 계산
-        total_members = team.teamuser_set.count()
-        peak_availability = 0
-        best_time_slot = None
-        
-        for day_data in availability:
-            for hour, count in day_data['availability'].items():
-                if count > peak_availability:
-                    peak_availability = count
-                    best_time_slot = {
-                        'date': day_data['date'],
-                        'hour': hour,
-                        'available_count': count,
-                        'availability_rate': (count / total_members * 100) if total_members > 0 else 0
-                    }
-        
-        return {
-            'availability_data': availability,
-            'summary': {
-                'total_members': total_members,
-                'peak_availability': peak_availability,
-                'best_time_slot': best_time_slot,
-                'week_range': f"{week_start} ~ {week_end}"
-            }
-        }
-    
-    def validate_schedule_data(self, schedule_data):
-        """스케줄 데이터의 유효성을 검증합니다. (미사용)"""
-        if not isinstance(schedule_data, dict):
-            return False
-        
-        # 기본적인 검증 로직
-        for day_offset in range(7):
-            for hour in range(24):
-                checkbox_name = f'time_{hour}-{day_offset + 1}'
-                if checkbox_name in schedule_data:
-                    # 체크박스 값이 유효한지 확인
-                    if schedule_data[checkbox_name] not in ['on', True, '1']:
-                        continue
-        
-        return True
-    
-    def can_edit_schedule(self, user, team):
-        """사용자가 해당 팀의 스케줄을 편집할 수 있는지 확인합니다."""
-        try:
-            TeamUser.objects.get(team=team, user=user)
-            return True
-        except TeamUser.DoesNotExist:
-            return False
-    
-    def get_team_user_or_error(self, user, team):
-        """팀 사용자 객체를 가져오거나 에러를 발생시킵니다."""
-        try:
-            return TeamUser.objects.get(team=team, user=user)
-        except TeamUser.DoesNotExist:
-            raise ValueError(self.ERROR_MESSAGES['TEAM_USER_NOT_FOUND'])
     
     @transaction.atomic
     def _bulk_process_weekly_schedule(self, team_user, week_start, schedule_data):

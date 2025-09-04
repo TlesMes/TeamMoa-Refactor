@@ -69,8 +69,8 @@ class SchedulerUploadPageView(TeamMemberRequiredMixin, TemplateView):
         team = get_object_or_404(Team, pk=kwargs['pk'])
         
         try:
-            # 서비스를 통한 팀 사용자 검증
-            teamuser = self.schedule_service.get_team_user_or_error(request.user, team)
+            # TeamMemberRequiredMixin에서 이미 멤버십 검증됨
+            teamuser = get_object_or_404(TeamUser, team=team, user=request.user)
             
             week = request.POST.get("week")
             if not week:

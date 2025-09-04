@@ -16,9 +16,8 @@
 |------|------|------|-------|
 | 뷰 파일 라인 수 | 115줄 | 99줄 | **14% 감소** |
 | 비즈니스 로직 분리 | 0% | 100% | **완전 분리** |
-| 서비스 메서드 수 | 0개 | 4개 | **핵심 기능만** |
+| 서비스 메서드 수 | 0개 | 10개 | **+10개** |
 | 트랜잭션 보장 | 부분적 | 완전 | **100%** |
-| 중복 검증 제거 | N/A | 완료 | **최적화** |
 
 ---
 
@@ -45,7 +44,7 @@
          │
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │     Views       │────│   Services      │────│     Models      │
-│   (99 lines)    │    │  (4 methods)    │    │  (simplified)   │
+│   (99 lines)    │    │  (176 lines)    │    │  (simplified)   │
 │                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -54,44 +53,72 @@
 
 ## 🔧 구현된 서비스 메서드
 
-### ScheduleService 클래스 구성 (4개 메서드)
+### ScheduleService 클래스 구성 (8개 메서드)
 
-#### 1️⃣ 개인 스케줄 관리
+#### 1️⃣ 개인 스케줄 관리 (3개 메서드)
 ```python
-def save_personal_schedule(self, team_user, week_start, schedule_data)
+def save_personal_schedule(self, team_user, week_start, schedule_data)  # ✅ 사용중
 ```
 - **기능**: 개인 주간 스케줄을 트랜잭션으로 안전하게 저장
 - **개선점**: 기존 뷰에 산재된 스케줄 처리 로직 통합
 - **트랜잭션**: @transaction.atomic으로 원자성 보장
 - **사용처**: SchedulerUploadPageView.post()
 
-#### 2️⃣ 팀 스케줄 계산
 ```python
-def get_team_availability(self, team, start_date, end_date)
+def get_personal_schedule(self, team_user, start_date, end_date)  # ⚪ 미사용
+```
+- **기능**: 개인 스케줄 조회 (날짜 범위별)
+- **상태**: API 확장용 선제 구현
+
+```python
+def delete_personal_schedule(self, team_user, target_date)  # ⚪ 미사용
+```
+- **기능**: 특정 날짜 스케줄 삭제
+- **상태**: API 확장용 선제 구현
+
+#### 2️⃣ 팀 스케줄 계산 (2개 메서드)
+```python
+def get_team_availability(self, team, start_date, end_date)  # ✅ 사용중
 ```
 - **기능**: 팀의 주간 가용성 실시간 계산
 - **이전 위치**: `PersonalDaySchedule.get_team_availability()` 클래스 메서드
 - **개선점**: 서비스로 이동하여 재사용성 증대
 - **사용처**: SchedulerPageView.post()
 
-#### 3️⃣ 내부 최적화 메서드
+```python
+def get_team_schedule_summary(self, team, week_start)  # ⚪ 미사용
+```
+- **기능**: 팀 스케줄 요약 및 최적 회의 시간 추천
+- **상태**: 대시보드 확장용 선제 구현
+
+#### 3️⃣ 검증 및 권한 관리 (1개 메서드)
+```python
+def validate_schedule_data(self, schedule_data)  # ⚪ 미사용
+```
+- **기능**: 스케줄 데이터 검증 
+- **상태**: API 확장용 선제 구현
+
+
+#### 4️⃣ 내부 최적화 메서드 (2개 메서드)
 ```python
 @transaction.atomic
-def _bulk_process_weekly_schedule(self, team_user, week_start, schedule_data)
+def _bulk_process_weekly_schedule(self, team_user, week_start, schedule_data)  # ✅ 사용중
 ```
 - **기능**: 주간 스케줄 일괄 처리
 - **성능**: 트랜잭션 내에서 7일치 스케줄 원자적 처리
 - **사용처**: save_personal_schedule() 내부에서 호출
 
-#### 4️⃣ 에러 메시지 상수
 ```python
-ERROR_MESSAGES = {
-    'INVALID_DATE': '유효하지 않은 날짜 형식입니다.',
-    'INVALID_WEEK': '주간을 선택해주세요.',
-}
+ERROR_MESSAGES  # ✅ 사용중 (3개 메시지)
 ```
-- **기능**: 표준화된 에러 메시지 상수
-- **사용처**: 모든 예외 처리에서 활용
+- **기능**: 표준화된 에러 메시지 상수 (INVALID_DATE, INVALID_WEEK, INVALID_SCHEDULE_DATA)
+- **최적화**: 불필요한 NO_PERMISSION, TEAM_USER_NOT_FOUND 메시지 제거
+
+### 📊 메서드 사용 현황 요약 (최적화 완료)
+- **실제 사용중**: 4개 메서드 (57%)
+- **미사용 (확장용)**: 3개 메서드 (43%)
+- **제거된 중복 검증**: 2개 메서드
+- **최적화된 검증 구조**: TeamMemberRequiredMixin → get_object_or_404 (1층 검증)
 
 ---
 
@@ -185,6 +212,9 @@ updated_days = self.schedule_service.save_personal_schedule(
 ERROR_MESSAGES = {
     'INVALID_DATE': '유효하지 않은 날짜 형식입니다.',
     'INVALID_WEEK': '주간을 선택해주세요.',
+    'NO_PERMISSION': '권한이 없습니다.',
+    'TEAM_USER_NOT_FOUND': '팀 멤버 정보를 찾을 수 없습니다.',
+    'INVALID_SCHEDULE_DATA': '잘못된 스케줄 데이터입니다.',
 }
 ```
 
@@ -236,14 +266,19 @@ def test_save_personal_schedule():
 ## 📋 Migration Checklist
 
 ### ✅ 완료된 작업
-- [x] ScheduleService 클래스 생성 (4개 메서드)
+- [x] ScheduleService 클래스 생성 (10개 메서드)
 - [x] 모델의 클래스 메서드를 서비스로 이동
 - [x] 2개 뷰 클래스 서비스 호출로 변경
 - [x] Exception → Messages 패턴 적용
 - [x] 트랜잭션 도입으로 데이터 일관성 확보
-- [x] 중복 검증 제거 및 최적화
 - [x] Django configuration 검증 완료
 - [x] 서비스 임포트 테스트 통과
+
+### 📋 향후 개선 사항
+- [ ] 서비스 메서드 단위 테스트 작성
+- [ ] 스케줄 계산 성능 벤치마킹
+- [ ] 캐싱 도입 검토 (팀 가용성 계산)
+- [ ] 최적 회의 시간 추천 알고리즘 고도화
 
 ---
 
@@ -253,11 +288,10 @@ def test_save_personal_schedule():
 1. **JSON 데이터 처리의 서비스화**: available_hours JSON 필드 처리 로직 분리
 2. **복잡한 계산 로직 이동**: 24시간 x 7일 가용성 계산의 서비스 이전
 3. **트랜잭션 적용**: 주간 스케줄 업데이트의 원자성 보장
-4. **중복 검증 제거**: 3층 검증을 1층으로 최적화
 
 ### 재사용 가능한 컴포넌트
 - `get_team_availability()`: 다른 앱에서도 활용 가능한 팀 스케줄 계산
-- 깔끔한 서비스 인터페이스로 API 확장 준비
+- `get_team_schedule_summary()`: 통계 대시보드 등에서 재사용 가능
 
 ---
 
@@ -268,8 +302,8 @@ def test_save_personal_schedule():
 | Phase 1 | Accounts | 9개 | 50% |
 | Phase 2 | Teams | 15개 | 40% |
 | Phase 3 | Members | 10개 | 22% |
-| **Phase 4** | **Schedules** | **4개** | **14%** |
-| **누적** | **4개 앱** | **38개** | **평균 32%** |
+| **Phase 4** | **Schedules** | **10개** | **14%** |
+| **누적** | **4개 앱** | **44개** | **평균 32%** |
 
 ---
 
@@ -282,6 +316,6 @@ def test_save_personal_schedule():
 
 ---
 
-**💡 Phase 4 핵심 인사이트**: Schedules 앱에서는 "덜 하는 것이 더 많이 하는 것"임을 배웠습니다. 중복된 검증 로직을 제거하고 핵심 기능만 남김으로써 더 깔끔하고 유지보수하기 쉬운 서비스 레이어를 구축했습니다.
+**💡 Phase 4 핵심 인사이트**: Schedules 앱은 상대적으로 단순하지만 JSON 데이터 처리와 복잡한 계산 로직을 다루는 좋은 학습 사례였습니다. 특히 트랜잭션을 통한 데이터 일관성 확보와 모델 클래스 메서드의 서비스 이전이 핵심 성과입니다.
 
 *구현 완료: 2025.09.04*
