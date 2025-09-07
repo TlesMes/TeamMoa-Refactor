@@ -3,6 +3,7 @@ from django.views.generic import TemplateView, ListView
 from django.views import View
 from .models import Post
 from .forms import PostWriteForm
+from .services import ShareService
 from accounts.models import User
 from django.contrib import messages
 
@@ -22,55 +23,55 @@ POST_DETAIL_PAGE = 'shares:post_detail_view'
 MAIN_PAGE = 'teams:main_page'
 
 
-class PostAuthorRequiredMixin:
-    """게시글 작성자 또는 관리자만 접근 가능한 Mixin"""
-    def dispatch(self, request, *args, **kwargs):
-        post = get_object_or_404(Post, pk=kwargs.get('post_id'))
-        if post.writer != request.user and request.user.level != '0':
-            messages.error(request, "본인 게시글이 아닙니다.")
-            return redirect(POST_LIST_PAGE, kwargs.get('pk'))
-        return super().dispatch(request, *args, **kwargs)
+# PostAuthorRequiredMixin은 서비스 레이어로 이동되었습니다.
+# ShareService.check_post_author() 메서드를 사용하세요.
 
 
-class PostListView(TeamMemberRequiredMixin, ListView):
-    model = Post
-    paginate_by = 10
+class PostListView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'shares/post_list.html'
-    context_object_name = 'post_list'
     
-    def get_team(self):
-        if not hasattr(self, '_team'):
-            self._team = get_object_or_404(Team, pk=self.kwargs["pk"])
-        return self._team
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
     
-    def get_queryset(self):
-        team = self.get_team()
-        # 🚀 최적화: 게시글과 작성자 정보 사전 로딩
-        return Post.objects.filter(isTeams=team.id).select_related('writer').order_by('-id')
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        team = self.get_team()
+        team_id = self.kwargs['pk']
+        
+        # 페이지 번호 가져오기
+        page = self.request.GET.get('page', 1)
+        
+        # 서비스 레이어를 통한 게시글 조회
+        posts_data = self.share_service.get_team_posts(team_id, page=page, per_page=10)
+        
         context.update({
-            'team': team,
-            'team_id': team.id
+            'post_list': posts_data['posts'],
+            'page_obj': posts_data['posts'],  # 템플릿 호환성을 위해
+            'team': posts_data['team'],
+            'team_id': team_id
         })
         return context
 
 class PostDetailView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'shares/post_detail1.html'
     
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=kwargs['pk'])
-        post = get_object_or_404(Post, pk=kwargs['post_id'])
         
-        # 작성자 본인인가를 템플릿에 전달
-        post_auth = self.request.user == post.writer
+        # 서비스 레이어를 통한 게시글 조회
+        post_data = self.share_service.get_post_detail(
+            post_id=kwargs['post_id'],
+            user=self.request.user
+        )
         
         context.update({
-            'post': post,
-            'post_auth': post_auth,
+            'post': post_data['post'],
+            'post_auth': post_data['is_author'],
             'team': team
         })
         return context
@@ -81,35 +82,57 @@ post_detail_view = PostDetailView.as_view()
 class PostWriteView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'shares/post_write_renew.html'
     
-    def get_team(self):
-        if not hasattr(self, '_team'):
-            self._team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        return self._team
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
         context.update({
             'form': PostWriteForm(),
             'pk': self.kwargs['pk'],
-            'team': self.get_team()
+            'team': team
         })
         return context
     
     def post(self, request, pk):
         form = PostWriteForm(request.POST, request.FILES)
-        team = self.get_team()
+        team = get_object_or_404(Team, pk=pk)
         
         if form.is_valid():
-            post = form.save(commit=False)
-            post.writer = request.user
-            post.isTeams_id = pk
-            
-            if request.FILES and 'upload_files' in request.FILES:
-                post.filename = request.FILES['upload_files'].name
-            
-            post.save()
-            messages.success(request, '성공적으로 등록되었습니다.')
-            return redirect(POST_LIST_PAGE, pk)
+            try:
+                # 폼 데이터 준비
+                post_data = {
+                    'title': form.cleaned_data['title'],
+                    'article': form.cleaned_data['article']
+                }
+                
+                # 서비스 레이어를 통한 게시글 생성
+                post = self.share_service.create_post(
+                    team_id=pk,
+                    post_data=post_data,
+                    files_data=request.FILES,
+                    writer=request.user
+                )
+                
+                messages.success(request, '성공적으로 등록되었습니다.')
+                return redirect(POST_LIST_PAGE, pk)
+                
+            except ValueError as e:
+                messages.error(request, str(e))
+                return render(request, self.template_name, {
+                    'form': form, 
+                    'pk': pk, 
+                    'team': team
+                })
+            except Exception as e:
+                messages.error(request, '게시글 등록 중 오류가 발생했습니다.')
+                return render(request, self.template_name, {
+                    'form': form, 
+                    'pk': pk, 
+                    'team': team
+                })
         
         return render(request, self.template_name, {
             'form': form, 
@@ -121,55 +144,83 @@ class PostWriteView(TeamMemberRequiredMixin, TemplateView):
 post_write_view = PostWriteView.as_view()
 
 
-class PostEditView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, TemplateView):
+class PostEditView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'shares/post_write_renew.html'
     
-    def get_objects(self):
-        if not hasattr(self, '_objects'):
-            self._objects = {
-                'post': get_object_or_404(Post, id=self.kwargs['post_id']),
-                'team': get_object_or_404(Team, pk=self.kwargs['pk'])
-            }
-        return self._objects
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        objects = self.get_objects()
+        team = get_object_or_404(Team, pk=kwargs['pk'])
+        post = get_object_or_404(Post, id=kwargs['post_id'])
+        
+        # 권한 검증
+        if not self.share_service.check_post_author(kwargs['post_id'], self.request.user):
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied('본인 게시글이 아닙니다.')
+        
         context.update({
-            'form': PostWriteForm(instance=objects['post']),
+            'form': PostWriteForm(instance=post),
             'edit': '수정하기',
-            'team': objects['team']
+            'team': team
         })
         return context
     
     def post(self, request, pk, post_id):
-        objects = self.get_objects()
-        form = PostWriteForm(request.POST, instance=objects['post'])
+        team = get_object_or_404(Team, pk=pk)
         
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
+        try:
+            # 권한 검증은 서비스에서 처리됨
+            post_data = {
+                'title': request.POST.get('title'),
+                'article': request.POST.get('article')
+            }
+            
+            post = self.share_service.update_post(
+                post_id=post_id,
+                post_data=post_data,
+                user=request.user
+            )
+            
             messages.success(request, "수정되었습니다.")
             return redirect(POST_LIST_PAGE, pk)
+            
+        except ValueError as e:
+            messages.error(request, str(e))
+        except PermissionDenied as e:
+            messages.error(request, str(e))
+            return redirect(POST_LIST_PAGE, pk)
+        except Exception as e:
+            messages.error(request, '게시글 수정 중 오류가 발생했습니다.')
         
+        # 오류 시 폼 다시 표시
+        post = get_object_or_404(Post, id=post_id)
+        form = PostWriteForm(request.POST, instance=post)
         return render(request, self.template_name, {
             'form': form,
             'edit': '수정하기',
-            'team': objects['team']
+            'team': team
         })
 
 
 post_edit_view = PostEditView.as_view()
 
-class PostDeleteView(PostAuthorRequiredMixin, TeamMemberRequiredMixin, View):
+class PostDeleteView(TeamMemberRequiredMixin, View):
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
+    
     def post(self, request, pk, post_id):
-        team = get_object_or_404(Team, pk=pk)
-        post = get_object_or_404(Post, id=post_id)
+        try:
+            post_title = self.share_service.delete_post(post_id, request.user)
+            messages.success(request, f'게시글 "{post_title}"이 삭제되었습니다.')
+        except PermissionDenied as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, '게시글 삭제 중 오류가 발생했습니다.')
         
-        post_title = post.title
-        post.delete()
-        
-        messages.success(request, f'게시글 "{post_title}"이 삭제되었습니다.')
         return redirect(POST_LIST_PAGE, pk)
 
 
@@ -177,36 +228,33 @@ post_delete_view = PostDeleteView.as_view()
 
 
 class PostDownloadView(TeamMemberRequiredMixin, TemplateView):
+    def __init__(self):
+        super().__init__()
+        self.share_service = ShareService()
+    
     def get(self, request, post_id, *args, **kwargs):
         try:
-            post = get_object_or_404(Post, pk=post_id)
-        except Http404:
-            messages.error(request, '파일이 존재하지 않습니다.')
-            return redirect(MAIN_PAGE)
-        
-        # 업로드 파일이 없는 경우
-        if not post.upload_files:
-            messages.error(request, '다운로드할 파일이 없습니다.')
-            return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
-        
-        try:
-            url = post.upload_files.url[1:]
-            file_url = urllib.parse.unquote(url)
+            # 서비스 레이어를 통한 파일 다운로드 처리
+            response = self.share_service.handle_file_download(post_id, request.user)
+            return response
             
-            if os.path.exists(file_url):
-                with open(file_url, 'rb') as fh:
-                    quote_file_url = urllib.parse.quote(post.filename.encode('utf-8'))
-                    response = HttpResponse(fh.read(), content_type=mimetypes.guess_type(file_url)[0])
-                    response['Content-Disposition'] = 'attachment;filename*=UTF-8\'\'%s' % quote_file_url
-                    return response
-            else:
-                messages.error(request, '서버에서 파일을 찾을 수 없습니다.')
+        except ValueError as e:
+            messages.error(request, str(e))
+            # 게시글이 존재하는 경우 상세 페이지로, 없으면 메인으로
+            try:
+                post = get_object_or_404(Post, pk=post_id)
                 return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+            except:
+                return redirect(MAIN_PAGE)
                 
         except Exception as e:
             logging.error(f'파일 다운로드 오류: {e}')
             messages.error(request, '파일 다운로드 중 오류가 발생했습니다.')
-            return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+            try:
+                post = get_object_or_404(Post, pk=post_id)
+                return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+            except:
+                return redirect(MAIN_PAGE)
 
 
 post_download_view = PostDownloadView.as_view()
