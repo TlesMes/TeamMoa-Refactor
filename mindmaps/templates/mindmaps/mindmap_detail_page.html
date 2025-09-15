@@ -39,20 +39,45 @@
     style="width: 100%; height: calc(100vh - 120px);"
   ></canvas>
 
-  <!-- 기존 폼은 숨김 (향후 모달로 개선) -->
-  <form
-    method="POST"
-    action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
-    class="node-form"
-    id="nodeForm"
-  >
-    {% csrf_token %}
-    <input type="hidden" name="posX" id="nodeX" />
-    <input type="hidden" name="posY" id="nodeY" />
-    <input type="text" name="title" placeholder="제목" required />
-    <input type="text" name="content" placeholder="내용" />
-    <input type="text" name="parent" placeholder="연결할 노드" />
-  </form>
+  <!-- 노드 생성 모달 -->
+  <div class="modal-overlay" id="nodeModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>새 노드 생성</h3>
+        <button type="button" class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <form
+        method="POST"
+        action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
+        class="node-form"
+        id="nodeForm"
+      >
+        {% csrf_token %}
+        <input type="hidden" name="posX" id="nodeX" />
+        <input type="hidden" name="posY" id="nodeY" />
+
+        <div class="form-group">
+          <label for="nodeTitle">제목 *</label>
+          <input type="text" id="nodeTitle" name="title" placeholder="노드 제목을 입력하세요" required />
+        </div>
+
+        <div class="form-group">
+          <label for="nodeContent">내용</label>
+          <textarea id="nodeContent" name="content" placeholder="노드 내용을 입력하세요" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="nodeParent">연결할 부모 노드</label>
+          <input type="text" id="nodeParent" name="parent" placeholder="부모 노드 제목 (선택사항)" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+          <button type="submit" class="btn-primary">노드 생성</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -287,13 +312,14 @@ class MindmapEditor {
   
   onWheel(e) {
     e.preventDefault();
-    
+
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    
+
     const wheel = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(0.1, this.scale * wheel), 5.0);
+    // 최소 스케일을 0.4로 변경 (축소 제한을 4배 크게 설정)
+    const newScale = Math.min(Math.max(0.4, this.scale * wheel), 5.0);
     
     // 마우스 위치를 중심으로 줌
     this.translateX = mouseX - (mouseX - this.translateX) * (newScale / this.scale);
@@ -343,13 +369,14 @@ class MindmapEditor {
   zoom(factor) {
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
-    
-    const newScale = Math.min(Math.max(0.1, this.scale * factor), 5.0);
-    
+
+    // 최소 스케일을 0.4로 변경 (축소 제한을 4배 크게 설정)
+    const newScale = Math.min(Math.max(0.4, this.scale * factor), 5.0);
+
     this.translateX = centerX - (centerX - this.translateX) * (newScale / this.scale);
     this.translateY = centerY - (centerY - this.translateY) * (newScale / this.scale);
     this.scale = newScale;
-    
+
     this.render();
   }
   
@@ -378,15 +405,26 @@ class MindmapEditor {
   }
   
   createNodeAt(x, y) {
-    // 간단한 프롬프트 (향후 모달로 개선)
-    const title = prompt('노드 제목을 입력하세요:');
-    if (title) {
-      const form = document.getElementById('nodeForm');
-      form.querySelector('[name="posX"]').value = Math.round(x);
-      form.querySelector('[name="posY"]').value = Math.round(y);
-      form.querySelector('[name="title"]').value = title;
-      form.submit();
-    }
+    // 모달 열기
+    const modal = document.getElementById('nodeModal');
+    const form = document.getElementById('nodeForm');
+
+    // 좌표 설정
+    form.querySelector('[name="posX"]').value = Math.round(x);
+    form.querySelector('[name="posY"]').value = Math.round(y);
+
+    // 폼 초기화
+    form.querySelector('#nodeTitle').value = '';
+    form.querySelector('#nodeContent').value = '';
+    form.querySelector('#nodeParent').value = '';
+
+    // 모달 표시
+    modal.style.display = 'flex';
+
+    // 첫 번째 입력 필드에 포커스 (애니메이션 후)
+    setTimeout(() => {
+      form.querySelector('#nodeTitle').focus();
+    }, 100);
   }
   
   // 렌더링 메서드
@@ -487,10 +525,48 @@ class MindmapEditor {
   }
 }
 
+// 모달 관련 이벤트 핸들러
+function initModalEvents() {
+  const modal = document.getElementById('nodeModal');
+  const closeBtn = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const form = document.getElementById('nodeForm');
+
+  // 모달 닫기 함수
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  // 닫기 버튼 클릭
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+
+  // 모달 외부 클릭시 닫기
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      e.preventDefault();
+      closeModal();
+    }
+  });
+
+  // 폼 제출 후 자동으로 모달 닫기 (페이지 새로고침되므로 실제로는 필요없지만)
+  form.addEventListener('submit', function() {
+    closeModal();
+  });
+}
+
 // 마인드맵 에디터 초기화
 let mindmapEditor;
 document.addEventListener('DOMContentLoaded', function() {
   mindmapEditor = new MindmapEditor({{ team.id }}, {{ mindmap.id }});
+  initModalEvents();
 });
 </script>
 {% endblock %}
