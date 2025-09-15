@@ -89,7 +89,20 @@ class MindmapEditor {
     this.canvas = document.getElementById('mindmap');
     this.ctx = this.canvas.getContext('2d');
     this.socket = null;
-    
+
+    // 가상 캔버스 경계 설정
+    this.VIRTUAL_CANVAS = {
+      width: 5400,   // 가상 캔버스 폭 (1/2 축소)
+      height: 3600,  // 가상 캔버스 높이 (1/2 축소)
+      minX: 0,       // 좌측 경계
+      minY: 0,       // 상단 경계
+      maxX: 5400,    // 우측 경계
+      maxY: 3600     // 하단 경계
+    };
+
+    // 시각적 피드백 상태
+    this.showBoundaryFeedback = false;
+
     // 상태 관리
     this.nodes = [];
     this.connections = [];
@@ -109,6 +122,9 @@ class MindmapEditor {
     this.initWebSocket();
     this.initEventListeners();
     this.loadInitialData();
+
+    // 초기 뷰포트를 가상 캔버스 중심의 2/3 크기로 설정
+    this.setInitialView();
   }
   
   initCanvas() {
@@ -272,15 +288,36 @@ class MindmapEditor {
     }
     
     if (this.isDragging && this.dragNode) {
-      // 노드 드래그
-      const newX = x - this.dragOffset.x;
-      const newY = y - this.dragOffset.y;
-      
+      // 노드 드래그 (가상 캔버스 경계 제한 적용)
+      let newX = x - this.dragOffset.x;
+      let newY = y - this.dragOffset.y;
+
+      // 경계 도달 감지를 위한 원래 좌표 저장
+      const originalX = newX;
+      const originalY = newY;
+
+      // 가상 캔버스 경계 내로 제한
+      newX = Math.max(this.VIRTUAL_CANVAS.minX, Math.min(this.VIRTUAL_CANVAS.maxX, newX));
+      newY = Math.max(this.VIRTUAL_CANVAS.minY, Math.min(this.VIRTUAL_CANVAS.maxY, newY));
+
+      // 경계에 도달했는지 확인하고 시각적 피드백 제공
+      const hitBoundary = (originalX !== newX || originalY !== newY);
+      if (hitBoundary) {
+        this.canvas.style.cursor = 'not-allowed';
+        this.showBoundaryFeedback = true;
+      } else {
+        this.canvas.style.cursor = 'grabbing';
+        this.showBoundaryFeedback = false;
+      }
+
       this.dragNode.x = newX;
       this.dragNode.y = newY;
-      
+
+      // 디버깅: 노드 이동 좌표 출력
+      console.log(`노드 ${this.dragNode.id} 이동: (${Math.round(newX)}, ${Math.round(newY)}) ${hitBoundary ? '[경계 제한됨]' : ''}`);
+
       this.render();
-      
+
       // WebSocket으로 위치 전송
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.send(JSON.stringify({
@@ -292,9 +329,13 @@ class MindmapEditor {
       }
       
     } else if (this.isPanning) {
-      // 캔버스 팬
-      this.translateX = e.clientX - this.panStart.x;
-      this.translateY = e.clientY - this.panStart.y;
+      // 캔버스 팬 (제한 적용)
+      const newTranslateX = e.clientX - this.panStart.x;
+      const newTranslateY = e.clientY - this.panStart.y;
+
+      const constrained = this.constrainPan(newTranslateX, newTranslateY);
+      this.translateX = constrained.x;
+      this.translateY = constrained.y;
       this.render();
     } else {
       // 마우스 오버 효과
@@ -307,7 +348,9 @@ class MindmapEditor {
     this.isDragging = false;
     this.dragNode = null;
     this.isPanning = false;
+    this.showBoundaryFeedback = false; // 경계 피드백 리셋
     this.canvas.style.cursor = 'default';
+    this.render(); // 피드백 제거를 위해 다시 렌더링
   }
   
   onWheel(e) {
@@ -318,14 +361,29 @@ class MindmapEditor {
     const mouseY = e.clientY - rect.top;
 
     const wheel = e.deltaY < 0 ? 1.1 : 0.9;
-    // 최소 스케일을 0.4로 변경 (축소 제한을 4배 크게 설정)
-    const newScale = Math.min(Math.max(0.4, this.scale * wheel), 5.0);
-    
+
+    // 가상 캔버스 크기에 맞춘 줌 범위 조정
+    // 최소 스케일: 가상 캔버스가 화면을 완전히 채우는 크기 (줌아웃 제한)
+    const minScale = Math.max(
+      this.canvas.width / this.VIRTUAL_CANVAS.width,
+      this.canvas.height / this.VIRTUAL_CANVAS.height
+    );
+
+    const maxScale = 5.0; // 최대 5배까지 확대 가능
+
+    const newScale = Math.min(Math.max(minScale, this.scale * wheel), maxScale);
+
     // 마우스 위치를 중심으로 줌
-    this.translateX = mouseX - (mouseX - this.translateX) * (newScale / this.scale);
-    this.translateY = mouseY - (mouseY - this.translateY) * (newScale / this.scale);
+    const newTranslateX = mouseX - (mouseX - this.translateX) * (newScale / this.scale);
+    const newTranslateY = mouseY - (mouseY - this.translateY) * (newScale / this.scale);
+
     this.scale = newScale;
-    
+
+    // 줌 후 팬 제한 적용
+    const constrained = this.constrainPan(newTranslateX, newTranslateY);
+    this.translateX = constrained.x;
+    this.translateY = constrained.y;
+
     this.render();
   }
   
@@ -351,6 +409,29 @@ class MindmapEditor {
              y >= node.y - node.height/2 && y <= node.y + node.height/2;
     });
   }
+
+  // 팬 제한 계산
+  calculatePanLimits() {
+    const virtualWidth = this.VIRTUAL_CANVAS.width * this.scale;
+    const virtualHeight = this.VIRTUAL_CANVAS.height * this.scale;
+
+    return {
+      minTranslateX: this.canvas.width - virtualWidth,
+      maxTranslateX: 0,
+      minTranslateY: this.canvas.height - virtualHeight,
+      maxTranslateY: 0
+    };
+  }
+
+  // 팬 제한 적용
+  constrainPan(translateX, translateY) {
+    const limits = this.calculatePanLimits();
+
+    return {
+      x: Math.max(limits.minTranslateX, Math.min(limits.maxTranslateX, translateX)),
+      y: Math.max(limits.minTranslateY, Math.min(limits.maxTranslateY, translateY))
+    };
+  }
   
   updateNodePosition(nodeId, x, y) {
     const node = this.nodes.find(n => n.id === nodeId);
@@ -370,20 +451,58 @@ class MindmapEditor {
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
 
-    // 최소 스케일을 0.4로 변경 (축소 제한을 4배 크게 설정)
-    const newScale = Math.min(Math.max(0.4, this.scale * factor), 5.0);
+    // 가상 캔버스 크기에 맞춘 줌 범위 조정
+    // 최소 스케일: 가상 캔버스가 화면을 완전히 채우는 크기 (줌아웃 제한)
+    const minScale = Math.max(
+      this.canvas.width / this.VIRTUAL_CANVAS.width,
+      this.canvas.height / this.VIRTUAL_CANVAS.height
+    );
+
+    const maxScale = 5.0; // 최대 5배까지 확대 가능
+
+    const newScale = Math.min(Math.max(minScale, this.scale * factor), maxScale);
 
     this.translateX = centerX - (centerX - this.translateX) * (newScale / this.scale);
     this.translateY = centerY - (centerY - this.translateY) * (newScale / this.scale);
     this.scale = newScale;
 
+    // 줌 후 팬 제한 적용
+    const constrained = this.constrainPan(this.translateX, this.translateY);
+    this.translateX = constrained.x;
+    this.translateY = constrained.y;
+
     this.render();
   }
   
+  setInitialView() {
+    // 초기 뷰: 가상 캔버스 중심을 2.5배 확대하여 표시
+    const scaleX = this.canvas.width / this.VIRTUAL_CANVAS.width;
+    const scaleY = this.canvas.height / this.VIRTUAL_CANVAS.height;
+    this.scale = Math.min(scaleX, scaleY) * 2.5; // 2.5배 확대
+
+    // 가상 캔버스의 중심이 화면 중심에 오도록 조정
+    const centerX = this.VIRTUAL_CANVAS.width / 2;  // 가상 캔버스 중심 X (2700)
+    const centerY = this.VIRTUAL_CANVAS.height / 2; // 가상 캔버스 중심 Y (1800)
+
+    this.translateX = this.canvas.width / 2 - centerX * this.scale;
+    this.translateY = this.canvas.height / 2 - centerY * this.scale;
+
+    this.render();
+  }
+
   resetView() {
-    this.scale = 1.0;
-    this.translateX = 0;
-    this.translateY = 0;
+    // 리셋: 가상 캔버스 전체가 화면에 맞도록 표시
+    const scaleX = this.canvas.width / this.VIRTUAL_CANVAS.width;
+    const scaleY = this.canvas.height / this.VIRTUAL_CANVAS.height;
+    this.scale = Math.min(scaleX, scaleY) * 0.9; // 여백을 위해 90% 크기로
+
+    // 가상 캔버스가 중앙에 오도록 조정
+    const scaledWidth = this.VIRTUAL_CANVAS.width * this.scale;
+    const scaledHeight = this.VIRTUAL_CANVAS.height * this.scale;
+
+    this.translateX = (this.canvas.width - scaledWidth) / 2;
+    this.translateY = (this.canvas.height - scaledHeight) / 2;
+
     this.render();
   }
   
@@ -405,13 +524,17 @@ class MindmapEditor {
   }
   
   createNodeAt(x, y) {
+    // 가상 캔버스 경계 내로 좌표 제한
+    const constrainedX = Math.max(this.VIRTUAL_CANVAS.minX, Math.min(this.VIRTUAL_CANVAS.maxX, x));
+    const constrainedY = Math.max(this.VIRTUAL_CANVAS.minY, Math.min(this.VIRTUAL_CANVAS.maxY, y));
+
     // 모달 열기
     const modal = document.getElementById('nodeModal');
     const form = document.getElementById('nodeForm');
 
-    // 좌표 설정
-    form.querySelector('[name="posX"]').value = Math.round(x);
-    form.querySelector('[name="posY"]').value = Math.round(y);
+    // 제한된 좌표 설정
+    form.querySelector('[name="posX"]').value = Math.round(constrainedX);
+    form.querySelector('[name="posY"]').value = Math.round(constrainedY);
 
     // 폼 초기화
     form.querySelector('#nodeTitle').value = '';
@@ -430,26 +553,99 @@ class MindmapEditor {
   // 렌더링 메서드
   render() {
     this.ctx.save();
-    
+
     // 캔버스 클리어
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
+
     // 변환 적용
     this.ctx.translate(this.translateX, this.translateY);
     this.ctx.scale(this.scale, this.scale);
-    
+
+    // 배경 그리드 표시
+    this.renderGrid();
+
+    // 가상 캔버스 경계 표시
+    this.renderVirtualCanvasBounds();
+
     // 연결선 그리기
     this.renderConnections();
-    
+
     // 노드 그리기
     this.renderNodes();
-    
+
     this.ctx.restore();
-    
+
     // 사용자 커서 렌더링 (변환 영향 없음)
     this.renderUserCursors();
   }
-  
+
+  renderGrid() {
+    const gridSize = 50; // 그리드 간격 (픽셀)
+
+    // 현재 뷰포트에서 보이는 영역 계산
+    const startX = Math.floor(-this.translateX / this.scale / gridSize) * gridSize;
+    const endX = Math.ceil((this.canvas.width - this.translateX) / this.scale / gridSize) * gridSize;
+    const startY = Math.floor(-this.translateY / this.scale / gridSize) * gridSize;
+    const endY = Math.ceil((this.canvas.height - this.translateY) / this.scale / gridSize) * gridSize;
+
+    this.ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+    this.ctx.lineWidth = 1;
+    this.ctx.setLineDash([]);
+
+    // 수직선 그리기
+    for (let x = startX; x <= endX; x += gridSize) {
+      // 가상 캔버스 영역 내에서만 그리드 표시
+      if (x >= this.VIRTUAL_CANVAS.minX && x <= this.VIRTUAL_CANVAS.maxX) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, Math.max(startY, this.VIRTUAL_CANVAS.minY));
+        this.ctx.lineTo(x, Math.min(endY, this.VIRTUAL_CANVAS.maxY));
+        this.ctx.stroke();
+      }
+    }
+
+    // 수평선 그리기
+    for (let y = startY; y <= endY; y += gridSize) {
+      // 가상 캔버스 영역 내에서만 그리드 표시
+      if (y >= this.VIRTUAL_CANVAS.minY && y <= this.VIRTUAL_CANVAS.maxY) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(Math.max(startX, this.VIRTUAL_CANVAS.minX), y);
+        this.ctx.lineTo(Math.min(endX, this.VIRTUAL_CANVAS.maxX), y);
+        this.ctx.stroke();
+      }
+    }
+  }
+
+  renderVirtualCanvasBounds() {
+    // 가상 캔버스 경계를 미묘한 테두리로 표시
+    const opacity = this.showBoundaryFeedback ? 0.8 : 0.3;
+    const lineWidth = this.showBoundaryFeedback ? 3 : 2;
+
+    this.ctx.strokeStyle = `rgba(166, 176, 208, ${opacity})`;
+    this.ctx.lineWidth = lineWidth;
+    this.ctx.setLineDash([10, 5]); // 점선 스타일
+
+    this.ctx.strokeRect(
+      this.VIRTUAL_CANVAS.minX,
+      this.VIRTUAL_CANVAS.minY,
+      this.VIRTUAL_CANVAS.width,
+      this.VIRTUAL_CANVAS.height
+    );
+
+    // 경계 도달시 추가 시각적 피드백
+    if (this.showBoundaryFeedback) {
+      this.ctx.fillStyle = 'rgba(255, 107, 107, 0.1)';
+      this.ctx.fillRect(
+        this.VIRTUAL_CANVAS.minX,
+        this.VIRTUAL_CANVAS.minY,
+        this.VIRTUAL_CANVAS.width,
+        this.VIRTUAL_CANVAS.height
+      );
+    }
+
+    // 선 스타일 초기화
+    this.ctx.setLineDash([]);
+  }
+
   renderConnections() {
     this.ctx.strokeStyle = '#a6b0d0';
     this.ctx.lineWidth = 2;

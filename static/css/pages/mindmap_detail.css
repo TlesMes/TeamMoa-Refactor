@@ -66,15 +66,7 @@
 .mindmap-canvas {
   border: 2px solid var(--border-color);
   border-radius: 12px;
-  background: linear-gradient(
-    90deg,
-    #f8f9fa 0%,
-    transparent 1px
-  ), linear-gradient(
-    #f8f9fa 0%,
-    transparent 1px
-  );
-  background-size: 20px 20px;
+  background: #ffffff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   margin-bottom: 2rem;
   cursor: grab;
