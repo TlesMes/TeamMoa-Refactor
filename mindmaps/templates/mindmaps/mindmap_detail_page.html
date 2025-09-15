@@ -8,93 +8,489 @@
 {% endblock %}
 
 {% block contents %}
-<section class="mindmap-section">
+<section class="mindmap-section" style="position: relative; height: 100vh;">
   <div class="mindmap-detail-header">
     <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="mindmap-detail-back-btn">
       <i class="ri-arrow-left-line"></i>
     </a>
     <h2 class="mindmap-title">"{{ mindmap.title }}" 마인드맵</h2>
-    <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}" class="refresh-btn">
-      <i class="ri-refresh-line"></i>
-      새로고침
-    </a>
+    <div class="connection-status disconnected" id="connectionStatus">
+      연결 중...
+    </div>
+  </div>
+
+  <!-- 줌 컨트롤 -->
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoomIn" title="확대">+</button>
+    <button class="zoom-btn" id="zoomOut" title="축소">-</button>
+    <button class="zoom-btn" id="resetZoom" title="원본크기">⌂</button>
+  </div>
+
+  <!-- 활성 사용자 목록 -->
+  <div class="active-users" id="activeUsers">
+    <strong>접속자:</strong> <span id="userList">로딩 중...</span>
   </div>
 
   <canvas
     id="mindmap"
-    width="800"
-    height="600"
+    width="1200"
+    height="800"
     class="mindmap-canvas"
+    style="width: 100%; height: calc(100vh - 120px);"
   ></canvas>
 
+  <!-- 기존 폼은 숨김 (향후 모달로 개선) -->
   <form
     method="POST"
     action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
     class="node-form"
+    id="nodeForm"
   >
     {% csrf_token %}
-    <input type="number" name="posX" placeholder="X좌표" required />
-    <input type="number" name="posY" placeholder="Y좌표" required />
+    <input type="hidden" name="posX" id="nodeX" />
+    <input type="hidden" name="posY" id="nodeY" />
     <input type="text" name="title" placeholder="제목" required />
     <input type="text" name="content" placeholder="내용" />
     <input type="text" name="parent" placeholder="연결할 노드" />
-    <button type="submit" class="create-node-btn">
-      <i class="ri-add-line"></i>
-      노드 생성
-    </button>
   </form>
 </section>
 
 <script>
-function loaded(){
-  const canvas = document.getElementById('mindmap');
-  const ctx = canvas.getContext('2d');
-  ctx.font = '16px GmarketSansMedium, sans-serif';
-
-  {% for line in lines %}
-    ctx.beginPath();
-    ctx.moveTo({{line.from_node.posX}}+40,{{line.from_node.posY}});
-    ctx.lineTo({{line.to_node.posX}}+40,{{line.to_node.posY}});
-    ctx.strokeStyle = '#a6b0d0';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  {% endfor %}
+// 마인드맵 에디터 클래스
+class MindmapEditor {
+  constructor(teamId, mindmapId) {
+    this.teamId = teamId;
+    this.mindmapId = mindmapId;
+    this.canvas = document.getElementById('mindmap');
+    this.ctx = this.canvas.getContext('2d');
+    this.socket = null;
+    
+    // 상태 관리
+    this.nodes = [];
+    this.connections = [];
+    this.activeUsers = new Map();
+    this.isDragging = false;
+    this.dragNode = null;
+    this.dragOffset = { x: 0, y: 0 };
+    
+    // 뷰포트 관리
+    this.scale = 1.0;
+    this.translateX = 0;
+    this.translateY = 0;
+    this.isPanning = false;
+    this.panStart = { x: 0, y: 0 };
+    
+    this.initCanvas();
+    this.initWebSocket();
+    this.initEventListeners();
+    this.loadInitialData();
+  }
   
-  {% for node in nodes %}
-    // 노드 박스 그리기
-    ctx.strokeStyle = '#a6b0d0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect({{node.posX}}-13,{{node.posY}}-35,100,60);
+  initCanvas() {
+    // 캔버스 크기를 부모 컨테이너에 맞게 조정
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
     
-    // 노드 배경 채우기
-    ctx.fillStyle = '#a6b0d0';
-    ctx.fillRect({{node.posX}}-13,{{node.posY}}-35,100,60);
-    
-    // 노드 텍스트
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText('{{node.title}}', {{node.posX}}+37, {{node.posY}}-5);
-  {% endfor %}
+    this.ctx.font = '14px GmarketSansMedium, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+  }
   
-  canvas.onclick = function(event){
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+  resizeCanvas() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const width = rect.width;
+    const height = window.innerHeight - 120;
     
-    {% for node in nodes %}
-      const minX = {{node.posX}}-13;
-      const maxX = {{node.posX}}+87;
-      const minY = {{node.posY}}-35;
-      const maxY = {{node.posY}}+25;
-      
-      if(minX < x && maxX > x && minY < y && maxY > y){
-        window.location.href = "/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}";
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.canvas.style.width = width + 'px';
+    this.canvas.style.height = height + 'px';
+    
+    this.render();
+  }
+  
+  initWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/mindmap/${this.teamId}/${this.mindmapId}/`;
+    
+    this.socket = new WebSocket(wsUrl);
+    
+    this.socket.onopen = () => {
+      console.log('WebSocket 연결됨');
+      this.updateConnectionStatus(true);
+    };
+    
+    this.socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.handleWebSocketMessage(data);
+    };
+    
+    this.socket.onclose = () => {
+      console.log('WebSocket 연결 종료');
+      this.updateConnectionStatus(false);
+      // 자동 재연결 시도
+      setTimeout(() => this.initWebSocket(), 3000);
+    };
+    
+    this.socket.onerror = (error) => {
+      console.error('WebSocket 오류:', error);
+      this.updateConnectionStatus(false);
+    };
+  }
+  
+  initEventListeners() {
+    // 마우스 이벤트
+    this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+    this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+    this.canvas.addEventListener('mouseup', (e) => this.onMouseUp(e));
+    this.canvas.addEventListener('wheel', (e) => this.onWheel(e));
+    this.canvas.addEventListener('dblclick', (e) => this.onDoubleClick(e));
+    
+    // 줌 컨트롤
+    document.getElementById('zoomIn').addEventListener('click', () => this.zoom(1.2));
+    document.getElementById('zoomOut').addEventListener('click', () => this.zoom(0.8));
+    document.getElementById('resetZoom').addEventListener('click', () => this.resetView());
+    
+    // 키보드 이벤트 (향후 구현)
+    document.addEventListener('keydown', (e) => this.onKeyDown(e));
+  }
+  
+  loadInitialData() {
+    // 서버에서 전달받은 초기 데이터
+    this.nodes = [
+      {% for node in nodes %}
+      {
+        id: {{ node.id }},
+        x: {{ node.posX }},
+        y: {{ node.posY }},
+        title: "{{ node.title|escapejs }}",
+        content: "{{ node.content|escapejs }}",
+        width: 120,
+        height: 60
+      },
+      {% endfor %}
+    ];
+    
+    this.connections = [
+      {% for line in lines %}
+      {
+        id: {{ line.id }},
+        fromNodeId: {{ line.from_node.id }},
+        toNodeId: {{ line.to_node.id }}
+      },
+      {% endfor %}
+    ];
+    
+    this.render();
+  }
+  
+  // WebSocket 메시지 처리
+  handleWebSocketMessage(data) {
+    switch (data.type) {
+      case 'user_joined':
+        console.log(`${data.username} 참가`);
+        this.updateActiveUsers();
+        break;
+      case 'user_left':
+        console.log(`${data.username} 퇴장`);
+        this.activeUsers.delete(data.user_id);
+        this.updateActiveUsers();
+        break;
+      case 'node_moved':
+        this.updateNodePosition(data.node_id, data.x, data.y);
+        break;
+      case 'cursor_moved':
+        this.updateUserCursor(data.user_id, data.username, data.x, data.y);
+        break;
+    }
+  }
+  
+  // 마우스 이벤트 핸들러
+  onMouseDown(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - this.translateX) / this.scale;
+    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    
+    const node = this.getNodeAt(x, y);
+    
+    if (node) {
+      // 노드 드래그 시작
+      this.isDragging = true;
+      this.dragNode = node;
+      this.dragOffset = { x: x - node.x, y: y - node.y };
+      this.canvas.style.cursor = 'grabbing';
+    } else if (e.button === 0) { // 왼쪽 버튼
+      // 팬 모드 시작
+      this.isPanning = true;
+      this.panStart = { x: e.clientX - this.translateX, y: e.clientY - this.translateY };
+      this.canvas.style.cursor = 'grabbing';
+    }
+  }
+  
+  onMouseMove(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - this.translateX) / this.scale;
+    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    
+    // 커서 위치 전송 (스로틀링)
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      if (!this.cursorThrottle) {
+        this.cursorThrottle = setTimeout(() => {
+          this.socket.send(JSON.stringify({
+            type: 'cursor_move',
+            x: x,
+            y: y
+          }));
+          this.cursorThrottle = null;
+        }, 50);
       }
-    {% endfor %}
+    }
+    
+    if (this.isDragging && this.dragNode) {
+      // 노드 드래그
+      const newX = x - this.dragOffset.x;
+      const newY = y - this.dragOffset.y;
+      
+      this.dragNode.x = newX;
+      this.dragNode.y = newY;
+      
+      this.render();
+      
+      // WebSocket으로 위치 전송
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify({
+          type: 'node_move',
+          node_id: this.dragNode.id,
+          x: newX,
+          y: newY
+        }));
+      }
+      
+    } else if (this.isPanning) {
+      // 캔버스 팬
+      this.translateX = e.clientX - this.panStart.x;
+      this.translateY = e.clientY - this.panStart.y;
+      this.render();
+    } else {
+      // 마우스 오버 효과
+      const node = this.getNodeAt(x, y);
+      this.canvas.style.cursor = node ? 'grab' : 'default';
+    }
+  }
+  
+  onMouseUp(e) {
+    this.isDragging = false;
+    this.dragNode = null;
+    this.isPanning = false;
+    this.canvas.style.cursor = 'default';
+  }
+  
+  onWheel(e) {
+    e.preventDefault();
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    const wheel = e.deltaY < 0 ? 1.1 : 0.9;
+    const newScale = Math.min(Math.max(0.1, this.scale * wheel), 5.0);
+    
+    // 마우스 위치를 중심으로 줌
+    this.translateX = mouseX - (mouseX - this.translateX) * (newScale / this.scale);
+    this.translateY = mouseY - (mouseY - this.translateY) * (newScale / this.scale);
+    this.scale = newScale;
+    
+    this.render();
+  }
+  
+  onDoubleClick(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - this.translateX) / this.scale;
+    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    
+    const node = this.getNodeAt(x, y);
+    if (node) {
+      // 노드 상세 페이지로 이동
+      window.location.href = `/mindmaps/node_detail_page/{{ team.id }}/${node.id}`;
+    } else {
+      // 새 노드 생성 (향후 모달로 개선)
+      this.createNodeAt(x, y);
+    }
+  }
+  
+  // 유틸리티 메서드
+  getNodeAt(x, y) {
+    return this.nodes.find(node => {
+      return x >= node.x - node.width/2 && x <= node.x + node.width/2 &&
+             y >= node.y - node.height/2 && y <= node.y + node.height/2;
+    });
+  }
+  
+  updateNodePosition(nodeId, x, y) {
+    const node = this.nodes.find(n => n.id === nodeId);
+    if (node) {
+      node.x = x;
+      node.y = y;
+      this.render();
+    }
+  }
+  
+  updateUserCursor(userId, username, x, y) {
+    this.activeUsers.set(userId, { username, x, y });
+    this.renderUserCursors();
+  }
+  
+  zoom(factor) {
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
+    
+    const newScale = Math.min(Math.max(0.1, this.scale * factor), 5.0);
+    
+    this.translateX = centerX - (centerX - this.translateX) * (newScale / this.scale);
+    this.translateY = centerY - (centerY - this.translateY) * (newScale / this.scale);
+    this.scale = newScale;
+    
+    this.render();
+  }
+  
+  resetView() {
+    this.scale = 1.0;
+    this.translateX = 0;
+    this.translateY = 0;
+    this.render();
+  }
+  
+  updateConnectionStatus(connected) {
+    const status = document.getElementById('connectionStatus');
+    if (connected) {
+      status.className = 'connection-status connected';
+      status.textContent = '실시간 연결됨';
+    } else {
+      status.className = 'connection-status disconnected';
+      status.textContent = '연결 끊어짐';
+    }
+  }
+  
+  updateActiveUsers() {
+    const userList = document.getElementById('userList');
+    const users = Array.from(this.activeUsers.values()).map(u => u.username);
+    userList.textContent = users.length > 0 ? users.join(', ') : '나만';
+  }
+  
+  createNodeAt(x, y) {
+    // 간단한 프롬프트 (향후 모달로 개선)
+    const title = prompt('노드 제목을 입력하세요:');
+    if (title) {
+      const form = document.getElementById('nodeForm');
+      form.querySelector('[name="posX"]').value = Math.round(x);
+      form.querySelector('[name="posY"]').value = Math.round(y);
+      form.querySelector('[name="title"]').value = title;
+      form.submit();
+    }
+  }
+  
+  // 렌더링 메서드
+  render() {
+    this.ctx.save();
+    
+    // 캔버스 클리어
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // 변환 적용
+    this.ctx.translate(this.translateX, this.translateY);
+    this.ctx.scale(this.scale, this.scale);
+    
+    // 연결선 그리기
+    this.renderConnections();
+    
+    // 노드 그리기
+    this.renderNodes();
+    
+    this.ctx.restore();
+    
+    // 사용자 커서 렌더링 (변환 영향 없음)
+    this.renderUserCursors();
+  }
+  
+  renderConnections() {
+    this.ctx.strokeStyle = '#a6b0d0';
+    this.ctx.lineWidth = 2;
+    
+    this.connections.forEach(conn => {
+      const fromNode = this.nodes.find(n => n.id === conn.fromNodeId);
+      const toNode = this.nodes.find(n => n.id === conn.toNodeId);
+      
+      if (fromNode && toNode) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(fromNode.x, fromNode.y);
+        this.ctx.lineTo(toNode.x, toNode.y);
+        this.ctx.stroke();
+      }
+    });
+  }
+  
+  renderNodes() {
+    this.nodes.forEach(node => {
+      const x = node.x - node.width / 2;
+      const y = node.y - node.height / 2;
+      
+      // 노드 배경
+      this.ctx.fillStyle = '#a6b0d0';
+      this.ctx.fillRect(x, y, node.width, node.height);
+      
+      // 노드 테두리
+      this.ctx.strokeStyle = '#8892b0';
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeRect(x, y, node.width, node.height);
+      
+      // 노드 텍스트
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = '14px GmarketSansMedium, sans-serif';
+      this.ctx.fillText(node.title, node.x, node.y);
+    });
+  }
+  
+  renderUserCursors() {
+    // DOM에서 기존 커서들 제거
+    document.querySelectorAll('.user-cursor').forEach(el => el.remove());
+    
+    this.activeUsers.forEach((user, userId) => {
+      const cursor = document.createElement('div');
+      cursor.className = 'user-cursor';
+      cursor.setAttribute('data-username', user.username);
+      
+      // 화면 좌표로 변환
+      const screenX = user.x * this.scale + this.translateX;
+      const screenY = user.y * this.scale + this.translateY;
+      
+      cursor.style.left = screenX + 'px';
+      cursor.style.top = screenY + 'px';
+      cursor.style.color = this.getUserColor(userId);
+      cursor.style.borderColor = this.getUserColor(userId);
+      
+      document.body.appendChild(cursor);
+    });
+  }
+  
+  getUserColor(userId) {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'];
+    return colors[userId % colors.length];
+  }
+  
+  onKeyDown(e) {
+    // 키보드 단축키 (향후 구현)
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      // 선택된 노드 삭제
+    } else if (e.key === 'Escape') {
+      // 선택 해제
+    }
   }
 }
 
-// DOM 로드 완료 후 실행
-document.addEventListener('DOMContentLoaded', loaded);
+// 마인드맵 에디터 초기화
+let mindmapEditor;
+document.addEventListener('DOMContentLoaded', function() {
+  mindmapEditor = new MindmapEditor({{ team.id }}, {{ mindmap.id }});
+});
 </script>
 {% endblock %}
