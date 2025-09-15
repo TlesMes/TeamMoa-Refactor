@@ -667,21 +667,75 @@ class MindmapEditor {
     this.nodes.forEach(node => {
       const x = node.x - node.width / 2;
       const y = node.y - node.height / 2;
-      
-      // 노드 배경
-      this.ctx.fillStyle = '#a6b0d0';
-      this.ctx.fillRect(x, y, node.width, node.height);
-      
-      // 노드 테두리
-      this.ctx.strokeStyle = '#8892b0';
+      const radius = 12; // 둥근 모서리 반지름
+
+      // 그림자 효과
+      this.ctx.save();
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      this.ctx.shadowBlur = 8;
+      this.ctx.shadowOffsetX = 0;
+      this.ctx.shadowOffsetY = 4;
+
+      // 둥근 사각형 노드 배경 (은은한 그라데이션)
+      const bgGradient = this.ctx.createLinearGradient(x, y, x, y + node.height);
+      bgGradient.addColorStop(0, '#f8fafc');
+      bgGradient.addColorStop(1, '#e2e8f0');
+
+      this.ctx.fillStyle = bgGradient;
+      this.ctx.beginPath();
+      this.ctx.roundRect(x, y, node.width, node.height, radius);
+      this.ctx.fill();
+
+      this.ctx.restore();
+
+      // 그라데이션 테두리
+      const gradient = this.ctx.createLinearGradient(x, y, x, y + node.height);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+
+      this.ctx.strokeStyle = gradient;
       this.ctx.lineWidth = 2;
-      this.ctx.strokeRect(x, y, node.width, node.height);
-      
-      // 노드 텍스트
-      this.ctx.fillStyle = '#ffffff';
-      this.ctx.font = '14px GmarketSansMedium, sans-serif';
-      this.ctx.fillText(node.title, node.x, node.y);
+      this.ctx.beginPath();
+      this.ctx.roundRect(x, y, node.width, node.height, radius);
+      this.ctx.stroke();
+
+      // 노드 제목 텍스트
+      this.ctx.fillStyle = '#2d3748';
+      this.ctx.font = 'bold 14px GmarketSansMedium, sans-serif';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+
+      // 텍스트 길이에 따른 줄바꿈 처리
+      const maxWidth = node.width - 16;
+      const lines = this.wrapText(node.title, maxWidth);
+      const lineHeight = 16;
+      const totalHeight = lines.length * lineHeight;
+      const startY = node.y - totalHeight / 2 + lineHeight / 2;
+
+      lines.forEach((line, index) => {
+        this.ctx.fillText(line, node.x, startY + index * lineHeight);
+      });
     });
+  }
+
+  // 텍스트 줄바꿈 헬퍼 함수
+  wrapText(text, maxWidth) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = this.ctx.measureText(currentLine + ' ' + word).width;
+      if (width < maxWidth) {
+        currentLine += ' ' + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
+    return lines;
   }
   
   renderUserCursors() {
