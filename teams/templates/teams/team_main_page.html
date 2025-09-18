@@ -1,4 +1,10 @@
-{% extends 'base_app.html' %} {% load static %} {% block contents %}
+{% extends 'base_app.html' %} {% load static %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/team_main.js' %}"></script>
+{% endblock %}
+
+{% block contents %}
 
 <section class="mainsection">
   {% if request.user.is_authenticated %}
@@ -258,33 +264,6 @@
     }
   </style>
 
-  <script>
-    const copyClipboard = () => {
-      const text = document.getElementById("copycode").textContent;
-      const textarea = document.createElement("textarea");
-      textarea.textContent = text;
-      document.body.append(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      textarea.remove();
-      showToast("팀코드가 복사되었습니다");
-    };
-
-    const button = document.getElementById("copybtn");
-    button.addEventListener("click", copyClipboard);
-
-    // 팀 해산 버튼 이벤트
-    const disbandTeamBtn = document.getElementById('disband-team-btn');
-    if (disbandTeamBtn) {
-      disbandTeamBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const teamTitle = this.dataset.teamTitle;
-        showConfirmModal(`"${teamTitle}" 팀을 정말로 해산하시겠습니까?\n해산된 팀은 복구할 수 없습니다.`, () => {
-          document.getElementById('disband-form').submit();
-        });
-      });
-    }
-  </script>
   {% endif %}
 </section>
 {% endblock %}
