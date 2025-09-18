@@ -186,22 +186,3 @@ refactor(scope): 코드 리팩토링
 docs(scope): 문서 업데이트
 ```
 
-## 📄 라이선스
-
-이 프로젝트는 **MIT 라이선스** 하에 있습니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
-## 📞 문의
-
-- **이메일**: your.email@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-- **프로젝트 링크**: [https://github.com/yourusername/TeamMoa](https://github.com/yourusername/TeamMoa)
-
----
-
-<div align="center">
-
-**⭐ 이 프로젝트가 도움이 되었다면 Star를 눌러주세요! ⭐**
-
-*TeamMoa로 팀 협업의 새로운 차원을 경험해보세요* 🚀
-
-</div>
