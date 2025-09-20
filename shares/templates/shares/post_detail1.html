@@ -15,7 +15,7 @@
     <div class="post-detail-body">
       {% if post.filename %}
       <span style="color: var(--text-secondary);">첨부파일:</span>
-      <a href="{% url 'shares:post_download' post.id %}" class="attachment-link">
+      <a href="{% url 'shares:post_download' team.id post.id %}" class="attachment-link">
         <i class="fas fa-paperclip"></i>&nbsp;{{ post.filename|truncatechars:25 }}
       </a>
       <div class="attachment-section">

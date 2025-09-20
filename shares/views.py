@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied
 # URL 패턴 상수
 LOGIN_PAGE = 'accounts:login'
 POST_LIST_PAGE = 'shares:post_list'
-POST_DETAIL_PAGE = 'shares:post_detail_view'
+POST_DETAIL_PAGE = 'shares:post_detail1'
 MAIN_PAGE = 'teams:main_page'
 
 
@@ -232,7 +232,7 @@ class PostDownloadView(TeamMemberRequiredMixin, TemplateView):
         super().__init__()
         self.share_service = ShareService()
     
-    def get(self, request, post_id, *args, **kwargs):
+    def get(self, request, pk, post_id, *args, **kwargs):
         try:
             # 서비스 레이어를 통한 파일 다운로드 처리
             response = self.share_service.handle_file_download(post_id, request.user)
