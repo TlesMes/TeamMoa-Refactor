@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function deleteTodo(todoId) {
-        if (confirm('이 할 일을 삭제하시겠습니까?')) {
+        showConfirmModal('이 할 일을 삭제하시겠습니까?', function() {
             // Use existing delete endpoint
             const form = document.createElement('form');
             form.method = 'POST';
@@ -312,6 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
             form.appendChild(csrfInput);
             document.body.appendChild(form);
             form.submit();
-        }
+        });
     }
 });
