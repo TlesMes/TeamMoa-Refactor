@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied
 # URL 패턴 상수
 LOGIN_PAGE = 'accounts:login'
 POST_LIST_PAGE = 'shares:post_list'
-POST_DETAIL_PAGE = 'shares:post_detail1'
+POST_DETAIL_PAGE = 'shares:post_detail'
 MAIN_PAGE = 'teams:main_page'
 
 
@@ -53,7 +53,7 @@ class PostListView(TeamMemberRequiredMixin, TemplateView):
         return context
 
 class PostDetailView(TeamMemberRequiredMixin, TemplateView):
-    template_name = 'shares/post_detail1.html'
+    template_name = 'shares/post_detail.html'
     
     def __init__(self):
         super().__init__()

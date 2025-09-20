@@ -12,7 +12,7 @@ app_name = 'shares'
 urlpatterns =[
 
     path('<int:pk>/', views.PostListView.as_view(), name='post_list'),   #게시판 리스트 - pk(팀id)
-    path('<int:pk>/detail/<int:post_id>',views.post_detail_view, name='post_detail1'),  #게시물 상세 - pk(게시물id)
+    path('<int:pk>/detail/<int:post_id>',views.post_detail_view, name='post_detail'),  #게시물 상세 - pk(게시물id)
     path('<int:pk>/write/',views.post_write_view,name='post_write'),   #게시물 작성 - pk(팀id)
     path('<int:pk>/edit/<int:post_id>' ,views.post_edit_view,name='post_edit'),  #게시물 수정 - pk(게시물id)
     path('<int:pk>/delete/<int:post_id>', views.post_delete_view, name='post_delete'),# 게시물 삭제 (게시물id)
