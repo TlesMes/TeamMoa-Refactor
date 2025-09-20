@@ -84,7 +84,7 @@ class SchedulerUploadPageView(TeamMemberRequiredMixin, TemplateView):
             )
             
             if updated_days > 0:
-                messages.success(request, f'{updated_days}일의 스케줄이 성공적으로 등록되었습니다.')
+                messages.success(request, '주간 스케줄이 성공적으로 업로드되었습니다.')
             else:
                 messages.info(request, '등록된 가능 시간이 없습니다.')
             
