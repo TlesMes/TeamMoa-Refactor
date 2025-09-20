@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="{% static 'css/pages/node_detail.css' %}" />
 {% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/pages/node_detail.js' %}"></script>
+{% endblock %}
+
 {% block contents %}
 <section class="node-detail-page">
   <div class="content-card">
@@ -82,19 +86,5 @@
   {% csrf_token %}
 </form>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteNodeBtn = document.getElementById('delete-node-btn');
-    if (deleteNodeBtn) {
-        deleteNodeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const deleteUrl = this.dataset.deleteUrl;
-            showConfirmModal('이 노드를 삭제하시겠습니까?', () => {
-                document.getElementById('delete-node-form').submit();
-            });
-        });
-    }
-});
-</script>
 
 {% endblock %}
