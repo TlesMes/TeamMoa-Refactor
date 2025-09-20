@@ -3,6 +3,10 @@
 
 {% block title %}회원가입 성공 - TeamMoa{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/pages/signup_success.js' %}"></script>
+{% endblock %}
+
 {% block contents %}
 <section class="success-page">
   <div class="success-container">
@@ -66,14 +70,14 @@
         <p class="help-text">
           <i class="ri-information-line"></i>
           메일이 오지 않나요? 스팸함을 확인하거나 
-          <a href="#" class="resend-link" onclick="showResendForm(); return false;">
+          <a href="#" class="resend-link">
             잠시 후 다시 시도해보세요
           </a>
         </p>
         
         <!-- 숨겨진 재전송 폼 -->
         <div id="resend-form" class="resend-form" style="display: none;">
-          <form method="POST" action="{% url 'accounts:resend_activation' %}" onsubmit="handleResendSubmit(event)">
+          <form method="POST" action="{% url 'accounts:resend_activation' %}" id="resend-submit-form">
             {% csrf_token %}
             <div class="resend-input-group">
               <label for="email_or_username">이메일 또는 사용자명:</label>
@@ -88,7 +92,7 @@
                 <i class="ri-mail-send-line"></i>
                 인증 메일 재전송
               </button>
-              <button type="button" class="btn btn-cancel" onclick="hideResendForm()">
+              <button type="button" class="btn btn-cancel">
                 <i class="ri-close-line"></i>
                 취소
               </button>
@@ -433,69 +437,4 @@
 }
 </style>
 
-<script>
-function showResendForm() {
-  const form = document.getElementById('resend-form');
-  const result = document.getElementById('resend-result');
-  
-  form.style.display = 'block';
-  result.style.display = 'none';
-  
-  // 폼이 나타날 때 입력 필드에 포커스
-  setTimeout(() => {
-    document.getElementById('email_or_username').focus();
-  }, 300);
-}
-
-function hideResendForm() {
-  const form = document.getElementById('resend-form');
-  form.style.display = 'none';
-}
-
-async function handleResendSubmit(event) {
-  event.preventDefault();
-  
-  const form = event.target;
-  const submitButton = form.querySelector('button[type="submit"]');
-  const resultDiv = document.getElementById('resend-result');
-  
-  // 버튼 비활성화 및 로딩 상태
-  submitButton.disabled = true;
-  submitButton.innerHTML = '<i class="ri-loader-4-line"></i> 전송 중...';
-  
-  try {
-    const formData = new FormData(form);
-    const response = await fetch(form.action, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    });
-    
-    const data = await response.json();
-    
-    // 결과 표시
-    resultDiv.style.display = 'block';
-    resultDiv.className = `resend-result ${data.status}`;
-    resultDiv.textContent = data.message;
-    
-    if (data.status === 'success') {
-      // 성공 시 폼 숨기기
-      setTimeout(() => {
-        hideResendForm();
-      }, 3000);
-    }
-    
-  } catch (error) {
-    resultDiv.style.display = 'block';
-    resultDiv.className = 'resend-result error';
-    resultDiv.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
-  } finally {
-    // 버튼 복원
-    submitButton.disabled = false;
-    submitButton.innerHTML = '<i class="ri-mail-send-line"></i> 인증 메일 재전송';
-  }
-}
-</script>
 {% endblock %}
