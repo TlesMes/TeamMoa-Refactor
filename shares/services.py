@@ -60,7 +60,7 @@ class ShareService:
             title=post_data['title'].strip(),
             article=post_data['article'].strip(),
             writer=writer,
-            isTeams=team
+            team=team
         )
         
         # 파일 업로드 처리
@@ -153,7 +153,7 @@ class ShareService:
         team = get_object_or_404(Team, pk=team_id)
         
         # 최적화된 쿼리: 게시글과 작성자 정보 사전 로딩
-        posts_queryset = Post.objects.filter(isTeams=team).select_related('writer').order_by('-id')
+        posts_queryset = Post.objects.filter(team=team).select_related('writer').order_by('-id')
         
         # 페이지네이션 적용
         paginator = Paginator(posts_queryset, per_page)
@@ -292,7 +292,7 @@ class ShareService:
         """
         post = get_object_or_404(Post, pk=post_id)
         
-        if post.isTeams_id != team_id:
+        if post.team_id != team_id:
             raise ValidationError('해당 팀의 게시글이 아닙니다.')
         
         return post

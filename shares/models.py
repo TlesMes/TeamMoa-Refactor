@@ -18,9 +18,8 @@ class Post(models.Model):
     article = models.TextField(verbose_name='내용')
     registered_date = models.DateTimeField(auto_now_add=True, verbose_name='등록시간')
     upload_files = models.FileField(upload_to=get_file_path, null=True, blank=True, verbose_name='파일')
-    upload_images = models.FileField(upload_to=get_file_path, null=True, blank=True, verbose_name='이미지파일')
     filename = models.CharField(max_length=64, null=True, verbose_name='첨부파일명')
-    isTeams = models.ForeignKey('teams.Team',on_delete=models.CASCADE, verbose_name='팀')
+    team = models.ForeignKey('teams.Team',on_delete=models.CASCADE, verbose_name='팀')
 
     def __str__(self):
         return self.title
@@ -30,6 +29,6 @@ class Post(models.Model):
             os.remove(os.path.join(settings.MEDIA_ROOT, self.upload_files.path))
         super(Post, self).delete(*args,**kargs)
     class Meta:
-        db_table = '공지사항'
-        verbose_name ='공지사항'
-        verbose_name_plural ='공지사항'
+        db_table = '게시물'
+        verbose_name = '게시물'
+        verbose_name_plural = '게시물'

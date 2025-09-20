@@ -243,7 +243,7 @@ class PostDownloadView(TeamMemberRequiredMixin, TemplateView):
             # 게시글이 존재하는 경우 상세 페이지로, 없으면 메인으로
             try:
                 post = get_object_or_404(Post, pk=post_id)
-                return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+                return redirect(POST_DETAIL_PAGE, pk=post.team_id, post_id=post_id)
             except:
                 return redirect(MAIN_PAGE)
                 
@@ -252,7 +252,7 @@ class PostDownloadView(TeamMemberRequiredMixin, TemplateView):
             messages.error(request, '파일 다운로드 중 오류가 발생했습니다.')
             try:
                 post = get_object_or_404(Post, pk=post_id)
-                return redirect(POST_DETAIL_PAGE, pk=post.isTeams_id, post_id=post_id)
+                return redirect(POST_DETAIL_PAGE, pk=post.team_id, post_id=post_id)
             except:
                 return redirect(MAIN_PAGE)
 
