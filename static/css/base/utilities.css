@@ -1,0 +1,174 @@
+/* ==========================================================================
+   TeamMoa Utility Classes - 공통 유틸리티 클래스
+   ========================================================================== */
+
+/* ==========================================================================
+   DISPLAY UTILITIES
+   ========================================================================== */
+
+/* Display utilities */
+.tm-hidden {
+  display: none !important;
+}
+
+.tm-block {
+  display: block !important;
+}
+
+.tm-inline {
+  display: inline !important;
+}
+
+.tm-inline-block {
+  display: inline-block !important;
+}
+
+.tm-flex {
+  display: flex !important;
+}
+
+/* ==========================================================================
+   POSITION UTILITIES
+   ========================================================================== */
+
+.tm-relative {
+  position: relative !important;
+}
+
+.tm-absolute {
+  position: absolute !important;
+}
+
+.tm-fixed {
+  position: fixed !important;
+}
+
+.tm-static {
+  position: static !important;
+}
+
+/* ==========================================================================
+   SIZE UTILITIES
+   ========================================================================== */
+
+/* Width utilities */
+.tm-w-100 {
+  width: 100% !important;
+}
+
+.tm-w-auto {
+  width: auto !important;
+}
+
+/* Height utilities */
+.tm-h-100 {
+  height: 100% !important;
+}
+
+.tm-vh-100 {
+  height: 100vh !important;
+}
+
+.tm-h-auto {
+  height: auto !important;
+}
+
+.tm-h-calc-canvas {
+  height: calc(100vh - 120px) !important;
+}
+
+/* ==========================================================================
+   FORM UTILITIES
+   ========================================================================== */
+
+/* Form related utilities */
+.tm-form-hidden {
+  display: none;
+}
+
+/* Field error utilities */
+.field-error {
+  display: none;
+  color: var(--tm-danger-color, #dc3545);
+  font-size: var(--tm-font-size-sm, 0.875rem);
+  margin-top: var(--tm-spacing-xs, 0.25rem);
+}
+
+.field-error.show {
+  display: block;
+}
+
+/* Button loading utilities */
+.btn-loading {
+  display: none;
+}
+
+.btn-loading.show {
+  display: inline-block;
+}
+
+/* ==========================================================================
+   TEAM JOIN UTILITIES
+   ========================================================================== */
+
+/* Team join step utilities */
+.team-join-step {
+  display: none;
+}
+
+.team-join-step.active {
+  display: block;
+}
+
+/* Team detail item utilities */
+.team-detail-item {
+  display: none;
+}
+
+.team-detail-item.show {
+  display: block;
+}
+
+/* ==========================================================================
+   MODAL UTILITIES
+   ========================================================================== */
+
+/* Modal overlay utilities */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--tm-z-index-modal, 10000);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+/* ==========================================================================
+   RESEND FORM UTILITIES (Accounts)
+   ========================================================================== */
+
+/* Resend form utilities */
+.resend-form {
+  display: none;
+}
+
+.resend-form.show {
+  display: block;
+}
+
+/* Resend result utilities */
+.resend-result {
+  display: none;
+}
+
+.resend-result.show {
+  display: block;
+}
