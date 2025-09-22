@@ -76,7 +76,7 @@
         </p>
         
         <!-- 숨겨진 재전송 폼 -->
-        <div id="resend-form" class="resend-form" style="display: none;">
+        <div id="resend-form" class="resend-form tm-hidden">
           <form method="POST" action="{% url 'accounts:resend_activation' %}" id="resend-submit-form">
             {% csrf_token %}
             <div class="resend-input-group">
@@ -99,7 +99,7 @@
             </div>
           </form>
           
-          <div id="resend-result" class="resend-result" style="display: none;"></div>
+          <div id="resend-result" class="resend-result tm-hidden"></div>
         </div>
       </div>
     </div>
