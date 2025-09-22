@@ -4,7 +4,7 @@
 {% block title %}{{ mindmap.title }} - 마인드맵{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/mindmap_detail.css' %}" />
+<link rel="stylesheet" href="{% static 'css/pages/mindmaps/mindmap_detail.css' %}" />
 {% endblock %}
 
 {% block extra_js %}
@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block contents %}
-<section class="mindmap-section" style="position: relative; height: 100vh;">
+<section class="mindmap-section tm-relative tm-vh-100">
   <div class="mindmap-detail-header">
     <a href="{% url 'mindmaps:mindmap_list_page' team.id %}" class="mindmap-detail-back-btn">
       <i class="ri-arrow-left-line"></i>
@@ -40,11 +40,11 @@
     width="1200"
     height="800"
     class="mindmap-canvas"
-    style="width: 100%; height: calc(100vh - 120px);"
+    class="tm-w-100 tm-h-calc-canvas"
   ></canvas>
 
   <!-- 노드 생성 모달 -->
-  <div class="modal-overlay" id="nodeModal" style="display: none;">
+  <div class="modal-overlay" id="nodeModal">
     <div class="modal-content">
       <div class="modal-header">
         <h3>새 노드 생성</h3>

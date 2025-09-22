@@ -4,7 +4,7 @@
 {% block title %}{{ node.title }} - 노드 상세{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/node_detail.css' %}" />
+<link rel="stylesheet" href="{% static 'css/pages/mindmaps/node_detail.css' %}" />
 {% endblock %}
 
 {% block extra_js %}
@@ -37,7 +37,7 @@
       
       <div class="node-detail-recommend">
         <span class="node-detail-recommend-count">추천: {{ node.recommendation_count }}</span>
-        <form method="POST" action="/mindmaps/node_recommend/{{ team.id }}/{{ node.id }}" style="display: inline;">
+        <form method="POST" action="/mindmaps/node_recommend/{{ team.id }}/{{ node.id }}" class="tm-inline">
           {% csrf_token %}
           <button type="submit" class="node-detail-recommend-btn">
             <i class="ri-thumb-up-line"></i>
@@ -82,7 +82,7 @@
 </section>
 
 <!-- 노드 삭제를 위한 숨겨진 폼 -->
-<form id="delete-node-form" method="POST" action="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" style="display: none;">
+<form id="delete-node-form" method="POST" action="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" class="tm-hidden">
   {% csrf_token %}
 </form>
 
