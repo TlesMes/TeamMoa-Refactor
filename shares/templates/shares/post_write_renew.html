@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base/variables.css' %}" type="text/css" />
 <link rel="stylesheet" href="{% static 'css/vendors/summernote/summernote.css' %}" type="text/css" />
-<link rel="stylesheet" href="{% static 'css/pages/post_write.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'css/pages/shares/post_write.css' %}" type="text/css" />
 {% endblock %}
 
 {% block extra_js %}
@@ -38,7 +39,7 @@
         <div class="file-upload-section">
           {% if form.instance.upload_files %}
             <div class="current-file-info">
-              <label style="color: var(--text-secondary); font-weight: 500; margin-bottom: 0.5rem; display: block;">
+              <label class="post-write__form-label">
                 <i class="fas fa-paperclip"></i>&nbsp;현재 첨부파일:
               </label>
               <div class="current-file-box">
@@ -48,17 +49,17 @@
                 </a>
               </div>
             </div>
-            <label style="color: var(--text-secondary); font-weight: 500; margin-bottom: 0.5rem; display: block;">
+            <label class="post-write__form-label">
               <i class="fas fa-edit"></i>&nbsp;파일 변경:
             </label>
-            <input type="file" name="upload_files" id="id_upload_files" style="width: 100%;">
+            <input type="file" name="upload_files" id="id_upload_files" class="post-write__file-input">
           {% else %}
-            <label style="color: var(--text-secondary); font-weight: 500; margin-bottom: 0.5rem; display: block;">
+            <label class="post-write__form-label">
               <i class="fas fa-upload"></i>&nbsp;파일 선택:
             </label>
-            <input type="file" name="upload_files" id="id_upload_files" style="width: 100%;">
+            <input type="file" name="upload_files" id="id_upload_files" class="post-write__file-input">
           {% endif %}
-          <small style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem; display: block;">
+          <small class="post-write__help-text">
             <i class="fas fa-upload"></i>&nbsp;파일 업로드: 10MB 이하의 파일만 첨부 가능합니다. 여러 파일은 압축해서 업로드해주세요.
           </small>
         </div>

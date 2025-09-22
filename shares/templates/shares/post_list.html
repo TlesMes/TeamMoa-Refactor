@@ -1,6 +1,15 @@
-{% extends "base_app.html" %} {% load humanize %} {% block mobileView %}
+{% extends "base_app.html" %} {% load static humanize %}
+
+{% block mobileView %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-{% endblock %} {% block contents %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base/variables.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'css/pages/shares/post_list.css' %}" type="text/css" />
+{% endblock %}
+
+{% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 
 <section class="sharessection">
@@ -8,7 +17,7 @@
     <div>
       <h1>공유 게시판</h1>
       {% if q %}
-      <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">
+      <p class="post-list__search-result">
         <i class="fas fa-search"></i>&nbsp;'{{ q }}' 검색 결과입니다.
       </p>
       {% endif %}

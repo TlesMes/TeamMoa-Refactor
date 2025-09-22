@@ -1,0 +1,16 @@
+/* 게시글 목록 페이지 전용 스타일 */
+
+/* ===============================================
+   검색 결과 메시지
+   =============================================== */
+
+.post-list__search-result {
+  color: var(--text-secondary);
+  margin: var(--tm-spacing-sm, 0.5rem) 0 0 0;
+  font-size: var(--tm-font-size-sm, 0.875rem);
+}
+
+.post-list__search-result i {
+  margin-right: var(--tm-spacing-xs, 0.25rem);
+  color: var(--tm-primary-color, #007bff);
+}

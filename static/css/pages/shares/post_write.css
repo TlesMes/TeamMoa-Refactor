@@ -1,0 +1,98 @@
+/* 게시글 작성/수정 페이지 전용 스타일 */
+
+/* ===============================================
+   폼 라벨 스타일
+   =============================================== */
+
+.post-write__form-label {
+  color: var(--text-secondary);
+  font-weight: var(--tm-font-weight-medium, 500);
+  margin-bottom: var(--tm-spacing-sm, 0.5rem);
+  display: block;
+}
+
+.post-write__form-label i {
+  margin-right: var(--tm-spacing-xs, 0.25rem);
+}
+
+/* ===============================================
+   파일 입력 스타일
+   =============================================== */
+
+.post-write__file-input {
+  width: 100%;
+  padding: var(--tm-spacing-sm, 0.5rem);
+  border: 2px dashed var(--tm-border-color, #dee2e6);
+  border-radius: var(--tm-border-radius, 6px);
+  transition: border-color 0.3s ease;
+  font-size: var(--tm-font-size-sm, 0.875rem);
+}
+
+.post-write__file-input:hover {
+  border-color: var(--tm-primary-color, #007bff);
+}
+
+.post-write__file-input:focus {
+  outline: none;
+  border-color: var(--tm-primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* ===============================================
+   도움말 텍스트
+   =============================================== */
+
+.post-write__help-text {
+  color: var(--text-muted);
+  font-size: var(--tm-font-size-sm, 0.875rem);
+  margin-top: var(--tm-spacing-sm, 0.5rem);
+  display: block;
+}
+
+.post-write__help-text i {
+  margin-right: var(--tm-spacing-xs, 0.25rem);
+}
+
+/* 현재 첨부파일 박스 */
+.current-file-box {
+  background: var(--background-secondary);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.current-file-box:hover {
+  background: var(--tm-primary-color-light, #f0f7ff);
+  transform: translateY(-1px);
+  box-shadow: var(--tm-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  border-color: var(--tm-primary-color, #007bff);
+}
+
+.current-file-box a {
+  color: var(--tm-primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+.current-file-box:hover a {
+  color: var(--tm-primary-color-dark, #0056b3);
+}
+
+.current-file-box .fa-download {
+  float: right;
+  opacity: 0.7;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.current-file-box:hover .fa-download {
+  opacity: 1;
+  transform: translateX(-2px);
+}
+
+/* 레거시: .file-upload-section과 통합됨 */

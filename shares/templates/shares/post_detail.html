@@ -1,6 +1,15 @@
-{% extends "base_app.html" %} {% load humanize %} {% block mobileView %}
+{% extends "base_app.html" %} {% load static humanize %}
+
+{% block mobileView %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-{% endblock %} {% block contents %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base/variables.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'css/pages/shares/post_detail.css' %}" type="text/css" />
+{% endblock %}
+
+{% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="post-detail-section">
   <div class="post-detail-card">
@@ -8,13 +17,13 @@
       <h1 class="post-detail-title">{{ post.title }}</h1>
       <div class="post-detail-meta">
         <span><i class="fas fa-user-edit"></i>&nbsp;작성자: {{ post.writer.nickname }}</span>
-        <span style="margin-left: 2rem;">등록일: {{ post.registered_date|date:'Y년 m월 d일' }}</span>
+        <span class="post-detail__meta-date">등록일: {{ post.registered_date|date:'Y년 m월 d일' }}</span>
       </div>
     </div>
     
     <div class="post-detail-body">
       {% if post.filename %}
-      <span style="color: var(--text-secondary);">첨부파일:</span>
+      <span class="post-detail__attachment-label">첨부파일:</span>
       <a href="{% url 'shares:post_download' team.id post.id %}" class="attachment-link">
         <i class="fas fa-paperclip"></i>&nbsp;{{ post.filename|truncatechars:25 }}
       </a>
@@ -22,7 +31,7 @@
       </div>
       {% endif %}
       
-      <div class="post-content">
+      <div class="post-content post-detail__content">
         {{ post.article | safe }}
       </div>
     </div>
@@ -43,125 +52,13 @@
 </section>
 
 <!-- 게시글 삭제를 위한 숨겨진 폼 -->
-<form id="delete-post-form" method="POST" action="{% url 'shares:post_delete' pk=team.id post_id=post.id %}" style="display: none;">
+<form id="delete-post-form" method="POST" action="{% url 'shares:post_delete' pk=team.id post_id=post.id %}" class="post-detail__hidden-form">
   {% csrf_token %}
 </form>
 
-<style>
-  .modal {
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-content {
-    background-color: white;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px 0 24px;
-  }
-
-  .modal-header h3 {
-    margin: 0;
-    color: #333;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-  }
-
-  .modal-close:hover {
-    color: #000;
-  }
-
-  .modal-body {
-    padding: 20px 24px;
-  }
-
-  .warning-message {
-    text-align: center;
-  }
-
-  .warning-message i {
-    font-size: 48px;
-    color: #e74c3c;
-    margin-bottom: 16px;
-  }
-
-  .warning-message p {
-    margin-bottom: 8px;
-    color: #333;
-  }
-
-  .warning-text {
-    font-size: 14px;
-    color: #666;
-  }
-
-  .modal-footer {
-    padding: 0 24px 24px 24px;
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-danger {
-    background-color: #e74c3c;
-    color: white;
-  }
-
-  .btn-danger:hover {
-    background-color: #c0392b;
-    color: white;
-    text-decoration: none;
-  }
-
-  .btn-secondary {
-    background-color: #95a5a6;
-    color: white;
-  }
-
-  .btn-secondary:hover {
-    background-color: #7f8c8d;
-  }
-</style>
 
 <script type="text/javascript">
-  document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-      img.style.width = '100%';
-    });
-  });
+  // 게시글 내 이미지는 CSS에서 자동 스타일링됨
 
   // 모달 제어 함수들
   // 게시글 삭제 버튼 이벤트

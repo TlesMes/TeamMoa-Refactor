@@ -1,0 +1,163 @@
+/* 게시글 상세 페이지 전용 스타일 */
+
+/* ===============================================
+   게시글 메타 정보
+   =============================================== */
+
+.post-detail__meta-date {
+  margin-left: var(--tm-spacing-xl, 2rem);
+}
+
+.post-detail__attachment-label {
+  color: var(--text-secondary);
+}
+
+/* ===============================================
+   숨겨진 폼 (게시글 삭제용)
+   =============================================== */
+
+.post-detail__hidden-form {
+  display: none;
+}
+
+/* ===============================================
+   확인 모달 스타일
+   =============================================== */
+
+.tm-modal {
+  position: fixed;
+  z-index: var(--tm-z-index-modal, 1050);
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--tm-background-overlay, rgba(0, 0, 0, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tm-modal__content {
+  background-color: var(--tm-background-primary, white);
+  border-radius: var(--tm-border-radius-lg, 8px);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--tm-shadow-xl, 0 20px 40px rgba(0, 0, 0, 0.2));
+}
+
+.tm-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--tm-spacing-lg, 1.5rem) var(--tm-spacing-xl, 2rem) 0 var(--tm-spacing-xl, 2rem);
+}
+
+.tm-modal__title {
+  margin: 0;
+  color: var(--tm-text-primary, #333);
+  font-size: var(--tm-font-size-lg, 1.125rem);
+  font-weight: var(--tm-font-weight-semibold, 600);
+}
+
+.tm-modal__close {
+  background: none;
+  border: none;
+  font-size: var(--tm-font-size-xl, 1.25rem);
+  cursor: pointer;
+  color: var(--tm-text-muted, #666);
+  padding: var(--tm-spacing-xs, 0.25rem);
+  transition: color var(--tm-transition-fast, 0.15s);
+}
+
+.tm-modal__close:hover {
+  color: var(--tm-text-primary, #000);
+}
+
+.tm-modal__body {
+  padding: var(--tm-spacing-lg, 1.5rem) var(--tm-spacing-xl, 2rem);
+}
+
+.tm-warning-message {
+  text-align: center;
+}
+
+.tm-warning-message__icon {
+  font-size: 48px;
+  color: var(--tm-danger-color, #e74c3c);
+  margin-bottom: var(--tm-spacing-md, 1rem);
+  display: block;
+}
+
+.tm-warning-message__text {
+  margin-bottom: var(--tm-spacing-sm, 0.5rem);
+  color: var(--tm-text-primary, #333);
+  font-weight: var(--tm-font-weight-medium, 500);
+}
+
+.tm-warning-message__subtext {
+  font-size: var(--tm-font-size-sm, 0.875rem);
+  color: var(--tm-text-muted, #666);
+  margin: 0;
+}
+
+.tm-modal__footer {
+  padding: 0 var(--tm-spacing-xl, 2rem) var(--tm-spacing-xl, 2rem) var(--tm-spacing-xl, 2rem);
+  display: flex;
+  gap: var(--tm-spacing-sm, 0.5rem);
+  justify-content: center;
+}
+
+/* ===============================================
+   모달 버튼 스타일
+   =============================================== */
+
+.tm-btn {
+  padding: var(--tm-spacing-sm, 0.5rem) var(--tm-spacing-lg, 1.5rem);
+  border: none;
+  border-radius: var(--tm-border-radius-sm, 4px);
+  cursor: pointer;
+  font-weight: var(--tm-font-weight-medium, 500);
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--tm-font-size-sm, 0.875rem);
+  transition: all var(--tm-transition-fast, 0.15s);
+  min-width: 80px;
+  text-align: center;
+}
+
+.tm-btn--danger {
+  background-color: var(--tm-danger-color, #e74c3c);
+  color: var(--tm-text-light, white);
+}
+
+.tm-btn--danger:hover {
+  background-color: var(--tm-danger-color-dark, #c0392b);
+  color: var(--tm-text-light, white);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--tm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.tm-btn--secondary {
+  background-color: var(--tm-secondary-color, #95a5a6);
+  color: var(--tm-text-light, white);
+}
+
+.tm-btn--secondary:hover {
+  background-color: var(--tm-secondary-color-dark, #7f8c8d);
+  color: var(--tm-text-light, white);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--tm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+/* ===============================================
+   게시글 내 이미지 스타일
+   =============================================== */
+
+.post-detail__content img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--tm-border-radius, 6px);
+  box-shadow: var(--tm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+}

@@ -1,0 +1,177 @@
+/* ================================================
+   TeamMoa 프로젝트 공통 CSS 변수
+   ================================================ */
+
+:root {
+  /* ===============================================
+     색상 시스템 (Color System)
+     =============================================== */
+
+  /* Primary Colors - TeamMoa 네임스페이스 */
+  --tm-primary-color: #007bff;
+  --tm-primary-color-light: #e3f2fd;
+  --tm-primary-color-dark: #0056b3;
+  --tm-primary-color-hover: #0069d9;
+
+  /* Secondary Colors */
+  --tm-secondary-color: #6c757d;
+  --tm-secondary-color-light: #f8f9fa;
+  --tm-secondary-color-dark: #495057;
+
+  /* Status Colors */
+  --tm-success-color: #28a745;
+  --tm-success-color-light: #d4edda;
+  --tm-success-color-dark: #155724;
+
+  --tm-warning-color: #ffc107;
+  --tm-warning-color-light: #fff3cd;
+  --tm-warning-color-dark: #856404;
+
+  --tm-danger-color: #dc3545;
+  --tm-danger-color-light: #f8d7da;
+  --tm-danger-color-dark: #721c24;
+
+  --tm-info-color: #17a2b8;
+  --tm-info-color-light: #d1ecf1;
+  --tm-info-color-dark: #0c5460;
+
+  /* ===============================================
+     배경 색상 (Background Colors) - TeamMoa 네임스페이스
+     =============================================== */
+  --tm-background-primary: #ffffff;
+  --tm-background-secondary: #f8f9fa;
+  --tm-background-tertiary: #e9ecef;
+  --tm-background-dark: #343a40;
+  --tm-background-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ===============================================
+     텍스트 색상 (Text Colors) - TeamMoa 네임스페이스
+     =============================================== */
+  --tm-text-primary: #212529;
+  --tm-text-secondary: #6c757d;
+  --tm-text-muted: #868e96;
+  --tm-text-light: #ffffff;
+  --tm-text-dark: #000000;
+
+  /* ===============================================
+     테두리 (Borders) - TeamMoa 네임스페이스
+     =============================================== */
+  --tm-border-color: #dee2e6;
+  --tm-border-color-light: #f1f3f4;
+  --tm-border-color-dark: #adb5bd;
+  --tm-border-width: 1px;
+  --tm-border-width-thick: 2px;
+  --tm-border-radius: 6px;
+  --tm-border-radius-sm: 4px;
+  --tm-border-radius-lg: 8px;
+  --tm-border-radius-xl: 12px;
+
+  /* ===============================================
+     간격 (Spacing) - TeamMoa 네임스페이스
+     =============================================== */
+  --tm-spacing-xs: 0.25rem;   /* 4px */
+  --tm-spacing-sm: 0.5rem;    /* 8px */
+  --tm-spacing-md: 1rem;      /* 16px */
+  --tm-spacing-lg: 1.5rem;    /* 24px */
+  --tm-spacing-xl: 2rem;      /* 32px */
+  --tm-spacing-xxl: 3rem;     /* 48px */
+
+  /* ===============================================
+     그림자 (Shadows) - TeamMoa 네임스페이스
+     =============================================== */
+  --tm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --tm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --tm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --tm-shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --tm-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+  /* ===============================================
+     폰트 (Typography)
+     =============================================== */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-xxl: 1.5rem;   /* 24px */
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ===============================================
+     Z-Index 시스템
+     =============================================== */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+
+  /* ===============================================
+     애니메이션 (Animation)
+     =============================================== */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-normal: 0.3s ease-in-out;
+  --transition-slow: 0.5s ease-in-out;
+
+  /* ===============================================
+     반응형 브레이크포인트 (Responsive Breakpoints)
+     =============================================== */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+
+  /* ===============================================
+     컴포넌트별 특화 변수
+     =============================================== */
+
+  /* 버튼 */
+  --btn-padding-y: 0.5rem;
+  --btn-padding-x: 1rem;
+  --btn-padding-y-sm: 0.375rem;
+  --btn-padding-x-sm: 0.75rem;
+  --btn-padding-y-lg: 0.75rem;
+  --btn-padding-x-lg: 1.5rem;
+
+  /* 폼 */
+  --form-input-height: 2.5rem;
+  --form-input-padding-y: 0.5rem;
+  --form-input-padding-x: 0.75rem;
+
+  /* 카드 */
+  --card-padding: 1.5rem;
+  --card-margin-bottom: 1.5rem;
+
+  /* 네비게이션 */
+  --nav-height: 60px;
+  --sidebar-width: 250px;
+}
+
+/* ===============================================
+   다크모드 지원 (추후 확장용)
+   =============================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-primary: #1a1a1a;
+    --background-secondary: #2d2d2d;
+    --background-tertiary: #404040;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-muted: #808080;
+    --border-color: #404040;
+  }
+}
