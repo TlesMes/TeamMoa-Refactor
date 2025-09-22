@@ -22,13 +22,13 @@
             <input type="text" name="invitecode" id="id_invitecode" class="form-control" 
                    placeholder="팀 코드를 입력하세요" required>
           </div>
-          <div id="code-error" class="field-error" style="display: none;"></div>
+          <div id="code-error" class="field-error"></div>
         </div>
 
         <button type="submit" class="auth-btn" id="search-btn">
           <i class="ri-search-line"></i>
           <span class="btn-text">팀 검색하기</span>
-          <span class="btn-loading" style="display: none;">
+          <span class="btn-loading">
             <i class="ri-loader-4-line spinning"></i>
             검색 중...
           </span>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- Step 2: 팀 정보 표시 및 비밀번호 입력 -->
-    <div id="step-2" class="team-join-step" style="display: none;">
+    <div id="step-2" class="team-join-step">
       <div class="auth-header">
         <h2>팀 정보 확인</h2>
         <p>아래 팀에 가입하시겠습니까?</p>
@@ -74,7 +74,7 @@
             <span class="detail-value" id="display-team-host"></span>
           </div>
 
-          <div class="team-detail-item" id="team-intro-item" style="display: none;">
+          <div class="team-detail-item" id="team-intro-item">
             <i class="ri-file-text-line"></i>
             <span class="detail-label">팀 소개</span>
             <span class="detail-value" id="display-team-intro"></span>
@@ -97,13 +97,13 @@
           <div class="help-text">
             <small>팀장에게 받은 비밀번호를 입력해주세요</small>
           </div>
-          <div id="password-error" class="field-error" style="display: none;"></div>
+          <div id="password-error" class="field-error"></div>
         </div>
 
         <button type="submit" class="auth-btn" id="join-btn">
           <i class="ri-user-add-line"></i>
           <span class="btn-text">팀에 가입하기</span>
-          <span class="btn-loading" style="display: none;">
+          <span class="btn-loading">
             <i class="ri-loader-4-line spinning"></i>
             가입 중...
           </span>
@@ -119,7 +119,7 @@
     </div>
 
     <!-- Step 3: 가입 완료 -->
-    <div id="step-3" class="team-join-step" style="display: none;">
+    <div id="step-3" class="team-join-step">
       <div class="auth-header">
         <h2>가입 완료!</h2>
         <p>팀에 성공적으로 가입되었습니다</p>
