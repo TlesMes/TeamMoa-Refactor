@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Schedules 앱 공통 스타일 - 스케줄 그리드 기본 구조
+   ========================================================================== */
+
+.schedulesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+/* Schedule Grid Improvements */
+.schedule-grid {
+  display: flex;
+  gap: 1px;
+  background-color: var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 720px; /* 시간컬럼(90) + 7일컬럼(90*7) = 720px */
+  max-width: fit-content;
+  margin: 0 auto;
+}
+
+.time-column {
+  background-color: var(--bg-secondary);
+  min-width: 80px;
+}
+
+.schedule-column,
+.day-column {
+  flex: 1;
+  background-color: var(--bg-primary);
+  min-width: 80px;
+}
+
+/* Headers */
+.schedule-day-header,
+.time-header,
+.day-header {
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.schedule-day-header .date-line,
+.time-header .date-line,
+.day-header .date-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.schedule-day-header .day-line,
+.time-header .day-line,
+.day-header .day-line {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+  opacity: 0.9;
+}
+
+/* Time and Schedule Slots */
+.time-slot,
+.schedule-slot {
+  padding: 0.5rem;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+.time-slot {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  justify-content: flex-end;
+  padding-right: 1rem;
+}
+
+.schedule-slot {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease;
+}
+
+.schedule-slot:hover {
+  background-color: var(--bg-accent);
+}
+
+/* Mobile Responsive - 기본 반응형 */
+@media (max-width: 768px) {
+  .schedulesection {
+    padding: 1rem;
+  }
+
+  .schedule-grid {
+    overflow-x: auto;
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-grid {
+    min-width: 500px;
+  }
+}

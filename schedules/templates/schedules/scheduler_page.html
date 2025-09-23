@@ -1,6 +1,12 @@
-{% extends 'base_app.html' %} 
-{% load static %} 
+{% extends 'base_app.html' %}
+{% load static %}
 {% load schedule_extras %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/schedules/common.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/schedules/scheduler_page.css' %}">
+{% endblock %}
+
 {% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="schedulesection">
