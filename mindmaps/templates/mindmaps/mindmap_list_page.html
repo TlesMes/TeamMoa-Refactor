@@ -1,4 +1,12 @@
-{% extends 'base_app.html' %} {% load static %} {% block contents %}
+{% extends 'base_app.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/mindmaps/common.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/mindmaps/mindmap_list.css' %}">
+{% endblock %}
+
+{% block contents %}
 {% comment %} Light theme styles loaded in base_app.html {% endcomment %}
 <section class="mindmapsection">
   <div class="mindmap-header">
