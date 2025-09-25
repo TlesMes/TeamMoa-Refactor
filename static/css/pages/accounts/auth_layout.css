@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Authentication Layout Styles - 인증 페이지 레이아웃
+   ========================================================================== */
+
+/* Auth section container */
+.auth-section {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 50%, var(--dark-accent-primary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-container {
+  max-width: 480px;
+  width: 100%;
+}
+
+/* Header section */
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-header .logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-header .logo-icon {
+  background: rgba(166, 176, 208, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-right: 0.75rem;
+}
+
+.auth-header .logo-icon i {
+  font-size: 1.5rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-header .site-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--dark-text-primary);
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--dark-text-primary);
+}
+
+.auth-subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 0;
+  color: var(--dark-text-secondary);
+}
+
+/* Authentication card */
+.auth-card {
+  background: var(--dark-bg-secondary);
+  border: 1px solid var(--dark-border-color);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .auth-section {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 2rem;
+  }
+
+  .auth-title {
+    font-size: 1.75rem;
+  }
+}

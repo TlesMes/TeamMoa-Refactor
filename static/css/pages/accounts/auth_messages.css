@@ -1,0 +1,219 @@
+/* ==========================================================================
+   Authentication Messages Styles - 인증 메시지 스타일
+   ========================================================================== */
+
+/* Error messages */
+.error-message {
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff6b7a;
+}
+
+.error-message i {
+  font-size: 1.25rem;
+}
+
+/* Field errors */
+.field-error {
+  color: #ff6b7a;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.field-error::before {
+  content: "⚠";
+  font-size: 0.9rem;
+}
+
+/* Help text */
+.help-text {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--dark-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-text::before {
+  content: "💡";
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Success messages */
+.success-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  animation: successPulse 0.6s ease-out;
+}
+
+.success-icon i {
+  font-size: 2.5rem;
+  color: white;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--dark-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.success-content p {
+  color: var(--dark-text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Help sections */
+.password-help {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--dark-bg-accent);
+  border-radius: 12px;
+  border: 1px solid var(--dark-border-color);
+}
+
+.help-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--dark-accent-light);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.help-title i {
+  font-size: 1.1rem;
+}
+
+.help-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.help-list li {
+  padding: 0.5rem 0;
+  color: var(--dark-text-secondary);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-list li::before {
+  content: "✓";
+  color: var(--dark-accent-light);
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Account info sections */
+.account-info {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--dark-bg-accent);
+  border-radius: 12px;
+  border: 1px solid var(--dark-border-color);
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--dark-accent-light);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--dark-border-color);
+}
+
+.info-title i {
+  font-size: 1.1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.info-item:not(:last-child) {
+  border-bottom: 1px solid var(--dark-border-light);
+}
+
+.info-label {
+  color: var(--dark-text-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  color: var(--dark-text-primary);
+  font-weight: 400;
+}
+
+/* Responsive messages */
+@media (max-width: 768px) {
+  .success-message {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .success-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .success-icon i {
+    font-size: 2rem;
+  }
+
+  .success-content h3 {
+    font-size: 1.25rem;
+  }
+}

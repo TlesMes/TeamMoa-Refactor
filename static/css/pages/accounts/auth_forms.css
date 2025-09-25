@@ -1,0 +1,145 @@
+/* ==========================================================================
+   Authentication Forms Styles - 인증 폼 스타일
+   ========================================================================== */
+
+/* Form container */
+.auth-form {
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* Input styles */
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dark-text-muted);
+  font-size: 1.1rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input-wrapper input:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+.input-wrapper input:focus ~ i {
+  color: var(--dark-accent-light);
+}
+
+.input-wrapper input::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* Textarea styles */
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-wrapper i {
+  top: 1rem;
+  transform: none;
+}
+
+.textarea-wrapper textarea {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.textarea-wrapper textarea:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+.textarea-wrapper textarea::placeholder {
+  color: var(--dark-text-muted);
+}
+
+/* Django form fields */
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--dark-bg-accent);
+  color: var(--dark-text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.auth-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
+  border-color: var(--dark-accent-light);
+  box-shadow: 0 0 0 3px rgba(255, 224, 130, 0.2);
+}
+
+/* Signup form specific styles */
+.signup-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.password-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.profile-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive forms */
+@media (max-width: 768px) {
+  .input-wrapper input {
+    padding: 0.875rem 0.875rem 0.875rem 2.25rem;
+    font-size: 0.95rem;
+  }
+}
