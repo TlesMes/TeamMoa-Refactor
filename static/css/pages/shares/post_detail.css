@@ -161,3 +161,129 @@
   border-radius: var(--tm-border-radius, 6px);
   box-shadow: var(--tm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
 }
+
+/* ===============================================
+   게시글 상세 페이지 메인 스타일
+   =============================================== */
+
+.post-detail-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.post-detail-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.post-detail-header {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-detail-title {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.post-detail-meta {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.post-detail-body {
+  padding: 2rem;
+}
+
+.post-content {
+  color: var(--text-primary);
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+.attachment-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.attachment-link {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.attachment-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.post-action-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.edit-btn {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.edit-btn:hover {
+  background: var(--accent-hover);
+  color: white;
+  text-decoration: none;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  color: white;
+  text-decoration: none;
+}
+
+.list-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.list-btn:hover {
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  text-decoration: none;
+}

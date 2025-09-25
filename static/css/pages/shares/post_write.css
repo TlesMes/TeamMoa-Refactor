@@ -96,3 +96,147 @@
 }
 
 /* 레거시: .file-upload-section과 통합됨 */
+
+/* ===============================================
+   글쓰기 페이지 메인 스타일
+   =============================================== */
+
+.post-write-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.write-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.write-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.write-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.write-back-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.write-form-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.write-form-header {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+}
+
+.write-form-header input[type="text"],
+.write-form-header input[name="title"] {
+  width: 100%;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 1rem;
+}
+
+.write-form-body {
+  padding: 1rem;
+}
+
+.content-editor {
+  min-height: 400px;
+}
+
+.content-editor textarea,
+.content-editor .note-editor {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.content-editor textarea {
+  width: 100% !important;
+  height: 400px !important;
+  min-height: 400px;
+  resize: vertical;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: "GmarketSansMedium", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.write-form-footer {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.file-upload-section {
+  margin-bottom: 1rem;
+}
+
+.file-upload-section input[type="file"] {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-family: "GmarketSansMedium", sans-serif;
+  width: 100%;
+}
+
+.write-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.submit-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
