@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Team Members Page Styles
+   Team Members Page Styles - 통합된 멤버 페이지 스타일
    ========================================================================== */
 
 /* Team Header */
@@ -230,6 +230,11 @@
   min-height: 200px;
 }
 
+.member-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
 .member-card.drop-zone-active {
   border-color: #3b82f6;
   background: #dbeafe;
@@ -281,6 +286,10 @@
   color: #64748b;
   margin: 4px 0 0 0;
   opacity: 0.8;
+}
+
+.member-todos {
+  min-height: 150px;
 }
 
 /* Member Todos */
@@ -355,6 +364,56 @@
   line-height: 1.3;
 }
 
+/* Additional TODO styles */
+.todo-item {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bg-accent);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-primary);
+  border: 1px solid rgba(166, 176, 208, 0.3);
+  transition: all 0.3s ease;
+}
+
+.todo-item.completed {
+  background-color: rgba(46, 204, 113, 0.1);
+  border-left: 4px solid #2ecc71;
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.todo-item.completed .todo-text {
+  color: #27ae60;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.todo-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.todo-checkbox:checked {
+  background-color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.todo-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
 .todo-actions {
   display: flex;
   align-items: center;
@@ -421,6 +480,49 @@
 
 .delete-btn:hover {
   background: #fee2e2;
+}
+
+/* Additional form styles */
+.add-todo-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.add-todo-title {
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.add-todo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
 }
 
 /* Permission-based visual feedback */

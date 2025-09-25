@@ -1,6 +1,11 @@
 {% extends 'base_app.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/members/common.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/members/team_members.css' %}" />
+{% endblock %}
+
 {% block extra_js %}
 <script>
 // 팀 데이터를 전역으로 설정 (JS 파일에서 접근 가능하도록)
@@ -19,10 +24,6 @@ window.teamMembersData = {
 };
 </script>
 <script src="{% static 'js/pages/team_members.js' %}"></script>
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/members/team_members.css' %}" />
 {% endblock %}
 
 {% block contents %}

@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Members 앱 공통 스타일 - 기본 레이아웃 및 공통 요소
+   ========================================================================== */
+
+.members-section {
+  font-family: "GmarketSansMedium", sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.team-header-card {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.team-title {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.team-code {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+.team-description {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .members-section {
+    padding: 1rem;
+  }
+
+  .team-header-card {
+    padding: 1.5rem;
+  }
+
+  .team-title {
+    font-size: 1.5rem;
+  }
+}
