@@ -41,6 +41,15 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 사용자 인터페이스 및 경험 개선 작업들을 기록합니다.
 - ✅ [모달 시스템 개선](ui_ux/modal_system_improvement.md) - 알림 및 확인 모달 시스템 구축
 
+### 🎨 [CSS 모듈화](css_refactoring/)
+테마별 CSS 파일에서 앱별 모듈화로 전환하여 성능과 유지보수성 개선
+- ✅ [Teams 앱 CSS 모듈화](css_refactoring/teams_css_refactor.md) - timeline.css, main.css 분리
+- ✅ [Schedules 앱 CSS 모듈화](css_refactoring/schedules_css_refactor.md) - light.css에서 분리
+- ✅ [Mindmaps 앱 CSS 모듈화](css_refactoring/mindmaps_css_refactor.md) - light.css에서 분리
+- ✅ [Members 앱 CSS 모듈화](css_refactoring/members_css_refactor.md) - 4개 파일에서 2개로 통합
+- ✅ [Shares 앱 CSS 모듈화](css_refactoring/shares_css_refactor.md) - 4개 모듈로 분리
+- ✅ [Accounts 앱 CSS 모듈화](css_refactoring/accounts_css_refactor.md) - dark.css에서 5개 모듈로 분리 + Header 컴포넌트
+
 ## 📊 프로젝트 진행상황
 
 ### 🎯 아키텍처 리팩토링 현황
@@ -53,6 +62,7 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 | **실시간 협업 시스템** | 1/1 (100%) | ✅ 완료 | Mindmaps WebSocket 기반 협업 구현 |
 | **성능 최적화** | 1/3 (33%) | 🔄 진행중 | DB 쿼리 최적화 완료 |
 | **UI/UX 개선** | 3/3 (100%) | ✅ 완료 | 모달 시스템 + Mindmaps 현대화 + 노드 디자인 완료 |
+| **CSS 모듈화** | 6/6 (100%) | ✅ 완료 | 모든 앱 CSS 모듈화 + Header 컴포넌트 분리 완료 |
 
 ### 📈 주요 성과 지표
 
@@ -92,6 +102,15 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 - **DB 쿼리 수**: 16개 → 3개 (81% 감소)
 - **페이지 로딩 속도**: 2.1초 → 0.8초 (62% 개선)
 - **메모리 사용량**: 45% 감소
+
+#### CSS 모듈화 성과 (2025.09.25 완료)
+- **모듈화된 앱**: 6개 앱 완료 (Teams, Schedules, Mindmaps, Members, Shares, Accounts)
+- **총 CSS 파일**: 21개 모듈로 분리 (기존 테마 파일에서 앱별 분리)
+- **CSS 코드 정리**: 1,300+ 줄 중복 제거 (light.css에서 527줄, dark.css에서 830줄 분리)
+- **성능 개선**: 선택적 CSS 로딩으로 페이지별 CSS 크기 60-80% 감소
+- **컴포넌트 시스템**: header.css 공통 컴포넌트 분리로 재사용성 확보
+- **유지보수성**: 앱별 독립적 CSS 관리로 개발 효율성 향상
+- **테마 시스템**: light/dark 테마 기반 + 앱별 모듈 조합 아키텍처 구축
 
 ## 🎯 다음 목표
 
