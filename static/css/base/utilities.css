@@ -7,7 +7,8 @@
    ========================================================================== */
 
 /* Display utilities */
-.tm-hidden {
+.tm-hidden,
+#django-messages.tm-hidden {
   display: none !important;
 }
 
