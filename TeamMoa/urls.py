@@ -21,6 +21,11 @@ from django.views.generic.base import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(url='/teams/', permanent=False)),
+
+    # API 엔드포인트
+    path('api/', include('api.urls')),
+
+    # 기존 템플릿 기반 뷰들
     path('accounts/', include('accounts.urls')),
     path('teams/', include('teams.urls')),
     path('shares/',include('shares.urls')),

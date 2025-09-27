@@ -39,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',  # WebSocket 지원
+
+    # Django REST Framework
+    'rest_framework',
+    'corsheaders',
+    'drf_spectacular',
+
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
     'shares.apps.SharesConfig',
@@ -50,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Static 파일 서빙용
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -187,3 +194,55 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.TeamMoaPageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
+
+# API 문서화 설정 (drf-spectacular)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'TeamMoa API',
+    'DESCRIPTION': 'TeamMoa 팀 프로젝트 관리 시스템 API',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+]
+
+# 개발 환경에서만 모든 출처 허용 (주의: 운영에서는 사용 금지)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS에서 허용할 헤더
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
