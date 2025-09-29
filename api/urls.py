@@ -4,6 +4,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 # ViewSet imports
 from accounts.viewsets import UserViewSet
+from members.viewsets import TodoViewSet, TeamMemberViewSet
 
 # API 라우터 설정
 router = DefaultRouter()
@@ -19,6 +20,37 @@ app_name = 'api'
 urlpatterns = [
     # API v1 엔드포인트
     path('v1/', include(router.urls)),
+
+    # 팀별 nested 엔드포인트
+    path('v1/teams/<int:team_pk>/todos/', TodoViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='team-todos-list'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/', TodoViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='team-todos-detail'),
+
+    # TODO 액션 엔드포인트
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/move/', TodoViewSet.as_view({
+        'post': 'move'
+    }), name='team-todos-move'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/assign/', TodoViewSet.as_view({
+        'post': 'assign'
+    }), name='team-todos-assign'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/complete/', TodoViewSet.as_view({
+        'post': 'complete'
+    }), name='team-todos-complete'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/return_to_board/', TodoViewSet.as_view({
+        'post': 'return_to_board'
+    }), name='team-todos-return'),
+
+    # 팀 멤버 엔드포인트
+    path('v1/teams/<int:team_pk>/members/', TeamMemberViewSet.as_view({
+        'get': 'list'
+    }), name='team-members-list'),
 
     # API 문서화
     path('schema/', SpectacularAPIView.as_view(), name='schema'),

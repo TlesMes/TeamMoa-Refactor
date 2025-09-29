@@ -226,92 +226,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // API Functions
-    function assignTodoToMember(todoId, memberId) {
-        fetch(`/members/api/${teamId}/assign-todo/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                todo_id: todoId,
-                member_id: memberId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Always reload to show Django messages
-            window.location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Reload to show error messages from Django
-            window.location.reload();
-        });
+    async function assignTodoToMember(todoId, memberId) {
+        try {
+            const response = await todoApi.assignTodo(teamId, todoId, memberId);
+            handleApiResponse(response);
+            console.log('Assign API response:', response);
+        } catch (error) {
+            handleApiError(error);
+            console.error('Assign API error:', error);
+        }
     }
 
-    function toggleTodoComplete(todoId) {
-        fetch(`/members/api/${teamId}/complete-todo/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                todo_id: todoId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Always reload to show Django messages
-            window.location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Reload to show error messages from Django
-            window.location.reload();
-        });
+    async function toggleTodoComplete(todoId) {
+        try {
+            const response = await todoApi.completeTodo(teamId, todoId);
+            handleApiResponse(response);
+            console.log('Complete API response:', response);
+        } catch (error) {
+            handleApiError(error);
+            console.error('Complete API error:', error);
+        }
     }
 
     // Return todo to board function (used by both drag&drop and button)
-    function returnTodoToBoard(todoId) {
-        fetch(`/members/api/${teamId}/return-to-board/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                todo_id: todoId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Always reload to show Django messages
-            window.location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Reload to show error messages from Django
-            window.location.reload();
-        });
+    async function returnTodoToBoard(todoId) {
+        try {
+            const response = await todoApi.returnTodoToBoard(teamId, todoId);
+            handleApiResponse(response);
+            console.log('Return to board API response:', response);
+        } catch (error) {
+            handleApiError(error);
+            console.error('Return to board API error:', error);
+        }
     }
 
-    function deleteTodo(todoId) {
-        showConfirmModal('이 할 일을 삭제하시겠습니까?', function() {
-            // Use existing delete endpoint
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/members/member_delete_Todo/${teamId}/${todoId}`;
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = csrfToken;
-
-            form.appendChild(csrfInput);
-            document.body.appendChild(form);
-            form.submit();
+    async function deleteTodo(todoId) {
+        showConfirmModal('이 할 일을 삭제하시겠습니까?', async function() {
+            try {
+                const response = await todoApi.deleteTodo(teamId, todoId);
+                handleApiResponse(response);
+                console.log('Delete API response:', response);
+            } catch (error) {
+                handleApiError(error);
+                console.error('Delete API error:', error);
+            }
         });
     }
 });

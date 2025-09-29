@@ -10,6 +10,7 @@ class IsTeamMember(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
+            print(f"[IsTeamMember] User not authenticated: {request.user}")
             return False
 
         # URL에서 team_id 추출 (여러 패턴 지원)
@@ -21,19 +22,25 @@ class IsTeamMember(permissions.BasePermission):
         elif hasattr(view, 'get_team_id'):
             team_id = view.get_team_id()
 
+        print(f"[IsTeamMember] User: {request.user}, Team ID: {team_id}, View kwargs: {view.kwargs}")
+
         if not team_id:
+            print(f"[IsTeamMember] No team_id found in view.kwargs: {view.kwargs}")
             return False
 
         # 팀 멤버십 확인
-        return TeamUser.objects.filter(
+        is_member = TeamUser.objects.filter(
             team_id=team_id,
             user=request.user
         ).exists()
 
+        print(f"[IsTeamMember] User {request.user} is member of team {team_id}: {is_member}")
+        return is_member
+
 
 class IsTeamLeader(permissions.BasePermission):
     """
-    팀 리더만 접근 가능한 권한 클래스
+    팀 리더(호스트)만 접근 가능한 권한 클래스
     """
 
     def has_permission(self, request, view):
@@ -50,12 +57,13 @@ class IsTeamLeader(permissions.BasePermission):
         if not team_id:
             return False
 
-        # 팀 리더 확인
-        return TeamUser.objects.filter(
-            team_id=team_id,
-            user=request.user,
-            role='leader'
-        ).exists()
+        # 팀 리더(호스트) 확인
+        from teams.models import Team
+        try:
+            team = Team.objects.get(id=team_id)
+            return team.host == request.user
+        except Team.DoesNotExist:
+            return False
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
