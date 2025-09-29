@@ -2,12 +2,17 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+# ViewSet imports
+from accounts.viewsets import UserViewSet
+
 # API 라우터 설정
 router = DefaultRouter()
 
-# 각 앱의 ViewSet들이 여기에 등록됩니다
+# ViewSet 등록
+router.register(r'users', UserViewSet, basename='user')
+
+# 향후 추가될 ViewSet들
 # router.register(r'teams', TeamViewSet)
-# router.register(r'accounts', UserViewSet)
 
 app_name = 'api'
 
