@@ -14,18 +14,15 @@ class ApiClient {
         // 1. 폼의 hidden input에서 가져오기
         const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
         if (csrfElement && csrfElement.value) {
-            console.log('[API Client] CSRF Token from form:', csrfElement.value);
             return csrfElement.value;
         }
 
         // 2. 쿠키에서 가져오기 (fallback)
         const cookieToken = this.getCSRFTokenFromCookie();
         if (cookieToken) {
-            console.log('[API Client] CSRF Token from cookie:', cookieToken);
             return cookieToken;
         }
 
-        console.warn('[API Client] No CSRF Token found!');
         return '';
     }
 
