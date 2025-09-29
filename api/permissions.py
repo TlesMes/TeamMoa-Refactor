@@ -10,7 +10,6 @@ class IsTeamMember(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
-            print(f"[IsTeamMember] User not authenticated: {request.user}")
             return False
 
         # URL에서 team_id 추출 (여러 패턴 지원)
@@ -22,10 +21,7 @@ class IsTeamMember(permissions.BasePermission):
         elif hasattr(view, 'get_team_id'):
             team_id = view.get_team_id()
 
-        print(f"[IsTeamMember] User: {request.user}, Team ID: {team_id}, View kwargs: {view.kwargs}")
-
         if not team_id:
-            print(f"[IsTeamMember] No team_id found in view.kwargs: {view.kwargs}")
             return False
 
         # 팀 멤버십 확인
@@ -34,7 +30,6 @@ class IsTeamMember(permissions.BasePermission):
             user=request.user
         ).exists()
 
-        print(f"[IsTeamMember] User {request.user} is member of team {team_id}: {is_member}")
         return is_member
 
 

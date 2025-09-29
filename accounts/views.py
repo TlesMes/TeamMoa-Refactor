@@ -275,9 +275,7 @@ class TestSignupSuccessView(TemplateView):
     def get(self, request, *args, **kwargs):
         # 테스트용 미인증 사용자가 없으면 생성
         user = self.auth_service.create_test_user()
-        if user:
-            print("테스트용 사용자 생성: testuser / test@example.com")
-        
+
         return super().get(request, *args, **kwargs)
 
 
