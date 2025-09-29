@@ -402,5 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 전역으로 접근 가능하도록 설정
     window.showConfirmModal = showConfirmModal;
     window.showToast = showToast;
+    window.showDjangoToast = showDjangoToast;
     
 });

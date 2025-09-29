@@ -1,0 +1,236 @@
+/* TODO 애니메이션 및 시각적 피드백 CSS */
+
+/* 기본 트랜지션 설정 */
+.todo-card,
+.assigned-todo {
+    transition: all 0.3s ease;
+}
+
+/* 완료된 TODO 스타일 */
+.assigned-todo.completed {
+    opacity: 0.7;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #0ea5e9;
+}
+
+.assigned-todo.completed .todo-title {
+    text-decoration: line-through;
+    color: #64748b;
+}
+
+.assigned-todo.completed .todo-description {
+    color: #94a3b8;
+}
+
+/* 로딩 상태 */
+.todo-card.loading,
+.assigned-todo.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.todo-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 에러 상태 */
+.todo-card.error,
+.assigned-todo.error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left: 4px solid #ef4444;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.todo-error-message {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ef4444;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 20;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+.todo-error-message::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #ef4444;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+    10%, 90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* 드래그 중 상태 */
+.todo-card.dragging,
+.assigned-todo.dragging {
+    opacity: 0.8;
+    transform: rotate(2deg);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+/* 드롭 존 하이라이트 */
+.member-card.drop-zone.drag-over {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 100%);
+    border: 2px dashed #0ea5e9;
+    transform: scale(1.02);
+}
+
+.todo-board.drag-over {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 2px dashed #6b7280;
+}
+
+/* 카운터 업데이트 애니메이션 */
+.assigned-count {
+    transition: all 0.2s ease;
+}
+
+.assigned-count.updating {
+    transform: scale(1.2);
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* 호버 효과 강화 */
+.todo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.assigned-todo:hover {
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+}
+
+/* 체크박스 애니메이션 */
+.complete-checkbox {
+    transition: all 0.2s ease;
+}
+
+.complete-checkbox:checked {
+    transform: scale(1.1);
+}
+
+/* 액션 버튼 호버 효과 */
+.action-btn {
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+.return-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* 부드러운 등장 애니메이션 */
+.todo-card.entering,
+.assigned-todo.entering {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 부드러운 사라짐 애니메이션 */
+.todo-card.leaving,
+.assigned-todo.leaving {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+/* 권한 없는 요소 스타일 */
+.todo-card.no-drag-permission,
+.assigned-todo.no-drag-permission {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.todo-card.no-drag-permission:hover,
+.assigned-todo.no-drag-permission:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .todo-loading-overlay {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .loading-spinner {
+        width: 16px;
+        height: 16px;
+    }
+
+    .todo-error-message {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+}

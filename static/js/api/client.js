@@ -255,9 +255,13 @@ window.ApiError = ApiError;
  * API 응답을 토스트로 표시하는 헬퍼 함수
  */
 window.handleApiResponse = function(response, successCallback = null) {
-    // 성공 메시지가 있으면 토스트로 표시
+    // 성공 메시지가 있으면 Django 토스트로 표시
     if (response.message) {
-        showToast(response.message);
+        if (window.showDjangoToast) {
+            showDjangoToast(response.message, 'success');
+        } else {
+            showToast(response.message);
+        }
     }
 
     // 성공 콜백 실행
@@ -274,11 +278,19 @@ window.handleApiResponse = function(response, successCallback = null) {
 window.handleApiError = function(error, errorCallback = null) {
     console.error('API Error:', error);
 
-    // 에러 메시지 토스트로 표시
+    // 에러 메시지 Django 토스트로 표시
     if (error instanceof ApiError) {
-        showToast(error.message, 'error');
+        if (window.showDjangoToast) {
+            showDjangoToast(error.message, 'error');
+        } else {
+            showToast(error.message, 'error');
+        }
     } else {
-        showToast('오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        if (window.showDjangoToast) {
+            showDjangoToast('오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        } else {
+            showToast('오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        }
     }
 
     // 에러 콜백 실행

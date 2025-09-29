@@ -1,5 +1,10 @@
 // 팀 멤버 관리 페이지 전용 JavaScript
 
+// TodoDOMUtils 스크립트 로드 확인
+if (typeof TodoDOMUtils === 'undefined') {
+    console.error('TodoDOMUtils가 로드되지 않았습니다. todo-dom-utils.js를 확인하세요.');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let draggedTodo = null;
@@ -52,65 +57,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Drag start - for both unassigned and assigned todos
-    todoCards.forEach(card => {
-        card.addEventListener('dragstart', function(e) {
-            // 권한 체크 - 드래그할 수 없는 경우 막기
-            if (!canMoveTodo(this)) {
-                e.preventDefault();
-                return;
-            }
+    // members 섹션 내에서만 이벤트 위임 - 성능과 범위 최적화
+    const membersSection = document.querySelector('.members-section');
+    if (membersSection) {
+        membersSection.addEventListener('dragstart', function(e) {
+            const card = e.target.closest('.draggable');
+            if (!card) return;
+        // 권한 체크 - 드래그할 수 없는 경우 막기
+        if (!canMoveTodo(card)) {
+            e.preventDefault();
+            return;
+        }
 
-            draggedTodo = this;
-            this.classList.add('dragging');
+        draggedTodo = card;
+        card.classList.add('dragging');
 
-            // Add visual feedback based on source and permissions
-            if (this.classList.contains('todo-card')) {
+        // Add visual feedback based on source and permissions
+        if (card.classList.contains('todo-card')) {
                 // From todo board - highlight only allowed member drop zones
                 memberCards.forEach(member => {
                     const memberId = member.dataset.memberId;
                     if (canAssignToMember(memberId)) {
-                        member.classList.add('drop-zone-active');
+                        member.classList.add('drag-over');
                     }
                 });
-            } else if (this.classList.contains('assigned-todo')) {
+        } else if (card.classList.contains('assigned-todo')) {
                 // From assigned todos - highlight allowed destinations only
 
-                // 할 일 보드로 되돌리기는 본인 할일이거나 팀장만 가능
-                const currentMemberCard = this.closest('.member-card');
-                const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
+            // 할 일 보드로 되돌리기는 본인 할일이거나 팀장만 가능
+            const currentMemberCard = card.closest('.member-card');
+            const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
 
-                if (isHost || (currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
-                    todoBoard.classList.add('drop-zone-active');
-                }
-
-                // 다른 멤버에게 재할당 - 권한에 따라
-                memberCards.forEach(member => {
-                    // 현재 멤버 카드는 제외
-                    if (member !== currentMemberCard) {
-                        const memberId = member.dataset.memberId;
-                        if (canAssignToMember(memberId)) {
-                            member.classList.add('drop-zone-active');
-                        }
-                    }
-                });
+            if (isHost || (currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
+                todoBoard.classList.add('drag-over');
             }
-        });
 
-        card.addEventListener('dragend', function(e) {
-            this.classList.remove('dragging');
+            // 다른 멤버에게 재할당 - 권한에 따라
+            memberCards.forEach(member => {
+                // 현재 멤버 카드는 제외
+                if (member !== currentMemberCard) {
+                    const memberId = member.dataset.memberId;
+                    if (canAssignToMember(memberId)) {
+                        member.classList.add('drag-over');
+                    }
+                }
+            });
+        }
+    });
+
+        // members 섹션 내에서만 드래그 종료 처리
+        membersSection.addEventListener('dragend', function(e) {
+            const card = e.target.closest('.draggable');
+            if (!card) return;
+
+            card.classList.remove('dragging');
             draggedTodo = null;
 
-            // Remove all visual feedback
-            memberCards.forEach(member => {
-                member.classList.remove('drop-zone-active');
-            });
-            todosLists.forEach(list => {
-                list.classList.remove('drop-zone-active');
-            });
-            todoBoard.classList.remove('drop-zone-active');
+            // 모든 하이라이팅 제거
+            clearAllHighlighting();
         });
-    });
+    }
 
     // Drop zones - Member cards
     memberCards.forEach(member => {
@@ -131,18 +137,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // 권한 체크
                 if (!canAssignToMember(memberId)) {
-                    console.log('Permission denied - cannot assign to this member');
                     return;
                 }
 
                 // Check if dropping on the same member (avoid unnecessary Ajax)
                 const currentMemberCard = draggedTodo.closest('.member-card');
                 if (currentMemberCard && currentMemberCard === this) {
-                    console.log('Same member drop - no action needed');
                     return; // Don't send Ajax request
                 }
 
+                // 드래그 상태 즉시 정리
+                if (draggedTodo) {
+                    draggedTodo.classList.remove('dragging');
+                }
+
+                // 드래그앤드롭도 동일한 DOM 조작 + API 호출
                 assignTodoToMember(todoId, memberId);
+
+                // 드롭 완료 후 모든 하이라이팅 제거
+                clearAllHighlighting();
             }
         });
     });
@@ -166,7 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (draggedTodo) {
             // Check if already on todo board (avoid unnecessary Ajax)
             if (draggedTodo.classList.contains('todo-card')) {
-                console.log('Already on todo board - no action needed');
                 return; // Don't send Ajax request
             }
 
@@ -177,12 +189,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
 
                 if (!isHost && !(currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
-                    console.log('Permission denied - cannot return this todo to board');
                     return;
                 }
 
                 const todoId = draggedTodo.dataset.todoId;
+
+                // 드래그 상태 즉시 정리
+                if (draggedTodo) {
+                    draggedTodo.classList.remove('dragging');
+                }
+
+                // 드래그앤드롭도 동일한 DOM 조작 + API 호출
                 returnTodoToBoard(todoId);
+
+                // 드롭 완료 후 모든 하이라이팅 제거
+                clearAllHighlighting();
             }
         }
     });
@@ -225,51 +246,150 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 모든 드래그 관련 하이라이팅 제거
+    function clearAllHighlighting() {
+        // 멤버 카드 하이라이팅 제거
+        memberCards.forEach(member => {
+            member.classList.remove('drag-over');
+        });
+
+        // 할일 리스트 하이라이팅 제거
+        todosLists.forEach(list => {
+            list.classList.remove('drag-over');
+        });
+
+        // 보드 하이라이팅 제거
+        todoBoard.classList.remove('drag-over');
+
+    }
+
     // API Functions
     async function assignTodoToMember(todoId, memberId) {
+
+        // 1. 즉시 DOM 업데이트 (Optimistic UI) - 실패하면 페이지 리로드로 처리
+        const backup = TodoDOMUtils.moveTodoToMember(todoId, memberId);
+        if (backup) {
+            TodoDOMUtils.setLoadingState(todoId, true);
+        }
+
         try {
+            // 2. API 호출
             const response = await todoApi.assignTodo(teamId, todoId, memberId);
             handleApiResponse(response);
-            console.log('Assign API response:', response);
+
+            // 3. 성공 시 처리
+            if (backup) {
+                // DOM 조작이 성공했으면 카운터 업데이트
+                TodoDOMUtils.updateMemberCounter(memberId);
+                TodoDOMUtils.setLoadingState(todoId, false);
+            } else {
+                // DOM 조작이 실패했으면 페이지 리로드
+                setTimeout(() => location.reload(), 1000); // 토스트 메시지를 본 후 리로드
+            }
         } catch (error) {
+            // 4. 실패 시 처리
+            if (backup) {
+                // DOM 조작이 성공했었으면 되돌리기
+                TodoDOMUtils.revertTodoMovement(backup);
+                TodoDOMUtils.setLoadingState(todoId, false);
+                TodoDOMUtils.showError(todoId, '할 일 할당에 실패했습니다');
+            } else {
+                // DOM 조작이 실패했으면 에러만 표시 (페이지 상태는 그대로)
+                if (window.showDjangoToast) {
+                    window.showDjangoToast('할 일 할당에 실패했습니다', 'error');
+                }
+            }
+
             handleApiError(error);
-            console.error('Assign API error:', error);
         }
     }
 
     async function toggleTodoComplete(todoId) {
+        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+        const checkbox = todoElement?.querySelector('.complete-checkbox');
+
+        if (!checkbox) {
+            return;
+        }
+
+        // 체크박스가 이미 클릭되어 변경된 상태를 사용
+        const newCompletedState = checkbox.checked;
+
+        // 1. 즉시 UI 업데이트 (Optimistic UI)
+        TodoDOMUtils.toggleTodoCompleteUI(todoId, newCompletedState);
+        TodoDOMUtils.setLoadingState(todoId, true);
+
         try {
+            // 2. API 호출
             const response = await todoApi.completeTodo(teamId, todoId);
             handleApiResponse(response);
-            console.log('Complete API response:', response);
+            TodoDOMUtils.setLoadingState(todoId, false);
         } catch (error) {
+            // 3. 실패 시 되돌리기
+            TodoDOMUtils.toggleTodoCompleteUI(todoId, !newCompletedState);
+            TodoDOMUtils.setLoadingState(todoId, false);
+            TodoDOMUtils.showError(todoId, '완료 상태 변경에 실패했습니다');
+
             handleApiError(error);
-            console.error('Complete API error:', error);
         }
     }
 
     // Return todo to board function (used by both drag&drop and button)
     async function returnTodoToBoard(todoId) {
+        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+        const memberCard = todoElement?.closest('.member-card');
+        const memberId = memberCard?.dataset.memberId;
+
+        // 1. 즉시 DOM 업데이트 (Optimistic UI)
+        const backup = TodoDOMUtils.moveTodoToBoard(todoId);
+        TodoDOMUtils.setLoadingState(todoId, true);
+
         try {
+            // 2. API 호출
             const response = await todoApi.returnTodoToBoard(teamId, todoId);
             handleApiResponse(response);
-            console.log('Return to board API response:', response);
+
+            // 3. 성공 시 카운터 업데이트 (서버에서 이미 메시지 제공)
+            if (memberId) {
+                TodoDOMUtils.updateMemberCounter(memberId);
+            }
+            TodoDOMUtils.setLoadingState(todoId, false);
         } catch (error) {
+            // 4. 실패 시 되돌리기
+            TodoDOMUtils.revertTodoMovement(backup);
+            TodoDOMUtils.setLoadingState(todoId, false);
+            TodoDOMUtils.showError(todoId, '보드 복귀에 실패했습니다');
+
             handleApiError(error);
-            console.error('Return to board API error:', error);
         }
     }
 
     async function deleteTodo(todoId) {
         showConfirmModal('이 할 일을 삭제하시겠습니까?', async function() {
+            const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+            const memberCard = todoElement?.closest('.member-card');
+            const memberId = memberCard?.dataset.memberId;
+
+            // 1. 즉시 DOM에서 제거 (Optimistic UI)
+            const backup = TodoDOMUtils.removeTodoFromDOM(todoId);
+
             try {
+                // 2. API 호출
                 const response = await todoApi.deleteTodo(teamId, todoId);
                 handleApiResponse(response);
-                console.log('Delete API response:', response);
+
+                // 3. 성공 시 카운터 업데이트 (서버에서 이미 메시지 제공)
+                if (memberId) {
+                    TodoDOMUtils.updateMemberCounter(memberId);
+                }
             } catch (error) {
+                // 4. 실패 시 복원
+                TodoDOMUtils.revertTodoMovement(backup);
+                TodoDOMUtils.showError(todoId, '할 일 삭제에 실패했습니다');
+
                 handleApiError(error);
-                console.error('Delete API error:', error);
             }
         });
     }
+
 });

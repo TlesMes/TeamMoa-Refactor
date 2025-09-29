@@ -316,6 +316,12 @@
   font-weight: 500;
 }
 
+.assigned-count.updating,
+.todo-count.updating {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
 .todos-list {
   min-height: 80px;
   position: relative;

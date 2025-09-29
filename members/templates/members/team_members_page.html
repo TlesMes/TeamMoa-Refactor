@@ -4,6 +4,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/members/common.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/members/team_members.css' %}" />
+<link rel="stylesheet" href="{% static 'css/components/todo-animations.css' %}" />
 {% endblock %}
 
 {% block extra_js %}
@@ -25,6 +26,8 @@ window.teamMembersData = {
 </script>
 <!-- API 클라이언트 로드 -->
 <script src="{% static 'js/api/client.js' %}"></script>
+<!-- TodoDOMUtils 유틸리티 로드 -->
+<script src="{% static 'js/utils/todo-dom-utils.js' %}"></script>
 <script src="{% static 'js/pages/team_members.js' %}"></script>
 {% endblock %}
 
