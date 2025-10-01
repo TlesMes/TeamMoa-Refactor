@@ -55,17 +55,41 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 📋 개발 가이드라인
 
-### 🔧 공통 JavaScript 함수
-- **위치**: `static/js/common/scripts.js`
-- **주요 함수들**:
-  - `showConfirmModal(message, onConfirm)`: 확인 모달 표시
-  - `showToast(message)`: 토스트 알림 표시
-  - `showDjangoMessages()`: Django messages를 토스트로 자동 변환
+### 🔧 공통 JavaScript 함수 (`ui-utils.js`)
+- **위치**: `static/js/common/ui-utils.js`
+- **자동 로드**: 모든 base 템플릿에서 자동 로드됨 (`base_app.html`, `base_minimal.html`, `base_minimal_alt.html`)
+
+**주요 함수들**:
+
+#### 1️⃣ **토스트 알림**
+```javascript
+// 기본 토스트 (다크 그레이)
+showToast('메시지 내용');
+
+// Django 스타일 토스트 (레벨별 색상 + 아이콘)
+showDjangoToast('성공 메시지', 'success');  // 초록색 + 체크 아이콘
+showDjangoToast('에러 메시지', 'error');    // 빨간색 + 경고 아이콘
+showDjangoToast('경고 메시지', 'warning');  // 주황색 + 알림 아이콘
+showDjangoToast('정보 메시지', 'info');     // 파란색 + 정보 아이콘
+```
+
+#### 2️⃣ **확인 모달**
+```javascript
+showConfirmModal('정말 삭제하시겠습니까?', () => {
+    // 확인 버튼 클릭 시 실행할 코드
+});
+```
+
+#### 3️⃣ **Django Messages 자동 변환**
+```javascript
+showDjangoMessages();  // Django messages를 토스트로 자동 표시 (DOMContentLoaded에서 자동 실행)
+```
 
 ### 🎯 사용자 피드백 처리 방침
-1. **사용자 알림**: 모든 경우에 Django messages 사용 (base 템플릿에서 자동으로 토스트 변환)
-2. **AJAX 응답**: Django messages 활용
-3. **확인/삭제 등 중요 액션**: `showConfirmModal()` 사용
+1. **백엔드 응답**: Django messages 사용 → 자동으로 토스트 변환
+2. **API 응답 (성공)**: `showDjangoToast(message, 'success')` 사용
+3. **API 응답 (실패)**: `showDjangoToast(message, 'error')` 사용
+4. **확인/삭제 등 중요 액션**: `showConfirmModal()` 사용
 
 ### 📝 커밋 메시지 스타일 가이드
 

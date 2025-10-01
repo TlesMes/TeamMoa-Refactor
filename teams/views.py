@@ -349,84 +349,9 @@ class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
 team_milestone_timeline = TeamMilestoneTimelineView.as_view()
 
 
-
-class MilestoneUpdateAjaxView(TeamMemberRequiredMixin, View):
-    """AJAX를 통한 마일스톤 업데이트"""
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.milestone_service = MilestoneService()
-    
-    def post(self, request, pk, milestone_id):
-        try:
-            team = get_object_or_404(Team, pk=pk)
-            
-            # JSON 데이터 파싱
-            if request.content_type == 'application/json':
-                data = json.loads(request.body)
-            else:
-                data = request.POST
-            
-            milestone, updated_fields = self.milestone_service.update_milestone(
-                milestone_id=milestone_id,
-                team=team,
-                **data
-            )
-            
-            return JsonResponse({
-                'success': True,
-                'message': f"마일스톤 {', '.join(updated_fields)}이(가) 업데이트되었습니다.",
-                'milestone': {
-                    'id': milestone.id,
-                    'title': milestone.title,
-                    'startdate': milestone.startdate.isoformat() if milestone.startdate else None,
-                    'enddate': milestone.enddate.isoformat() if milestone.enddate else None,
-                    'progress_percentage': milestone.progress_percentage,
-                    'is_completed': milestone.is_completed,
-                }
-            })
-            
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'message': '잘못된 JSON 형식입니다.'
-            }, status=400)
-            
-        except ValueError as e:
-            return JsonResponse({
-                'success': False,
-                'message': str(e)
-            }, status=400)
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'업데이트 중 오류가 발생했습니다: {str(e)}'
-            }, status=500)
-
-
-milestone_update_ajax = MilestoneUpdateAjaxView.as_view()
-
-
-class MilestoneDeleteAjaxView(TeamMemberRequiredMixin, View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.milestone_service = MilestoneService()
-        
-    def post(self, request, pk, milestone_id):
-        try:
-            team = get_object_or_404(Team, pk=pk)
-            milestone_title = self.milestone_service.delete_milestone(milestone_id, team)
-            
-            messages.success(request, f'"{milestone_title}" 마일스톤이 삭제되었습니다.')
-            return HttpResponse(status=200)
-            
-        except Exception as e:
-            messages.error(request, f'마일스톤 삭제 중 오류가 발생했습니다: {str(e)}')
-            return HttpResponse(status=500)
-
-
-milestone_delete_ajax = MilestoneDeleteAjaxView.as_view()
+# 마일스톤 업데이트/삭제는 REST API로 이동됨
+# teams/viewsets.py의 MilestoneViewSet 참고
+# API 엔드포인트: /api/v1/teams/<team_pk>/milestones/<pk>/
 
 
 class TeamDisbandView(TeamHostRequiredMixin, View):

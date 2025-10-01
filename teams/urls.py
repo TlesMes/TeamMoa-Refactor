@@ -15,7 +15,6 @@ urlpatterns = [
     path('team_main_page/<int:pk>/', views.team_main_page, name='team_main_page'),
     path('team_add_milestone/<int:pk>/', views.team_add_milestone, name='team_add_milestone'),
     path('team_milestone_timeline/<int:pk>/', views.team_milestone_timeline, name='team_milestone_timeline'),
-    path('team/<int:pk>/milestone/<int:milestone_id>/update/', views.milestone_update_ajax, name='milestone_update_ajax'),
-    path('team/<int:pk>/milestone/<int:milestone_id>/delete/', views.milestone_delete_ajax, name='milestone_delete_ajax'),
+    # 마일스톤 업데이트/삭제는 REST API로 이동됨 (/api/v1/teams/<team_pk>/milestones/<pk>/)
     path('team_disband/<int:pk>/', views.team_disband, name='team_disband')
 ]

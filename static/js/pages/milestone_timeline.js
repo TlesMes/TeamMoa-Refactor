@@ -380,51 +380,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 마일스톤 업데이트 AJAX 함수
-    function updateMilestone(milestoneId, data) {
-        console.log('AJAX 요청 시작:', {
-            url: `/teams/team/${window.teamData.id}/milestone/${milestoneId}/update/`,
-            data: data
-        });
-        fetch(`/teams/team/${window.teamData.id}/milestone/${milestoneId}/update/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.teamData.csrfToken
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            console.log('응답 상태:', response.status, response.statusText);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            console.log('서버 응답:', result);
-            if (result.success) {
-                console.log('마일스톤 업데이트 성공:', result.message);
+    // 마일스톤 업데이트 API 함수 (API Client 사용)
+    async function updateMilestone(milestoneId, data) {
+        try {
+            const response = await apiClient.patch(
+                `/teams/${window.teamData.id}/milestones/${milestoneId}/`,
+                data
+            );
+
+            if (response.success) {
+                console.log('마일스톤 업데이트 성공:', response.message);
+
                 // 좌측 정보 패널의 날짜 정보도 업데이트
                 const infoItem = document.querySelector(`[data-milestone-id="${milestoneId}"]`);
-                if (infoItem) {
+                if (infoItem && response.milestone) {
                     const dateRange = infoItem.querySelector('.date-range');
-                    const newStart = new Date(result.milestone.startdate);
-                    const newEnd = new Date(result.milestone.enddate);
+                    const newStart = new Date(response.milestone.startdate);
+                    const newEnd = new Date(response.milestone.enddate);
                     dateRange.textContent = `${(newStart.getMonth()+1).toString().padStart(2,'0')}/${newStart.getDate().toString().padStart(2,'0')} - ${(newEnd.getMonth()+1).toString().padStart(2,'0')}/${newEnd.getDate().toString().padStart(2,'0')}`;
+
+                    // 진행률 업데이트 (있는 경우)
+                    if (response.milestone.progress_percentage !== undefined) {
+                        const progressElement = infoItem.querySelector('.progress');
+                        if (progressElement) {
+                            progressElement.textContent = `${response.milestone.progress_percentage}%`;
+                        }
+                    }
                 }
+
+                showDjangoToast(response.message || '마일스톤이 업데이트되었습니다.', 'success');
             } else {
-                console.error('업데이트 실패:', result.message);
-                alert('마일스톤 업데이트에 실패했습니다: ' + result.message);
-                location.reload(); // 실패시 페이지 새로고침
+                throw new Error(response.error || '업데이트에 실패했습니다.');
             }
-        })
-        .catch(error => {
-            console.error('네트워크 또는 파싱 에러:', error);
-            console.error('에러 스택:', error.stack);
-            alert(`마일스톤 업데이트 중 오류가 발생했습니다: ${error.message}`);
-            location.reload();
-        });
+        } catch (error) {
+            console.error('마일스톤 업데이트 실패:', error);
+            showDjangoToast(`업데이트에 실패했습니다: ${error.message}`, 'error');
+            location.reload(); // 실패시 페이지 새로고침
+        }
     }
 
     // 오늘 날짜 마커 추가
@@ -502,30 +494,28 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(scrollToCurrentDate, 100);
 });
 
-// 마일스톤 삭제 함수
-function deleteMilestone(milestoneId, milestoneName) {
+// 마일스톤 삭제 함수 (API Client 사용)
+async function deleteMilestone(milestoneId, milestoneName) {
     showConfirmModal(
         `정말로 '<strong>${milestoneName}</strong>' 마일스톤을 삭제하시겠습니까?<br><small style="color: #6b7280;">이 작업은 되돌릴 수 없습니다.</small>`,
-        () => {
-            fetch(`/teams/team/${window.teamData.id}/milestone/${milestoneId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': window.teamData.csrfToken
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
+        async () => {
+            try {
+                const response = await apiClient.delete(
+                    `/teams/${window.teamData.id}/milestones/${milestoneId}/`
+                );
+
+                if (response.success) {
+                    showDjangoToast(response.message || '마일스톤이 삭제되었습니다.', 'success');
+                    // 페이지 새로고침으로 UI 업데이트
+                    setTimeout(() => location.reload(), 500);
                 } else {
-                    console.error('삭제 요청 실패');
-                    location.reload();
+                    throw new Error(response.error || '삭제에 실패했습니다.');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            } catch (error) {
+                console.error('마일스톤 삭제 실패:', error);
+                showDjangoToast(`삭제에 실패했습니다: ${error.message}`, 'error');
                 location.reload();
-            });
+            }
         }
     );
 }

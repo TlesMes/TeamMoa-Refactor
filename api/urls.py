@@ -5,6 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 # ViewSet imports
 from accounts.viewsets import UserViewSet
 from members.viewsets import TodoViewSet, TeamMemberViewSet
+from teams.viewsets import MilestoneViewSet
 
 # API 라우터 설정
 router = DefaultRouter()
@@ -51,6 +52,18 @@ urlpatterns = [
     path('v1/teams/<int:team_pk>/members/', TeamMemberViewSet.as_view({
         'get': 'list'
     }), name='team-members-list'),
+
+    # 마일스톤 엔드포인트
+    path('v1/teams/<int:team_pk>/milestones/', MilestoneViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='team-milestones-list'),
+    path('v1/teams/<int:team_pk>/milestones/<int:pk>/', MilestoneViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='team-milestones-detail'),
 
     # API 문서화
     path('schema/', SpectacularAPIView.as_view(), name='schema'),

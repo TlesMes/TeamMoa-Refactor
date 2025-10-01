@@ -373,9 +373,17 @@ class MilestoneService:
             if startdate > enddate:
                 raise ValueError('시작일은 종료일보다 이전이어야 합니다.')
     
-    def _parse_date(self, date_string):
-        """문자열을 날짜 객체로 변환"""
-        try:
-            return datetime.strptime(date_string, '%Y-%m-%d').date()
-        except ValueError:
-            raise ValueError(f'날짜 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)')
+    def _parse_date(self, date_input):
+        """문자열 또는 날짜 객체를 날짜 객체로 변환"""
+        # 이미 date 객체인 경우 그대로 반환 (DRF Serializer에서 파싱된 경우)
+        if isinstance(date_input, date):
+            return date_input
+
+        # 문자열인 경우 파싱
+        if isinstance(date_input, str):
+            try:
+                return datetime.strptime(date_input, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError(f'날짜 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)')
+
+        raise ValueError(f'날짜는 문자열 또는 date 객체여야 합니다. (받은 타입: {type(date_input)})')
