@@ -3,6 +3,7 @@
 {% csrf_token %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/common/modal.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/teams/timeline.css' %}" />
 {% endblock %}
 
@@ -35,10 +36,31 @@ const apiClient = new ApiClient();
         <p>팀의 마일스톤을 시각적 타임라인으로 관리하세요</p>
       </div>
     </div>
-    <a href="{% url 'teams:team_add_milestone' team.id %}" class="primary-btn">
+
+    <!-- 필터 버튼 -->
+    <div class="timeline-filters">
+      <button class="filter-preset active" data-preset="all">
+        <i class="ri-eye-line"></i>
+        전체
+      </button>
+      <button class="filter-preset" data-preset="active">
+        <i class="ri-play-circle-line"></i>
+        진행중
+      </button>
+      <button class="filter-preset" data-preset="overdue">
+        <i class="ri-alarm-warning-line"></i>
+        지연
+      </button>
+      <button class="filter-preset" data-preset="incomplete">
+        <i class="ri-checkbox-multiple-line"></i>
+        완료 제외
+      </button>
+    </div>
+
+    <button class="primary-btn" id="addMilestoneBtn">
       <i class="ri-add-line"></i>
       마일스톤 추가
-    </a>
+    </button>
   </div>
 
   <div class="timeline-container">
@@ -49,7 +71,10 @@ const apiClient = new ApiClient();
       </div>
       <div class="milestone-info-list">
         {% for milestone in milestones %}
-        <div class="milestone-info-item" data-milestone-id="{{ milestone.id }}">
+        <div class="milestone-info-item"
+             data-milestone-id="{{ milestone.id }}"
+             data-status="{{ milestone.get_status }}"
+             data-priority="{{ milestone.priority }}">
           <div class="milestone-title">{{ milestone.title }}</div>
           <button class="delete-btn" onclick="deleteMilestone({{ milestone.id }}, '{{ milestone.title }}')" title="마일스톤 삭제">
             <i class="ri-delete-bin-line"></i>
@@ -82,9 +107,12 @@ const apiClient = new ApiClient();
 
         <!-- 마일스톤 타임라인 -->
         {% for milestone in milestones %}
-        <div class="milestone-timeline-item" data-milestone-id="{{ milestone.id }}"
+        <div class="milestone-timeline-item"
+             data-milestone-id="{{ milestone.id }}"
              data-start="{{ milestone.startdate|date:'Y-m-d' }}"
-             data-end="{{ milestone.enddate|date:'Y-m-d' }}">
+             data-end="{{ milestone.enddate|date:'Y-m-d' }}"
+             data-status="{{ milestone.get_status }}"
+             data-priority="{{ milestone.priority }}">
           <div class="milestone-bar priority-{{ milestone.priority }}
                      {% if milestone.is_completed %}completed{% endif %}"
                data-title="{{ milestone.title }}">
@@ -95,9 +123,9 @@ const apiClient = new ApiClient();
         <div class="empty-timeline">
           <i class="ri-calendar-todo-line"></i>
           <p>아직 등록된 마일스톤이 없습니다</p>
-          <a href="{% url 'teams:team_add_milestone' team.id %}" class="primary-btn">
+          <button class="primary-btn" onclick="document.getElementById('addMilestoneBtn').click()">
             첫 번째 마일스톤 추가하기
-          </a>
+          </button>
         </div>
         {% endfor %}
 
@@ -123,6 +151,82 @@ const apiClient = new ApiClient();
       <div class="milestone-detail" id="milestoneDetail">
         <!-- JavaScript로 동적 생성 -->
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 마일스톤 생성 모달 -->
+<div class="modal" id="createMilestoneModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>마일스톤 추가</h3>
+      <button class="modal-close" id="createModalClose">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="createMilestoneForm">
+        {% csrf_token %}
+
+        <div class="date-range-group">
+          <div class="form-group">
+            <label for="startdate">시작일</label>
+            <div class="input-wrapper">
+              <i class="ri-calendar-line"></i>
+              <input type="date" id="startdate" name="startdate" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="enddate">종료일</label>
+            <div class="input-wrapper">
+              <i class="ri-calendar-check-line"></i>
+              <input type="date" id="enddate" name="enddate" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="title">마일스톤 제목</label>
+          <div class="input-wrapper">
+            <i class="ri-flag-line"></i>
+            <input type="text" id="title" name="title" maxlength="100" placeholder="마일스톤 제목 입력" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">마일스톤 설명</label>
+          <div class="textarea-wrapper">
+            <i class="ri-file-text-line"></i>
+            <textarea id="description" name="description" rows="4" placeholder="마일스톤 설명을 입력하세요"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="priority">우선순위</label>
+          <div class="input-wrapper">
+            <i class="ri-star-line"></i>
+            <select id="priority" name="priority" required>
+              <option value="critical">최우선</option>
+              <option value="high">중요</option>
+              <option value="medium" selected>보통</option>
+              <option value="low">낮음</option>
+              <option value="minimal">미미</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="create-btn">
+            <i class="ri-add-line"></i>
+            마일스톤 추가
+          </button>
+          <button type="button" class="cancel-btn" id="createCancelBtn">
+            <i class="ri-close-line"></i>
+            취소
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

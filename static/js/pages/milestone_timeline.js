@@ -165,8 +165,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // 툴팁 이벤트
         milestoneBar.addEventListener('mouseenter', function(e) {
             const title = this.dataset.title;
-            const startStr = formatDateForDisplay(startDate);
-            const endStr = formatDateForDisplay(endDate);
+
+            // ⭐ 최신 날짜를 data 속성에서 다시 읽기 (드래그 업데이트 반영)
+            const parentItem = this.closest('.milestone-timeline-item');
+            const currentStartDate = new Date(parentItem.dataset.start);
+            const currentEndDate = new Date(parentItem.dataset.end);
+
+            const startStr = formatDateForDisplay(currentStartDate);
+            const endStr = formatDateForDisplay(currentEndDate);
 
             tooltip.textContent = `${title} (${startStr} ~ ${endStr})`;
             tooltip.style.display = 'block';
@@ -380,6 +386,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // 마일스톤 상태 계산 (클라이언트 사이드)
+    function calculateMilestoneStatus(startdate, enddate, progressPercentage) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);  // 시간 제거
+
+        const start = new Date(startdate);
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(enddate);
+        end.setHours(0, 0, 0, 0);
+
+        // 100% 완료
+        if (progressPercentage >= 100) {
+            return 'completed';
+        }
+
+        // 시작 전
+        if (today < start) {
+            return 'not_started';
+        }
+
+        // 지연
+        if (today > end) {
+            return 'overdue';
+        }
+
+        // 진행 중
+        return 'in_progress';
+    }
+
     // 마일스톤 업데이트 API 함수 (API Client 사용)
     async function updateMilestone(milestoneId, data) {
         try {
@@ -392,7 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('마일스톤 업데이트 성공:', response.message);
 
                 // 좌측 정보 패널의 날짜 정보도 업데이트
-                const infoItem = document.querySelector(`[data-milestone-id="${milestoneId}"]`);
+                const infoItem = document.querySelector(`.milestone-info-item[data-milestone-id="${milestoneId}"]`);
+                const timelineItem = document.querySelector(`.milestone-timeline-item[data-milestone-id="${milestoneId}"]`);
+
                 if (infoItem && response.milestone) {
                     const dateRange = infoItem.querySelector('.date-range');
                     const newStart = new Date(response.milestone.startdate);
@@ -406,6 +444,26 @@ document.addEventListener('DOMContentLoaded', function() {
                             progressElement.textContent = `${response.milestone.progress_percentage}%`;
                         }
                     }
+
+                    // ⭐ 상태 재계산 및 data-status 업데이트
+                    const newStatus = calculateMilestoneStatus(
+                        response.milestone.startdate,
+                        response.milestone.enddate,
+                        response.milestone.progress_percentage || 0
+                    );
+
+                    // 좌측 패널 상태 업데이트
+                    infoItem.setAttribute('data-status', newStatus);
+
+                    // 타임라인 아이템 상태 업데이트
+                    if (timelineItem) {
+                        timelineItem.setAttribute('data-status', newStatus);
+                        timelineItem.setAttribute('data-start', response.milestone.startdate);
+                        timelineItem.setAttribute('data-end', response.milestone.enddate);
+                    }
+
+                    // ⭐ 필터 재적용 (상태 변경 시 필터에서 보이거나 숨겨질 수 있음)
+                    applyFilter();
                 }
 
                 showDjangoToast(response.message || '마일스톤이 업데이트되었습니다.', 'success');
@@ -492,9 +550,196 @@ document.addEventListener('DOMContentLoaded', function() {
     // 오늘 날짜 마커 추가 및 스크롤 실행
     addTodayMarker();
     setTimeout(scrollToCurrentDate, 100);
+
+    // 필터 기능 초기화
+    initializeFilters();
+
+    // 마일스톤 생성 모달 초기화
+    initializeCreateMilestoneModal();
 });
 
-// 마일스톤 삭제 함수 (API Client 사용)
+// ========================================
+// 필터 기능
+// ========================================
+
+// 필터 상태 저장
+const filterState = {
+    status: ['in_progress', 'not_started', 'overdue', 'completed'],  // 기본: 전체
+    priority: ['critical', 'high', 'medium', 'low', 'minimal']
+};
+
+function initializeFilters() {
+    // localStorage에서 필터 상태 복원
+    const savedFilter = localStorage.getItem('milestoneFilter');
+    if (savedFilter) {
+        try {
+            const parsed = JSON.parse(savedFilter);
+            Object.assign(filterState, parsed);
+
+            // 저장된 프리셋 적용
+            const activePreset = localStorage.getItem('milestoneFilterPreset') || 'all';
+            updateFilterButtonState(activePreset);
+        } catch (e) {
+            console.error('필터 복원 실패:', e);
+        }
+    }
+
+    // 필터 버튼 이벤트 등록
+    const filterButtons = document.querySelectorAll('.filter-preset');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preset = btn.dataset.preset;
+            applyFilterPreset(preset);
+
+            // 버튼 상태 업데이트
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // localStorage에 저장
+            localStorage.setItem('milestoneFilterPreset', preset);
+        });
+    });
+
+    // 초기 필터 적용
+    const activePreset = localStorage.getItem('milestoneFilterPreset') || 'all';
+    applyFilterPreset(activePreset);
+}
+
+function applyFilterPreset(preset) {
+    switch(preset) {
+        case 'all':
+            filterState.status = ['in_progress', 'not_started', 'overdue', 'completed'];
+            break;
+        case 'active':
+            filterState.status = ['in_progress'];
+            break;
+        case 'overdue':
+            filterState.status = ['overdue'];
+            break;
+        case 'incomplete':
+            filterState.status = ['in_progress', 'not_started', 'overdue'];
+            break;
+    }
+
+    applyFilter();
+
+    // localStorage에 저장
+    localStorage.setItem('milestoneFilter', JSON.stringify(filterState));
+}
+
+function applyFilter() {
+    // 타임라인 아이템 필터링
+    const timelineItems = document.querySelectorAll('.milestone-timeline-item');
+    timelineItems.forEach(item => {
+        const status = item.dataset.status;
+        const priority = item.dataset.priority;
+
+        const visible =
+            filterState.status.includes(status) &&
+            filterState.priority.includes(priority);
+
+        item.style.display = visible ? 'block' : 'none';
+    });
+
+    // 좌측 정보 패널 필터링
+    const infoItems = document.querySelectorAll('.milestone-info-item');
+    infoItems.forEach(item => {
+        const status = item.dataset.status;
+        const priority = item.dataset.priority;
+
+        const visible =
+            filterState.status.includes(status) &&
+            filterState.priority.includes(priority);
+
+        item.style.display = visible ? 'flex' : 'none';
+    });
+}
+
+function updateFilterButtonState(preset) {
+    const filterButtons = document.querySelectorAll('.filter-preset');
+    filterButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === preset);
+    });
+}
+
+// ========================================
+// 마일스톤 생성 모달
+// ========================================
+
+function initializeCreateMilestoneModal() {
+    const modal = document.getElementById('createMilestoneModal');
+    const openBtn = document.getElementById('addMilestoneBtn');
+    const closeBtn = document.getElementById('createModalClose');
+    const cancelBtn = document.getElementById('createCancelBtn');
+    const form = document.getElementById('createMilestoneForm');
+
+    // 모달 열기
+    openBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        // 시작일을 오늘로 기본 설정
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startdate').value = today;
+    });
+
+    // 모달 닫기
+    const closeModal = () => {
+        modal.classList.remove('active');
+        form.reset();
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // 모달 외부 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // 폼 제출
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            startdate: document.getElementById('startdate').value,
+            enddate: document.getElementById('enddate').value,
+            priority: document.getElementById('priority').value
+        };
+
+        // 날짜 유효성 검사
+        if (new Date(formData.startdate) > new Date(formData.enddate)) {
+            showDjangoToast('종료일은 시작일보다 이후여야 합니다.', 'error');
+            return;
+        }
+
+        try {
+            const response = await apiClient.post(
+                `/teams/${window.teamData.id}/milestones/`,
+                formData
+            );
+
+            if (response.success) {
+                showDjangoToast(response.message || '마일스톤이 추가되었습니다.', 'success');
+                closeModal();
+                // 페이지 새로고침으로 새 마일스톤 표시
+                setTimeout(() => location.reload(), 500);
+            } else {
+                throw new Error(response.error || '마일스톤 추가에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('마일스톤 생성 실패:', error);
+            showDjangoToast(`마일스톤 추가에 실패했습니다: ${error.message}`, 'error');
+        }
+    });
+}
+
+// ========================================
+// 마일스톤 삭제 함수
+// ========================================
+
 async function deleteMilestone(milestoneId, milestoneName) {
     showConfirmModal(
         `정말로 '<strong>${milestoneName}</strong>' 마일스톤을 삭제하시겠습니까?<br><small style="color: #6b7280;">이 작업은 되돌릴 수 없습니다.</small>`,
