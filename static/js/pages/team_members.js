@@ -340,8 +340,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const memberCard = todoElement?.closest('.member-card');
         const memberId = memberCard?.dataset.memberId;
 
+        // 원본 생성일 가져오기 (data-created-at 속성에서)
+        const createdAt = todoElement?.dataset.createdAt;
+
         // 1. 즉시 DOM 업데이트 (Optimistic UI)
-        const backup = TodoDOMUtils.moveTodoToBoard(todoId);
+        const backup = TodoDOMUtils.moveTodoToBoard(todoId, createdAt);
         TodoDOMUtils.setLoadingState(todoId, true);
 
         try {

@@ -52,7 +52,7 @@ window.teamMembersData = {
     </div>
     <div class="todo-board" id="todo-board">
       {% for todo in todos_unassigned %}
-        <div class="todo-card draggable" data-todo-id="{{ todo.id }}" draggable="true">
+        <div class="todo-card draggable" data-todo-id="{{ todo.id }}" data-created-at="{{ todo.created_at|date:'c' }}" draggable="true">
           <div class="todo-content">{{ todo.content }}</div>
           <div class="todo-meta">
             <span class="todo-date">{{ todo.created_at|date:"m/d" }}</span>
@@ -113,7 +113,7 @@ window.teamMembersData = {
         
         <div class="todos-list">
           {% for todo in member_data.todos %}
-            <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" draggable="true">
+            <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" data-created-at="{{ todo.created_at|date:'c' }}" draggable="true">
                 <div class="todo-text">{{ todo.content }}</div>
                 <div class="todo-actions">
                   {% if todo.assignee.user == request.user or is_host %}

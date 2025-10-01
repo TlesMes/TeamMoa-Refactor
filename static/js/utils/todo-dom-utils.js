@@ -26,9 +26,17 @@ class TodoDOMUtils {
 
         // 미할당 TODO를 할당된 TODO로 변환
         if (clonedTodo.classList.contains('todo-card')) {
+            // 원본 생성일 보존 (data-created-at 속성)
+            const createdAt = todoElement.dataset.createdAt;
+
             // 클래스 순서를 정확히 맞추기 위해 className 전체 재설정
             clonedTodo.className = 'assigned-todo draggable';
             clonedTodo.setAttribute('draggable', 'true');
+
+            // data-created-at 속성 보존
+            if (createdAt) {
+                clonedTodo.dataset.createdAt = createdAt;
+            }
 
             // 텍스트 컨테이너 클래스 변경: .todo-content → .todo-text
             const contentElement = clonedTodo.querySelector('.todo-content');
@@ -108,9 +116,10 @@ class TodoDOMUtils {
     /**
      * TODO를 보드로 이동
      * @param {string} todoId - 이동할 TODO ID
+     * @param {string} createdAt - 원본 생성일 (ISO 형식)
      * @returns {Object} 백업 정보 (되돌리기용)
      */
-    static moveTodoToBoard(todoId) {
+    static moveTodoToBoard(todoId, createdAt) {
         const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
         const todoBoard = document.getElementById('todo-board');
 
@@ -152,11 +161,19 @@ class TodoDOMUtils {
             const todoMeta = document.createElement('div');
             todoMeta.className = 'todo-meta';
 
-            // 날짜 스팬 추가 (현재 날짜로)
+            // 날짜 스팬 추가 (원본 생성일 사용)
             const todoDate = document.createElement('span');
             todoDate.className = 'todo-date';
-            const now = new Date();
-            todoDate.textContent = `${now.getMonth() + 1}/${now.getDate()}`;
+
+            // createdAt을 "m/d" 형식으로 변환
+            if (createdAt) {
+                const date = new Date(createdAt);
+                todoDate.textContent = `${date.getMonth() + 1}/${date.getDate()}`;
+            } else {
+                // fallback: createdAt이 없으면 현재 날짜 사용
+                const now = new Date();
+                todoDate.textContent = `${now.getMonth() + 1}/${now.getDate()}`;
+            }
 
             // 삭제 버튼 추가 (template과 동일한 구조)
             const deleteBtn = document.createElement('button');
