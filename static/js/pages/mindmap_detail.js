@@ -501,13 +501,13 @@ class MindmapEditor {
     form.querySelector('#nodeContent').value = '';
     form.querySelector('#nodeParent').value = '';
 
-    // 모달 표시
-    modal.style.display = 'flex';
+    // 모달 표시 (공통 모달 CSS 사용)
+    modal.classList.add('active');
 
     // 첫 번째 입력 필드에 포커스 (애니메이션 후)
     setTimeout(() => {
       form.querySelector('#nodeTitle').focus();
-    }, 100);
+    }, 300);
   }
 
   // 렌더링 메서드
@@ -742,9 +742,9 @@ function initModalEvents() {
   const cancelBtn = document.getElementById('cancelBtn');
   const form = document.getElementById('nodeForm');
 
-  // 모달 닫기 함수
+  // 모달 닫기 함수 (공통 모달 CSS 사용)
   function closeModal() {
-    modal.style.display = 'none';
+    modal.classList.remove('active');
   }
 
   // 닫기 버튼 클릭
@@ -760,7 +760,7 @@ function initModalEvents() {
 
   // ESC 키로 모달 닫기
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && modal.style.display === 'flex') {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
       e.preventDefault();
       closeModal();
     }

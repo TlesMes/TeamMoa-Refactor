@@ -4,6 +4,7 @@
 {% block title %}{{ mindmap.title }} - 마인드맵{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/common/modal.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/common.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/mindmap_detail.css' %}" />
 {% endblock %}
@@ -49,38 +50,56 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3>새 노드 생성</h3>
-        <button type="button" class="modal-close" id="closeModal">&times;</button>
+        <button type="button" class="modal-close" id="closeModal">
+          <i class="ri-close-line"></i>
+        </button>
       </div>
-      <form
-        method="POST"
-        action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
-        class="node-form"
-        id="nodeForm"
-      >
-        {% csrf_token %}
-        <input type="hidden" name="posX" id="nodeX" />
-        <input type="hidden" name="posY" id="nodeY" />
+      <div class="modal-body">
+        <form
+          method="POST"
+          action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
+          id="nodeForm"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="posX" id="nodeX" />
+          <input type="hidden" name="posY" id="nodeY" />
 
-        <div class="form-group">
-          <label for="nodeTitle">제목 *</label>
-          <input type="text" id="nodeTitle" name="title" placeholder="노드 제목을 입력하세요" required />
-        </div>
+          <div class="form-group">
+            <label for="nodeTitle">제목 *</label>
+            <div class="input-wrapper">
+              <i class="ri-edit-line"></i>
+              <input type="text" id="nodeTitle" name="title" placeholder="노드 제목을 입력하세요" required />
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label for="nodeContent">내용</label>
-          <textarea id="nodeContent" name="content" placeholder="노드 내용을 입력하세요" rows="3"></textarea>
-        </div>
+          <div class="form-group">
+            <label for="nodeContent">내용</label>
+            <div class="textarea-wrapper">
+              <i class="ri-file-text-line"></i>
+              <textarea id="nodeContent" name="content" placeholder="노드 내용을 입력하세요" rows="3"></textarea>
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label for="nodeParent">연결할 부모 노드</label>
-          <input type="text" id="nodeParent" name="parent" placeholder="부모 노드 제목 (선택사항)" />
-        </div>
+          <div class="form-group">
+            <label for="nodeParent">연결할 부모 노드</label>
+            <div class="input-wrapper">
+              <i class="ri-link"></i>
+              <input type="text" id="nodeParent" name="parent" placeholder="부모 노드 제목 (선택사항)" />
+            </div>
+          </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
-          <button type="submit" class="btn-primary">노드 생성</button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              <i class="ri-add-line"></i>
+              노드 생성
+            </button>
+            <button type="button" class="btn-cancel" id="cancelBtn">
+              <i class="ri-close-line"></i>
+              취소
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </section>
