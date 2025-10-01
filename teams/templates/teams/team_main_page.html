@@ -85,8 +85,8 @@
           <i class="ri-calendar-todo-line"></i>
           <p>아직 등록된 마일스톤이 없습니다</p>
           {% if request.user == team.host %}
-          <a href="{% url 'teams:team_add_milestone' team.id %}" class="add-milestone-link">
-            첫 번째 마일스톤 추가하기
+          <a href="{% url 'teams:team_milestone_timeline' team.id %}" class="add-milestone-link">
+            타임라인에서 마일스톤 추가하기
           </a>
           {% endif %}
         </div>
@@ -118,9 +118,6 @@
       </div>
       <div class="editdiv">
         {% if request.user == team.host %}
-        <a href="{% url 'teams:team_add_milestone' team.id %}">
-          <button class="plusbtn">개발 단계 추가</button>
-        </a>
         <a href="{% url 'teams:team_info_change' team.id %}">
           <button class="plusbtn2">팀 정보 수정</button>
         </a>

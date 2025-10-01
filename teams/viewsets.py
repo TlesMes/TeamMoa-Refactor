@@ -42,12 +42,13 @@ class MilestoneViewSet(viewsets.ModelViewSet):
         return MilestoneSerializer
 
     def list(self, request, *args, **kwargs):
-        """마일스톤 목록 조회 (정렬 기본: 시작일)"""
+        """마일스톤 목록 조회 (정렬: 시작일 → 종료일 → 우선순위)"""
         team = self.get_team()
 
         # 서비스 레이어를 통한 조회 (정렬 포함)
+        # 같은 시작일/종료일이면 우선순위 높은 순
         milestones = self.milestone_service.get_team_milestones(
-            team, order_by=['startdate', 'enddate']
+            team, order_by=['startdate', 'enddate', 'priority']
         )
 
         serializer = self.get_serializer(milestones, many=True)
@@ -71,7 +72,11 @@ class MilestoneViewSet(viewsets.ModelViewSet):
 
             # 생성된 마일스톤을 MilestoneSerializer로 직렬화하여 반환
             response_serializer = MilestoneSerializer(milestone)
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            return Response({
+                'success': True,
+                'message': f'"{milestone.title}" 마일스톤이 생성되었습니다.',
+                'milestone': response_serializer.data
+            }, status=status.HTTP_201_CREATED)
 
         except ValueError as e:
             raise serializers.ValidationError({'detail': str(e)})

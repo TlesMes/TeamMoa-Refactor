@@ -5,7 +5,7 @@
 <section class="page-section">
   <div class="content-card">
     <div class="card-header">
-      <a href="{% url 'teams:team_main_page' team.id %}" class="back-btn">
+      <a href="{% url 'teams:team_milestone_timeline' team.id %}" class="back-btn">
         <i class="ri-arrow-left-line"></i>
       </a>
       <h2>마일스톤 추가</h2>
@@ -142,7 +142,7 @@
           <i class="ri-add-line"></i>
           마일스톤 추가
         </button>
-        <a href="{% url 'teams:team_main_page' team.id %}" class="cancel-btn">
+        <a href="{% url 'teams:team_milestone_timeline' team.id %}" class="cancel-btn">
           <i class="ri-close-line"></i>
           취소
         </a>

@@ -266,7 +266,7 @@ class TeamAddMilestoneView(TeamHostRequiredMixin, FormView):
         self.milestone_service = MilestoneService()
     
     def get_success_url(self):
-        return reverse('teams:team_main_page', kwargs={'pk': self.kwargs['pk']})
+        return reverse('teams:team_milestone_timeline', kwargs={'pk': self.kwargs['pk']})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -336,11 +336,11 @@ class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        
+
         context.update({
             'team': team,
             'milestones': self.milestone_service.get_team_milestones(
-                team, order_by=['startdate', 'enddate']
+                team, order_by=['startdate', 'enddate', 'priority']  # ← 우선순위 추가
             ),
         })
         return context

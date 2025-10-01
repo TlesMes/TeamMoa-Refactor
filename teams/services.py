@@ -358,13 +358,35 @@ class MilestoneService:
     
     def get_team_milestones(self, team, order_by=None):
         """팀의 마일스톤 목록을 반환합니다."""
-        queryset = Milestone.objects.filter(team=team)
-        
+        from django.db.models import Case, When, IntegerField
+
+        # 우선순위를 숫자로 변환 (critical=1, minimal=5)
+        queryset = Milestone.objects.filter(team=team).annotate(
+            priority_order=Case(
+                When(priority='critical', then=1),
+                When(priority='high', then=2),
+                When(priority='medium', then=3),
+                When(priority='low', then=4),
+                When(priority='minimal', then=5),
+                default=6,
+                output_field=IntegerField(),
+            )
+        )
+
         if order_by:
-            queryset = queryset.order_by(*order_by)
+            # order_by에 'priority' 포함 시 priority_order로 치환
+            processed_order = []
+            for field in order_by:
+                if field == 'priority':
+                    processed_order.append('priority_order')
+                elif field == '-priority':
+                    processed_order.append('-priority_order')
+                else:
+                    processed_order.append(field)
+            queryset = queryset.order_by(*processed_order)
         else:
-            queryset = queryset.order_by('priority', 'enddate')
-            
+            queryset = queryset.order_by('priority_order', 'enddate')
+
         return queryset
     
     def _validate_milestone_dates(self, startdate, enddate):
