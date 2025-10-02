@@ -1,23 +1,127 @@
-{% extends 'base_minimal.html' %} 
-{% load static %} 
+{% extends 'base_app.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/mindmaps/common.css' %}">
+<style>
+.mindmap-create-form {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-header h2 {
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 1rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.field-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.submit-btn, .cancel-btn {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 8px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submit-btn {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.cancel-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.cancel-btn:hover {
+  background: var(--border-color);
+}
+</style>
+{% endblock %}
 
 {% block contents %}
-<section class="auth-section">
-  <div class="auth-card">
-    <div class="auth-header">
-      <h2>새 마인드맵 만들기</h2>
+<section class="mindmapsection">
+  <div class="mindmap-header">
+    <h1>새 마인드맵 만들기</h1>
+  </div>
+
+  <div class="mindmap-create-form">
+    <div class="form-header">
+      <h2>마인드맵 생성</h2>
       <p>팀의 아이디어를 시각적으로 구조화하세요</p>
     </div>
-    
-    <form method="POST" action="{% url 'mindmaps:mindmap_create' team.id %}" class="auth-form">
+
+    <form method="POST" action="{% url 'mindmaps:mindmap_create' team.id %}">
       {% csrf_token %}
-      
+
       <div class="form-group">
         <label for="id_title">마인드맵 제목</label>
-        <div class="input-wrapper">
-          <i class="ri-mind-map"></i>
-          {{ form.title }}
-        </div>
+        {{ form.title }}
         {% if form.title.errors %}
           <div class="field-error">
             {% for error in form.title.errors %}
@@ -27,20 +131,17 @@
         {% endif %}
       </div>
 
-      <button type="submit" class="auth-btn">
-        <i class="ri-add-circle-line"></i>
-        마인드맵 생성하기
-      </button>
-    </form>
-    
-    <div class="auth-links">
-      <p>
-        <a href="javascript:history.back();">
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" onclick="history.back();">
           <i class="ri-arrow-left-line"></i>
-          이전 페이지로 돌아가기
-        </a>
-      </p>
-    </div>
+          취소
+        </button>
+        <button type="submit" class="submit-btn">
+          <i class="ri-add-circle-line"></i>
+          마인드맵 생성하기
+        </button>
+      </div>
+    </form>
   </div>
 </section>
 {% endblock %}

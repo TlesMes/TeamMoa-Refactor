@@ -13,8 +13,7 @@ urlpatterns = [
     # 기존 team_join/<int:pk>/ URL 제거됨 - 보안상 이유로
     path('team_info_change/<int:pk>/', views.team_info_change, name='team_info_change'),
     path('team_main_page/<int:pk>/', views.team_main_page, name='team_main_page'),
-    path('team_add_milestone/<int:pk>/', views.team_add_milestone, name='team_add_milestone'),
     path('team_milestone_timeline/<int:pk>/', views.team_milestone_timeline, name='team_milestone_timeline'),
-    # 마일스톤 업데이트/삭제는 REST API로 이동됨 (/api/v1/teams/<team_pk>/milestones/<pk>/)
+    # 마일스톤 생성/업데이트/삭제는 REST API로 이동됨 (/api/v1/teams/<team_pk>/milestones/)
     path('team_disband/<int:pk>/', views.team_disband, name='team_disband')
 ]
