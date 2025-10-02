@@ -73,35 +73,60 @@ document.addEventListener('DOMContentLoaded', function() {
         card.classList.add('dragging');
 
         // Add visual feedback based on source and permissions
+        const isDoneBoard = card.closest('#done-board');
+        const isTodoBoard = card.closest('#todo-board');
+
         if (card.classList.contains('todo-card')) {
-                // From todo board - highlight only allowed member drop zones
+            // From todo board or done board
+            if (isTodoBoard) {
+                // TODO 보드에서 시작 - 멤버와 DONE 보드 하이라이트
                 memberCards.forEach(member => {
                     const memberId = member.dataset.memberId;
                     if (canAssignToMember(memberId)) {
-                        member.classList.add('drag-over');
+                        member.classList.add('drop-zone-active');
                     }
                 });
-        } else if (card.classList.contains('assigned-todo')) {
-                // From assigned todos - highlight allowed destinations only
 
-            // 할 일 보드로 되돌리기는 본인 할일이거나 팀장만 가능
+                const doneBoard = document.getElementById('done-board');
+                if (doneBoard) {
+                    doneBoard.classList.add('drop-zone-active');
+                }
+            } else if (isDoneBoard) {
+                // DONE 보드에서 시작 - 멤버와 TODO 보드 하이라이트 (DONE 제외)
+                memberCards.forEach(member => {
+                    const memberId = member.dataset.memberId;
+                    if (canAssignToMember(memberId)) {
+                        member.classList.add('drop-zone-active');
+                    }
+                });
+
+                todoBoard.classList.add('drop-zone-active');
+            }
+        } else if (card.classList.contains('assigned-todo')) {
+            // From assigned todos - highlight allowed destinations only
             const currentMemberCard = card.closest('.member-card');
             const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
 
+            // TODO 보드 하이라이트 (권한 있는 경우)
             if (isHost || (currentMemberId && memberPermissions[currentMemberId] && memberPermissions[currentMemberId].isCurrentUser)) {
-                todoBoard.classList.add('drag-over');
+                todoBoard.classList.add('drop-zone-active');
             }
 
-            // 다른 멤버에게 재할당 - 권한에 따라
+            // 다른 멤버에게 재할당 - 권한에 따라 (현재 멤버 제외)
             memberCards.forEach(member => {
-                // 현재 멤버 카드는 제외
                 if (member !== currentMemberCard) {
                     const memberId = member.dataset.memberId;
                     if (canAssignToMember(memberId)) {
-                        member.classList.add('drag-over');
+                        member.classList.add('drop-zone-active');
                     }
                 }
             });
+
+            // DONE 보드도 하이라이트
+            const doneBoardDrop = document.getElementById('done-board');
+            if (doneBoardDrop) {
+                doneBoardDrop.classList.add('drop-zone-active');
+            }
         }
     });
 
@@ -160,10 +185,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Drop zone - Todo Board (for returning assigned todos)
+    // Drop zone - Todo Board (for returning assigned todos and done todos)
     todoBoard.addEventListener('dragover', function(e) {
-        // 권한이 있는 경우만 드롭 허용
-        if (draggedTodo && draggedTodo.classList.contains('assigned-todo')) {
+        if (!draggedTodo) return;
+
+        // TODO 보드에서 시작한 경우 - 드롭 불가
+        const isTodoBoard = draggedTodo.closest('#todo-board');
+        if (isTodoBoard) {
+            return;
+        }
+
+        // assigned-todo (멤버에서 온 것) - 권한 체크
+        if (draggedTodo.classList.contains('assigned-todo')) {
             const currentMemberCard = draggedTodo.closest('.member-card');
             const currentMemberId = currentMemberCard ? currentMemberCard.dataset.memberId : null;
 
@@ -171,18 +204,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
             }
         }
+        // DONE 보드에서 온 todo-card - 항상 허용
+        else if (draggedTodo.classList.contains('todo-card') && draggedTodo.closest('#done-board')) {
+            e.preventDefault();
+        }
     });
 
     todoBoard.addEventListener('drop', function(e) {
         e.preventDefault();
 
         if (draggedTodo) {
-            // Check if already on todo board (avoid unnecessary Ajax)
-            if (draggedTodo.classList.contains('todo-card')) {
-                return; // Don't send Ajax request
+            const todoId = draggedTodo.dataset.todoId;
+            const isDoneBoard = draggedTodo.closest('#done-board');
+            const isTodoBoard = draggedTodo.closest('#todo-board');
+
+            // DONE 보드에서 온 TODO
+            if (isDoneBoard) {
+                draggedTodo.classList.remove('dragging');
+                draggedTodo.dataset.isCompleted = 'false'; // TODO 보드는 미완료
+                returnTodoToBoard(todoId);
+                clearAllHighlighting();
+                return;
             }
 
-            // Only process assigned todos being returned to board
+            // TODO 보드 내부 이동은 무시
+            if (isTodoBoard && draggedTodo.classList.contains('todo-card')) {
+                return;
+            }
+
+            // 멤버에서 온 assigned-todo
             if (draggedTodo.classList.contains('assigned-todo')) {
                 // 권한 체크
                 const currentMemberCard = draggedTodo.closest('.member-card');
@@ -192,12 +242,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                const todoId = draggedTodo.dataset.todoId;
-
                 // 드래그 상태 즉시 정리
-                if (draggedTodo) {
-                    draggedTodo.classList.remove('dragging');
-                }
+                draggedTodo.classList.remove('dragging');
+
+                // TODO 보드에 드롭 → is_completed를 false로 강제 설정
+                draggedTodo.dataset.isCompleted = 'false';
 
                 // 드래그앤드롭도 동일한 DOM 조작 + API 호출
                 returnTodoToBoard(todoId);
@@ -250,17 +299,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearAllHighlighting() {
         // 멤버 카드 하이라이팅 제거
         memberCards.forEach(member => {
-            member.classList.remove('drag-over');
+            member.classList.remove('drop-zone-active');
         });
 
         // 할일 리스트 하이라이팅 제거
         todosLists.forEach(list => {
-            list.classList.remove('drag-over');
+            list.classList.remove('drop-zone-active');
         });
 
-        // 보드 하이라이팅 제거
-        todoBoard.classList.remove('drag-over');
+        // TODO 보드 하이라이팅 제거
+        todoBoard.classList.remove('drop-zone-active');
 
+        // DONE 보드 하이라이팅 제거
+        const doneBoard = document.getElementById('done-board');
+        if (doneBoard) {
+            doneBoard.classList.remove('drop-zone-active');
+        }
     }
 
     // API Functions
@@ -340,16 +394,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const memberCard = todoElement?.closest('.member-card');
         const memberId = memberCard?.dataset.memberId;
 
+        // is_completed 상태 확인
+        const isCompleted = todoElement?.dataset.isCompleted === 'true';
+
         // 원본 생성일 가져오기 (data-created-at 속성에서)
         const createdAt = todoElement?.dataset.createdAt;
 
         // 1. 즉시 DOM 업데이트 (Optimistic UI)
-        const backup = TodoDOMUtils.moveTodoToBoard(todoId, createdAt);
+        let backup;
+        if (isCompleted) {
+            // Done Board로 이동
+            backup = TodoDOMUtils.moveTodoToDoneBoard(todoId, createdAt);
+        } else {
+            // Todo Board로 이동
+            backup = TodoDOMUtils.moveTodoToBoard(todoId, createdAt);
+        }
         TodoDOMUtils.setLoadingState(todoId, true);
 
         try {
-            // 2. API 호출
-            const response = await todoApi.returnTodoToBoard(teamId, todoId);
+            // 2. API 호출 - is_completed에 따라 다른 엔드포인트 호출
+            let response;
+            if (isCompleted) {
+                response = await todoApi.moveTodoToDoneBoard(teamId, todoId);
+            } else {
+                response = await todoApi.moveTodoToTodoBoard(teamId, todoId);
+            }
             handleApiResponse(response);
 
             // 3. 성공 시 카운터 업데이트 (서버에서 이미 메시지 제공)
@@ -393,6 +462,91 @@ document.addEventListener('DOMContentLoaded', function() {
                 handleApiError(error);
             }
         });
+    }
+
+    // ==================== DONE BOARD 기능 ====================
+
+    // DONE 보드를 드롭존으로 추가
+    const doneBoard = document.getElementById('done-board');
+
+    if (doneBoard) {
+        doneBoard.addEventListener('dragover', function(e) {
+            if (!draggedTodo) return;
+
+            // DONE 보드에서 시작한 경우 - 드롭 불가
+            const isDoneBoard = draggedTodo.closest('#done-board');
+            if (isDoneBoard) {
+                return;
+            }
+
+            e.preventDefault();
+            doneBoard.classList.add('drop-zone-active');
+        });
+
+        doneBoard.addEventListener('dragleave', function(e) {
+            if (e.target === doneBoard) {
+                doneBoard.classList.remove('drop-zone-active');
+            }
+        });
+
+        doneBoard.addEventListener('drop', async function(e) {
+            e.preventDefault();
+
+            if (draggedTodo) {
+                handleDoneBoardDrop(draggedTodo);
+            }
+
+            // 드롭 완료 후 모든 하이라이팅 제거
+            clearAllHighlighting();
+        });
+    }
+
+    // Done 보드 드롭 처리 함수
+    function handleDoneBoardDrop(draggedElement) {
+        const todoId = draggedElement.dataset.todoId;
+        const createdAt = draggedElement.dataset.createdAt;
+
+        // 권한 체크
+        if (!canMoveTodo(draggedElement)) {
+            showDjangoToast('권한이 없습니다', 'error');
+            draggedElement.classList.remove('dragging');
+            draggedTodo = null;
+            return;
+        }
+
+        // 드래그 상태 정리
+        draggedElement.classList.remove('dragging');
+        draggedTodo = null;
+
+        // Done Board로 이동 (moveTodoToDoneBoard에서 데이터 속성 업데이트)
+        moveTodoToDoneBoard(todoId, createdAt);
+    }
+
+    // Done Board로 TODO 이동
+    async function moveTodoToDoneBoard(todoId, createdAt) {
+        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+        const memberCard = todoElement?.closest('.member-card');
+        const memberId = memberCard?.dataset.memberId;
+
+        // 1. 즉시 DOM 업데이트 (Optimistic UI)
+        const backup = TodoDOMUtils.moveTodoToDoneBoard(todoId, createdAt);
+        TodoDOMUtils.setLoadingState(todoId, true);
+
+        try {
+            // 2. API 호출
+            const response = await todoApi.moveTodoToDoneBoard(teamId, todoId);
+            handleApiResponse(response);
+
+            // 3. 성공 시 로딩 상태 해제 (카운터는 이미 DOM 유틸에서 업데이트됨)
+            TodoDOMUtils.setLoadingState(todoId, false);
+        } catch (error) {
+            // 4. 실패 시 되돌리기
+            TodoDOMUtils.revertTodoMovement(backup);
+            TodoDOMUtils.setLoadingState(todoId, false);
+            TodoDOMUtils.showError(todoId, 'DONE 보드로 이동에 실패했습니다');
+
+            handleApiError(error);
+        }
     }
 
 });

@@ -182,17 +182,21 @@ class TodoApiClient {
     }
 
     /**
-     * TODO 이동 (상태/순서 변경)
+     * TODO를 TODO 보드로 이동
      */
-    async moveTodo(teamId, todoId, newStatus, newOrder = 0) {
-        return this.api.post(`/teams/${teamId}/todos/${todoId}/move/`, {
-            new_status: newStatus,
-            new_order: newOrder
-        });
+    async moveTodoToTodoBoard(teamId, todoId) {
+        return this.api.post(`/teams/${teamId}/todos/${todoId}/move-to-todo/`, {});
     }
 
     /**
-     * TODO 할당
+     * TODO를 DONE 보드로 이동
+     */
+    async moveTodoToDoneBoard(teamId, todoId) {
+        return this.api.post(`/teams/${teamId}/todos/${todoId}/move-to-done/`, {});
+    }
+
+    /**
+     * TODO 할당 (Member 보드로 이동)
      */
     async assignTodo(teamId, todoId, memberId) {
         return this.api.post(`/teams/${teamId}/todos/${todoId}/assign/`, {
@@ -205,13 +209,6 @@ class TodoApiClient {
      */
     async completeTodo(teamId, todoId) {
         return this.api.post(`/teams/${teamId}/todos/${todoId}/complete/`, {});
-    }
-
-    /**
-     * TODO 보드로 되돌리기
-     */
-    async returnTodoToBoard(teamId, todoId) {
-        return this.api.post(`/teams/${teamId}/todos/${todoId}/return_to_board/`, {});
     }
 
     /**
@@ -270,10 +267,23 @@ window.handleApiResponse = function(response, successCallback = null) {
 };
 
 /**
- * API 에러를 토스트로 표시하는 헬퍼 함수
+ * API 에러를 콘솔과 토스트로 표시하는 헬퍼 함수
  */
 window.handleApiError = function(error, errorCallback = null) {
-    console.error('API Error:', error);
+    // 콘솔에 상세 에러 정보 출력
+    console.group('🔴 API Error Details');
+    console.error('Error Object:', error);
+
+    if (error instanceof ApiError) {
+        console.error('Status:', error.status);
+        console.error('Message:', error.message);
+        console.error('Data:', error.data);
+        console.error('URL:', error.url);
+    } else {
+        console.error('Non-API Error:', error.message || error);
+        console.error('Stack:', error.stack);
+    }
+    console.groupEnd();
 
     // 에러 메시지 Django 토스트로 표시
     if (error instanceof ApiError) {

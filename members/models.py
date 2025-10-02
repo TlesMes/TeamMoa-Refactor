@@ -3,14 +3,8 @@ from django.db import models
 # Create your models here.
 
 class Todo(models.Model):
-    STATUS_CHOICES = [
-        ('todo', 'To Do'),
-        ('in_progress', 'In Progress'),
-        ('done', 'Done')
-    ]
-    
     content = models.TextField(default="", null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
+    is_completed = models.BooleanField(default=False)
     assignee = models.ForeignKey('teams.TeamUser', on_delete=models.CASCADE, null=True, blank=True, related_name='todo_set')
     team = models.ForeignKey('teams.Team', on_delete=models.CASCADE, default=1)
     order = models.PositiveIntegerField(default=0)

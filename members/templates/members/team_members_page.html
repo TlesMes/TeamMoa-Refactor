@@ -43,21 +43,26 @@ window.teamMembersData = {
   </div>
 
   {% if request.user.is_authenticated %}
-  
+
   <!-- Todo Board Section -->
   <div class="todo-board-section">
     <div class="section-header">
       <h2 class="section-title">📋 할 일 목록</h2>
       <span class="todo-count">{{ todos_unassigned.count }}개</span>
     </div>
-    <div class="todo-board" id="todo-board">
+    <div class="todo-board drop-zone" id="todo-board" data-board-type="todo">
       {% for todo in todos_unassigned %}
-        <div class="todo-card draggable" data-todo-id="{{ todo.id }}" data-created-at="{{ todo.created_at|date:'c' }}" draggable="true">
+        <div class="todo-card draggable"
+             data-todo-id="{{ todo.id }}"
+             data-is-completed="{{ todo.is_completed|yesno:'true,false' }}"
+             data-assignee-id="{{ todo.assignee.id|default:'null' }}"
+             data-created-at="{{ todo.created_at|date:'c' }}"
+             draggable="true">
           <div class="todo-content">{{ todo.content }}</div>
           <div class="todo-meta">
             <span class="todo-date">{{ todo.created_at|date:"m/d" }}</span>
-            {% if is_host or request.user == todo.owner %}
-            <button class="todo-delete-btn">
+            {% if is_host %}
+            <button class="todo-delete-btn" data-todo-id="{{ todo.id }}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
               </svg>
@@ -87,7 +92,7 @@ window.teamMembersData = {
   <!-- Members Grid -->
   <div class="members-grid">
     {% for member_data in members_data %}
-    <div class="member-card drop-zone" data-member-id="{{ member_data.member.id }}">
+    <div class="member-card drop-zone" data-member-id="{{ member_data.member.id }}" data-board-type="member">
       <!-- Member Info -->
       <div class="member-info">
         <div class="member-avatar">
@@ -110,31 +115,34 @@ window.teamMembersData = {
             {{ member_data.todo_count }}개
           </span>
         </div>
-        
+
         <div class="todos-list">
           {% for todo in member_data.todos %}
-            <div class="assigned-todo draggable {% if todo.status == 'done' %}completed{% endif %}" data-todo-id="{{ todo.id }}" data-created-at="{{ todo.created_at|date:'c' }}" draggable="true">
+            <div class="assigned-todo draggable {% if todo.is_completed %}completed{% endif %}"
+                 data-todo-id="{{ todo.id }}"
+                 data-is-completed="{{ todo.is_completed|yesno:'true,false' }}"
+                 data-assignee-id="{{ todo.assignee.id }}"
+                 data-created-at="{{ todo.created_at|date:'c' }}"
+                 draggable="true">
                 <div class="todo-text">{{ todo.content }}</div>
                 <div class="todo-actions">
                   {% if todo.assignee.user == request.user or is_host %}
                     <!-- Complete/Uncomplete Checkbox -->
                     <label class="checkbox-label">
-                      <input type="checkbox" 
-                             class="complete-checkbox" 
+                      <input type="checkbox"
+                             class="complete-checkbox"
                              data-todo-id="{{ todo.id }}"
-                             {% if todo.status == 'done' %}checked{% endif %}>
+                             {% if todo.is_completed %}checked{% endif %}>
                       <span class="checkmark"></span>
                     </label>
-                    
-                    <!-- Return to Todo Board (팀장 또는 본인만) -->
-                    {% if is_host or todo.assignee.user == request.user %}
-                    <button class="return-btn" title="할 일 보드로 되돌리기">
+
+                    <!-- Return to Board Button -->
+                    <button class="return-btn" data-todo-id="{{ todo.id }}" title="보드로 되돌리기">
                       ↶
                     </button>
-                    {% endif %}
 
                     <!-- Delete Button -->
-                    <button class="delete-btn" title="삭제">
+                    <button class="delete-btn" data-todo-id="{{ todo.id }}" title="삭제">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
                       </svg>
@@ -143,16 +151,48 @@ window.teamMembersData = {
                 </div>
             </div>
           {% endfor %}
-          
+
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
 
+  <!-- DONE Board Section (최하단 추가) -->
+  <div class="done-board-section">
+    <div class="section-header">
+      <h2 class="section-title">✅ 완료된 할 일</h2>
+      <span class="todo-count">{{ todos_done.count }}개</span>
+    </div>
+    <div class="todo-board drop-zone" id="done-board" data-board-type="done">
+      {% for todo in todos_done %}
+        <div class="todo-card draggable completed"
+             data-todo-id="{{ todo.id }}"
+             data-is-completed="true"
+             data-assignee-id="null"
+             data-created-at="{{ todo.created_at|date:'c' }}"
+             draggable="true">
+          <div class="todo-content">{{ todo.content }}</div>
+          <div class="todo-meta">
+            <span class="todo-date">완료: {{ todo.completed_at|date:"m/d" }}</span>
+            {% if is_host %}
+            <button class="todo-delete-btn" data-todo-id="{{ todo.id }}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+              </svg>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-todos">
+          <p>완료된 할 일이 없습니다</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
   {% endif %}
 </section>
-
-
 
 {% endblock %}

@@ -35,18 +35,18 @@ urlpatterns = [
     }), name='team-todos-detail'),
 
     # TODO 액션 엔드포인트
-    path('v1/teams/<int:team_pk>/todos/<int:pk>/move/', TodoViewSet.as_view({
-        'post': 'move'
-    }), name='team-todos-move'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/move-to-todo/', TodoViewSet.as_view({
+        'post': 'move_to_todo'
+    }), name='team-todos-move-to-todo'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/move-to-done/', TodoViewSet.as_view({
+        'post': 'move_to_done'
+    }), name='team-todos-move-to-done'),
     path('v1/teams/<int:team_pk>/todos/<int:pk>/assign/', TodoViewSet.as_view({
         'post': 'assign'
     }), name='team-todos-assign'),
     path('v1/teams/<int:team_pk>/todos/<int:pk>/complete/', TodoViewSet.as_view({
         'post': 'complete'
     }), name='team-todos-complete'),
-    path('v1/teams/<int:team_pk>/todos/<int:pk>/return_to_board/', TodoViewSet.as_view({
-        'post': 'return_to_board'
-    }), name='team-todos-return'),
 
     # 팀 멤버 엔드포인트
     path('v1/teams/<int:team_pk>/members/', TeamMemberViewSet.as_view({

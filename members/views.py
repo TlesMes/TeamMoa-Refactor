@@ -37,7 +37,8 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
         context.update({
             'team': team,
             'members': todo_data['members'],
-            'todos_unassigned': todo_data['todos_unassigned'], 
+            'todos_unassigned': todo_data['todos_unassigned'],
+            'todos_done': todo_data['todos_done'],
             'members_data': todo_data['members_data'],
             'form': form,
             'is_host': is_host

@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404
 
 from .models import Todo
 from .serializers import (
-    TodoSerializer, TodoCreateSerializer, TodoMoveSerializer,
-    TodoAssignSerializer, TodoCompleteSerializer, TodoReturnSerializer,
+    TodoSerializer, TodoCreateSerializer,
+    TodoAssignSerializer, TodoCompleteSerializer,
     TeamMemberSerializer
 )
 from .services import TodoService
@@ -60,31 +60,47 @@ class TodoViewSet(viewsets.ModelViewSet):
         todo_serializer = TodoSerializer(serializer.instance)
         return Response(todo_serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['post'])
-    def move(self, request, team_pk=None, pk=None):
-        """TODO 상태/순서 이동"""
+    @action(detail=True, methods=['post'], url_path='move-to-todo')
+    def move_to_todo(self, request, team_pk=None, pk=None):
+        """TODO 보드로 이동"""
         todo = self.get_object()
         team = self.get_team()
 
-        serializer = TodoMoveSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
         try:
-            updated_todo = self.todo_service.move_todo(
+            updated_todo = self.todo_service.move_to_todo(
                 todo_id=todo.id,
-                new_status=serializer.validated_data['new_status'],
                 team=team,
-                requester=request.user,
-                new_order=serializer.validated_data['new_order']
-            )
-
-            status_display = self.todo_service.get_status_display(
-                serializer.validated_data['new_status']
+                requester=request.user
             )
 
             return Response({
                 'success': True,
-                'message': f'할 일이 {status_display}(으)로 이동되었습니다.',
+                'message': '할 일이 TODO 보드로 이동되었습니다.',
+                'todo': TodoSerializer(updated_todo).data
+            })
+
+        except ValueError as e:
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], url_path='move-to-done')
+    def move_to_done(self, request, team_pk=None, pk=None):
+        """DONE 보드로 이동"""
+        todo = self.get_object()
+        team = self.get_team()
+
+        try:
+            updated_todo = self.todo_service.move_to_done(
+                todo_id=todo.id,
+                team=team,
+                requester=request.user
+            )
+
+            return Response({
+                'success': True,
+                'message': '할 일이 DONE 보드로 이동되었습니다.',
                 'todo': TodoSerializer(updated_todo).data
             })
 
@@ -137,48 +153,18 @@ class TodoViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            updated_todo, new_status = self.todo_service.complete_todo(
+            updated_todo, is_completed = self.todo_service.complete_todo(
                 todo_id=todo.id,
                 team=team,
                 requester=request.user
             )
 
-            status_message = '완료되었습니다.' if new_status == 'done' else '미완료로 변경되었습니다.'
+            status_message = '완료되었습니다.' if is_completed else '미완료로 변경되었습니다.'
 
             return Response({
                 'success': True,
                 'message': status_message,
-                'new_status': new_status,
-                'todo': TodoSerializer(updated_todo).data
-            })
-
-        except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['post'])
-    def return_to_board(self, request, team_pk=None, pk=None):
-        """TODO 보드로 되돌리기"""
-        todo = self.get_object()
-        team = self.get_team()
-
-        serializer = TodoReturnSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            updated_todo = self.todo_service.return_to_board(
-                todo_id=todo.id,
-                team=team,
-                requester=request.user
-            )
-
-            message = '할일이 보드로 되돌려졌습니다.'
-
-            return Response({
-                'success': True,
-                'message': message,
+                'is_completed': is_completed,
                 'todo': TodoSerializer(updated_todo).data
             })
 

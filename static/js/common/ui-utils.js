@@ -348,6 +348,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 모달 닫기 함수
         function closeModal() {
+            // 이벤트 리스너 제거
+            document.removeEventListener('keydown', handleKeyDown);
+
             modalBackdrop.style.opacity = '0';
             modal.style.transform = 'scale(0.9)';
             setTimeout(() => {
@@ -374,14 +377,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // ESC 키로 닫기
-        const handleEscKey = (e) => {
+        // 키보드 이벤트 처리
+        const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
                 closeModal();
-                document.removeEventListener('keydown', handleEscKey);
+                document.removeEventListener('keydown', handleKeyDown);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                closeModal();
+                document.removeEventListener('keydown', handleKeyDown);
+                if (onConfirm) onConfirm();
             }
         };
-        document.addEventListener('keydown', handleEscKey);
+        document.addEventListener('keydown', handleKeyDown);
         
         // 버튼 호버 효과
         cancelBtn.addEventListener('mouseenter', () => {

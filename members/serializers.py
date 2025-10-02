@@ -9,13 +9,13 @@ User = get_user_model()
 class TodoSerializer(serializers.ModelSerializer):
     """기본 TODO 직렬화"""
     assignee_name = serializers.SerializerMethodField()
-    status_display = serializers.SerializerMethodField()
+    assignee_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Todo
-        fields = ['id', 'content', 'status', 'status_display', 'assignee',
+        fields = ['id', 'content', 'is_completed', 'assignee', 'assignee_id',
                  'assignee_name', 'order', 'created_at', 'completed_at']
-        read_only_fields = ['id', 'created_at', 'completed_at', 'assignee_name', 'status_display']
+        read_only_fields = ['id', 'created_at', 'completed_at', 'assignee_name', 'assignee_id']
 
     def get_assignee_name(self, obj):
         """할당자 이름 반환"""
@@ -23,14 +23,9 @@ class TodoSerializer(serializers.ModelSerializer):
             return obj.assignee.user.nickname or obj.assignee.user.username
         return None
 
-    def get_status_display(self, obj):
-        """상태 표시명 반환"""
-        status_map = {
-            'todo': 'To Do',
-            'in_progress': 'In Progress',
-            'done': 'Done'
-        }
-        return status_map.get(obj.status, obj.status)
+    def get_assignee_id(self, obj):
+        """할당자 ID 반환"""
+        return obj.assignee.id if obj.assignee else None
 
 
 class TodoCreateSerializer(serializers.ModelSerializer):
@@ -51,17 +46,26 @@ class TodoCreateSerializer(serializers.ModelSerializer):
         return value.strip()
 
 
-class TodoMoveSerializer(serializers.Serializer):
-    """TODO 이동 액션용 직렬화"""
-    new_status = serializers.ChoiceField(choices=Todo.STATUS_CHOICES)
+class TodoDragMoveSerializer(serializers.Serializer):
+    """TODO 드래그 이동용 직렬화"""
+    target_board = serializers.ChoiceField(choices=['todo', 'done', 'member'])
+    target_member_id = serializers.IntegerField(required=False, allow_null=True)
     new_order = serializers.IntegerField(min_value=0, default=0)
 
-    def validate_new_status(self, value):
-        """유효한 상태인지 검증"""
-        valid_statuses = [choice[0] for choice in Todo.STATUS_CHOICES]
-        if value not in valid_statuses:
-            raise serializers.ValidationError('유효하지 않은 상태입니다.')
-        return value
+    def validate(self, data):
+        """멤버 보드로 이동 시 target_member_id 필수"""
+        if data['target_board'] == 'member' and not data.get('target_member_id'):
+            raise serializers.ValidationError('멤버 보드로 이동 시 멤버 ID가 필요합니다.')
+
+        # 멤버 유효성 검증
+        if data.get('target_member_id'):
+            team = self.context.get('team')
+            try:
+                TeamUser.objects.get(id=data['target_member_id'], team=team)
+            except TeamUser.DoesNotExist:
+                raise serializers.ValidationError('유효하지 않은 팀 멤버입니다.')
+
+        return data
 
 
 class TodoAssignSerializer(serializers.Serializer):

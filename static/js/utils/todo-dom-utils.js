@@ -4,6 +4,17 @@
  */
 class TodoDOMUtils {
     /**
+     * 날짜를 "m/d" 또는 "mm/dd" 형식으로 변환 (Django 템플릿과 동일하게 0 패딩)
+     * @param {Date|string} date - 변환할 날짜
+     * @returns {string} 형식화된 날짜 문자열
+     */
+    static formatDate(date) {
+        const d = date instanceof Date ? date : new Date(date);
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${month}/${day}`;
+    }
+    /**
      * TODO를 멤버 카드로 이동
      * @param {string} todoId - 이동할 TODO ID
      * @param {string} memberId - 대상 멤버 ID
@@ -28,10 +39,20 @@ class TodoDOMUtils {
         if (clonedTodo.classList.contains('todo-card')) {
             // 원본 생성일 보존 (data-created-at 속성)
             const createdAt = todoElement.dataset.createdAt;
+            const isCompleted = todoElement.dataset.isCompleted === 'true';
 
-            // 클래스 순서를 정확히 맞추기 위해 className 전체 재설정
-            clonedTodo.className = 'assigned-todo draggable';
+            // 클래스 변경 (completed 상태 유지)
+            clonedTodo.classList.remove('todo-card');
+            clonedTodo.classList.add('assigned-todo');
+            if (!clonedTodo.classList.contains('draggable')) {
+                clonedTodo.classList.add('draggable');
+            }
+            // completed 클래스는 유지됨
             clonedTodo.setAttribute('draggable', 'true');
+
+            // inline style 제거 (opacity 등)
+            clonedTodo.style.opacity = '';
+            clonedTodo.style.transition = '';
 
             // data-created-at 속성 보존
             if (createdAt) {
@@ -58,6 +79,7 @@ class TodoDOMUtils {
             checkbox.type = 'checkbox';
             checkbox.className = 'complete-checkbox';
             checkbox.dataset.todoId = todoId;
+            checkbox.checked = isCompleted; // 완료 상태 반영
 
             const checkmark = document.createElement('span');
             checkmark.className = 'checkmark';
@@ -84,6 +106,17 @@ class TodoDOMUtils {
             actionsDiv.appendChild(returnBtn);
             actionsDiv.appendChild(deleteBtn);
             clonedTodo.appendChild(actionsDiv);
+
+            // data 속성 업데이트 (중요!)
+            clonedTodo.dataset.assigneeId = memberId;
+            clonedTodo.dataset.isCompleted = isCompleted ? 'true' : 'false';
+            if (createdAt) {
+                clonedTodo.dataset.createdAt = createdAt;
+            }
+        } else if (clonedTodo.classList.contains('assigned-todo')) {
+            // 이미 assigned-todo인 경우 (멤버 간 이동)
+            // data 속성 업데이트
+            clonedTodo.dataset.assigneeId = memberId;
         }
 
         // 멤버 카드의 todos-list에 추가
@@ -93,15 +126,19 @@ class TodoDOMUtils {
         }
 
         // 보드에서 제거되는 경우 빈 메시지 복원 체크
-        const parentBoard = todoElement.closest('#todo-board');
+        const parentTodoBoard = todoElement.closest('#todo-board');
+        const parentDoneBoard = todoElement.closest('#done-board');
 
         // 원본 요소 제거
         todoElement.remove();
 
         // 보드 카운터 업데이트 및 빈 메시지 복원 체크
-        if (parentBoard) {
+        if (parentTodoBoard) {
             this.updateBoardCounter();
-            this.restoreEmptyMessage(parentBoard);
+            this.restoreEmptyMessage(parentTodoBoard);
+        } else if (parentDoneBoard) {
+            this.updateBoardCounter();
+            this.restoreEmptyMessage(parentDoneBoard);
         }
 
         // 등장 애니메이션 효과
@@ -136,9 +173,17 @@ class TodoDOMUtils {
 
         // 할당된 TODO를 미할당 TODO로 변환
         if (clonedTodo.classList.contains('assigned-todo')) {
-            // 클래스 순서를 정확히 맞추기 위해 className 전체 재설정
-            clonedTodo.className = 'todo-card draggable';
+            // 클래스 변경 (completed 상태 제거 - TODO 보드는 미완료만)
+            clonedTodo.classList.remove('assigned-todo', 'completed');
+            clonedTodo.classList.add('todo-card');
+            if (!clonedTodo.classList.contains('draggable')) {
+                clonedTodo.classList.add('draggable');
+            }
             clonedTodo.setAttribute('draggable', 'true');
+
+            // inline style 제거 (opacity 등)
+            clonedTodo.style.opacity = '';
+            clonedTodo.style.transition = '';
 
             // 텍스트 컨테이너 클래스 변경: .todo-text → .todo-content
             const textElement = clonedTodo.querySelector('.todo-text');
@@ -165,14 +210,12 @@ class TodoDOMUtils {
             const todoDate = document.createElement('span');
             todoDate.className = 'todo-date';
 
-            // createdAt을 "m/d" 형식으로 변환
+            // createdAt을 "mm/dd" 형식으로 변환 (0 패딩)
             if (createdAt) {
-                const date = new Date(createdAt);
-                todoDate.textContent = `${date.getMonth() + 1}/${date.getDate()}`;
+                todoDate.textContent = this.formatDate(createdAt);
             } else {
                 // fallback: createdAt이 없으면 현재 날짜 사용
-                const now = new Date();
-                todoDate.textContent = `${now.getMonth() + 1}/${now.getDate()}`;
+                todoDate.textContent = this.formatDate(new Date());
             }
 
             // 삭제 버튼 추가 (template과 동일한 구조)
@@ -187,6 +230,26 @@ class TodoDOMUtils {
             todoMeta.appendChild(todoDate);
             todoMeta.appendChild(deleteBtn);
             clonedTodo.appendChild(todoMeta);
+        } else if (clonedTodo.classList.contains('todo-card')) {
+            // DONE 보드에서 온 todo-card인 경우
+            clonedTodo.classList.remove('completed');
+
+            // inline style 제거
+            clonedTodo.style.opacity = '';
+            clonedTodo.style.transition = '';
+
+            // 완료 날짜를 생성일로 변경
+            const todoDate = clonedTodo.querySelector('.todo-date');
+            if (todoDate && createdAt) {
+                todoDate.textContent = this.formatDate(createdAt);
+            }
+        }
+
+        // data 속성 업데이트 (중요!)
+        clonedTodo.dataset.isCompleted = 'false';
+        clonedTodo.dataset.assigneeId = 'null';
+        if (createdAt) {
+            clonedTodo.dataset.createdAt = createdAt;
         }
 
         // 빈 메시지 제거 (TODO가 추가되므로)
@@ -228,6 +291,9 @@ class TodoDOMUtils {
             checkbox.checked = isCompleted;
         }
 
+        // data 속성 업데이트 (중요!)
+        todoElement.dataset.isCompleted = isCompleted ? 'true' : 'false';
+
         // 시각적 완료 상태 반영 (부드러운 전환 효과)
         todoElement.style.transition = 'all 0.3s ease';
 
@@ -263,12 +329,16 @@ class TodoDOMUtils {
 
         setTimeout(() => {
             if (todoElement.parentNode) {
-                const parentBoard = todoElement.closest('#todo-board');
+                const parentTodoBoard = todoElement.closest('#todo-board');
+                const parentDoneBoard = todoElement.closest('#done-board');
                 todoElement.remove();
 
                 // 보드에서 제거된 경우 빈 메시지 복원 체크 및 카운터 업데이트
-                if (parentBoard) {
-                    this.restoreEmptyMessage(parentBoard);
+                if (parentTodoBoard) {
+                    this.restoreEmptyMessage(parentTodoBoard);
+                    this.updateBoardCounter();
+                } else if (parentDoneBoard) {
+                    this.restoreEmptyMessage(parentDoneBoard);
                     this.updateBoardCounter();
                 }
 
@@ -499,7 +569,14 @@ class TodoDOMUtils {
         if (todos.length === 0 && !todoBoard.querySelector('.empty-todos')) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'empty-todos';
-            emptyDiv.innerHTML = '<p>아직 할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>';
+
+            // 보드 종류에 따라 다른 메시지 표시
+            if (todoBoard.id === 'done-board') {
+                emptyDiv.innerHTML = '<p>완료된 할 일이 없습니다</p>';
+            } else {
+                emptyDiv.innerHTML = '<p>아직 할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>';
+            }
+
             todoBoard.appendChild(emptyDiv);
         }
     }
@@ -508,22 +585,188 @@ class TodoDOMUtils {
      * 보드의 TODO 카운터 업데이트
      */
     static updateBoardCounter() {
+        // TODO 보드 카운터 업데이트
         const todoBoard = document.getElementById('todo-board');
-        const boardCounter = document.querySelector('.todo-count');
+        const todoBoardSection = todoBoard?.closest('.todo-board-section');
+        const todoCounter = todoBoardSection?.querySelector('.todo-count');
 
-        if (todoBoard && boardCounter) {
+        if (todoBoard && todoCounter) {
             const todoCards = todoBoard.querySelectorAll('.todo-card');
             const count = todoCards.length;
 
-            // 카운터 업데이트 애니메이션 ("N개" 형태로 일관성 유지)
-            boardCounter.classList.add('updating');
-            boardCounter.textContent = `${count}개`;
+            // 카운터 업데이트 애니메이션
+            todoCounter.classList.add('updating');
+            todoCounter.textContent = `${count}개`;
 
             setTimeout(() => {
-                boardCounter.classList.remove('updating');
+                todoCounter.classList.remove('updating');
             }, 200);
-
         }
+
+        // DONE 보드 카운터 업데이트
+        const doneBoard = document.getElementById('done-board');
+        const doneBoardSection = doneBoard?.closest('.done-board-section');
+        const doneCounter = doneBoardSection?.querySelector('.todo-count');
+
+        if (doneBoard && doneCounter) {
+            const doneCards = doneBoard.querySelectorAll('.todo-card');
+            const count = doneCards.length;
+
+            // 카운터 업데이트 애니메이션
+            doneCounter.classList.add('updating');
+            doneCounter.textContent = `${count}개`;
+
+            setTimeout(() => {
+                doneCounter.classList.remove('updating');
+            }, 200);
+        }
+    }
+
+    /**
+     * TODO를 생성일 기준으로 정렬하여 보드에 삽입
+     * @param {HTMLElement} board - 대상 보드
+     * @param {HTMLElement} todoElement - 삽입할 TODO 요소
+     * @param {string} createdAt - 생성일 (ISO 문자열)
+     */
+    static insertTodoInOrder(board, todoElement, createdAt) {
+        if (!board || !todoElement) {
+            return;
+        }
+
+        const existingTodos = Array.from(board.querySelectorAll('.todo-card, .assigned-todo'));
+
+        // 빈 메시지 제거
+        this.removeEmptyMessage(board);
+
+        // 삽입 위치 찾기 (생성일 기준 오름차순)
+        let insertIndex = existingTodos.length;
+        for (let i = 0; i < existingTodos.length; i++) {
+            const existingCreatedAt = existingTodos[i].dataset.createdAt;
+            if (createdAt && existingCreatedAt && createdAt < existingCreatedAt) {
+                insertIndex = i;
+                break;
+            }
+        }
+
+        // 삽입
+        if (insertIndex >= existingTodos.length) {
+            board.appendChild(todoElement);
+        } else {
+            board.insertBefore(todoElement, existingTodos[insertIndex]);
+        }
+    }
+
+    /**
+     * TODO를 Done 보드로 이동
+     * @param {string} todoId - 이동할 TODO ID
+     * @param {string} createdAt - 생성일 (정렬용)
+     * @returns {Object} 백업 정보 (되돌리기용)
+     */
+    static moveTodoToDoneBoard(todoId, createdAt) {
+        const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`);
+        const doneBoard = document.getElementById('done-board');
+
+        if (!todoElement || !doneBoard) {
+            return null;
+        }
+
+        // 백업 생성
+        const backup = this.createBackup(todoElement);
+
+        // 원본 요소 복제
+        const clonedTodo = todoElement.cloneNode(true);
+        clonedTodo.classList.remove('dragging');
+
+        // Todo 카드로 변환 (assigned-todo → todo-card)
+        if (clonedTodo.classList.contains('assigned-todo')) {
+            // 클래스 변경 (completed 추가)
+            clonedTodo.classList.remove('assigned-todo');
+            clonedTodo.classList.add('todo-card', 'completed');
+            if (!clonedTodo.classList.contains('draggable')) {
+                clonedTodo.classList.add('draggable');
+            }
+
+            // inline style 제거 (opacity 등)
+            clonedTodo.style.opacity = '';
+            clonedTodo.style.transition = '';
+
+            // todo-text를 todo-content로 변경
+            const textElement = clonedTodo.querySelector('.todo-text');
+            if (textElement) {
+                textElement.className = 'todo-content';
+            }
+
+            // todo-actions를 todo-meta로 변경
+            const actionsElement = clonedTodo.querySelector('.todo-actions');
+            if (actionsElement) {
+                actionsElement.remove();
+            }
+
+            // todo-meta 추가 (완료 날짜 포함)
+            const todoMeta = document.createElement('div');
+            todoMeta.className = 'todo-meta';
+
+            const todoDate = document.createElement('span');
+            todoDate.className = 'todo-date';
+            todoDate.textContent = `완료: ${this.formatDate(new Date())}`;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'todo-delete-btn';
+            deleteBtn.dataset.todoId = todoId;
+            deleteBtn.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+                </svg>
+            `;
+
+            todoMeta.appendChild(todoDate);
+            todoMeta.appendChild(deleteBtn);
+            clonedTodo.appendChild(todoMeta);
+        } else {
+            // 이미 todo-card면 completed 클래스 추가하고 날짜 업데이트
+            clonedTodo.classList.add('completed');
+
+            // inline style 제거
+            clonedTodo.style.opacity = '';
+            clonedTodo.style.transition = '';
+
+            // 기존 todo-date를 완료 날짜로 업데이트
+            const todoDate = clonedTodo.querySelector('.todo-date');
+            if (todoDate) {
+                todoDate.textContent = `완료: ${this.formatDate(new Date())}`;
+            }
+        }
+
+        // data 속성 업데이트
+        clonedTodo.dataset.isCompleted = 'true';
+        clonedTodo.dataset.assigneeId = 'null';
+        if (createdAt) {
+            clonedTodo.dataset.createdAt = createdAt;
+        }
+
+        // 원본이 속한 멤버 카드 체크 (멤버 카운터 업데이트용)
+        const parentMemberCard = todoElement.closest('.member-card');
+        const memberId = parentMemberCard?.dataset.memberId;
+
+        // Done 보드에 추가 (생성일 기준 정렬)
+        this.insertTodoInOrder(doneBoard, clonedTodo, createdAt);
+
+        // 원본 제거
+        todoElement.remove();
+
+        // 카운터 업데이트
+        this.updateBoardCounter(); // TODO 보드와 DONE 보드
+        if (memberId) {
+            this.updateMemberCounter(memberId); // 멤버 카운터
+        }
+
+        // 등장 애니메이션 효과
+        clonedTodo.classList.add('entering');
+        setTimeout(() => {
+            clonedTodo.classList.remove('entering');
+        }, 300);
+
+        return backup;
     }
 }
 
