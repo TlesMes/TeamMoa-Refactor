@@ -6,7 +6,10 @@ from django.db import models
 class Mindmap(models.Model):
     title = models.CharField(max_length=64)
     team = models.ForeignKey('teams.Team',on_delete = models.CASCADE)
-    
+
+    class Meta:
+        unique_together = [['team', 'title']]
+
     def __str__(self):
         return self.title
 
