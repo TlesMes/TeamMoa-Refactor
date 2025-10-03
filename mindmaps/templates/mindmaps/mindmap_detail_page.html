@@ -131,9 +131,9 @@ window.mindmapData = {
   ]
 };
 
-// URL 정보를 전역으로 설정
+// URL 정보를 전역으로 설정 (템플릿으로 베이스 URL만 설정, JS에서 node ID 추가)
 window.mindmapUrls = {
-  nodeDetail: '/mindmaps/node_detail_page/{{ team.id }}/0'
+  nodeDetailBase: "{% url 'mindmaps:node_detail_page' team.id 0 %}".replace('/0', '')
 };
 
 // 현재 사용자 정보를 전역으로 설정

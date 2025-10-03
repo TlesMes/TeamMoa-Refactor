@@ -16,7 +16,7 @@
 <section class="node-detail-page">
   <div class="content-card">
     <div class="node-detail-header">
-      <a href="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ node.mindmap.id }}" class="node-detail-back-btn">
+      <a href="{% url 'mindmaps:mindmap_detail_page' team.id node.mindmap.id %}" class="node-detail-back-btn">
         <i class="ri-arrow-left-line"></i>
       </a>
       <div class="node-detail-header-content">
@@ -24,10 +24,10 @@
         <p>노드 상세 정보</p>
       </div>
       <div class="node-detail-header-actions">
-        <a href="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}" class="node-detail-action-btn node-detail-refresh-btn" title="새로고침">
+        <a href="{% url 'mindmaps:node_detail_page' team.id node.id %}" class="node-detail-action-btn node-detail-refresh-btn" title="새로고침">
           <i class="ri-refresh-line"></i>
         </a>
-        <a href="#" class="node-detail-action-btn node-detail-delete-btn" title="노드 삭제" id="delete-node-btn" data-delete-url="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}">
+        <a href="#" class="node-detail-action-btn node-detail-delete-btn" title="노드 삭제" id="delete-node-btn" data-delete-url="{% url 'mindmaps:mindmap_delete_node' team.id node.id %}">
           <i class="ri-delete-bin-line"></i>
         </a>
       </div>
@@ -35,10 +35,10 @@
 
     <div class="node-detail-content">
       <p class="node-detail-description">{{ node.content }}</p>
-      
+
       <div class="node-detail-recommend">
         <span class="node-detail-recommend-count">추천: {{ node.recommendation_count }}</span>
-        <form method="POST" action="/mindmaps/node_recommend/{{ team.id }}/{{ node.id }}" class="tm-inline">
+        <form method="POST" action="{% url 'mindmaps:node_recommend' team.id node.id %}" class="tm-inline">
           {% csrf_token %}
           <button type="submit" class="node-detail-recommend-btn">
             <i class="ri-thumb-up-line"></i>
@@ -68,7 +68,7 @@
         {% endfor %}
       </div>
 
-      <form method="POST" action="/mindmaps/node_detail_page/{{ team.id }}/{{ node.id }}" class="node-detail-comment-form">
+      <form method="POST" action="{% url 'mindmaps:node_detail_page' team.id node.id %}" class="node-detail-comment-form">
         {% csrf_token %}
         <div class="form-group">
           <input type="text" name="comment" placeholder="댓글을 작성해주세요" class="node-detail-comment-input" required />
@@ -83,7 +83,7 @@
 </section>
 
 <!-- 노드 삭제를 위한 숨겨진 폼 -->
-<form id="delete-node-form" method="POST" action="/mindmaps/mindmap_delete_node/{{ team.id }}/{{ node.id }}" class="tm-hidden">
+<form id="delete-node-form" method="POST" action="{% url 'mindmaps:mindmap_delete_node' team.id node.id %}" class="tm-hidden">
   {% csrf_token %}
 </form>
 

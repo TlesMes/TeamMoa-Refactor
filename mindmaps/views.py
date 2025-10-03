@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
-from django.views.generic import TemplateView, ListView, DetailView, DeleteView, FormView
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView, FormView, CreateView
 from django.views import View
 from django.contrib import messages
 from django.urls import reverse
@@ -60,20 +60,18 @@ class MindmapDetailPageView(TeamMemberRequiredMixin, DetailView):
         return context
 
 
-class MindmapCreateView(TeamMemberRequiredMixin, FormView):
+class MindmapCreateView(TeamMemberRequiredMixin, CreateView):
+    """마인드맵 생성 뷰 - 모달에서 fetch로 호출됨"""
+    model = Mindmap
     form_class = CreateMindmapForm
-    template_name = 'mindmaps/mindmap_create.html'
-    
+
     def __init__(self):
         super().__init__()
         self.mindmap_service = MindmapService()
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        context['team'] = team
-        return context
-    
+
+    def get_success_url(self):
+        return reverse('mindmaps:mindmap_list_page', kwargs={'pk': self.kwargs['pk']})
+
     def form_valid(self, form):
         try:
             mindmap = self.mindmap_service.create_mindmap(
@@ -82,14 +80,13 @@ class MindmapCreateView(TeamMemberRequiredMixin, FormView):
                 creator=self.request.user
             )
             messages.success(self.request, f'마인드맵 "{mindmap.title}"가 성공적으로 생성되었습니다.')
+            return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
         except ValueError as e:
             messages.error(self.request, str(e))
-            return self.form_invalid(form)
+            return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
         except Exception as e:
             messages.error(self.request, '마인드맵 생성 중 오류가 발생했습니다.')
-            return self.form_invalid(form)
-        
-        return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
+            return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
 
 
 class MindmapDeleteView(TeamHostRequiredMixin, View):

@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/common/modal.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/common.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/mindmap_list.css' %}">
 {% endblock %}
@@ -11,7 +12,8 @@
 <section class="mindmapsection">
   <div class="mindmap-header">
     <h1>마인드맵 목록</h1>
-    <button class="create-btn" onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'">
+    <button class="create-btn" id="createMindmapBtn">
+      <i class="ri-add-line"></i>
       마인드맵 생성
     </button>
   </div>
@@ -22,11 +24,11 @@
     <div class="mindmap-card">
       <h3 class="mindmap-title">{{ mindmap.title }}</h3>
       <div class="mindmap-actions">
-        <button class="view-btn view-mindmap-btn" data-view-url="/mindmaps/mindmap_detail_page/{{ team.id }}/{{ mindmap.id }}">
+        <button class="view-btn view-mindmap-btn" data-view-url="{% url 'mindmaps:mindmap_detail_page' team.id mindmap.id %}">
           보기
         </button>
         {% if request.user == team.host %}
-        <button class="delete-btn delete-mindmap-btn" data-delete-url="/mindmaps/mindmap_delete/{{ team.id }}/{{ mindmap.id }}">
+        <button class="delete-btn delete-mindmap-btn" data-delete-url="{% url 'mindmaps:mindmap_delete' team.id mindmap.id %}">
           삭제
         </button>
         {% endif %}
@@ -39,15 +41,57 @@
     <div class="empty-icon">🧠</div>
     <h3>아직 마인드맵이 없습니다</h3>
     <p>팀의 첫 번째 마인드맵을 만들어보세요!</p>
-    <button class="empty-create-btn" onclick="location.href='/mindmaps/mindmap_create/{{team.id}}'">
+    <button class="empty-create-btn" id="emptyCreateBtn">
+      <i class="ri-add-circle-line"></i>
       마인드맵 생성하기
     </button>
   </div>
   {% endif %}
 </section>
 
+<!-- 마인드맵 생성 모달 -->
+<div class="modal" id="createMindmapModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>새 마인드맵 만들기</h3>
+      <button class="modal-close" id="createModalClose">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="createMindmapForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="mindmap_title">마인드맵 제목</label>
+          <div class="input-wrapper">
+            <i class="ri-mind-map"></i>
+            <input type="text" id="mindmap_title" name="title" maxlength="100" placeholder="마인드맵 제목 입력" required>
+          </div>
+          <div class="help-text">
+            <small>팀의 아이디어를 시각적으로 구조화하세요</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="create-btn">
+            <i class="ri-add-circle-line"></i>
+            마인드맵 생성하기
+          </button>
+          <button type="button" class="cancel-btn" id="createCancelBtn">
+            <i class="ri-close-line"></i>
+            취소
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const teamId = {{ team.id }};
+
     // 마인드맵 보기 버튼 이벤트
     const viewBtns = document.querySelectorAll('.view-mindmap-btn');
     viewBtns.forEach(btn => {
@@ -69,21 +113,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.method = 'POST';
                 form.action = deleteUrl;
                 form.style.display = 'none';
-                
+
                 // CSRF 토큰 추가 (Django에서 제공)
-                const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || 
+                const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
                                   '{{ csrf_token }}';
-                
+
                 const hiddenField = document.createElement('input');
                 hiddenField.type = 'hidden';
                 hiddenField.name = 'csrfmiddlewaretoken';
                 hiddenField.value = csrfToken;
                 form.appendChild(hiddenField);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             });
         });
+    });
+
+    // ========================================
+    // 마인드맵 생성 모달
+    // ========================================
+    const modal = document.getElementById('createMindmapModal');
+    const openBtn = document.getElementById('createMindmapBtn');
+    const emptyOpenBtn = document.getElementById('emptyCreateBtn');
+    const closeBtn = document.getElementById('createModalClose');
+    const cancelBtn = document.getElementById('createCancelBtn');
+    const form = document.getElementById('createMindmapForm');
+
+    // 모달 열기
+    function openModal() {
+        modal.classList.add('active');
+        document.getElementById('mindmap_title').focus();
+    }
+
+    if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+    }
+
+    if (emptyOpenBtn) {
+        emptyOpenBtn.addEventListener('click', openModal);
+    }
+
+    // 모달 닫기
+    function closeModal() {
+        modal.classList.remove('active');
+        form.reset();
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // 모달 외부 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // 폼 제출
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('mindmap_title').value.trim();
+
+        if (!title) {
+            showDjangoToast('마인드맵 제목을 입력해주세요.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        try {
+            await fetch("{% url 'mindmaps:mindmap_create' team.id %}", {
+                method: 'POST',
+                body: formData,
+                redirect: 'manual'  // redirect 자동 따라가지 않음 (messages 보존)
+            });
+            // 성공/실패 모두 목록 페이지로 이동하여 Django messages 표시
+            window.location.href = "{% url 'mindmaps:mindmap_list_page' team.id %}";
+        } catch (error) {
+            console.error('마인드맵 생성 요청 실패:', error);
+            showDjangoToast('네트워크 오류가 발생했습니다.', 'error');
+        }
     });
 });
 </script>
