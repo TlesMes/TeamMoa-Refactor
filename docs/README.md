@@ -42,6 +42,10 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 - ✅ [모달 시스템 개선](ui_ux/modal_system_improvement.md) - 알림 및 확인 모달 시스템 구축
 - ✅ [Members App API 기반 실시간 UI](ui_ux/members_realtime_ui.md) - API 호출 기반 실시간 TODO 관리 시스템
 
+### 🔌 [API 레이어](api/)
+Django REST Framework 기반 API 인프라 및 앱별 API 전환 작업
+- ✅ [Milestone API 마이그레이션 보고서](api/milestone-api-migration-report.md) - Teams 앱 마일스톤 API 전환 완료
+
 ### 🎨 [CSS 모듈화](css_refactoring/)
 테마별 CSS 파일에서 앱별 모듈화로 전환하여 성능과 유지보수성 개선
 - ✅ [Teams 앱 CSS 모듈화](css_refactoring/teams_css_refactor.md) - timeline.css, main.css 분리
@@ -64,6 +68,7 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 | **성능 최적화** | 1/3 (33%) | 🔄 진행중 | DB 쿼리 최적화 완료 |
 | **UI/UX 개선** | 4/4 (100%) | ✅ 완료 | 모달 시스템 + Mindmaps 현대화 + 노드 디자인 + Members API 기반 UI 완료 |
 | **CSS 모듈화** | 6/6 (100%) | ✅ 완료 | 모든 앱 CSS 모듈화 + Header 컴포넌트 분리 완료 |
+| **API 레이어 도입** | 2/6 (33%) | 🔄 진행중 | DRF 인프라 구축, Members/Teams API 전환 완료 |
 
 ### 📈 주요 성과 지표
 
@@ -109,9 +114,17 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 - **총 CSS 파일**: 21개 모듈로 분리 (기존 테마 파일에서 앱별 분리)
 - **CSS 코드 정리**: 1,300+ 줄 중복 제거 (light.css에서 527줄, dark.css에서 830줄 분리)
 - **성능 개선**: 선택적 CSS 로딩으로 페이지별 CSS 크기 60-80% 감소
-- **컴포넌트 시스템**: header.css 공통 컴포넌트 분리로 재사용성 확보
+- **컴포넌트 시스템**: header.css, modal.css 공통 컴포넌트 분리로 재사용성 확보
 - **유지보수성**: 앱별 독립적 CSS 관리로 개발 효율성 향상
 - **테마 시스템**: light/dark 테마 기반 + 앱별 모듈 조합 아키텍처 구축
+
+#### API 레이어 도입 성과 (2025.09.28~)
+- **DRF 인프라**: Django REST Framework 3.15.2 + drf-spectacular 기반 Swagger 문서 자동 생성
+- **Members API**: Todo CRUD 완전 API화, TodoDOMUtils 실시간 UI 시스템 구현
+- **Teams API**: Milestone CRUD API 전환, 타임라인 필터 및 인라인 생성 기능
+- **공통 인증/권한**: IsTeamMember, IsTeamLeader 등 재사용 가능한 권한 클래스
+- **표준화된 응답**: 일관된 JSON 응답 형식 및 예외 처리
+- **서비스 레이어 통합**: 기존 서비스 레이어와 완벽 연동
 
 ## 🎯 다음 목표
 
@@ -119,6 +132,9 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 - **서비스 레이어 도입**: 전체 6개 앱 서비스 레이어 도입 100% 완료 (2025.09.07)
 - **사용성 분석**: 전체 앱 사용자 경험 평가 및 개선 우선순위 도출 완료 (2025.09.07)
 - **🎉 Mindmaps 실시간 협업**: WebSocket 기반 드래그 앤 드롭 + 실시간 협업 구현 완료 (2025.09.07 Phase 1)
+- **API 인프라 구축**: DRF 기반 API 시스템 + Members/Teams 앱 API 전환 완료 (2025.09.28)
+- **모달 기반 생성 시스템**: Teams 마일스톤, Mindmaps 생성 페이지 → 모달 전환 (2025.09.30~10.03)
+- **Members DONE 보드**: 완료된 할 일 아카이브 시스템 구현 (2025.09.30)
 
 ## 🔧 주요 개선 과제
 
@@ -172,15 +188,15 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 - [ ] **2단계 인증** 옵션
 
 ### 🔄 단기 목표 (2-4주)
-1. **Mindmaps 앱 재설계 착수** - 기술 스택 선정 및 프로토타입
-2. **Schedules 앱 UI 개선** - 시간 블록 방식 도입
-3. **서비스 레이어 통합 테스트** - 전체 앱 서비스 간 통합 검증
+1. **Schedules 앱 UI 개선** - 시간 블록 방식 도입
+2. **API 레이어 확장** - Schedules, Mindmaps, Shares 앱 API 전환
+3. **Mindmaps unique 제약 프론트 처리** - 중복 제목 시 사용자 친화적 에러 메시지
 
-### 🚀 장기 목표 (2-3개월)  
-1. **API 레이어 도입** - Django REST Framework와 서비스 레이어 통합
+### 🚀 장기 목표 (2-3개월)
+1. **전체 앱 API 전환 완료** - 6개 앱 모두 REST API 기반으로 전환
 2. **성능 모니터링 시스템** - 서비스별 성능 지표 추적 및 최적화
 3. **CI/CD 파이프라인 구축** - 자동화된 테스트 및 배포 시스템
-4. **마이크로서비스 아키텍처 준비** - 서비스 간 의존성 최소화
+4. **테스트 커버리지 확대** - API, 서비스 레이어 단위 테스트
 
 ## 📝 기여 가이드
 
@@ -198,4 +214,4 @@ WebSocket 기반 실시간 마인드맵 협업 시스템 (2025.09.07 Phase 1 완
 
 **💡 Tip**: 각 문서는 독립적으로 읽을 수 있도록 작성되었으나, 연관된 문서들을 함께 읽으면 전체적인 아키텍처 발전 과정을 더 잘 이해할 수 있습니다.
 
-*최종 업데이트: 2025.09.16*
+*최종 업데이트: 2025.10.03*
