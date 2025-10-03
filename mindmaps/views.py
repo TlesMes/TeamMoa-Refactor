@@ -9,7 +9,7 @@ from django.urls import reverse
 from teams.models import TeamUser, Team
 from .forms import CreateMindmapForm
 from .models import Comment, Mindmap, Node, NodeConnection
-from .services import MindmapService
+from .services import MindmapService, DuplicateTitleError
 from accounts.models import User
 from common.mixins import TeamMemberRequiredMixin, TeamHostRequiredMixin
 import logging
@@ -80,6 +80,9 @@ class MindmapCreateView(TeamMemberRequiredMixin, CreateView):
                 creator=self.request.user
             )
             messages.success(self.request, f'마인드맵 "{mindmap.title}"가 성공적으로 생성되었습니다.')
+            return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
+        except DuplicateTitleError as e:
+            messages.error(self.request, str(e))
             return redirect('mindmaps:mindmap_list_page', pk=self.kwargs['pk'])
         except ValueError as e:
             messages.error(self.request, str(e))

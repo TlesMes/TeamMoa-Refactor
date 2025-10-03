@@ -7,6 +7,11 @@ from teams.models import Team
 from accounts.models import User
 
 
+class DuplicateTitleError(Exception):
+    """제목 중복 시 발생하는 예외"""
+    pass
+
+
 class MindmapService:
     """
     마인드맵 관련 비즈니스 로직을 처리하는 서비스 클래스
@@ -25,28 +30,34 @@ class MindmapService:
     def create_mindmap(self, team_id, title, creator):
         """
         새로운 마인드맵을 생성합니다.
-        
+
         Args:
             team_id (int): 팀 ID
             title (str): 마인드맵 제목
             creator (User): 생성자
-            
+
         Returns:
             Mindmap: 생성된 마인드맵 객체
-            
+
         Raises:
             ValueError: 제목이 비어있거나 유효하지 않은 경우
+            DuplicateTitleError: 같은 팀에 동일한 제목이 이미 존재하는 경우
             ValidationError: 팀이 존재하지 않거나 권한이 없는 경우
         """
         if not title or not title.strip():
             raise ValueError('마인드맵 제목을 입력해주세요.')
-        
+
         team = get_object_or_404(Team, pk=team_id)
-        
+        title = title.strip()
+
+        # unique_together 제약 검증 (team, title)
+        if Mindmap.objects.filter(team=team, title=title).exists():
+            raise DuplicateTitleError('이미 사용중인 이름입니다.')
+
         # 팀 멤버 권한 검증은 뷰에서 Mixin으로 처리되므로 여기서는 생략
-        
+
         return Mindmap.objects.create(
-            title=title.strip(),
+            title=title,
             team=team
         )
     
