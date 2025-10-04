@@ -48,12 +48,44 @@ Django 기반 팀 프로젝트 관리 시스템
 6. **CI/CD 파이프라인** - 자동화된 테스트 및 배포 시스템
 
 ## 🛠️ 기술 스택
-- Backend: Django 4.x, Python
+- Backend: Django 4.x, Python, Django REST Framework
 - Frontend: HTML5, CSS3, JavaScript (Canvas API)
 - Database: SQLite (개발), MySQL (운영)
-- Architecture: Service Layer Pattern, CBV
+- Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 
 ## 📋 개발 가이드라인
+
+### 🏗️ API 아키텍처 전략
+
+프로젝트는 **하이브리드 SSR + API** 방식을 채택합니다:
+
+#### 📌 SSR 중심 (Django Templates 유지)
+**정적이고 SEO가 중요한 기능**
+- **accounts**: 로그인, 회원가입, 비밀번호 찾기, 이메일 인증
+- **shares**: 게시판 CRUD, 파일 업로드/다운로드
+
+**특징**:
+- Django Form + Templates 활용
+- 페이지 새로고침 방식
+- 복잡한 파일 처리에 유리
+
+#### ⚡ API 중심 (REST API + JavaScript)
+**동적이고 실시간성이 중요한 기능**
+- **teams**: 팀 생성/수정/삭제, 멤버 관리
+- **members**: TODO 관리, 드래그 앤 드롭
+- **schedules**: 주간 스케줄 저장/조회, 팀 가용성 실시간 계산
+- **mindmaps**: 노드 CRUD, 드래그 이동, 실시간 협업
+
+**특징**:
+- DRF ViewSet + Serializers
+- 서비스 레이어 재사용
+- 페이지 새로고침 없는 UX
+- JSON 기반 통신
+
+**장점**:
+- 각 기능의 특성에 맞는 최적의 방식 선택
+- 점진적 마이그레이션 가능
+- 기존 코드 재사용 (서비스 레이어)
 
 ### 🔧 공통 JavaScript 함수 (`ui-utils.js`)
 - **위치**: `static/js/common/ui-utils.js`

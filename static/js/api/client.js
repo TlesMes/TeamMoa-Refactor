@@ -236,11 +236,149 @@ class TeamMemberApiClient {
 }
 
 /**
+ * 스케줄 API 클라이언트
+ */
+class ScheduleApiClient {
+    constructor(apiClient) {
+        this.api = apiClient;
+    }
+
+    /**
+     * 개인 주간 스케줄 저장
+     */
+    async savePersonalSchedule(teamId, weekStart, scheduleData) {
+        return this.api.post(`/teams/${teamId}/schedules/save-personal/`, {
+            week_start: weekStart,
+            schedule_data: scheduleData
+        });
+    }
+
+    /**
+     * 팀 가용성 조회
+     */
+    async getTeamAvailability(teamId, startDate, endDate) {
+        return this.api.get(`/teams/${teamId}/schedules/team-availability/?start_date=${startDate}&end_date=${endDate}`);
+    }
+
+    /**
+     * 내 스케줄 조회
+     */
+    async getMySchedule(teamId, startDate, endDate) {
+        return this.api.get(`/teams/${teamId}/schedules/my-schedule/?start_date=${startDate}&end_date=${endDate}`);
+    }
+}
+
+/**
+ * 마인드맵 API 클라이언트
+ */
+class MindmapApiClient {
+    constructor(apiClient) {
+        this.api = apiClient;
+    }
+
+    /**
+     * 팀의 마인드맵 목록 조회
+     */
+    async getMindmaps(teamId) {
+        return this.api.get(`/teams/${teamId}/mindmaps/`);
+    }
+
+    /**
+     * 마인드맵 상세 조회 (노드 및 연결선 포함)
+     */
+    async getMindmap(teamId, mindmapId) {
+        return this.api.get(`/teams/${teamId}/mindmaps/${mindmapId}/`);
+    }
+
+    /**
+     * 마인드맵 생성
+     */
+    async createMindmap(teamId, title) {
+        return this.api.post(`/teams/${teamId}/mindmaps/`, {
+            title: title
+        });
+    }
+
+    /**
+     * 마인드맵 삭제
+     */
+    async deleteMindmap(teamId, mindmapId) {
+        return this.api.delete(`/teams/${teamId}/mindmaps/${mindmapId}/`);
+    }
+
+    /**
+     * 노드 생성
+     */
+    async createNode(teamId, mindmapId, nodeData) {
+        return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/`, nodeData);
+    }
+
+    /**
+     * 노드 위치 업데이트
+     */
+    async updateNodePosition(teamId, mindmapId, nodeId, posX, posY) {
+        return this.api.patch(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/`, {
+            posX: posX,
+            posY: posY
+        });
+    }
+
+    /**
+     * 노드 삭제
+     */
+    async deleteNode(teamId, mindmapId, nodeId) {
+        return this.api.delete(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/`);
+    }
+
+    /**
+     * 노드 추천 토글
+     */
+    async toggleNodeRecommend(teamId, mindmapId, nodeId) {
+        return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/recommend/`, {});
+    }
+
+    /**
+     * 노드 댓글 조회
+     */
+    async getNodeComments(teamId, mindmapId, nodeId) {
+        return this.api.get(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/comments/`);
+    }
+
+    /**
+     * 노드 댓글 작성
+     */
+    async createNodeComment(teamId, mindmapId, nodeId, comment) {
+        return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/comments/`, {
+            comment: comment
+        });
+    }
+
+    /**
+     * 노드 연결 생성
+     */
+    async createConnection(teamId, mindmapId, fromNodeId, toNodeId) {
+        return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/connections/`, {
+            from_node_id: fromNodeId,
+            to_node_id: toNodeId
+        });
+    }
+
+    /**
+     * 노드 연결 삭제
+     */
+    async deleteConnection(teamId, mindmapId, connectionId) {
+        return this.api.delete(`/teams/${teamId}/mindmaps/${mindmapId}/connections/${connectionId}/`);
+    }
+}
+
+/**
  * 전역 API 클라이언트 인스턴스
  */
 window.apiClient = new ApiClient();
 window.todoApi = new TodoApiClient(window.apiClient);
 window.teamMemberApi = new TeamMemberApiClient(window.apiClient);
+window.scheduleApi = new ScheduleApiClient(window.apiClient);
+window.mindmapApi = new MindmapApiClient(window.apiClient);
 
 // ApiError를 전역으로 export
 window.ApiError = ApiError;
