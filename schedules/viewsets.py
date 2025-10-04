@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 from datetime import timedelta
 
 from .models import PersonalDaySchedule
@@ -15,6 +16,7 @@ from .serializers import (
 from .services import ScheduleService
 from teams.models import Team, TeamUser
 from api.permissions import IsTeamMember
+from api.utils import api_response, api_success_response, api_error_response
 
 
 class ScheduleViewSet(viewsets.ModelViewSet):
@@ -71,17 +73,14 @@ class ScheduleViewSet(viewsets.ModelViewSet):
             else:
                 message = '등록된 가능 시간이 없습니다.'
 
-            return Response({
-                'success': True,
-                'message': message,
-                'updated_days': updated_days
-            }, status=status.HTTP_200_OK)
+            return api_success_response(
+                request,
+                message,
+                data={'updated_days': updated_days}
+            )
 
         except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return api_error_response(request, str(e))
 
     @action(detail=False, methods=['get'], url_path='team-availability')
     def get_team_availability(self, request, team_pk=None):

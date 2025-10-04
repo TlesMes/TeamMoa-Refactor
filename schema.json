@@ -1,0 +1,1113 @@
+openapi: 3.0.3
+info:
+  title: TeamMoa API
+  version: 1.0.0
+  description: TeamMoa 팀 프로젝트 관리 시스템 API
+paths:
+  /api/v1/teams/{team_pk}/members/:
+    get:
+      operationId: api_v1_teams_members_list
+      description: 팀 멤버 조회 ViewSet
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTeamMemberList'
+          description: ''
+  /api/v1/teams/{team_pk}/milestones/:
+    get:
+      operationId: api_v1_teams_milestones_list
+      description: '마일스톤 목록 조회 (정렬 기본: 시작일)'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMilestoneList'
+          description: ''
+    post:
+      operationId: api_v1_teams_milestones_create
+      description: 마일스톤 생성
+      parameters:
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneCreate'
+          description: ''
+  /api/v1/teams/{team_pk}/milestones/{id}/:
+    get:
+      operationId: api_v1_teams_milestones_retrieve
+      description: 팀 마일스톤 관리 ViewSet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Milestone'
+          description: ''
+    put:
+      operationId: api_v1_teams_milestones_update
+      description: 마일스톤 전체 업데이트 (PUT)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneUpdate'
+          description: ''
+    patch:
+      operationId: api_v1_teams_milestones_partial_update
+      description: 마일스톤 부분 업데이트 (PATCH) - 드래그앤드롭, 진행률 변경
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMilestoneUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneUpdate'
+          description: ''
+    delete:
+      operationId: api_v1_teams_milestones_destroy
+      description: 마일스톤 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/teams/{team_pk}/todos/:
+    get:
+      operationId: api_v1_teams_todos_list
+      description: 팀 TODO 관리 ViewSet
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTodoList'
+          description: ''
+    post:
+      operationId: api_v1_teams_todos_create
+      description: TODO 생성
+      parameters:
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+  /api/v1/teams/{team_pk}/todos/{id}/:
+    get:
+      operationId: api_v1_teams_todos_retrieve
+      description: 팀 TODO 관리 ViewSet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+    put:
+      operationId: api_v1_teams_todos_update
+      description: 팀 TODO 관리 ViewSet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+    patch:
+      operationId: api_v1_teams_todos_partial_update
+      description: 팀 TODO 관리 ViewSet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTodo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTodo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTodo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+    delete:
+      operationId: api_v1_teams_todos_destroy
+      description: 팀 TODO 관리 ViewSet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/teams/{team_pk}/todos/{id}/assign/:
+    post:
+      operationId: api_v1_teams_todos_assign_create
+      description: TODO 팀원 할당
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+  /api/v1/teams/{team_pk}/todos/{id}/complete/:
+    post:
+      operationId: api_v1_teams_todos_complete_create
+      description: TODO 완료 토글
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+  /api/v1/teams/{team_pk}/todos/{id}/move/:
+    post:
+      operationId: api_v1_teams_todos_move_create
+      description: TODO 상태/순서 이동
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+  /api/v1/teams/{team_pk}/todos/{id}/return_to_board/:
+    post:
+      operationId: api_v1_teams_todos_return_to_board_create
+      description: TODO 보드로 되돌리기
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: team_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: api_v1_users_retrieve
+      description: 사용자 목록 조회 - 보안상 비활성화
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: api_v1_users_create
+      description: 사용자 생성 - register 액션 사용 필요
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/users/{id}/:
+    get:
+      operationId: api_v1_users_retrieve_2
+      description: 특정 사용자 조회 - me 액션 사용 필요
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: api_v1_users_update
+      description: 사용자 정보 수정 - update_profile 액션 사용 필요
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: api_v1_users_destroy
+      description: 사용자 삭제 - 보안상 비활성화
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/change_password/:
+    post:
+      operationId: api_v1_users_change_password_create
+      description: |-
+        현재 사용자의 비밀번호 변경
+
+        POST /api/v1/users/change_password/
+
+        필수 필드: current_password, new_password, new_password_confirm
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/check_availability/:
+    post:
+      operationId: api_v1_users_check_availability_create
+      description: |-
+        사용자명, 이메일, 닉네임의 사용 가능 여부 실시간 확인
+
+        POST /api/v1/users/check_availability/
+
+        필수 필드: field ('username', 'email', 'nickname'), value
+
+        응답: {'field': '필드명', 'value': '검사값', 'available': true/false}
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/login/:
+    post:
+      operationId: api_v1_users_login_create
+      description: |-
+        사용자 로그인
+
+        POST /api/v1/users/login/
+
+        필수 필드: username, password
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/logout/:
+    post:
+      operationId: api_v1_users_logout_create
+      description: |-
+        사용자 로그아웃
+
+        POST /api/v1/users/logout/
+
+        인증된 사용자만 접근 가능
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/me/:
+    get:
+      operationId: api_v1_users_me_retrieve
+      description: |-
+        현재 로그인한 사용자의 프로필 정보 조회
+
+        GET /api/v1/users/me/
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/profile_stats/:
+    get:
+      operationId: api_v1_users_profile_stats_retrieve
+      description: |-
+        현재 사용자의 활동 통계 정보
+
+        GET /api/v1/users/profile_stats/
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/register/:
+    post:
+      operationId: api_v1_users_register_create
+      description: |-
+        새 사용자 회원가입
+
+        POST /api/v1/users/register/
+
+        필수 필드: username, email, nickname, password, password_confirm
+        선택 필드: profile
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/update_profile/:
+    put:
+      operationId: api_v1_users_update_profile_update
+      description: |-
+        현재 사용자의 프로필 정보 수정
+
+        PUT/PATCH /api/v1/users/update_profile/
+
+        수정 가능한 필드: nickname, profile
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: api_v1_users_update_profile_partial_update
+      description: |-
+        현재 사용자의 프로필 정보 수정
+
+        PUT/PATCH /api/v1/users/update_profile/
+
+        수정 가능한 필드: nickname, profile
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Milestone:
+      type: object
+      description: 마일스톤 기본 직렬화
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        team:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        startdate:
+          type: string
+          format: date
+        enddate:
+          type: string
+          format: date
+        is_completed:
+          type: boolean
+          readOnly: true
+        completed_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        progress_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        priority:
+          $ref: '#/components/schemas/PriorityEnum'
+        priority_display:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+      required:
+      - completed_date
+      - enddate
+      - id
+      - is_completed
+      - priority_display
+      - startdate
+      - status
+      - status_display
+      - team
+      - title
+    MilestoneCreate:
+      type: object
+      description: 마일스톤 생성용 직렬화
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        startdate:
+          type: string
+          format: date
+        enddate:
+          type: string
+          format: date
+        priority:
+          $ref: '#/components/schemas/PriorityEnum'
+      required:
+      - enddate
+      - startdate
+      - title
+    MilestoneUpdate:
+      type: object
+      description: 마일스톤 업데이트용 직렬화 (드래그앤드롭, 진행률 변경)
+      properties:
+        startdate:
+          type: string
+          format: date
+        enddate:
+          type: string
+          format: date
+        progress_percentage:
+          type: integer
+          maximum: 100
+          minimum: 0
+    PaginatedMilestoneList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Milestone'
+    PaginatedTeamMemberList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+    PaginatedTodoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+    PatchedMilestoneUpdate:
+      type: object
+      description: 마일스톤 업데이트용 직렬화 (드래그앤드롭, 진행률 변경)
+      properties:
+        startdate:
+          type: string
+          format: date
+        enddate:
+          type: string
+          format: date
+        progress_percentage:
+          type: integer
+          maximum: 100
+          minimum: 0
+    PatchedTodo:
+      type: object
+      description: 기본 TODO 직렬화
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        status_display:
+          type: string
+          readOnly: true
+        assignee:
+          type: integer
+          nullable: true
+        assignee_name:
+          type: string
+          readOnly: true
+        order:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PriorityEnum:
+      enum:
+      - critical
+      - high
+      - medium
+      - low
+      - minimal
+      type: string
+      description: |-
+        * `critical` - 최우선
+        * `high` - 중요
+        * `medium` - 보통
+        * `low` - 낮음
+        * `minimal` - 미미
+    StatusEnum:
+      enum:
+      - todo
+      - in_progress
+      - done
+      type: string
+      description: |-
+        * `todo` - To Do
+        * `in_progress` - In Progress
+        * `done` - Done
+    TeamMember:
+      type: object
+      description: 팀 멤버 정보 직렬화
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        nickname:
+          type: string
+          readOnly: true
+        is_host:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - is_host
+      - nickname
+      - user_id
+      - username
+    Todo:
+      type: object
+      description: 기본 TODO 직렬화
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        status_display:
+          type: string
+          readOnly: true
+        assignee:
+          type: integer
+          nullable: true
+        assignee_name:
+          type: string
+          readOnly: true
+        order:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - assignee_name
+      - completed_at
+      - created_at
+      - id
+      - status_display
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

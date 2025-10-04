@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 from .models import Todo
 from .serializers import (
@@ -13,6 +14,7 @@ from .serializers import (
 from .services import TodoService
 from teams.models import Team, TeamUser
 from api.permissions import IsTeamMember
+from api.utils import api_response, api_success_response, api_error_response
 
 
 class TodoViewSet(viewsets.ModelViewSet):
@@ -98,17 +100,14 @@ class TodoViewSet(viewsets.ModelViewSet):
                 requester=request.user
             )
 
-            return Response({
-                'success': True,
-                'message': '할 일이 DONE 보드로 이동되었습니다.',
-                'todo': TodoSerializer(updated_todo).data
-            })
+            return api_success_response(
+                request,
+                '할 일이 DONE 보드로 이동되었습니다.',
+                data={'todo': TodoSerializer(updated_todo).data}
+            )
 
         except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return api_error_response(request, str(e))
 
     @action(detail=True, methods=['post'])
     def assign(self, request, team_pk=None, pk=None):
@@ -130,17 +129,14 @@ class TodoViewSet(viewsets.ModelViewSet):
             assignee_name = updated_todo.assignee.user.nickname or updated_todo.assignee.user.username
             message = f'{updated_todo.content}이(가) {assignee_name}님에게 할당되었습니다.'
 
-            return Response({
-                'success': True,
-                'message': message,
-                'todo': TodoSerializer(updated_todo).data
-            })
+            return api_success_response(
+                request,
+                message,
+                data={'todo': TodoSerializer(updated_todo).data}
+            )
 
         except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return api_error_response(request, str(e))
 
     @action(detail=True, methods=['post'])
     def complete(self, request, team_pk=None, pk=None):
@@ -161,18 +157,17 @@ class TodoViewSet(viewsets.ModelViewSet):
 
             status_message = '완료되었습니다.' if is_completed else '미완료로 변경되었습니다.'
 
-            return Response({
-                'success': True,
-                'message': status_message,
-                'is_completed': is_completed,
-                'todo': TodoSerializer(updated_todo).data
-            })
+            return api_success_response(
+                request,
+                status_message,
+                data={
+                    'is_completed': is_completed,
+                    'todo': TodoSerializer(updated_todo).data
+                }
+            )
 
         except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return api_error_response(request, str(e))
 
 
 class TeamMemberViewSet(viewsets.ReadOnlyModelViewSet):

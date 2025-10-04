@@ -2,6 +2,43 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const weekInput = document.getElementById('week');
+    const scheduleForm = document.querySelector('.form-container');
+    const teamId = window.location.pathname.match(/\/teams\/(\d+)\//)?.[1];
+
+    // 폼 제출 이벤트를 API 호출로 대체
+    if (scheduleForm) {
+        scheduleForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const weekValue = weekInput.value;
+            if (!weekValue) {
+                showDjangoToast('주차를 선택해주세요.', 'error');
+                return;
+            }
+
+            // ISO week format (YYYY-W##)을 YYYY-MM-DD 형식으로 변환
+            const weekStart = getWeekStartDate(weekValue);
+
+            // 체크된 모든 체크박스 수집
+            const scheduleData = {};
+            document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+                if (checkbox.checked) {
+                    scheduleData[checkbox.name] = true;
+                }
+            });
+
+            // 체크된 항목이 없으면 경고
+            const checkedCount = Object.keys(scheduleData).length;
+            if (checkedCount === 0) {
+                showConfirmModal('가능한 시간대를 선택하지 않았습니다. 빈 스케줄로 저장하시겠습니까?', async () => {
+                    await saveSchedule(teamId, weekStart, scheduleData);
+                });
+                return;
+            }
+
+            await saveSchedule(teamId, weekStart, scheduleData);
+        });
+    }
 
     // 주차 입력 변경 시 날짜 업데이트
     if (weekInput) {
@@ -299,4 +336,43 @@ function updateSlotVisual(slot, isChecked) {
     } else {
         slot.classList.remove('selected');
     }
+}
+
+/**
+ * API를 통한 스케줄 저장
+ */
+async function saveSchedule(teamId, weekStart, scheduleData) {
+    try {
+        const response = await scheduleApi.savePersonalSchedule(teamId, weekStart, scheduleData);
+
+        if (response.success) {
+            // 성공 시 스케줄 조회 페이지로 이동 (메시지는 Django messages로 표시)
+            window.location.href = `/teams/${teamId}/schedules/`;
+        } else {
+            showDjangoToast(response.error || '스케줄 저장에 실패했습니다.', 'error');
+        }
+    } catch (error) {
+        handleApiError(error);
+    }
+}
+
+/**
+ * ISO week format을 YYYY-MM-DD 형식으로 변환
+ */
+function getWeekStartDate(weekValue) {
+    // YYYY-W## 형식을 파싱
+    const [year, week] = weekValue.split('-W');
+
+    // 해당 주차의 월요일 계산
+    const jan1 = new Date(year, 0, 1);
+    const dayOfWeek = jan1.getDay() || 7; // 월요일 = 1, 일요일 = 7
+    const mondayOfFirstWeek = new Date(year, 0, 1 + (8 - dayOfWeek) % 7);
+    const mondayOfTargetWeek = new Date(mondayOfFirstWeek.getTime() + (parseInt(week) - 1) * 7 * 24 * 60 * 60 * 1000);
+
+    // YYYY-MM-DD 형식으로 반환
+    const yyyy = mondayOfTargetWeek.getFullYear();
+    const mm = String(mondayOfTargetWeek.getMonth() + 1).padStart(2, '0');
+    const dd = String(mondayOfTargetWeek.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
 }

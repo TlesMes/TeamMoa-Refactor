@@ -387,10 +387,21 @@ window.ApiError = ApiError;
  * API 응답을 토스트로 표시하는 헬퍼 함수
  */
 window.handleApiResponse = function(response, successCallback = null) {
-    // 성공 메시지가 있으면 Django 토스트로 표시
-    if (response.message) {
+    // Django messages 배열이 있으면 모두 표시
+    if (response.messages && Array.isArray(response.messages)) {
+        response.messages.forEach(msg => {
+            if (window.showDjangoToast) {
+                showDjangoToast(msg.message, msg.level);
+            } else {
+                showToast(msg.message);
+            }
+        });
+    }
+    // 하위 호환성: 단일 message 필드도 지원
+    else if (response.message) {
+        const level = response.success === false ? 'error' : 'success';
         if (window.showDjangoToast) {
-            showDjangoToast(response.message, 'success');
+            showDjangoToast(response.message, level);
         } else {
             showToast(response.message);
         }
@@ -423,8 +434,18 @@ window.handleApiError = function(error, errorCallback = null) {
     }
     console.groupEnd();
 
-    // 에러 메시지 Django 토스트로 표시
-    if (error instanceof ApiError) {
+    // 에러 응답에서 Django messages 처리
+    if (error instanceof ApiError && error.data && error.data.messages) {
+        error.data.messages.forEach(msg => {
+            if (window.showDjangoToast) {
+                showDjangoToast(msg.message, msg.level || 'error');
+            } else {
+                showToast(msg.message, 'error');
+            }
+        });
+    }
+    // 일반 에러 메시지 표시
+    else if (error instanceof ApiError) {
         if (window.showDjangoToast) {
             showDjangoToast(error.message, 'error');
         } else {
