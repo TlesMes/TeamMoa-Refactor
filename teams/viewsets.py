@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 from .models import Team, Milestone
 from .serializers import (
@@ -10,6 +11,7 @@ from .serializers import (
 )
 from .services import MilestoneService
 from api.permissions import IsTeamMember
+from api.utils import api_response, api_success_response, api_error_response
 
 
 class MilestoneViewSet(viewsets.ModelViewSet):
@@ -72,14 +74,15 @@ class MilestoneViewSet(viewsets.ModelViewSet):
 
             # 생성된 마일스톤을 MilestoneSerializer로 직렬화하여 반환
             response_serializer = MilestoneSerializer(milestone)
-            return Response({
-                'success': True,
-                'message': f'"{milestone.title}" 마일스톤이 생성되었습니다.',
-                'milestone': response_serializer.data
-            }, status=status.HTTP_201_CREATED)
+            return api_success_response(
+                request,
+                f'"{milestone.title}" 마일스톤이 생성되었습니다.',
+                data={'milestone': response_serializer.data},
+                status_code=status.HTTP_201_CREATED
+            )
 
         except ValueError as e:
-            raise serializers.ValidationError({'detail': str(e)})
+            return api_error_response(request, str(e))
 
     def update(self, request, *args, **kwargs):
         """마일스톤 전체 업데이트 (PUT)"""
@@ -112,17 +115,14 @@ class MilestoneViewSet(viewsets.ModelViewSet):
             # 업데이트된 마일스톤을 MilestoneSerializer로 직렬화하여 반환
             response_serializer = MilestoneSerializer(updated_milestone)
 
-            return Response({
-                'success': True,
-                'message': f"마일스톤 {', '.join(updated_fields)}이(가) 업데이트되었습니다.",
-                'milestone': response_serializer.data
-            })
+            return api_success_response(
+                request,
+                f"마일스톤 {', '.join(updated_fields)}이(가) 업데이트되었습니다.",
+                data={'milestone': response_serializer.data}
+            )
 
         except ValueError as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return api_error_response(request, str(e))
 
     def destroy(self, request, *args, **kwargs):
         """마일스톤 삭제"""
@@ -135,13 +135,10 @@ class MilestoneViewSet(viewsets.ModelViewSet):
                 team=team
             )
 
-            return Response({
-                'success': True,
-                'message': f'"{milestone_title}" 마일스톤이 삭제되었습니다.'
-            }, status=status.HTTP_200_OK)
+            return api_success_response(
+                request,
+                f'"{milestone_title}" 마일스톤이 삭제되었습니다.'
+            )
 
         except Exception as e:
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
