@@ -252,7 +252,79 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 페이지 로드 시 Django Messages 표시
     showDjangoMessages();
-    
+
+    // sessionStorage에 저장된 메시지 확인 및 표시
+    function showPendingMessages() {
+        const pendingMessages = sessionStorage.getItem('pendingMessages');
+        if (pendingMessages) {
+            try {
+                const messages = JSON.parse(pendingMessages);
+                messages.forEach((msg, index) => {
+                    // 각 메시지를 순차적으로 표시 (0.5초 간격)
+                    setTimeout(() => {
+                        showDjangoToast(msg.message, msg.level);
+                    }, index * 500);
+                });
+                // 표시 후 삭제 (한 번만 표시)
+                sessionStorage.removeItem('pendingMessages');
+            } catch (e) {
+                console.error('Failed to parse pending messages:', e);
+                sessionStorage.removeItem('pendingMessages');
+            }
+        }
+    }
+
+    // 페이지 로드 시 sessionStorage 메시지 확인
+    showPendingMessages();
+
+    // 필수 입력 필드 검증
+    function validateRequiredFields(fields) {
+        let isValid = true;
+        let firstErrorField = null;
+
+        fields.forEach(field => {
+            const input = field.input;
+            const value = input.value?.trim();
+            const wrapper = input.closest('.input-wrapper') || input.closest('.form-group');
+
+            if (!value) {
+                // 에러 상태 추가
+                if (wrapper) {
+                    wrapper.classList.add('error');
+                }
+
+                if (field.message && isValid) {
+                    showDjangoToast(field.message, 'error');
+                }
+
+                if (!firstErrorField) {
+                    firstErrorField = input;
+                }
+
+                isValid = false;
+            } else {
+                // 값이 있으면 에러 상태 제거
+                if (wrapper) {
+                    wrapper.classList.remove('error');
+                }
+            }
+        });
+
+        if (firstErrorField) {
+            firstErrorField.focus();
+        }
+
+        return isValid;
+    }
+
+    // 필드 에러 제거
+    function clearFieldError(input) {
+        const wrapper = input.closest('.input-wrapper') || input.closest('.form-group');
+        if (wrapper) {
+            wrapper.classList.remove('error');
+        }
+    }
+
     // 공통 확인 모달 함수
     function showConfirmModal(message, onConfirm) {
         // 기존 모달이 있다면 제거
@@ -411,5 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.showConfirmModal = showConfirmModal;
     window.showToast = showToast;
     window.showDjangoToast = showDjangoToast;
-    
+    window.validateRequiredFields = validateRequiredFields;
+    window.clearFieldError = clearFieldError;
+
 });

@@ -3,18 +3,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const weekInput = document.getElementById('week');
     const scheduleForm = document.querySelector('.form-container');
-    const teamId = window.location.pathname.match(/\/teams\/(\d+)\//)?.[1];
+    const teamId = window.TEAM_ID || window.location.pathname.match(/\/scheduler_upload_page\/(\d+)\//)?.[1];
 
     // 폼 제출 이벤트를 API 호출로 대체
     if (scheduleForm) {
         scheduleForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // 필수 필드 검증
+            const isValid = validateRequiredFields([
+                { input: weekInput, message: '주차를 선택해주세요.' }
+            ]);
+
+            if (!isValid) return;
+
             const weekValue = weekInput.value;
-            if (!weekValue) {
-                showDjangoToast('주차를 선택해주세요.', 'error');
-                return;
-            }
 
             // ISO week format (YYYY-W##)을 YYYY-MM-DD 형식으로 변환
             const weekStart = getWeekStartDate(weekValue);
@@ -40,9 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 주차 입력 변경 시 날짜 업데이트
+    // 주차 입력 변경 시 날짜 업데이트 및 에러 상태 제거
     if (weekInput) {
         weekInput.addEventListener('change', function() {
+            // 값이 입력되면 에러 상태 제거
+            if (this.value) {
+                clearFieldError(this);
+            }
+
             updateWeekDates(this.value);
         });
 
@@ -292,14 +300,8 @@ function selectWeekends() {
 function updateWeekDates(weekValue) {
     if (!weekValue) return;
 
-    // YYYY-W## 형식을 파싱
-    const [year, week] = weekValue.split('-W');
-
-    // 해당 주차의 월요일 계산
-    const jan1 = new Date(year, 0, 1);
-    const dayOfWeek = jan1.getDay() || 7; // 월요일 = 1, 일요일 = 7
-    const mondayOfFirstWeek = new Date(year, 0, 1 + (8 - dayOfWeek) % 7);
-    const mondayOfTargetWeek = new Date(mondayOfFirstWeek.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+    // 정의된 getWeekStartDate 함수 사용
+    const mondayOfTargetWeek = new Date(getWeekStartDate(weekValue));
 
     // 각 요일의 날짜 계산 및 업데이트
     for (let i = 0; i < 7; i++) {
@@ -346,8 +348,13 @@ async function saveSchedule(teamId, weekStart, scheduleData) {
         const response = await scheduleApi.savePersonalSchedule(teamId, weekStart, scheduleData);
 
         if (response.success) {
-            // 성공 시 스케줄 조회 페이지로 이동 (메시지는 Django messages로 표시)
-            window.location.href = `/teams/${teamId}/schedules/`;
+            // 리다이렉트 후 표시할 메시지를 sessionStorage에 저장
+            if (response.messages && response.messages.length > 0) {
+                sessionStorage.setItem('pendingMessages', JSON.stringify(response.messages));
+            }
+
+            // 즉시 리다이렉트
+            window.location.href = `/schedules/scheduler_page/${teamId}/`;
         } else {
             showDjangoToast(response.error || '스케줄 저장에 실패했습니다.', 'error');
         }
@@ -357,17 +364,20 @@ async function saveSchedule(teamId, weekStart, scheduleData) {
 }
 
 /**
- * ISO week format을 YYYY-MM-DD 형식으로 변환
+ * ISO week format (YYYY-W##) → YYYY-MM-DD (월요일)
  */
 function getWeekStartDate(weekValue) {
-    // YYYY-W## 형식을 파싱
-    const [year, week] = weekValue.split('-W');
+    const [year, week] = weekValue.split('-W').map(Number);
 
-    // 해당 주차의 월요일 계산
-    const jan1 = new Date(year, 0, 1);
-    const dayOfWeek = jan1.getDay() || 7; // 월요일 = 1, 일요일 = 7
-    const mondayOfFirstWeek = new Date(year, 0, 1 + (8 - dayOfWeek) % 7);
-    const mondayOfTargetWeek = new Date(mondayOfFirstWeek.getTime() + (parseInt(week) - 1) * 7 * 24 * 60 * 60 * 1000);
+    // ISO 주차 규칙: 1월 4일이 포함된 주가 Week 1
+    const simple = new Date(year, 0, 4); // 1월 4일
+    const dayOfWeek = simple.getDay() || 7; // 일요일 = 7
+    const mondayOfWeek1 = new Date(simple);
+    mondayOfWeek1.setDate(simple.getDate() - dayOfWeek + 1); // 첫 주 월요일
+
+    // 목표 주의 월요일 계산
+    const mondayOfTargetWeek = new Date(mondayOfWeek1);
+    mondayOfTargetWeek.setDate(mondayOfWeek1.getDate() + (week - 1) * 7);
 
     // YYYY-MM-DD 형식으로 반환
     const yyyy = mondayOfTargetWeek.getFullYear();

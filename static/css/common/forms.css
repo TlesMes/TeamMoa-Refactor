@@ -1,0 +1,34 @@
+/* ==========================================================================
+   공통 폼 에러 스타일
+   ========================================================================== */
+
+/* 에러 상태 input/select/textarea */
+.input-wrapper.error input,
+.form-group.error input,
+.input-wrapper.error select,
+.form-group.error select,
+.input-wrapper.error textarea,
+.form-group.error textarea {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.05);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* 에러 상태 아이콘 */
+.input-wrapper.error i,
+.form-group.error i {
+  color: #e74c3c;
+  transition: color 0.2s ease;
+}
+
+/* 포커스 시에도 에러 색상 유지 */
+.input-wrapper.error input:focus,
+.form-group.error input:focus,
+.input-wrapper.error select:focus,
+.form-group.error select:focus,
+.input-wrapper.error textarea:focus,
+.form-group.error textarea:focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+  outline: none;
+}
