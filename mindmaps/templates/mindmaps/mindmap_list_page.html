@@ -143,8 +143,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // 모달 열기
     function openModal() {
         modal.classList.add('active');
-        document.getElementById('mindmap_title').focus();
+        const titleInput = document.getElementById('mindmap_title');
+        titleInput.focus();
     }
+
+    // 제목 입력 시 에러 상태 제거
+    const titleInput = document.getElementById('mindmap_title');
+    titleInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            clearFieldError(this);
+        }
+    });
 
     if (openBtn) {
         openBtn.addEventListener('click', openModal);
@@ -174,12 +183,16 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const title = document.getElementById('mindmap_title').value.trim();
+        const titleInput = document.getElementById('mindmap_title');
 
-        if (!title) {
-            showDjangoToast('마인드맵 제목을 입력해주세요.', 'error');
-            return;
-        }
+        // 필수 필드 검증
+        const isValid = validateRequiredFields([
+            { input: titleInput, message: '마인드맵 제목을 입력해주세요.' }
+        ]);
+
+        if (!isValid) return;
+
+        const title = titleInput.value.trim();
 
         const formData = new FormData();
         formData.append('title', title);
