@@ -294,7 +294,7 @@ def get_status_display(self, obj):
 - [x] JavaScript API Client 전환
 - [x] 템플릿 스크립트 로드
 - [x] 레거시 코드 제거 (79줄)
-- [x] Django check 통과
+- [x] Django check 
 - [x] 서버 실행 확인
 - [x] API 스키마 생성 확인
 - [x] Swagger UI 작동 확인
