@@ -1,4 +1,4 @@
-{% extends "base_app.html" %} {% load static %}
+{% extends "base_team.html" %} {% load static %}
 
 {% block mobileView %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,7 +16,7 @@
 <script type="text/javascript" src="/static/js/lang/summernote-ko-KR.js"></script>
 <script src="{% static 'js/pages/post_write.js' %}"></script>
 {% endblock %} {% block contents %} {% load static %}
-{% comment %} Light theme styles loaded in base_app.html {% endcomment %}
+{% comment %} Light theme styles loaded in base_team.html {% endcomment %}
 <section class="post-write-section">
   <div class="write-header">
     <a href="{% url 'shares:post_list' team.id %}" class="write-back-btn">

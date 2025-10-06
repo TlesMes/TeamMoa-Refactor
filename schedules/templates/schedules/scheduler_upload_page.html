@@ -1,4 +1,4 @@
-{% extends 'base_app.html' %}
+{% extends 'base_team.html' %}
 {% load static %}
 
 {% block extra_css %}
@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // 템플릿에서 팀 ID 전달
+    window.TEAM_ID = {{ team.id }};
+</script>
+<script src="{% static 'js/api/client.js' %}"></script>
 <script src="{% static 'js/pages/scheduler_upload.js' %}"></script>
 {% endblock %} 
 
@@ -40,7 +45,7 @@
         <label for="week">주차 선택</label>
         <div class="input-wrapper">
           <i class="ri-calendar-2-line"></i>
-          <input type="week" name="week" id="week" required>
+          <input type="week" name="week" id="week">
         </div>
         <div class="help-text">
           <small>스케줄을 등록할 주차를 선택해주세요</small>
