@@ -60,7 +60,6 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         try:
             # 팀 멤버 확인
             team_user = get_object_or_404(TeamUser, team=team, user=request.user)
-
             # 서비스 레이어를 통한 스케줄 저장
             updated_days = self.schedule_service.save_personal_schedule(
                 team_user=team_user,
@@ -68,10 +67,9 @@ class ScheduleViewSet(viewsets.ModelViewSet):
                 schedule_data=serializer.validated_data['schedule_data']
             )
 
-            if updated_days > 0:
-                message = f'주간 스케줄이 성공적으로 저장되었습니다. ({updated_days}일)'
-            else:
-                message = '등록된 가능 시간이 없습니다.'
+            
+            message = '주간 스케줄이 성공적으로 저장되었습니다.'
+            
 
             return api_success_response(
                 request,

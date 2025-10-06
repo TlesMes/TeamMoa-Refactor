@@ -26,10 +26,10 @@ class ScheduleService:
         """팀의 주간 가용성을 실시간 계산합니다. (기존 모델 메서드에서 이동)"""
         # 전체 기간의 스케줄을 한 번에 가져오기 (성능 최적화)
         schedules = PersonalDaySchedule.objects.filter(
-            owner__team=team, 
+            owner__team=team,
             date__range=[start_date, end_date]
         ).select_related('owner')
-        
+
         # 날짜별로 그룹화
         schedules_by_date = {}
         for schedule in schedules:
@@ -63,24 +63,24 @@ class ScheduleService:
     def _bulk_process_weekly_schedule(self, team_user, week_start, schedule_data):
         """주간 스케줄을 일괄 처리합니다."""
         updated_days = 0
-        
+
         # 7일간 스케줄 처리
         for day_offset in range(7):
             current_date = week_start + timedelta(days=day_offset)
-            
+
             # 기존 스케줄 삭제 (중복 방지)
             PersonalDaySchedule.objects.filter(
                 owner=team_user,
                 date=current_date
             ).delete()
-            
+
             # 새 스케줄 생성
             available_hours = []
             for hour in range(24):
                 checkbox_name = f'time_{hour}-{day_offset + 1}'
                 if schedule_data.get(checkbox_name):
                     available_hours.append(hour)
-            
+
             # 가능한 시간이 있을 때만 저장
             if available_hours:
                 PersonalDaySchedule.objects.create(

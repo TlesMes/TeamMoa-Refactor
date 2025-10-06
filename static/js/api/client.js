@@ -434,6 +434,14 @@ window.handleApiError = function(error, errorCallback = null) {
     }
     console.groupEnd();
 
+    // HTML 에러 페이지인 경우 (Django 디버그 페이지) 전체 페이지로 표시
+    if (error instanceof ApiError && typeof error.data === 'string' && error.data.includes('<!DOCTYPE html>')) {
+        document.open();
+        document.write(error.data);
+        document.close();
+        return error;
+    }
+
     // 에러 응답에서 Django messages 처리
     if (error instanceof ApiError && error.data && error.data.messages) {
         error.data.messages.forEach(msg => {

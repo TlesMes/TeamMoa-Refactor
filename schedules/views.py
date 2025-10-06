@@ -37,7 +37,7 @@ class SchedulerPageView(TeamMemberRequiredMixin, TemplateView):
             
             # 서비스를 통한 팀 가용성 계산
             team_availability = self.schedule_service.get_team_availability(team, date_mon, date_sun)
-            
+
             return self.render_to_response({
                 'schedules': team_availability,
                 'team': team,
@@ -75,7 +75,7 @@ class SchedulerUploadPageView(TeamMemberRequiredMixin, TemplateView):
             week = request.POST.get("week")
             if not week:
                 raise ValueError(self.schedule_service.ERROR_MESSAGES['INVALID_WEEK'])
-            
+
             week_start = date.fromisoformat(week)
             
             # 서비스를 통한 스케줄 저장
