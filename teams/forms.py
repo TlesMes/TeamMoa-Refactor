@@ -23,7 +23,11 @@ class CreateTeamForm(forms.ModelForm):
     )
     introduction = forms.CharField(
         required=False,  # JavaScript에서 검증, HTML required 제거
-        widget=forms.Textarea(attrs={'class': 'introduction', 'maxlength': '200'}),
+        widget=forms.Textarea(attrs={
+            'class': 'introduction',
+            'maxlength': '200',
+            'style': 'resize: vertical; min-height: 100px; padding: 12px;'
+        }),
         label='팀 소개'
     )
 
