@@ -22,8 +22,8 @@ class CreateTeamForm(forms.ModelForm):
         label='비밀번호'
     )
     introduction = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'introduction', 'maxlength': '20'}),
+        required=False,  # JavaScript에서 검증, HTML required 제거
+        widget=forms.Textarea(attrs={'class': 'introduction', 'maxlength': '200'}),
         label='팀 소개'
     )
 
@@ -55,8 +55,9 @@ class CreateTeamForm(forms.ModelForm):
 
     def clean_introduction(self):
         introduction = self.cleaned_data.get('introduction', '')
-        # 팀 소개는 선택 사항이므로 빈 값 허용
-        return introduction.strip() if introduction else ''
+        if not introduction or not introduction.strip():
+            raise ValidationError('팀 소개를 입력해주세요.')
+        return introduction.strip()
 
 
 class SearchTeamForm(forms.ModelForm):

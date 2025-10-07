@@ -105,9 +105,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const titleInput = document.getElementById('id_title');
     const maxuserInput = document.getElementById('id_maxuser');
     const passwordInput = document.getElementById('id_teampasswd');
+    const introductionInput = document.getElementById('id_introduction');
 
     // 입력 시 에러 상태 제거
-    [titleInput, maxuserInput, passwordInput].forEach(input => {
+    [titleInput, maxuserInput, passwordInput, introductionInput].forEach(input => {
         if (input) {
             input.addEventListener('input', function() {
                 if (this.value.trim()) {
@@ -123,7 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const isValid = validateRequiredFields([
             { input: titleInput, message: '팀명을 입력해주세요.' },
             { input: maxuserInput, message: '최대 인원수를 입력해주세요.' },
-            { input: passwordInput, message: '팀 비밀번호를 입력해주세요.' }
+            { input: passwordInput, message: '팀 비밀번호를 입력해주세요.' },
+            { input: introductionInput, message: '팀 소개를 입력해주세요.' }
         ]);
 
         if (!isValid) {
