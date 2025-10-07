@@ -197,18 +197,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // 입력 필드 참조
+    const inviteCodeInput = document.getElementById('id_invitecode');
+    const passwordInput = document.getElementById('id_teampasswd');
+
+    // 입력 시 에러 상태 제거
+    inviteCodeInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            clearFieldError(this);
+        }
+    });
+
+    passwordInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            clearFieldError(this);
+        }
+    });
+
     // Step 1: 팀 코드 검증
     document.getElementById('team-search-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
+        // 필수 필드 검증
+        const isValid = validateRequiredFields([
+            { input: inviteCodeInput, message: '팀 코드를 입력해주세요.' }
+        ]);
+
+        if (!isValid) return;
+
         const formData = new FormData(this);
-        const inviteCode = formData.get('invitecode').trim();
-        
-        if (!inviteCode) {
-            showError('code-error', '팀 코드를 입력해주세요.');
-            return;
-        }
-        
+        const inviteCode = inviteCodeInput.value.trim();
+
         toggleLoading('search-btn', true);
         
         fetch("{% url 'teams:team_verify_code' %}", {
@@ -253,15 +272,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Step 2: 팀 가입 처리
     document.getElementById('team-join-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
+        // 필수 필드 검증
+        const isValid = validateRequiredFields([
+            { input: passwordInput, message: '팀 비밀번호를 입력해주세요.' }
+        ]);
+
+        if (!isValid) return;
+
         const formData = new FormData(this);
-        const password = formData.get('teampasswd').trim();
-        
-        if (!password) {
-            showError('password-error', '팀 비밀번호를 입력해주세요.');
-            return;
-        }
-        
+        const password = passwordInput.value.trim();
+
         toggleLoading('join-btn', true);
         
         fetch("{% url 'teams:team_join_process' %}", {

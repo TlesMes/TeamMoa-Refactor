@@ -697,16 +697,41 @@ function initializeCreateMilestoneModal() {
         }
     });
 
+    // 입력 필드 참조
+    const titleInput = document.getElementById('title');
+    const startDateInput = document.getElementById('startdate');
+    const endDateInput = document.getElementById('enddate');
+    const priorityInput = document.getElementById('priority');
+
+    // 입력 시 에러 상태 제거
+    [titleInput, startDateInput, endDateInput, priorityInput].forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldError(this);
+            }
+        });
+    });
+
     // 폼 제출
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // 필수 필드 검증
+        const isValid = validateRequiredFields([
+            { input: titleInput, message: '마일스톤 제목을 입력해주세요.' },
+            { input: startDateInput, message: '시작일을 선택해주세요.' },
+            { input: endDateInput, message: '종료일을 선택해주세요.' },
+            { input: priorityInput, message: '우선순위를 선택해주세요.' }
+        ]);
+
+        if (!isValid) return;
+
         const formData = {
-            title: document.getElementById('title').value,
+            title: titleInput.value,
             description: document.getElementById('description').value,
-            startdate: document.getElementById('startdate').value,
-            enddate: document.getElementById('enddate').value,
-            priority: document.getElementById('priority').value
+            startdate: startDateInput.value,
+            enddate: endDateInput.value,
+            priority: priorityInput.value
         };
 
         // 날짜 유효성 검사
