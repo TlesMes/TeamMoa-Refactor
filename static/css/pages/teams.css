@@ -1,0 +1,1898 @@
+/* ========================================
+   Teams CSS - Consolidated Team-related Styles
+   ======================================== */
+
+/* ==========================================================================
+   BACK BUTTON (for team create/search pages)
+   ========================================================================== */
+
+/* Back button for team-join-step (search page) - positioned before header */
+.team-join-step .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--dark-bg-accent);
+  border: 1px solid var(--dark-border-color);
+  border-radius: 8px;
+  color: var(--dark-text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-bottom: 0;
+}
+
+.team-join-step .back-btn:hover {
+  background: var(--dark-bg-secondary);
+  border-color: var(--dark-accent-primary);
+  color: var(--dark-accent-primary);
+  transform: translateX(-2px);
+}
+
+.team-join-step .back-btn i {
+  font-size: 20px;
+}
+
+/* Back button for auth-card (create page) - top left corner */
+.auth-card > .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--dark-bg-accent);
+  border: 1px solid var(--dark-border-color);
+  border-radius: 8px;
+  color: var(--dark-text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.auth-card > .back-btn:hover {
+  background: var(--dark-bg-secondary);
+  border-color: var(--dark-accent-primary);
+  color: var(--dark-accent-primary);
+  transform: translateX(-2px);
+}
+
+.auth-card > .back-btn i {
+  font-size: 20px;
+}
+
+/* Need relative positioning for back button */
+.team-join-step,
+.auth-card {
+  position: relative;
+}
+
+/* ==========================================================================
+   MILESTONE TIMELINE STYLES
+   ========================================================================== */
+
+/* Timeline Page Layout */
+.timeline-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.timeline-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.timeline-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.timeline-title-section h2 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: #2c3e50;
+}
+
+.timeline-title-section p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.timeline-container {
+  display: flex;
+  height: 600px; /* 높이 증가 */
+  min-height: 600px; /* 최소 높이 보장 */
+  background: white;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+.timeline-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 20px;
+}
+
+.timeline-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.timeline-btn {
+  padding: 8px 16px;
+  border: 2px solid #e9ecef;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeline-btn:hover {
+  border-color: #007bff;
+  background: #f8f9fa;
+}
+
+.timeline-btn.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.timeline-legend {
+  display: flex;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.legend-color.critical { background: #dc3545; }
+.legend-color.high { background: #fd7e14; }
+.legend-color.medium { background: #ffc107; }
+.legend-color.low { background: #007bff; }
+
+.timeline-chart {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 좌측 고정 영역: 마일스톤 정보 */
+.milestone-info-fixed {
+  width: 250px;
+  background: #e9ecef;
+  border-right: 2px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.milestone-info-header {
+  padding: 20px;
+  background: #dee2e6;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  font-size: 16px;
+  color: #495057;
+  height: 60px; /* 고정 높이 설정 */
+  box-sizing: border-box;
+}
+
+.milestone-info-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.milestone-info-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.milestone-info-item {
+  padding: 10px 50px 10px 20px; /* 위아래 패딩 감소 */
+  margin: 10px 15px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+  transition: background-color 0.2s ease;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative; /* 절대 위치 버튼을 위한 relative */
+}
+
+.milestone-info-item .delete-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #ef4444;
+  font-size: 16px;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.milestone-info-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.milestone-info-item .delete-btn:hover {
+  background: #fee2e2;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.milestone-info-item:hover {
+  background: #f8f9fa;
+}
+
+.milestone-title {
+  margin: 6px 0 2px 0;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.milestone-dates {
+  margin: 2px 0;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.empty-milestone-info {
+  padding: 40px 15px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* 우측 스크롤 영역: 타임라인 */
+.timeline-scroll-area {
+  flex: 1;
+  overflow-x: auto; /* auto 대신 scroll로 강제 표시 */
+  overflow-y: hidden;
+  background: #f0f0f0; /* 디버깅용 배경색 */
+}
+
+.timeline-scroll-area::-webkit-scrollbar {
+  height: 12px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.timeline-scroll-content {
+  width: 4800px;
+  min-width: 4800px;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+  background: #f8f9fa;
+}
+
+.timeline-dates-header {
+  background: #e9ecef;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  padding: 15px 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+  height: 50px;
+  align-items: center;
+}
+
+.timeline-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #dee2e6;
+  height: 100%;
+  font-weight: 600;
+  padding: 0 10px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.timeline-month:first-child {
+  border-left: 2px solid #dee2e6;
+}
+
+.timeline-month:last-child {
+  border-right: none;
+}
+
+.timeline-content {
+  flex: 1;
+  position: relative;
+  background: #f8f9fa;
+}
+
+.milestone-timeline-row {
+  height: 80px;
+  border-bottom: 1px solid #f1f3f4;
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.milestone-timeline-row:hover {
+  background: #f8f9fa;
+}
+
+.empty-timeline {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  width: 100%;
+}
+
+
+.milestone-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.priority {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  color: #fff;
+  min-width: 36px;
+  text-align: center;
+  display: inline-block;
+}
+
+.priority.priority-critical { background: #dc3545; }
+.priority.priority-high { background: #fd7e14; }
+.priority.priority-medium { background: #ffc107; color: #000; }
+.priority.priority-low { background: #007bff; }
+.priority.priority-minimal { background: #6c757d; }
+
+.progress {
+  color: #666;
+  font-weight: 500;
+}
+
+
+.empty-timeline i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-timeline p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.milestone-bar {
+  position: absolute;
+  height: 40px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 5px 3px;
+  font-size: 12px;
+  color: #333;
+  border: 2px solid #007bff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.milestone-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  background: rgba(255,255,255,1);
+}
+
+
+.month-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #8c9399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-label {
+  background: rgba(255,255,255,0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  transform: rotate(-90deg);
+}
+
+/* 우측 헤더 높이 맞춤용 빈 영역 */
+.timeline-header-spacer {
+  height: 60px; /* milestone-info-header와 동일한 높이 */
+  flex-shrink: 0;
+  background: #dee2e6; /* milestone-info-header와 동일한 배경색 */
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 월별 헤더 */
+.month-header {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+  /* border-right: 1px solid rgba(0, 0, 0, 0.1); */
+  box-sizing: border-box;
+}
+
+.month-header:last-child {
+  border-right: none;
+}
+
+/* 마일스톤 타임라인 아이템 높이 정렬 */
+.milestone-timeline-item {
+  position: relative;
+  height: 80px;
+  margin: 10px 0;
+}
+
+.milestone-bar.dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  z-index: 100;
+}
+
+.milestone-bar.priority-critical { border-color: #dc3545; }
+.milestone-bar.priority-high { border-color: #fd7e14; }
+.milestone-bar.priority-medium { border-color: #ffc107; }
+.milestone-bar.priority-low { border-color: #007bff; }
+.milestone-bar.priority-minimal { border-color: #6c757d; }
+
+.milestone-bar.completed {
+  opacity: 0.8;
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.milestone-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 15px;
+  color: #fff;
+  font-size: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.milestone-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.milestone-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.3);
+  border-radius: inherit;
+  transition: width 0.3s ease;
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.3);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.milestone-bar:hover .resize-handle {
+  opacity: 1;
+}
+
+.resize-handle.left {
+  left: 0;
+}
+
+.resize-handle.right {
+  right: 0;
+}
+
+.milestone-marker {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -15px;
+  font-size: 20px;
+  color: #666;
+}
+
+.milestone-marker.completed {
+  color: #28a745;
+}
+
+.empty-timeline {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-timeline i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-timeline p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .timeline-container {
+    padding: 10px;
+  }
+  
+  .milestone-info {
+    width: 200px;
+  }
+  
+  .timeline-legend {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .milestone-row {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+  }
+  
+  .milestone-info {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .milestone-timeline {
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   TEAM MAIN PAGE STYLES
+   ========================================================================== */
+
+.mainsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.datediv h2 {
+  margin-bottom: 20px;
+  font-size: 35px;
+  font-weight: 400;
+  color: #8a98b4;
+}
+
+.datediv span {
+  font-weight: 600;
+  color: #4b6b7c;
+}
+
+.mainsection hr {
+  border: 1px solid #d3daef;
+  margin: 15px 0;
+}
+
+.datediv div {
+  display: flex;
+  margin-bottom: 10px;
+  margin-left: 50px;
+  font-size: 18px;
+}
+
+.datediv > div > img {
+  margin-right: 8px;
+  width: 15px;
+}
+
+.datediv button {
+  border: none;
+  background: transparent;
+}
+
+.deletebtn {
+  margin-top: 2px;
+  margin-left: 10px;
+  position: relative;
+  width: 12px;
+}
+
+.deletehover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+.deletebtn:hover .deletehover {
+  display: block;
+  margin-top: 2px;
+}
+
+.deletebtn:hover path {
+  fill: #929292;
+}
+
+.teamdiv {
+  margin-top: 20px;
+  border: 1px solid #071540;
+  border-radius: 30px;
+  padding: 30px;
+  width: 900px;
+}
+
+.teamdiv h2 {
+  margin: 3px 0;
+  font-size: 20px;
+  color: #2d3d57;
+}
+
+.teamdiv h3 {
+  font-size: 19px;
+  font-weight: 400;
+  color: #4b6b7c;
+}
+
+#copybtn {
+  border: none;
+  background: transparent;
+  position: relative;
+  width: 12px;
+}
+
+.copyhover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+#copybtn:hover .copyhover {
+  display: block;
+}
+
+#copybtn:hover path {
+  fill: #7f8bb1;
+}
+
+.logspan {
+  font-size: 17px;
+  color: #868686;
+}
+
+.editdiv {
+  position: relative;
+}
+
+.editdiv button {
+  position: absolute;
+  right: 0;
+  background: #a6b0d0;
+  color: #fff;
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.plusbtn {
+  margin-right: 220px;
+}
+
+.plusbtn2 {
+  margin-right: 90px;
+}
+
+.timeline-btn {
+  border: none;
+  background: #007bff;
+  color: white;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 10px;
+}
+
+.timeline-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.editdiv button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+/* ==========================================================================
+   TEAM CREATE & SEARCH - AUTH LAYOUT EXTENSIONS
+   ========================================================================== */
+
+/* Team search specific styles */
+.team-join-step {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.team-join-step.active {
+  display: block;
+  opacity: 1;
+}
+
+.team-join-step.fade-out {
+  opacity: 0;
+}
+
+
+/* Team info card */
+.team-info-card {
+  background: var(--dark-bg-accent);
+  border: 1px solid var(--dark-border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.team-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.team-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.team-detail-item i {
+  font-size: 1.25rem;
+  color: var(--dark-accent-primary);
+  min-width: 24px;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: var(--dark-text-muted);
+  min-width: 80px;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--dark-text-primary);
+  font-weight: 500;
+}
+
+/* Success message */
+.success-message {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #10b981;
+  margin-bottom: 1rem;
+}
+
+.success-content h3 {
+  color: var(--dark-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.success-content p {
+  color: var(--dark-text-secondary);
+}
+
+/* Auth links */
+.auth-links {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.auth-links p {
+  color: var(--dark-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.auth-links a {
+  color: var(--dark-accent-light);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.auth-links a:hover {
+  color: var(--dark-accent-primary);
+  text-decoration: underline;
+}
+
+/* Link buttons container */
+.link-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Link button base styles */
+.link-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.link-button i {
+  font-size: 1.1rem;
+}
+
+/* Primary link button */
+.link-button.primary {
+  background: linear-gradient(135deg, var(--dark-accent-primary), var(--dark-accent-light));
+  color: var(--dark-bg-primary);
+  box-shadow: 0 2px 8px rgba(166, 176, 208, 0.2);
+}
+
+.link-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(166, 176, 208, 0.3);
+  color: var(--dark-bg-primary);
+}
+
+/* Secondary link button */
+.link-button.secondary {
+  background: transparent;
+  border-color: var(--dark-border-color);
+  color: var(--dark-text-secondary);
+}
+
+.link-button.secondary:hover {
+  border-color: var(--dark-accent-primary);
+  background: rgba(166, 176, 208, 0.1);
+  color: var(--dark-accent-primary);
+  transform: translateY(-1px);
+}
+
+/* Help text */
+.help-text {
+  margin-top: 0.5rem;
+}
+
+.help-text small {
+  color: var(--dark-text-muted);
+  font-size: 0.85rem;
+}
+
+/* Field error */
+.field-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+/* ==========================================================================
+   TEAM CREATE STYLES
+   ========================================================================== */
+
+.teamcreatesection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamcreatesection h2 {
+  font-size: 19px;
+  color: #a6b0d0;
+  margin-bottom: 10px;
+}
+
+.teamcreatesection input {
+  width: 480px;
+  padding: 15px;
+  background-color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  color: #465173;
+  outline: none;
+  margin-bottom: 20px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamcreatesection textarea {
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  height: 150px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamcreatesection button {
+  width: 100%;
+  height: 70px;
+  background: #a6b0d0;
+  color: #fff;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+}
+
+.teamcreatesection .caption {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.teamcreatesection .caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
+}
+
+.teamcreatesection .caption a span {
+  color: #6285f6;
+}
+
+/* ==========================================================================
+   TEAM LIST STYLES
+   ========================================================================== */
+
+.teamlistsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamlistsection .container {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+}
+
+.teamlistsection .scroll_section {
+  overflow: auto;
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  padding: 20px 25px;
+  height: 400px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar {
+  width: 20px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar-thumb {
+  height: 30%;
+  background: #a0a0a0;
+  border-radius: 30px;
+}
+
+.teamlistsection .scroll_section::-webkit-scrollbar-track {
+  background: #ededed;
+  border-radius: 30px;
+}
+
+.teamlistsection .teamlist {
+  background-color: #fff;
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 30px;
+}
+
+.teamlistsection .teamlist > h2 {
+  display: inline-block;
+  color: #2d3d57;
+  font-size: 20px;
+  margin-right: 20px;
+}
+
+.teamlistsection .teamlist h2 span {
+  color: #868686;
+  font-weight: 500;
+}
+
+.teamlistsection #user_num {
+  color: #4b6b7c;
+  font-weight: 400;
+}
+
+.teamlistsection .teamlist button {
+  float: right;
+  padding: 10px 20px;
+  margin-top: -10px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.teamlistsection .btn_section {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #d9d9d9;
+  margin-top: 30px;
+}
+
+.teamlistsection .btn_section button {
+  background: #a6b0d0;
+  border-style: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 12px 40px;
+}
+
+/* ==========================================================================
+   TEAM JOIN STYLES
+   ========================================================================== */
+
+.teamjoinsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamjoinsection .joindiv {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+  margin: 0 auto;
+}
+
+.teamjoinsection .titlediv {
+  margin-top: 13px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 17px;
+  width: 480px;
+  height: 70px;
+  color: #465173;
+}
+
+.teamjoinsection .titlediv h2 {
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.teamjoinsection textarea {
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 19px;
+  width: 480px;
+  height: 70px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  color: #465173;
+}
+
+.teamjoinsection button {
+  width: 100%;
+  height: 70px;
+  background: #a6b0d0;
+  color: #fff;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   TEAM SEARCH STYLES
+   ========================================================================== */
+
+.teamsearchsection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.teamsearchsection .searchdiv {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  height: auto;
+  padding: 40px 50px;
+  margin: 0 auto;
+}
+
+.teamsearchsection .searchdiv h2 {
+  color: #2d3d57;
+  font-size: 23px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.teamsearchsection .search {
+  display: flex;
+}
+
+.teamsearchsection input {
+  background-color: #fff;
+  border: none;
+  border-radius: 30px 0px 0px 30px;
+  padding: 10px 20px;
+  font-size: 20px;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.teamsearchsection button {
+  background-color: #a6b0d0;
+  color: #fff;
+  border: none;
+  border-radius: 0px 30px 30px 0px;
+  padding: 8px 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.teamsearchsection .caption {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.teamsearchsection .caption a {
+  font-size: 18px;
+  color: #a6b0d0;
+  text-decoration: none;
+}
+
+.teamsearchsection .caption a span {
+  color: #6285f6;
+}
+
+/* ==========================================================================
+   INFO CHANGE STYLES
+   ========================================================================== */
+
+.infosection {
+  font-family: "GmarketSansMedium", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 83vh;
+}
+
+.infosection > div {
+  position: relative;
+}
+
+.infosection img {
+  width: 150px;
+  display: block;
+  margin: auto;
+}
+
+.infosection .changediv {
+  margin-top: 10px;
+}
+
+.infosection h3 {
+  font-size: 21px;
+  color: #a6b0d0;
+}
+
+.infosection .changediv div {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+}
+
+.infosection input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.infosection textarea {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 15px;
+  width: 480px;
+  height: 200px;
+  font-size: 20px;
+  color: #465173;
+  font-family: "GmarketSansMedium", sans-serif;
+  font-weight: normal;
+}
+
+.infosection button {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #a6b0d0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+
+/* ==========================================================================
+   SHARED TEAM STYLES
+   ========================================================================== */
+
+/* Common hover effects for team pages */
+.teamcreatesection button:hover,
+.teamlistsection button:hover,
+.teamjoinsection button:hover,
+.teamsearchsection button:hover,
+.infosection button:hover {
+  cursor: pointer;
+  background-color: #7f8bb1;
+}
+
+/* Common link hover effects */
+.teamcreatesection a:hover,
+.teamsearchsection a:hover,
+.infosection a:hover path,
+.teamjoinsection a:hover path {
+  color: #7f8bb1;
+}
+
+.infosection a:hover path,
+.teamjoinsection a:hover path {
+  fill: #7f8bb1;
+}
+
+/* ==========================================================================
+   MILESTONE STYLES
+   ========================================================================== */
+
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  border-radius: 10px;
+  background: #fff;
+  border-left: 4px solid #ddd;
+  transition: all 0.2s ease;
+}
+
+.milestone-item:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.milestone-item.completed {
+  background: #f8fff8;
+  border-left-color: #28a745;
+  opacity: 0.8;
+}
+
+/* Priority colors */
+.milestone-item.priority-critical {
+  border-left-color: #dc3545;
+}
+
+.milestone-item.priority-high {
+  border-left-color: #fd7e14;
+}
+
+.milestone-item.priority-medium {
+  border-left-color: #ffc107;
+}
+
+.milestone-item.priority-low {
+  border-left-color: #007bff;
+}
+
+.milestone-item.priority-minimal {
+  border-left-color: #6c757d;
+}
+
+.milestone-status {
+  margin-right: 15px;
+  font-size: 20px;
+  color: #28a745;
+}
+
+.milestone-status i {
+  color: #6c757d;
+}
+
+.milestone-item.completed .milestone-status i {
+  color: #28a745;
+}
+
+.milestone-content {
+  flex: 1;
+}
+
+.milestone-content h4 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.milestone-content p {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+
+.priority {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priority.priority-critical {
+  background: #fee;
+  color: #dc3545;
+}
+
+.priority.priority-high {
+  background: #fff3cd;
+  color: #fd7e14;
+}
+
+.priority.priority-medium {
+  background: #fff9db;
+  color: #ffc107;
+}
+
+.priority.priority-low {
+  background: #e7f3ff;
+  color: #007bff;
+}
+
+.priority.priority-minimal {
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.dates {
+  color: #8a98b4;
+  font-weight: 500;
+}
+
+/* Common link states */
+.teamcreatesection a:visited,
+.teamcreatesection a:hover,
+.teamcreatesection a:focus,
+.teamcreatesection a:active,
+.teamsearchsection a:visited,
+.teamsearchsection a:hover,
+.teamsearchsection a:focus,
+.teamsearchsection a:active {
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   MILESTONE SUMMARY STYLES (Main Page)
+   ========================================================================== */
+
+.milestone-summary {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 마일스톤 카드 */
+.milestone-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.milestone-card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.milestone-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.card-number {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.card-label {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* 전체 카드 */
+.card-total .card-icon {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.card-total .card-number {
+  color: #495057;
+}
+
+/* 시작 전 카드 */
+.card-not-started .card-icon {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.card-not-started .card-number {
+  color: #1976d2;
+}
+
+/* 진행 중 카드 */
+.card-in-progress .card-icon {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.card-in-progress .card-number {
+  color: #2e7d32;
+}
+
+/* 완료됨 카드 */
+.card-completed .card-icon {
+  background: #e8f5e8;
+  color: #388e3c;
+}
+
+.card-completed .card-number {
+  color: #388e3c;
+}
+
+/* 지연됨 카드 */
+.card-overdue .card-icon {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.card-overdue .card-number {
+  color: #d32f2f;
+}
+
+.card-overdue .card-label {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .milestone-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .milestone-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .card-number {
+    font-size: 24px;
+  }
+  
+  .card-label {
+    font-size: 12px;
+  }
+}
+
+/* 오늘 관련 마일스톤 */
+.today-milestones {
+  margin-bottom: 20px;
+}
+
+.today-milestones h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.today-milestones h4 i {
+  color: #007bff;
+  font-size: 18px;
+}
+
+.milestone-brief {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid #dee2e6;
+  background: #f8f9fa;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.milestone-brief:hover {
+  background: #e9ecef;
+}
+
+.milestone-brief.priority-critical {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+
+.milestone-brief.priority-high {
+  border-left-color: #fd7e14;
+  background: #fff8f0;
+}
+
+.milestone-brief.priority-medium {
+  border-left-color: #ffc107;
+  background: #fffbf0;
+}
+
+.milestone-brief.priority-low {
+  border-left-color: #28a745;
+  background: #f0fff4;
+}
+
+.milestone-brief .milestone-status i {
+  font-size: 16px;
+  color: #28a745;
+}
+
+.milestone-brief .milestone-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+
+
+/* 마일스톤 액션 */
+.milestone-actions {
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.timeline-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.timeline-link:hover {
+  background: #0056b3;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.timeline-link i:first-child {
+  font-size: 18px;
+}
+
+.timeline-link i:last-child {
+  font-size: 14px;
+}
+
+/* 빈 마일스톤 상태 */
+.milestone-summary .no-milestones {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.milestone-summary .no-milestones i {
+  font-size: 48px;
+  color: #dee2e6;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.milestone-summary .no-milestones p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.add-milestone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.add-milestone-link:hover {
+  background: #1e7e34;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}

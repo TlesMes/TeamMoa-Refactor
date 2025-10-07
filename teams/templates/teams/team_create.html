@@ -8,6 +8,10 @@
 {% block contents %}
 <section class="auth-section">
   <div class="auth-card">
+    <a href="{% url 'teams:main_page' %}" class="back-btn">
+      <i class="ri-arrow-left-line"></i>
+    </a>
+
     <div class="auth-header">
       <h2>새 팀 만들기</h2>
       <p>팀을 생성하여 프로젝트를 시작하세요</p>
@@ -90,7 +94,7 @@
     
     <div class="auth-links">
       <p>
-        이미 팀이 있으신가요? 
+        이미 팀이 있으신가요?
         <a href="{% url 'teams:team_search' %}">팀 검색하기</a>
       </p>
     </div>

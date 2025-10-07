@@ -1,15 +1,22 @@
-{% extends 'base_user.html' %} 
-{% load static %} 
+{% extends 'base_user.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/teams.css' %}" />
+{% endblock %}
 
 {% block contents %}
 <section class="auth-section">
   <div class="auth-card">
-    
     <!-- Step 1: 팀 코드 입력 -->
     <div id="step-1" class="team-join-step active">
+      <a href="{% url 'teams:main_page' %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+
       <div class="auth-header">
         <h2>팀 검색하기</h2>
-        <p>팀 코드를 입력하여 기존 팀에 가입하세요</p>
+        <p>팀 코드를 입력하여 팀에 가입하세요</p>
       </div>
       
       <form id="team-search-form" class="auth-form" method="post" action="javascript:void(0);">
@@ -37,17 +44,18 @@
       
       <div class="auth-links">
         <p>
-          팀이 없으신가요? 
+          팀이 없으신가요?
           <a href="{% url 'teams:team_create' %}">새 팀 만들기</a>
-        </p>
-        <p>
-          <a href="{% url 'teams:main_page' %}">팀 목록 보기</a>
         </p>
       </div>
     </div>
 
     <!-- Step 2: 팀 정보 표시 및 비밀번호 입력 -->
     <div id="step-2" class="team-join-step">
+      <a href="{% url 'teams:main_page' %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+
       <div class="auth-header">
         <h2>팀 정보 확인</h2>
         <p>아래 팀에 가입하시겠습니까?</p>
@@ -120,6 +128,10 @@
 
     <!-- Step 3: 가입 완료 -->
     <div id="step-3" class="team-join-step">
+      <a href="{% url 'teams:main_page' %}" class="back-btn">
+        <i class="ri-arrow-left-line"></i>
+      </a>
+
       <div class="auth-header">
         <h2>가입 완료!</h2>
         <p>팀에 성공적으로 가입되었습니다</p>
@@ -159,15 +171,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function switchStep(fromStep, toStep) {
         const fromElement = document.getElementById(`step-${fromStep}`);
         const toElement = document.getElementById(`step-${toStep}`);
-        
+
         // 현재 단계 fade out
         fromElement.classList.add('fade-out');
         fromElement.classList.remove('active');
-        
+
         setTimeout(() => {
             fromElement.style.display = 'none';
             toElement.style.display = 'block';
-            
+
+            // 이전에 남아있을 수 있는 fade-out 클래스 제거
+            toElement.classList.remove('fade-out');
+
             setTimeout(() => {
                 toElement.classList.add('active');
             }, 10);
