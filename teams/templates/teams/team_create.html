@@ -133,18 +133,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 최대 인원수 숫자 검증
         const maxuserValue = maxuserInput.value.trim();
-        const maxuserNum = parseInt(maxuserValue, 10);
 
-        if (isNaN(maxuserNum)) {
+        // 완전한 숫자인지 확인 (정수만)
+        if (!/^\d+$/.test(maxuserValue)) {
             const wrapper = maxuserInput.closest('.input-wrapper') || maxuserInput.closest('.form-group');
             if (wrapper) {
                 wrapper.classList.add('error');
             }
-            showDjangoToast('최대 인원수는 숫자로 입력해주세요.', 'error');
+            showDjangoToast('최대 인원수는 숫자만 입력해주세요.', 'error');
             maxuserInput.focus();
             e.preventDefault();
             return false;
         }
+
+        const maxuserNum = parseInt(maxuserValue, 10);
 
         if (maxuserNum < 1) {
             const wrapper = maxuserInput.closest('.input-wrapper') || maxuserInput.closest('.form-group');
