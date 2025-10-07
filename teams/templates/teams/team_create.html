@@ -1,5 +1,9 @@
-{% extends 'base_user.html' %} 
-{% load static %} 
+{% extends 'base_user.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/teams.css' %}" />
+{% endblock %}
 
 {% block contents %}
 <section class="auth-section">
@@ -92,4 +96,78 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.auth-form');
+    const titleInput = document.getElementById('id_title');
+    const maxuserInput = document.getElementById('id_maxuser');
+    const passwordInput = document.getElementById('id_teampasswd');
+
+    // 입력 시 에러 상태 제거
+    [titleInput, maxuserInput, passwordInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    clearFieldError(this);
+                }
+            });
+        }
+    });
+
+    // 폼 제출 검증
+    form.addEventListener('submit', function(e) {
+        // 필수 필드 검증
+        const isValid = validateRequiredFields([
+            { input: titleInput, message: '팀명을 입력해주세요.' },
+            { input: maxuserInput, message: '최대 인원수를 입력해주세요.' },
+            { input: passwordInput, message: '팀 비밀번호를 입력해주세요.' }
+        ]);
+
+        if (!isValid) {
+            e.preventDefault();
+            return false;
+        }
+
+        // 최대 인원수 숫자 검증
+        const maxuserValue = maxuserInput.value.trim();
+        const maxuserNum = parseInt(maxuserValue, 10);
+
+        if (isNaN(maxuserNum)) {
+            const wrapper = maxuserInput.closest('.input-wrapper') || maxuserInput.closest('.form-group');
+            if (wrapper) {
+                wrapper.classList.add('error');
+            }
+            showDjangoToast('최대 인원수는 숫자로 입력해주세요.', 'error');
+            maxuserInput.focus();
+            e.preventDefault();
+            return false;
+        }
+
+        if (maxuserNum < 1) {
+            const wrapper = maxuserInput.closest('.input-wrapper') || maxuserInput.closest('.form-group');
+            if (wrapper) {
+                wrapper.classList.add('error');
+            }
+            showDjangoToast('팀 인원수는 1명 이상이어야 합니다.', 'error');
+            maxuserInput.focus();
+            e.preventDefault();
+            return false;
+        }
+
+        if (maxuserNum > 100) {
+            const wrapper = maxuserInput.closest('.input-wrapper') || maxuserInput.closest('.form-group');
+            if (wrapper) {
+                wrapper.classList.add('error');
+            }
+            showDjangoToast('팀 인원수는 100명을 초과할 수 없습니다.', 'error');
+            maxuserInput.focus();
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
 {% endblock %}

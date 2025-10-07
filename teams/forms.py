@@ -5,38 +5,58 @@ from django.core.exceptions import ValidationError
 from .models import Milestone, Team, TeamUser
 
 class CreateTeamForm(forms.ModelForm):
+    # 필수 필드를 JavaScript에서 검증하므로 HTML required 제거
+    title = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'create_input'}),
+        label='팀명'
+    )
+    maxuser = forms.IntegerField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'create_input', 'type': 'text'}),
+        label='인원수'
+    )
+    teampasswd = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'create_input'}),
+        label='비밀번호'
+    )
+    introduction = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'introduction', 'maxlength': '20'}),
+        label='팀 소개'
+    )
+
     class Meta:
         model = Team
         fields = ['title', 'maxuser', 'teampasswd', 'introduction']
-        widgets = {
-            'title': forms.TextInput(
-                attrs={'class': 'create_input'}
-            ),
-            'maxuser': forms.TextInput(
-                attrs={'class': 'create_input'}
-            ),
-            'teampasswd': forms.TextInput(
-                attrs={'class': 'create_input'}
-            ),
-            'introduction': forms.Textarea(
-                attrs={'class': 'introduction', 'maxlength': '20'}
-            )
-        }
-        labels = {
-            'title': '팀명',
-            'maxuser': '인원수',
-            'teampasswd': '비밀번호',
-            'introduction': '팀 소개',
-        }
-    
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if not title or not title.strip():
+            raise ValidationError('팀명을 입력해주세요.')
+        return title
+
     def clean_maxuser(self):
         maxuser = self.cleaned_data.get('maxuser')
-        if maxuser is not None:
-            if maxuser < 1:
-                raise ValidationError('팀 인원수는 1명 이상이어야 합니다.')
-            if maxuser > 100:
-                raise ValidationError('팀 인원수는 100명을 초과할 수 없습니다.')
+        if maxuser is None:
+            raise ValidationError('최대 인원수를 입력해주세요.')
+        if maxuser < 1:
+            raise ValidationError('팀 인원수는 1명 이상이어야 합니다.')
+        if maxuser > 100:
+            raise ValidationError('팀 인원수는 100명을 초과할 수 없습니다.')
         return maxuser
+
+    def clean_teampasswd(self):
+        teampasswd = self.cleaned_data.get('teampasswd')
+        if not teampasswd or not teampasswd.strip():
+            raise ValidationError('팀 비밀번호를 입력해주세요.')
+        return teampasswd
+
+    def clean_introduction(self):
+        introduction = self.cleaned_data.get('introduction', '')
+        # 팀 소개는 선택 사항이므로 빈 값 허용
+        return introduction.strip() if introduction else ''
 
 
 class SearchTeamForm(forms.ModelForm):
