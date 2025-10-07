@@ -24,7 +24,7 @@
   color: #ff6b7a;
   font-size: 0.8rem;
   margin-top: 0.25rem;
-  display: flex;
+  display: none; /* 기본적으로 숨김 */
   align-items: center;
   gap: 0.25rem;
 }
@@ -32,6 +32,11 @@
 .field-error::before {
   content: "⚠";
   font-size: 0.9rem;
+}
+
+/* 에러 메시지가 있을 때만 표시 */
+.field-error:not(:empty) {
+  display: flex;
 }
 
 /* Help text */
