@@ -127,7 +127,7 @@ class TodoViewSet(viewsets.ModelViewSet):
             )
 
             assignee_name = updated_todo.assignee.user.nickname or updated_todo.assignee.user.username
-            message = f'{updated_todo.content}이(가) {assignee_name}님에게 할당되었습니다.'
+            message = f'할 일이 {assignee_name}님에게 할당되었습니다.'
 
             return api_success_response(
                 request,

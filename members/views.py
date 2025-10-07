@@ -170,7 +170,7 @@ class AssignTodoView(TeamMemberRequiredMixin, View):
             )
             
             assignee_name = todo.assignee.user.nickname or todo.assignee.user.username
-            messages.success(request, f'{todo.content}이(가) {assignee_name}님에게 할당되었습니다.')
+            messages.success(request, f'할 일이 {assignee_name}님에게 할당되었습니다.')
             
             return JsonResponse({'success': True})
             
