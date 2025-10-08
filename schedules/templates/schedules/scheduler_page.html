@@ -7,16 +7,18 @@
 <link rel="stylesheet" href="{% static 'css/pages/schedules/scheduler_page.css' %}">
 {% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/pages/scheduler_page.js' %}"></script>
+{% endblock %}
+
 {% block contents %}
 {% comment %} Light theme styles loaded in base_team.html {% endcomment %}
 <section class="schedulesection">
   <div class="schedule-header">
     <div class="schedule-controls">
-      <form method="POST" action="." class="week-selector">
-        {% csrf_token %}
+      <div class="week-selector">
         <input type="week" name="week" value="{{ selected_week }}" required />
-        <button type="submit">시간표 확인</button>
-      </form>
+      </div>
       <a href="{% url 'schedules:scheduler_upload_page' team.id %}">
         <button>시간표 업로드</button>
       </a>

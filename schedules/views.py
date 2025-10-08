@@ -14,14 +14,21 @@ from common.mixins import TeamMemberRequiredMixin
 
 class SchedulerPageView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'schedules/scheduler_page.html'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.schedule_service = ScheduleService()
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['team'] = get_object_or_404(Team, pk=self.kwargs['pk'])
+
+        # 현재 주차를 기본값으로 설정 (ISO 8601 형식: YYYY-Www)
+        today = date.today()
+        iso_calendar = today.isocalendar()
+        current_week = f"{iso_calendar[0]}-W{iso_calendar[1]:02d}"
+        context['selected_week'] = current_week
+
         return context
     
     def post(self, request, *args, **kwargs):
