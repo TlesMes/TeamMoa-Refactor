@@ -61,6 +61,23 @@ class IsTeamLeader(permissions.BasePermission):
             return False
 
 
+class IsTeamHost(permissions.BasePermission):
+    """
+    팀 호스트(생성자)만 접근 가능한 권한 클래스 (객체 레벨)
+    팀 수정, 해체 등에 사용
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if not request.user.is_authenticated:
+            return False
+
+        # obj가 Team 인스턴스인 경우
+        if hasattr(obj, 'host'):
+            return obj.host == request.user
+
+        return False
+
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     객체의 소유자는 수정/삭제 가능, 나머지는 읽기만 가능

@@ -5,7 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 # ViewSet imports
 from accounts.viewsets import UserViewSet
 from members.viewsets import TodoViewSet, TeamMemberViewSet
-from teams.viewsets import MilestoneViewSet
+from teams.viewsets import TeamViewSet, MilestoneViewSet
 from schedules.viewsets import ScheduleViewSet
 from mindmaps.viewsets import MindmapViewSet, NodeViewSet, NodeConnectionViewSet
 
@@ -14,9 +14,7 @@ router = DefaultRouter()
 
 # ViewSet 등록
 router.register(r'users', UserViewSet, basename='user')
-
-# 향후 추가될 ViewSet들
-# router.register(r'teams', TeamViewSet)
+router.register(r'teams', TeamViewSet, basename='team')
 
 app_name = 'api'
 

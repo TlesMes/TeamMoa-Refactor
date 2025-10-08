@@ -7,11 +7,185 @@ from django.contrib import messages
 
 from .models import Team, Milestone
 from .serializers import (
+    TeamListSerializer, TeamDetailSerializer, TeamCreateSerializer,
+    TeamUpdateSerializer, TeamJoinVerifySerializer, TeamJoinSerializer,
     MilestoneSerializer, MilestoneCreateSerializer, MilestoneUpdateSerializer
 )
-from .services import MilestoneService
+from .services import TeamService, MilestoneService
 from api.permissions import IsTeamMember
 from api.utils import api_response, api_success_response, api_error_response
+
+
+class TeamViewSet(viewsets.ModelViewSet):
+    """팀 관리 ViewSet"""
+    permission_classes = [IsAuthenticated]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.team_service = TeamService()
+
+    def get_queryset(self):
+        """사용자가 속한 팀 목록 반환"""
+        return Team.objects.filter(
+            teamuser__user=self.request.user
+        ).select_related('host').distinct()
+
+    def get_serializer_class(self):
+        """액션별 Serializer 클래스 선택"""
+        if self.action == 'list':
+            return TeamListSerializer
+        elif self.action == 'retrieve':
+            return TeamDetailSerializer
+        elif self.action == 'create':
+            return TeamCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return TeamUpdateSerializer
+        return TeamDetailSerializer
+
+    def list(self, request, *args, **kwargs):
+        """사용자가 속한 팀 목록 조회"""
+        teams = self.team_service.get_user_teams(request.user)
+        serializer = TeamListSerializer(teams, many=True)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
+
+    def retrieve(self, request, *args, **kwargs):
+        """팀 상세 조회"""
+        team = self.get_object()
+        serializer = TeamDetailSerializer(team)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
+
+    def create(self, request, *args, **kwargs):
+        """팀 생성"""
+        serializer = TeamCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            team = self.team_service.create_team(
+                host_user=request.user,
+                title=serializer.validated_data['title'],
+                maxuser=serializer.validated_data['maxuser'],
+                teampasswd=serializer.validated_data['teampasswd'],
+                introduction=serializer.validated_data.get('introduction', '')
+            )
+
+            response_serializer = TeamDetailSerializer(team)
+            return api_success_response(
+                request,
+                f'"{team.title}" 팀이 생성되었습니다.',
+                data={'team': response_serializer.data},
+                status_code=status.HTTP_201_CREATED
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    def partial_update(self, request, *args, **kwargs):
+        """팀 정보 수정 (PATCH)"""
+        team = self.get_object()
+
+        # 팀장만 수정 가능
+        if team.host != request.user:
+            return api_error_response(
+                request,
+                '팀장만 팀 정보를 수정할 수 있습니다.',
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = TeamUpdateSerializer(team, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        # 팀 정보 업데이트
+        for field, value in serializer.validated_data.items():
+            setattr(team, field, value)
+        team.save()
+
+        response_serializer = TeamDetailSerializer(team)
+        return api_success_response(
+            request,
+            '팀 정보가 수정되었습니다.',
+            data={'team': response_serializer.data}
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        """팀 해체"""
+        team = self.get_object()
+
+        try:
+            team_title = self.team_service.disband_team(team.id, request.user)
+            return api_success_response(
+                request,
+                f'"{team_title}" 팀이 해체되었습니다.'
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e), status_code=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'], url_path='verify-code')
+    def verify_code(self, request):
+        """팀 코드 검증"""
+        serializer = TeamJoinVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            team_info = self.team_service.verify_team_code(
+                invite_code=serializer.validated_data['invitecode'],
+                user=request.user
+            )
+
+            return Response({
+                'success': True,
+                'message': '유효한 팀 코드입니다.',
+                'data': {'team': team_info}
+            })
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    @action(detail=True, methods=['post'])
+    def join(self, request, pk=None):
+        """팀 가입"""
+        team = self.get_object()
+        serializer = TeamJoinSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            self.team_service.join_team(
+                user=request.user,
+                team_id=team.id,
+                password=serializer.validated_data['teampasswd']
+            )
+
+            return api_success_response(
+                request,
+                f'"{team.title}" 팀에 가입되었습니다.',
+                data={'team_id': team.id}
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    @action(detail=True, methods=['get'])
+    def statistics(self, request, pk=None):
+        """팀 통계 조회"""
+        team = self.get_object()
+
+        try:
+            stats = self.team_service.get_team_statistics(team)
+            return Response({
+                'success': True,
+                'data': stats
+            })
+
+        except Exception as e:
+            return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MilestoneViewSet(viewsets.ModelViewSet):
