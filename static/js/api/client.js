@@ -269,6 +269,22 @@ class ScheduleApiClient {
 }
 
 /**
+ * 팀 API 클라이언트
+ */
+class TeamApiClient {
+    constructor(apiClient) {
+        this.api = apiClient;
+    }
+
+    /**
+     * 팀 멤버 제거 (추방/탈퇴)
+     */
+    async removeMember(teamId, userId) {
+        return this.api.delete(`/teams/${teamId}/members/${userId}/`);
+    }
+}
+
+/**
  * 마인드맵 API 클라이언트
  */
 class MindmapApiClient {
@@ -376,6 +392,7 @@ class MindmapApiClient {
  */
 window.apiClient = new ApiClient();
 window.todoApi = new TodoApiClient(window.apiClient);
+window.teamApi = new TeamApiClient(window.apiClient);
 window.teamMemberApi = new TeamMemberApiClient(window.apiClient);
 window.scheduleApi = new ScheduleApiClient(window.apiClient);
 window.mindmapApi = new MindmapApiClient(window.apiClient);

@@ -259,7 +259,7 @@ class TeamService:
             raise ValueError('해당 사용자는 팀에 속해있지 않습니다.')
 
         is_host = team.host == requesting_user
-        is_self = requesting_user.id == target_user_id
+        is_self = requesting_user.id == int(target_user_id)
 
         # 권한 검증
         if not (is_host or is_self):

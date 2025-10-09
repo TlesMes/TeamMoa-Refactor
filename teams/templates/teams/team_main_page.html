@@ -5,6 +5,15 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/api/client.js' %}"></script>
+<script>
+  // 팀 데이터를 JavaScript로 전달
+  window.teamData = {
+    teamId: {{ team.id }},
+    isHost: {% if request.user == team.host %}true{% else %}false{% endif %},
+    currentUserId: {{ request.user.id }}
+  };
+</script>
 <script src="{% static 'js/pages/team_main.js' %}"></script>
 {% endblock %}
 
@@ -128,7 +137,7 @@
     
     <div class="team-members">
       <div class="member-list">
-        <div class="member-item leader">
+        <div class="member-item leader" data-user-id="{{ team.host.id }}">
           <div>
             <span class="member-name">{{ team.host.nickname }}</span>
             <span class="member-role">팀장</span>
@@ -137,12 +146,23 @@
         </div>
         {% for member in members %}
         {% if member.user != team.host %}
-        <div class="member-item">
+        <div class="member-item" data-user-id="{{ member.user.id }}">
           <div>
             <span class="member-name">{{member.user.nickname}}</span>
             <span class="member-role">팀원</span>
           </div>
-          <span class="member-login">{{member.user.last_login|date:'Y-m-d, H:i:s'}}</span>
+          <div class="member-actions">
+            {% if request.user == team.host %}
+            <button class="remove-member-btn" data-user-id="{{ member.user.id }}" data-user-name="{{ member.user.nickname }}" title="추방">
+              <i class="ri-user-unfollow-line"></i>
+            </button>
+            {% elif request.user == member.user %}
+            <button class="leave-team-btn" data-user-id="{{ member.user.id }}" title="탈퇴">
+              <i class="ri-logout-box-line"></i>
+            </button>
+            {% endif %}
+            <span class="member-login">{{member.user.last_login|date:'Y-m-d, H:i:s'}}</span>
+          </div>
         </div>
         {% endif %}
         {% endfor %}
