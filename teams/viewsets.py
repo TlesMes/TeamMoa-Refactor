@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .models import Team, Milestone
 from .serializers import (
@@ -128,6 +129,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @extend_schema(request=TeamJoinVerifySerializer)
     @action(detail=False, methods=['post'], url_path='verify-code')
     def verify_code(self, request):
         """팀 코드 검증"""
@@ -149,6 +151,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         except ValueError as e:
             return api_error_response(request, str(e))
 
+    @extend_schema(request=TeamJoinSerializer)
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         """팀 가입"""
