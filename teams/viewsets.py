@@ -190,6 +190,34 @@ class TeamViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @action(detail=True, methods=['delete'], url_path='members/(?P<user_id>[0-9]+)')
+    def remove_member(self, request, pk=None, user_id=None):
+        """팀 멤버 제거 (팀장의 추방 or 본인의 탈퇴)"""
+        team = self.get_object()
+
+        try:
+            result = self.team_service.remove_member(
+                team_id=team.id,
+                target_user_id=user_id,
+                requesting_user=request.user
+            )
+
+            if result['action_type'] == 'leave':
+                message = f'"{team.title}" 팀에서 탈퇴했습니다.'
+            else:
+                message = f'{result["username"]}님을 팀에서 추방했습니다.'
+
+            return api_success_response(
+                request,
+                message,
+                data={'remaining_members': result['remaining_members']}
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e), status_code=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class MilestoneViewSet(viewsets.ModelViewSet):
     """팀 마일스톤 관리 ViewSet"""

@@ -209,26 +209,81 @@ class TeamService:
     def disband_team(self, team_id, host_user):
         """
         팀을 해체합니다. (호스트만 가능)
-        
+
         Args:
-            team_id: 해체할 팀 ID  
+            team_id: 해체할 팀 ID
             host_user: 요청한 사용자 (호스트 검증용)
-            
+
         Returns:
             str: 해체된 팀 이름
-            
+
         Raises:
             ValueError: 권한 없음 또는 팀 없음
         """
         team = get_object_or_404(Team, pk=team_id)
-        
+
         if team.host != host_user:
             raise ValueError('팀을 해체할 권한이 없습니다.')
-        
+
         team_title = team.title
         team.delete()
-        
+
         return team_title
+
+    @transaction.atomic
+    def remove_member(self, team_id, target_user_id, requesting_user):
+        """
+        팀에서 멤버를 제거합니다. (팀장의 추방 or 본인의 탈퇴)
+
+        Args:
+            team_id: 팀 ID
+            target_user_id: 제거할 사용자 ID
+            requesting_user: 요청한 사용자
+
+        Returns:
+            dict: 제거된 사용자 정보 및 액션 타입
+
+        Raises:
+            ValueError: 권한 없음, 팀장 탈퇴 시도 등
+        """
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        team = get_object_or_404(Team, pk=team_id)
+        target_user = get_object_or_404(User, pk=target_user_id)
+
+        # TeamUser 관계 확인
+        try:
+            team_user = TeamUser.objects.get(team=team, user=target_user)
+        except TeamUser.DoesNotExist:
+            raise ValueError('해당 사용자는 팀에 속해있지 않습니다.')
+
+        is_host = team.host == requesting_user
+        is_self = requesting_user.id == target_user_id
+
+        # 권한 검증
+        if not (is_host or is_self):
+            raise ValueError('권한이 없습니다.')
+
+        # 팀장 본인 탈퇴 방지
+        if team.host == target_user:
+            raise ValueError('팀장은 탈퇴할 수 없습니다. 팀을 해체해주세요.')
+
+        # 멤버 제거
+        username = target_user.nickname if target_user.nickname else target_user.username
+        team_user.delete()
+
+        # currentuser 업데이트
+        team.currentuser = team.get_current_member_count()
+        team.save()
+
+        action_type = 'leave' if is_self else 'remove'
+
+        return {
+            'username': username,
+            'action_type': action_type,
+            'remaining_members': team.currentuser
+        }
     
     def _validate_team_creation_data(self, title, maxuser, teampasswd):
         """팀 생성 데이터 검증"""
