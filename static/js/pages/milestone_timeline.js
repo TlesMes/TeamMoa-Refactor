@@ -416,11 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'in_progress';
     }
 
-    // 마일스톤 업데이트 API 함수 (API Client 사용)
+    // 마일스톤 업데이트 API 함수 (TeamApiClient 사용)
     async function updateMilestone(milestoneId, data) {
         try {
-            const response = await apiClient.patch(
-                `/teams/${window.teamData.id}/milestones/${milestoneId}/`,
+            const response = await window.teamApi.updateMilestone(
+                window.teamData.id,
+                milestoneId,
                 data
             );
 
@@ -741,8 +742,8 @@ function initializeCreateMilestoneModal() {
         }
 
         try {
-            const response = await apiClient.post(
-                `/teams/${window.teamData.id}/milestones/`,
+            const response = await window.teamApi.createMilestone(
+                window.teamData.id,
                 formData
             );
 
@@ -770,8 +771,9 @@ async function deleteMilestone(milestoneId, milestoneName) {
         `정말로 '<strong>${milestoneName}</strong>' 마일스톤을 삭제하시겠습니까?<br><small style="color: #6b7280;">이 작업은 되돌릴 수 없습니다.</small>`,
         async () => {
             try {
-                const response = await apiClient.delete(
-                    `/teams/${window.teamData.id}/milestones/${milestoneId}/`
+                const response = await window.teamApi.deleteMilestone(
+                    window.teamData.id,
+                    milestoneId
                 );
 
                 if (response.success) {

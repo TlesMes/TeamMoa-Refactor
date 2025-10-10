@@ -220,22 +220,6 @@ class TodoApiClient {
 }
 
 /**
- * 팀 멤버 API 클라이언트
- */
-class TeamMemberApiClient {
-    constructor(apiClient) {
-        this.api = apiClient;
-    }
-
-    /**
-     * 팀 멤버 목록 조회
-     */
-    async getMembers(teamId) {
-        return this.api.get(`/teams/${teamId}/members/`);
-    }
-}
-
-/**
  * 스케줄 API 클라이언트
  */
 class ScheduleApiClient {
@@ -270,17 +254,50 @@ class ScheduleApiClient {
 
 /**
  * 팀 API 클라이언트
+ * 팀 관련 모든 기능을 캡슐화 (멤버 관리, 마일스톤 관리)
  */
 class TeamApiClient {
     constructor(apiClient) {
         this.api = apiClient;
     }
 
+    // ==================== 멤버 관리 ====================
+
     /**
      * 팀 멤버 제거 (추방/탈퇴)
      */
     async removeMember(teamId, userId) {
         return this.api.delete(`/teams/${teamId}/members/${userId}/`);
+    }
+
+    /**
+     * 팀 멤버 목록 조회
+     */
+    async getMembers(teamId) {
+        return this.api.get(`/teams/${teamId}/members/`);
+    }
+
+    // ==================== 마일스톤 관리 ====================
+
+    /**
+     * 마일스톤 생성
+     */
+    async createMilestone(teamId, milestoneData) {
+        return this.api.post(`/teams/${teamId}/milestones/`, milestoneData);
+    }
+
+    /**
+     * 마일스톤 수정
+     */
+    async updateMilestone(teamId, milestoneId, milestoneData) {
+        return this.api.patch(`/teams/${teamId}/milestones/${milestoneId}/`, milestoneData);
+    }
+
+    /**
+     * 마일스톤 삭제
+     */
+    async deleteMilestone(teamId, milestoneId) {
+        return this.api.delete(`/teams/${teamId}/milestones/${milestoneId}/`);
     }
 }
 
@@ -393,7 +410,6 @@ class MindmapApiClient {
 window.apiClient = new ApiClient();
 window.todoApi = new TodoApiClient(window.apiClient);
 window.teamApi = new TeamApiClient(window.apiClient);
-window.teamMemberApi = new TeamMemberApiClient(window.apiClient);
 window.scheduleApi = new ScheduleApiClient(window.apiClient);
 window.mindmapApi = new MindmapApiClient(window.apiClient);
 
