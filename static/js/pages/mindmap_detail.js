@@ -64,14 +64,14 @@ class MindmapEditor {
   }
 
   resizeCanvas() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
-    const width = rect.width;
-    const height = window.innerHeight - 120;
+    // 뷰포트 크기 기준으로 계산 (95% 너비, 헤더/여백 제외 높이)
+    const maxWidth = window.innerWidth * 0.95;
+    const maxHeight = window.innerHeight - 250;
 
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
+    this.canvas.width = maxWidth;
+    this.canvas.height = maxHeight;
+    this.canvas.style.width = maxWidth + 'px';
+    this.canvas.style.height = maxHeight + 'px';
 
     this.render();
   }

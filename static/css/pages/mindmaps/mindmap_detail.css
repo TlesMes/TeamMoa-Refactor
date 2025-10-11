@@ -2,12 +2,26 @@
    Mindmap Detail Page Styles
    ========================================================================== */
 
-.mindmap-section {
-  padding: 2rem 0;
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: calc(100vh - 120px);
+  height: 100vh;
+}
+
+.mindmap-section {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column; /* 세로 방향 */
+  justify-content: center; /* 수직 중앙 */
+  align-items: center;     /* 수평 중앙 */
+  height: calc(100vh - 60px);
+  box-sizing: border-box;
 }
 
 .mindmap-detail-header {
@@ -64,14 +78,17 @@
 }
 
 .mindmap-canvas {
+  width: 100%;
+  height: auto; /* flex 안에서 비율 맞춤 */
+  max-width: calc(100% - 4rem);  /* 좌우 padding 반영 */
+  max-height: calc(100% - 4rem); /* 상하 padding 반영 */
   border: 2px solid var(--border-color);
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
   cursor: grab;
+  display: block;
 }
-
 /* ==========================================================================
    Modal Styles - 공통 모달 CSS 사용 (static/css/common/modal.css)
    ========================================================================== */
