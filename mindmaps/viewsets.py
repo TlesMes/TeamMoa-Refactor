@@ -148,20 +148,16 @@ class NodeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            node, connection_message = self.mindmap_service.create_node(
+            node = self.mindmap_service.create_node(
                 mindmap_id=mindmap.id,
                 node_data=serializer.validated_data,
                 creator=request.user
             )
 
-            message = f'노드 "{node.title}"이 생성되었습니다.'
-            if connection_message:
-                message += connection_message
-
             response_serializer = NodeSerializer(node)
             return Response({
                 'success': True,
-                'message': message,
+                'message': f'노드 "{node.title}"이 생성되었습니다.\nCtrl+드래그로 다른 노드와 연결할 수 있습니다.',
                 'node': response_serializer.data
             }, status=status.HTTP_201_CREATED)
 
@@ -324,3 +320,24 @@ class NodeConnectionViewSet(viewsets.ModelViewSet):
                 'success': False,
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        """노드 연결 삭제"""
+        connection = self.get_object()
+
+        try:
+            from_title, to_title = self.mindmap_service.delete_node_connection(
+                connection_id=connection.id,
+                user=request.user
+            )
+
+            return Response({
+                'success': True,
+                'message': f'"{from_title}" → "{to_title}" 연결이 삭제되었습니다.'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

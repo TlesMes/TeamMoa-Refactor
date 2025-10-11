@@ -89,6 +89,10 @@ class MindmapConsumer(AsyncWebsocketConsumer):
                 await self.handle_node_delete(data)
             elif message_type == 'cursor_move':
                 await self.handle_cursor_move(data)
+            elif message_type == 'connection_create':
+                await self.handle_connection_create(data)
+            elif message_type == 'connection_delete':
+                await self.handle_connection_delete(data)
             else:
                 logger.warning(f"Unknown message type: {message_type}")
                 
@@ -137,10 +141,10 @@ class MindmapConsumer(AsyncWebsocketConsumer):
         """커서 이동 처리"""
         x = data.get('x')
         y = data.get('y')
-        
+
         if x is None or y is None:
             return
-        
+
         # 다른 사용자들에게 커서 위치 브로드캐스트
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -153,7 +157,49 @@ class MindmapConsumer(AsyncWebsocketConsumer):
                 'sender_channel': self.channel_name
             }
         )
-    
+
+    async def handle_connection_create(self, data):
+        """연결선 생성 처리"""
+        connection_id = data.get('connection_id')
+        from_node_id = data.get('from_node_id')
+        to_node_id = data.get('to_node_id')
+
+        if connection_id is None or from_node_id is None or to_node_id is None:
+            return
+
+        # 다른 사용자들에게 브로드캐스트
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'connection_created',
+                'connection_id': connection_id,
+                'from_node_id': from_node_id,
+                'to_node_id': to_node_id,
+                'user_id': self.user.id,
+                'username': self.user.username,
+                'sender_channel': self.channel_name
+            }
+        )
+
+    async def handle_connection_delete(self, data):
+        """연결선 삭제 처리"""
+        connection_id = data.get('connection_id')
+
+        if connection_id is None:
+            return
+
+        # 다른 사용자들에게 브로드캐스트
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'connection_deleted',
+                'connection_id': connection_id,
+                'user_id': self.user.id,
+                'username': self.user.username,
+                'sender_channel': self.channel_name
+            }
+        )
+
     # 그룹 메시지 핸들러들
     async def user_joined(self, event):
         """사용자 참가 알림"""
@@ -195,7 +241,31 @@ class MindmapConsumer(AsyncWebsocketConsumer):
                 'user_id': event['user_id'],
                 'username': event['username']
             }))
-    
+
+    async def connection_created(self, event):
+        """연결선 생성 알림"""
+        # 발신자에게는 전송하지 않음
+        if event.get('sender_channel') != self.channel_name:
+            await self.send(text_data=json.dumps({
+                'type': 'connection_created',
+                'connection_id': event['connection_id'],
+                'from_node_id': event['from_node_id'],
+                'to_node_id': event['to_node_id'],
+                'user_id': event['user_id'],
+                'username': event['username']
+            }))
+
+    async def connection_deleted(self, event):
+        """연결선 삭제 알림"""
+        # 발신자에게는 전송하지 않음
+        if event.get('sender_channel') != self.channel_name:
+            await self.send(text_data=json.dumps({
+                'type': 'connection_deleted',
+                'connection_id': event['connection_id'],
+                'user_id': event['user_id'],
+                'username': event['username']
+            }))
+
     # 데이터베이스 작업 (동기 → 비동기 변환)
     @database_sync_to_async
     def check_permissions(self):

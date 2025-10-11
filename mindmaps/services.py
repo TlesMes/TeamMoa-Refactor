@@ -131,32 +131,31 @@ class MindmapService:
     @transaction.atomic
     def create_node(self, mindmap_id, node_data, creator):
         """
-        새로운 노드를 생성하고 부모 노드와 연결합니다.
-        
+        새로운 노드를 생성합니다.
+
         Args:
             mindmap_id (int): 마인드맵 ID
             node_data (dict): {
                 'posX': int, 'posY': int,
-                'title': str, 'content': str,
-                'parent': str (optional) - 부모 노드 제목
+                'title': str, 'content': str
             }
             creator (User): 생성자
-            
+
         Returns:
-            tuple: (Node 객체, 생성된 연결 메시지)
-            
+            Node: 생성된 노드 객체
+
         Raises:
             ValueError: 필수 필드가 누락되거나 유효하지 않은 경우
             ValidationError: 마인드맵이 존재하지 않는 경우
         """
         mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
-        
+
         # 필수 필드 검증
         required_fields = ['posX', 'posY', 'title', 'content']
         for field in required_fields:
             if field not in node_data or not str(node_data[field]).strip():
                 raise ValueError(f'{field} 필드는 필수입니다.')
-        
+
         # 좌표값 검증
         try:
             pos_x = int(node_data['posX'])
@@ -165,7 +164,7 @@ class MindmapService:
                 raise ValueError('위치 정보는 0 이상의 숫자여야 합니다.')
         except (ValueError, TypeError):
             raise ValueError('위치 정보는 숫자여야 합니다.')
-        
+
         # 노드 생성
         node = Node.objects.create(
             posX=pos_x,
@@ -174,23 +173,8 @@ class MindmapService:
             content=node_data['content'].strip(),
             mindmap=mindmap
         )
-        
-        # 부모 노드 연결 처리
-        connection_message = ""
-        parent_title = node_data.get('parent')
-        if parent_title and parent_title.strip():
-            try:
-                parent_node = Node.objects.get(title=parent_title.strip(), mindmap=mindmap)
-                NodeConnection.objects.create(
-                    from_node=node,
-                    to_node=parent_node,
-                    mindmap=mindmap
-                )
-                connection_message = f" 부모 노드 '{parent_title}'와 연결되었습니다."
-            except Node.DoesNotExist:
-                connection_message = " 부모 노드를 찾을 수 없어 연결이 생성되지 않았습니다."
-        
-        return node, connection_message
+
+        return node
     
     def delete_node(self, node_id, user):
         """
@@ -219,15 +203,15 @@ class MindmapService:
     def create_node_connection(self, from_node_id, to_node_id, mindmap_id):
         """
         두 노드 사이의 연결을 생성합니다.
-        
+
         Args:
             from_node_id (int): 시작 노드 ID
             to_node_id (int): 끝 노드 ID
             mindmap_id (int): 마인드맵 ID
-            
+
         Returns:
             NodeConnection: 생성된 연결 객체
-            
+
         Raises:
             ValueError: 노드가 다른 마인드맵에 속하거나 자기 자신과 연결하려는 경우
             ValidationError: 노드가 존재하지 않는 경우
@@ -235,28 +219,51 @@ class MindmapService:
         from_node = get_object_or_404(Node, pk=from_node_id)
         to_node = get_object_or_404(Node, pk=to_node_id)
         mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
-        
+
         # 검증: 같은 마인드맵의 노드들인지 확인
         if from_node.mindmap != mindmap or to_node.mindmap != mindmap:
             raise ValueError('다른 마인드맵의 노드들은 연결할 수 없습니다.')
-        
+
         # 검증: 자기 자신과 연결하려는지 확인
         if from_node_id == to_node_id:
             raise ValueError('노드는 자기 자신과 연결할 수 없습니다.')
-        
-        # 중복 연결 검증
+
+        # 중복 연결 검증 (같은 방향만 체크)
         if NodeConnection.objects.filter(
-            from_node=from_node, 
-            to_node=to_node, 
+            from_node=from_node,
+            to_node=to_node,
             mindmap=mindmap
         ).exists():
-            raise ValueError('이미 연결된 노드들입니다.')
-        
+            raise ValueError('이미 같은 방향으로 연결되어 있습니다.')
+
         return NodeConnection.objects.create(
             from_node=from_node,
             to_node=to_node,
             mindmap=mindmap
         )
+
+    def delete_node_connection(self, connection_id, user):
+        """
+        노드 연결선을 삭제합니다.
+
+        Args:
+            connection_id (int): 연결선 ID
+            user (User): 삭제를 요청한 사용자
+
+        Returns:
+            tuple: (from_node_title, to_node_title)
+
+        Raises:
+            ValidationError: 연결선이 존재하지 않는 경우
+        """
+        connection = get_object_or_404(NodeConnection, pk=connection_id)
+
+        from_title = connection.from_node.title
+        to_title = connection.to_node.title
+
+        connection.delete()
+
+        return from_title, to_title
     
     def toggle_node_recommendation(self, node_id, user_id):
         """

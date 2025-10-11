@@ -46,8 +46,6 @@ class NodeCreateSerializer(serializers.Serializer):
     posY = serializers.IntegerField(min_value=0, help_text="Y 좌표")
     title = serializers.CharField(max_length=64, help_text="노드 제목")
     content = serializers.CharField(help_text="노드 내용")
-    parent = serializers.CharField(max_length=64, required=False, allow_blank=True,
-                                   help_text="부모 노드 제목 (선택)")
 
     def validate_title(self, value):
         """제목 검증"""

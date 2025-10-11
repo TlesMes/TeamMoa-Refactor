@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/common/modal.css' %}" />
+<link rel="stylesheet" href="{% static 'css/common/forms.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/common.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/mindmaps/mindmap_detail.css' %}" />
 {% endblock %}
@@ -30,6 +31,69 @@
     <button class="zoom-btn" id="zoomIn" title="확대">+</button>
     <button class="zoom-btn" id="zoomOut" title="축소">-</button>
     <button class="zoom-btn" id="resetZoom" title="원본크기">⌂</button>
+    <button class="zoom-btn" id="helpBtn" title="도움말">?</button>
+  </div>
+
+  <!-- 도움말 모달 -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>마인드맵 사용 가이드</h3>
+        <button type="button" class="modal-close" id="closeHelpModal">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="padding: 1rem;">
+          <h4 style="margin-bottom: 1rem; color: #667eea; font-size: 1.1rem;">🎨 기본 조작</h4>
+          <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>노드 이동:</strong> 노드를 드래그
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>화면 이동:</strong> 빈 공간을 드래그
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>확대/축소:</strong> 마우스 휠 또는 +/- 버튼
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>노드 생성:</strong> 빈 공간 더블클릭
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>노드 상세보기:</strong> 노드 더블클릭
+            </li>
+          </ul>
+
+          <h4 style="margin-bottom: 1rem; color: #667eea; font-size: 1.1rem;">🔗 연결선 관리</h4>
+          <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>연결선 생성:</strong> <kbd style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; border: 1px solid #d1d5db;">Ctrl</kbd> + 노드 드래그 → 다른 노드에 드롭
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>연결선 선택:</strong> 연결선 클릭
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>연결선 삭제:</strong> 연결선 선택 후 <kbd style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; border: 1px solid #d1d5db;">Delete</kbd> 키
+            </li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+              <strong>연결 취소:</strong> <kbd style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; border: 1px solid #d1d5db;">Esc</kbd> 키
+            </li>
+          </ul>
+
+          <h4 style="margin-bottom: 1rem; color: #667eea; font-size: 1.1rem;">💡 팁</h4>
+          <ul style="list-style: none; padding: 0;">
+            <li style="padding: 0.5rem 0; display: flex; align-items: start;">
+              <span style="margin-right: 0.5rem;">✨</span>
+              <span>연결선은 곡선 화살표로 표시되며, 마우스를 올리면 빨간색으로 강조됩니다.</span>
+            </li>
+            <li style="padding: 0.5rem 0; display: flex; align-items: start;">
+              <span style="margin-right: 0.5rem;">🤝</span>
+              <span>다른 팀원들이 실시간으로 작업하는 내용이 자동으로 동기화됩니다.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 활성 사용자 목록 -->
@@ -42,7 +106,6 @@
     width="1200"
     height="800"
     class="mindmap-canvas"
-    class="tm-w-100 tm-h-calc-canvas"
   ></canvas>
 
   <!-- 노드 생성 모달 -->
@@ -56,8 +119,6 @@
       </div>
       <div class="modal-body">
         <form
-          method="POST"
-          action="{% url 'mindmaps:mindmap_create_node' mindmap_id=mindmap.id pk=team.id %}"
           id="nodeForm"
         >
           {% csrf_token %}
@@ -68,23 +129,15 @@
             <label for="nodeTitle">제목 *</label>
             <div class="input-wrapper">
               <i class="ri-edit-line"></i>
-              <input type="text" id="nodeTitle" name="title" placeholder="노드 제목을 입력하세요" required />
+              <input type="text" id="nodeTitle" name="title" placeholder="노드 제목을 입력하세요" />
             </div>
           </div>
 
           <div class="form-group">
-            <label for="nodeContent">내용</label>
+            <label for="nodeContent">내용 *</label>
             <div class="textarea-wrapper">
               <i class="ri-file-text-line"></i>
               <textarea id="nodeContent" name="content" placeholder="노드 내용을 입력하세요" rows="3"></textarea>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="nodeParent">연결할 부모 노드</label>
-            <div class="input-wrapper">
-              <i class="ri-link"></i>
-              <input type="text" id="nodeParent" name="parent" placeholder="부모 노드 제목 (선택사항)" />
             </div>
           </div>
 
@@ -145,6 +198,35 @@ window.currentUser = {
 // 마인드맵 에디터 초기화
 document.addEventListener('DOMContentLoaded', function() {
   const mindmapEditor = initMindmapEditor({{ team.id }}, {{ mindmap.id }}, window.currentUser);
+
+  // 도움말 모달 이벤트
+  const helpBtn = document.getElementById('helpBtn');
+  const helpModal = document.getElementById('helpModal');
+  const closeHelpModal = document.getElementById('closeHelpModal');
+
+  helpBtn.addEventListener('click', () => {
+    helpModal.classList.add('active');
+  });
+
+  closeHelpModal.addEventListener('click', () => {
+    helpModal.classList.remove('active');
+  });
+
+  // 모달 외부 클릭 시 닫기
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) {
+      helpModal.classList.remove('active');
+    }
+  });
+
+  // 첫 방문 시 도움말 자동 표시 (localStorage 사용)
+  const hasSeenGuide = localStorage.getItem('mindmap_guide_seen_{{ mindmap.id }}');
+  if (!hasSeenGuide) {
+    setTimeout(() => {
+      helpModal.classList.add('active');
+      localStorage.setItem('mindmap_guide_seen_{{ mindmap.id }}', 'true');
+    }, 1000); // 1초 후 표시
+  }
 });
 </script>
 {% endblock %}

@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/api/client.js' %}"></script>
 <script src="{% static 'js/pages/node_detail.js' %}"></script>
 {% endblock %}
 
@@ -37,14 +38,11 @@
       <p class="node-detail-description">{{ node.content }}</p>
 
       <div class="node-detail-recommend">
-        <span class="node-detail-recommend-count">추천: {{ node.recommendation_count }}</span>
-        <form method="POST" action="{% url 'mindmaps:node_recommend' team.id node.id %}" class="tm-inline">
-          {% csrf_token %}
-          <button type="submit" class="node-detail-recommend-btn">
-            <i class="ri-thumb-up-line"></i>
-            추천하기
-          </button>
-        </form>
+        <span class="node-detail-recommend-count" id="recommendCount">추천: {{ node.recommendation_count }}</span>
+        <button type="button" class="node-detail-recommend-btn" id="recommendBtn">
+          <i class="ri-thumb-up-line"></i>
+          추천하기
+        </button>
       </div>
     </div>
 
