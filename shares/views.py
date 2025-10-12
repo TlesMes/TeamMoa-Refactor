@@ -29,26 +29,44 @@ MAIN_PAGE = 'teams:main_page'
 
 class PostListView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'shares/post_list.html'
-    
+
     def __init__(self):
         super().__init__()
         self.share_service = ShareService()
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team_id = self.kwargs['pk']
-        
-        # 페이지 번호 가져오기
+
+        # GET 파라미터 가져오기
         page = self.request.GET.get('page', 1)
-        
-        # 서비스 레이어를 통한 게시글 조회
-        posts_data = self.share_service.get_team_posts(team_id, page=page, per_page=10)
-        
+        search_query = self.request.GET.get('q', '').strip()
+        search_type = self.request.GET.get('type', 'all')
+
+        # 검색어가 있으면 검색, 없으면 전체 목록 조회
+        if search_query:
+            posts_data = self.share_service.search_posts(
+                team_id=team_id,
+                query=search_query,
+                search_type=search_type,
+                page=page,
+                per_page=10
+            )
+        else:
+            posts_data = self.share_service.get_team_posts(
+                team_id=team_id,
+                page=page,
+                per_page=10
+            )
+
         context.update({
             'post_list': posts_data['posts'],
             'page_obj': posts_data['posts'],  # 템플릿 호환성을 위해
             'team': posts_data['team'],
-            'team_id': team_id
+            'team_id': team_id,
+            'q': search_query,  # 검색어 유지
+            'type': search_type,  # 검색 타입 유지
+            'is_paginated': posts_data['posts'].paginator.num_pages > 1,  # 페이지네이션 표시 여부
         })
         return context
 

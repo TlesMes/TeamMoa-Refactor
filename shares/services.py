@@ -2,6 +2,7 @@ import os
 import urllib.parse
 import mimetypes
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator
@@ -138,12 +139,12 @@ class ShareService:
     def get_team_posts(self, team_id, page=1, per_page=10):
         """
         팀의 게시글 목록을 페이지네이션과 함께 조회합니다.
-        
+
         Args:
             team_id (int): 팀 ID
             page (int): 페이지 번호 (기본값: 1)
             per_page (int): 페이지당 항목 수 (기본값: 10)
-            
+
         Returns:
             dict: {
                 'posts': Page 객체 (페이지네이션된 게시글),
@@ -151,14 +152,80 @@ class ShareService:
             }
         """
         team = get_object_or_404(Team, pk=team_id)
-        
+
         # 최적화된 쿼리: 게시글과 작성자 정보 사전 로딩
         posts_queryset = Post.objects.filter(team=team).select_related('writer').order_by('-id')
-        
+
         # 페이지네이션 적용
         paginator = Paginator(posts_queryset, per_page)
         posts_page = paginator.get_page(page)
-        
+
+        return {
+            'posts': posts_page,
+            'team': team
+        }
+
+    def search_posts(self, team_id, query, search_type='all', page=1, per_page=10):
+        """
+        팀의 게시글을 검색합니다.
+
+        Args:
+            team_id (int): 팀 ID
+            query (str): 검색어
+            search_type (str): 검색 타입 ('all', 'title_content', 'title', 'content', 'writer')
+            page (int): 페이지 번호 (기본값: 1)
+            per_page (int): 페이지당 항목 수 (기본값: 10)
+
+        Returns:
+            dict: {
+                'posts': Page 객체 (페이지네이션된 검색 결과),
+                'team': Team 객체
+            }
+        """
+        team = get_object_or_404(Team, pk=team_id)
+
+        # 검색어가 없으면 빈 결과 반환
+        if not query or not query.strip():
+            return {
+                'posts': Paginator([], per_page).get_page(page),
+                'team': team
+            }
+
+        query = query.strip()
+
+        # 기본 쿼리셋: 팀 필터 + 작성자 정보 사전 로딩
+        posts_queryset = Post.objects.filter(team=team).select_related('writer')
+
+        # 검색 타입별 필터링
+        if search_type == 'title':
+            # 제목만 검색
+            posts_queryset = posts_queryset.filter(title__icontains=query)
+        elif search_type == 'content':
+            # 내용만 검색
+            posts_queryset = posts_queryset.filter(article__icontains=query)
+        elif search_type == 'writer':
+            # 작성자 닉네임 검색
+            posts_queryset = posts_queryset.filter(writer__nickname__icontains=query)
+        elif search_type == 'title_content':
+            # 제목 또는 내용 검색
+            posts_queryset = posts_queryset.filter(
+                Q(title__icontains=query) | Q(article__icontains=query)
+            )
+        else:  # 'all'
+            # 제목, 내용, 작성자 모두 검색
+            posts_queryset = posts_queryset.filter(
+                Q(title__icontains=query) |
+                Q(article__icontains=query) |
+                Q(writer__nickname__icontains=query)
+            )
+
+        # 정렬: 최신순
+        posts_queryset = posts_queryset.order_by('-id')
+
+        # 페이지네이션 적용
+        paginator = Paginator(posts_queryset, per_page)
+        posts_page = paginator.get_page(page)
+
         return {
             'posts': posts_page,
             'team': team
