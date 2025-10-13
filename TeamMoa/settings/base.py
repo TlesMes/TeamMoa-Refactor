@@ -38,12 +38,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # allauth 필수
     'channels',  # WebSocket 지원
 
     # Django REST Framework
     'rest_framework',
     'corsheaders',
     'drf_spectacular',
+
+    # Django Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
@@ -64,10 +71,56 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware'
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # allauth 필수
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# Django Sites Framework (allauth 필수)
+SITE_ID = 1
+
+# Django Allauth 설정
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # 기본 Django 인증
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth 인증
+]
+
+# Allauth 계정 설정
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # username 또는 email로 로그인
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # 소셜 로그인은 이메일 인증 선택적
+
+# 소셜 로그인 후 리다이렉트
+LOGIN_REDIRECT_URL = '/teams/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# 소셜 계정 자동 연결 (이메일 기반)
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+
+# Custom Adapters
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
+
+# Google OAuth 설정
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': env('GOOGLE_OAUTH_CLIENT_ID', default=''),
+            'secret': env('GOOGLE_OAUTH_CLIENT_SECRET', default=''),
+            'key': ''
+        }
+    }
+}
 
 # email
 # 메일을 보내는 호스트 서버
