@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import FormView, TemplateView, RedirectView
@@ -29,6 +29,27 @@ HOME_PAGE = 'accounts:home'
 class SignupSuccessView(TemplateView):
     template_name = 'accounts/signup_success.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 세션에서 성공 메시지 가져오기
+        signup_email = self.request.session.pop('signup_email', None)
+        email_sent = self.request.session.pop('email_sent', False)
+
+        if signup_email and email_sent:
+            context['signup_email'] = signup_email
+            context['show_success_message'] = True
+
+        # 세션에서 에러 메시지 가져오기
+        resend_error = self.request.session.pop('resend_error', None)
+        resend_error_level = self.request.session.pop('resend_error_level', None)
+
+        if resend_error:
+            context['resend_error'] = resend_error
+            context['resend_error_level'] = resend_error_level
+
+        return context
+
 
 signup_success = SignupSuccessView.as_view()
 
@@ -50,10 +71,16 @@ class SignupView(FormView):
     def form_valid(self, form):
         try:
             current_site = get_current_site(self.request)
-            self.auth_service.register_user(form, current_site)
-            return super().form_valid(form)
+            user = self.auth_service.register_user(form, current_site)
+            # 세션에 이메일 정보 저장 (signup_success 페이지에서 표시용)
+            self.request.session['signup_email'] = user.email
+            self.request.session['email_sent'] = True
+            return redirect('accounts:signup_success')
         except SMTPRecipientsRefused:
             form.add_error(None, "유효하지 않은 이메일 주소입니다.")
+            return self.form_invalid(form)
+        except Exception:
+            form.add_error(None, "회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
             return self.form_invalid(form)
 
 
@@ -69,7 +96,8 @@ class ActivateView(TemplateView):
     def get(self, request, uid64, token, *args, **kwargs):
         try:
             user = self.auth_service.activate_account(uid64, token)
-            auth.login(request, user)
+            # 백엔드 명시 (ModelBackend 사용)
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, '계정이 성공적으로 활성화되었습니다!')
             return redirect(MAIN_PAGE)
         except ValueError as e:
@@ -107,7 +135,8 @@ class LoginView(TemplateView):
         try:
             user = self.auth_service.authenticate_user(username, password)
             # HTTP 처리는 뷰에서 담당
-            auth.login(request, user)
+            # authenticate()가 설정한 backend 속성 사용
+            auth.login(request, user, backend=user.backend)
             request.session.set_expiry(0)  # 브라우저 종료시 세션 만료
             messages.success(request, f'{user.nickname}님, 환영합니다!')
             return redirect(MAIN_PAGE)
@@ -218,28 +247,36 @@ password = PasswordChangeView.as_view()
 
 
 class ResendActivationEmailView(TemplateView):
-    template_name = 'accounts/resend_activation.html'
-    
+    """
+    인증 메일 재전송 뷰
+    - AJAX 요청: JSON 응답 반환
+    - 일반 요청: 메시지와 함께 signup_success로 리다이렉트
+    """
+    template_name = 'accounts/signup_success.html'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.auth_service = AuthService()
-    
+
     def post(self, request, *args, **kwargs):
         email_or_username = request.POST.get('email_or_username', '').strip()
-        
+
         # AJAX 요청인지 확인
         is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-        
+
         try:
             current_site = get_current_site(request)
             user = self.auth_service.resend_activation_email(request, email_or_username, current_site)
-            
+
             message = f'{user.email}로 인증 메일을 재전송했습니다.'
             if is_ajax:
                 return JsonResponse({'status': 'success', 'message': message})
-            messages.success(request, message)
-            return render(request, 'accounts/resend_success.html', {'email': user.email})
-            
+
+            # 일반 요청: 세션에 저장 후 리다이렉트
+            request.session['signup_email'] = user.email
+            request.session['email_sent'] = True
+            return redirect('accounts:signup_success')
+
         except ValueError as e:
             return self._handle_response(is_ajax, 'warning', str(e))
         except SMTPRecipientsRefused:
@@ -248,18 +285,16 @@ class ResendActivationEmailView(TemplateView):
         except Exception:
             message = '메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
             return self._handle_response(is_ajax, 'error', message)
-    
+
     def _handle_response(self, is_ajax, status, message):
         """응답 처리 헬퍼 메서드"""
         if is_ajax:
             return JsonResponse({'status': status, 'message': message})
-        
-        if status == 'error':
-            messages.error(self.request, message)
-        elif status == 'warning':
-            messages.warning(self.request, message)
-        
-        return self.render_to_response({})
+
+        # 일반 요청은 세션에 에러 정보 저장 후 리다이렉트
+        self.request.session['resend_error'] = message
+        self.request.session['resend_error_level'] = status
+        return redirect('accounts:signup_success')
 
 
 resend_activation_email = ResendActivationEmailView.as_view()
@@ -280,5 +315,76 @@ class TestSignupSuccessView(TemplateView):
 
 
 test_signup_success = TestSignupSuccessView.as_view()
+
+
+class SocialConnectionsView(LoginRequiredMixin, TemplateView):
+    """소셜 계정 연결 관리 페이지"""
+    template_name = 'accounts/social_connections.html'
+    login_url = '/accounts/login/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 연결된 소셜 계정 가져오기
+        from allauth.socialaccount.models import SocialAccount
+        social_accounts = SocialAccount.objects.filter(user=self.request.user)
+        context['social_accounts'] = social_accounts
+
+        # 이미 연결된 프로바이더 목록
+        connected_providers = [account.provider for account in social_accounts]
+        context['has_google'] = 'google' in connected_providers
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """소셜 계정 연결 해제 처리"""
+        from allauth.socialaccount.models import SocialAccount
+
+        account_id = request.POST.get('account')
+
+        if not account_id:
+            messages.error(request, '잘못된 요청입니다.')
+            return redirect('accounts:social_connections')
+
+        try:
+            social_account = SocialAccount.objects.get(id=account_id, user=request.user)
+
+            # 최소 1개 로그인 방법 유지 검증
+            can_disconnect, error_message = self._can_disconnect_account(request.user, social_account)
+
+            if not can_disconnect:
+                messages.warning(request, error_message)
+                return redirect('accounts:social_connections')
+
+            # 연결 해제
+            provider_name = 'Google' if social_account.provider == 'google' else social_account.provider.title()
+            social_account.delete()
+            messages.success(request, f'{provider_name} 계정 연결이 해제되었습니다.')
+
+        except SocialAccount.DoesNotExist:
+            messages.error(request, '존재하지 않는 소셜 계정입니다.')
+
+        return redirect('accounts:social_connections')
+
+    def _can_disconnect_account(self, user, social_account):
+        """
+        소셜 계정 연결 해제 가능 여부 검증
+        최소 1개의 로그인 방법(비밀번호 또는 소셜 계정) 유지 필요
+        """
+        from allauth.socialaccount.models import SocialAccount
+
+        # 연결된 소셜 계정 수
+        social_count = SocialAccount.objects.filter(user=user).count()
+
+        # 사용 가능한 비밀번호 있는지 확인
+        has_password = user.has_usable_password()
+
+        # 마지막 소셜 계정이고 비밀번호도 없으면 연결 해제 불가
+        if social_count == 1 and not has_password:
+            return False, "최소 1개의 로그인 방법이 필요합니다. 비밀번호를 설정하거나 다른 소셜 계정을 연결한 후 해제할 수 있습니다."
+
+        return True, None
+
+
+social_connections = SocialConnectionsView.as_view()
 
 

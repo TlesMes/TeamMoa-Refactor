@@ -1,70 +1,77 @@
-
 // DOM이 로드된 후 실행
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[UI-Utils] Loaded');
+
     // 드롭다운 기능
     const dropdownToggle = document.getElementById('userDropdown');
     const dropdownMenu = document.getElementById('dropdownMenu');
-    const dropdownArrow = dropdownToggle.querySelector('.dropdown-arrow');
-    
-    // 드롭다운 토글 함수
-    function toggleDropdown() {
-        const isOpen = dropdownMenu.classList.contains('show');
-        
-        if (isOpen) {
-            closeDropdown();
-        } else {
-            openDropdown();
+    console.log('[UI-Utils] Dropdown elements:', { dropdownToggle, dropdownMenu });
+
+    // 드롭다운이 존재하는 페이지에서만 초기화
+    if (dropdownToggle && dropdownMenu) {
+        const dropdownArrow = dropdownToggle.querySelector('.dropdown-arrow');
+
+        // 드롭다운 토글 함수
+        function toggleDropdown() {
+            const isOpen = dropdownMenu.classList.contains('show');
+
+            if (isOpen) {
+                closeDropdown();
+            } else {
+                openDropdown();
+            }
         }
-    }
-    
-    // 드롭다운 열기
-    function openDropdown() {
-        dropdownMenu.classList.add('show');
-        dropdownToggle.classList.add('active');
-        dropdownToggle.setAttribute('aria-expanded', 'true');
-    }
-    
-    // 드롭다운 닫기
-    function closeDropdown() {
-        dropdownMenu.classList.remove('show');
-        dropdownToggle.classList.remove('active');
-        dropdownToggle.setAttribute('aria-expanded', 'false');
-    }
-    
-    // 드롭다운 버튼 클릭 이벤트
-    dropdownToggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleDropdown();
-    });
-    
-    // 문서 클릭 시 드롭다운 닫기
-    document.addEventListener('click', function(e) {
-        if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            closeDropdown();
+
+        // 드롭다운 열기
+        function openDropdown() {
+            dropdownMenu.classList.add('show');
+            dropdownToggle.classList.add('active');
+            dropdownToggle.setAttribute('aria-expanded', 'true');
         }
-    });
-    
-    // ESC 키로 드롭다운 닫기
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeDropdown();
+
+        // 드롭다운 닫기
+        function closeDropdown() {
+            dropdownMenu.classList.remove('show');
+            dropdownToggle.classList.remove('active');
+            dropdownToggle.setAttribute('aria-expanded', 'false');
         }
-    });
-    
-    // 로그아웃 버튼 클릭 이벤트
-    const logoutBtn = document.querySelector('.logout-btn');
-    const logoutUrl = document.getElementById('logout-url').dataset.logoutUrl;
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
+
+        // 드롭다운 버튼 클릭 이벤트
+        dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            showConfirmModal('정말 로그아웃하시겠습니까?', () => {
-                showToast('로그아웃되었습니다.');
-                setTimeout(() => {
-                    window.location.href = logoutUrl;
-                }, 1000);
-            });
+            e.stopPropagation();
+            toggleDropdown();
         });
+
+        // 문서 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function(e) {
+            if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+
+        // ESC 키로 드롭다운 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDropdown();
+            }
+        });
+
+        // 로그아웃 버튼 클릭 이벤트
+        const logoutBtn = document.querySelector('.logout-btn');
+        const logoutUrlElement = document.getElementById('logout-url');
+        if (logoutBtn && logoutUrlElement) {
+            const logoutUrl = logoutUrlElement.dataset.logoutUrl;
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showConfirmModal('정말 로그아웃하시겠습니까?', () => {
+                    showToast('로그아웃되었습니다.');
+                    setTimeout(() => {
+                        window.location.href = logoutUrl;
+                    }, 1000);
+                });
+            });
+        }
     }
     
     // 복사 아이콘 클릭 이벤트
