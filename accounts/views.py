@@ -332,6 +332,7 @@ class SocialConnectionsView(LoginRequiredMixin, TemplateView):
         # 이미 연결된 프로바이더 목록
         connected_providers = [account.provider for account in social_accounts]
         context['has_google'] = 'google' in connected_providers
+        context['has_github'] = 'github' in connected_providers
 
         return context
 
@@ -356,7 +357,15 @@ class SocialConnectionsView(LoginRequiredMixin, TemplateView):
                 return redirect('accounts:social_connections')
 
             # 연결 해제
-            provider_name = 'Google' if social_account.provider == 'google' else social_account.provider.title()
+            provider_names = {'google': 'Google', 'github': 'GitHub'}
+            provider_name = provider_names.get(social_account.provider, social_account.provider.title())
+
+            # EmailAddress 테이블에서도 해당 이메일 삭제 (소셜 계정 이메일만)
+            from allauth.account.models import EmailAddress
+            social_email = social_account.extra_data.get('email')
+            if social_email:
+                EmailAddress.objects.filter(user=request.user, email=social_email).delete()
+
             social_account.delete()
             messages.success(request, f'{provider_name} 계정 연결이 해제되었습니다.')
 

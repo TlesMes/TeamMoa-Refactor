@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
 
     'accounts.apps.AccountsConfig',
     'teams.apps.TeamsConfig',
@@ -110,7 +111,7 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
 ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
 
-# Google OAuth 설정
+# OAuth 설정 (Google + GitHub)
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -123,6 +124,18 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id': env('GOOGLE_OAUTH_CLIENT_ID', default=''),
             'secret': env('GOOGLE_OAUTH_CLIENT_SECRET', default=''),
+            'key': ''
+        }
+    },
+    'github': {
+        'SCOPE': [
+            'user',
+            'read:user',
+            'user:email',
+        ],
+        'APP': {
+            'client_id': env('GITHUB_OAUTH_CLIENT_ID', default=''),
+            'secret': env('GITHUB_OAUTH_CLIENT_SECRET', default=''),
             'key': ''
         }
     }

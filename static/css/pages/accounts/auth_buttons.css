@@ -240,6 +240,19 @@
   border-color: #4285F4;
 }
 
+.social-btn.github {
+  border-color: #6e7681;
+}
+
+.social-btn.github:hover {
+  background: rgba(110, 118, 129, 0.1);
+  border-color: #8b949e;
+}
+
+.social-btn.github svg {
+  color: #c9d1d9;
+}
+
 .social-btn svg {
   flex-shrink: 0;
 }

@@ -9,7 +9,7 @@ User = get_user_model()
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     """
     소셜 로그인 커스텀 어댑터
-    - Google OAuth로 회원가입 시 nickname 및 username 자동 생성
+    - Google/GitHub OAuth로 회원가입 시 nickname 및 username 자동 생성
     - 동일 이메일 계정 자동 연결
     """
 
@@ -19,6 +19,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         username, nickname 자동 생성
         """
         user = super().populate_user(request, sociallogin, data)
+        provider = sociallogin.account.provider
 
         # username 자동 생성 (이메일 기반)
         if not user.username:
@@ -26,23 +27,34 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             if email:
                 user.username = self.generate_unique_username(email)
             else:
-                # 이메일이 없으면 Google ID 사용
+                # 이메일이 없으면 Provider UID 사용
                 uid = sociallogin.account.uid
                 user.username = f"user_{uid[:10]}"
 
-        # nickname 자동 생성 (Google 프로필 기반)
+        # nickname 자동 생성 (프로바이더별 처리)
         extra_data = sociallogin.account.extra_data
 
         if not user.nickname:
-            # 1순위: Google의 given_name (예: "길동")
-            given_name = extra_data.get('given_name', '')
-            if given_name:
-                user.nickname = given_name[:10]
-            # 2순위: Google의 name (예: "홍길동")
-            elif extra_data.get('name'):
-                user.nickname = extra_data['name'][:10]
-            # 3순위: username에서 생성
+            if provider == 'google':
+                # Google: given_name → name → username
+                given_name = extra_data.get('given_name', '')
+                if given_name:
+                    user.nickname = given_name[:10]
+                elif extra_data.get('name'):
+                    user.nickname = extra_data['name'][:10]
+                else:
+                    user.nickname = user.username[:10]
+            elif provider == 'github':
+                # GitHub: name → login → username
+                github_name = extra_data.get('name', '')
+                if github_name:
+                    user.nickname = github_name[:10]
+                elif extra_data.get('login'):
+                    user.nickname = extra_data['login'][:10]
+                else:
+                    user.nickname = user.username[:10]
             else:
+                # 기타 프로바이더
                 user.nickname = user.username[:10]
 
         # profile은 빈 값으로 초기화 (나중에 사용자가 직접 입력)
