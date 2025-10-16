@@ -176,3 +176,70 @@
 .back-link i {
   font-size: 1.1rem;
 }
+
+/* ==========================================================================
+   Social Login Buttons - 소셜 로그인 버튼
+   ========================================================================== */
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--dark-text-muted);
+  font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--dark-border-color);
+}
+
+.divider span {
+  padding: 0 1rem;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--dark-border-color);
+  border-radius: 10px;
+  background: var(--dark-bg-secondary);
+  color: var(--dark-text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--dark-accent-primary);
+}
+
+.social-btn.google {
+  border-color: #4285F4;
+}
+
+.social-btn.google:hover {
+  background: rgba(66, 133, 244, 0.1);
+  border-color: #4285F4;
+}
+
+.social-btn svg {
+  flex-shrink: 0;
+}

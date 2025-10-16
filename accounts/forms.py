@@ -68,8 +68,17 @@ class SignupForm(forms.ModelForm):
         REGEX_EMAIL = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.fullmatch(REGEX_EMAIL, email):
             raise forms.ValidationError("이메일 형식이 맞지 않습니다.")
+
+        # 1. 일반 회원가입으로 사용 중인 이메일 체크
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('이미 사용중인 이메일입니다.')
+
+        # 2. OAuth 소셜 계정으로 사용 중인 이메일 체크
+        # allauth는 EmailAddress 테이블에 소셜 계정 이메일도 저장함
+        from allauth.account.models import EmailAddress
+        if EmailAddress.objects.filter(email=email).exists():
+            raise forms.ValidationError('이미 소셜 로그인으로 사용 중인 이메일입니다. Google 로그인을 이용해주세요.')
+
         return email
     
     def save(self, commit=True):

@@ -15,4 +15,5 @@ urlpatterns = [
     path('test-signup-success/', views.test_signup_success, name='test_signup_success'),  # 테스트용
     path('update/', views.update, name='update'),
     path('password/', views.password, name='password'),
+    path('social-connections/', views.social_connections, name='social_connections'),
 ]

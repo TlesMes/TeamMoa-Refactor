@@ -16,6 +16,12 @@ class User(AbstractUser):
             MinLengthValidator(3)      # 최소 3자
         ]
     )
+    email = models.EmailField(
+        unique=True,  # DB 레벨 이메일 중복 방지
+        error_messages={
+            'unique': '이미 사용 중인 이메일입니다.',
+        }
+    )
     nickname = models.CharField(
         max_length=10,
         validators=[MinLengthValidator(2)]
@@ -26,7 +32,7 @@ class User(AbstractUser):
         null=True,
         blank=True
     )
-    
+
     REQUIRED_FIELDS = ['email', 'nickname'] 
 
     def __str__(self): #어드민 페이지에서 username으로 표시

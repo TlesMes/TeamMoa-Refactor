@@ -86,10 +86,9 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',  # Allauth 인증
 ]
 
-# Allauth 계정 설정
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # username 또는 email로 로그인
+# Allauth 계정 설정 (최신 버전)
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}  # username 또는 email로 로그인
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # 회원가입 필수 필드
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # 소셜 로그인은 이메일 인증 선택적
 
 # 소셜 로그인 후 리다이렉트
@@ -99,6 +98,13 @@ ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 # 소셜 계정 자동 연결 (이메일 기반)
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
+
+# 소셜 로그인 시 확인 페이지 건너뛰기 (바로 Google로 리다이렉트)
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# 소셜 계정 연결 시 User.email 업데이트 방지 (기존 이메일 유지)
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
 
 # Custom Adapters
 ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'

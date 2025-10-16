@@ -25,8 +25,12 @@ urlpatterns = [
     # API 엔드포인트
     path('api/', include('api.urls')),
 
-    # 기존 템플릿 기반 뷰들
+    # 기존 템플릿 기반 뷰들 (우선순위: 기존 로그인/회원가입 유지)
     path('accounts/', include('accounts.urls')),
+
+    # Django Allauth (소셜 로그인만 사용, accounts/ 아래 남은 경로들)
+    path('accounts/', include('allauth.urls')),
+
     path('teams/', include('teams.urls')),
     path('shares/',include('shares.urls')),
     path('schedules/', include('schedules.urls')),

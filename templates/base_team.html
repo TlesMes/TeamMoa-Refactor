@@ -51,9 +51,18 @@
                 <span>프로필</span>
               </div>
             </a>
-            
+
+            <a href="{% url 'accounts:social_connections' %}" class="dropdown-item">
+              <div class="dropdown-item-content">
+                <div class="dropdown-icon">
+                  <i class="ri-links-line"></i>
+                </div>
+                <span>소셜 계정 관리</span>
+              </div>
+            </a>
+
             <hr class="dropdown-divider">
-            
+
             <a href="{% url 'accounts:logout' %}" id="logout-url" data-logout-url="{% url 'accounts:logout' %}" class="dropdown-item logout-btn">
               <div class="dropdown-item-content">
                 <div class="dropdown-icon">

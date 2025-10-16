@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Social Connections Page Styles - 소셜 계정 연결 페이지
+   ========================================================================== */
+
+/* Container override - 소셜 계정 페이지는 더 넓게 */
+.auth-section .auth-container {
+  max-width: 680px; /* 기본 480px → 680px */
+}
+
+/* Section Title */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--dark-border-color);
+}
+
+.section-title i {
+  font-size: 1.3rem;
+  color: var(--dark-accent-primary);
+}
+
+/* Social Accounts Section */
+.social-accounts-section {
+  margin-bottom: 2rem;
+}
+
+/* Social Accounts List */
+.social-accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.social-account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  background: var(--dark-bg-secondary);
+  border: 2px solid var(--dark-border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.social-account-item:hover {
+  border-color: var(--dark-accent-primary);
+  box-shadow: 0 4px 12px rgba(166, 176, 208, 0.15);
+}
+
+/* Social Account Info */
+.social-account-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0; /* flex 컨테이너에서 text-overflow 작동하도록 */
+}
+
+.social-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--dark-bg-primary);
+  border: 2px solid var(--dark-border-color);
+  flex-shrink: 0;
+}
+
+.social-icon.google {
+  border-color: #4285F4;
+  background: rgba(66, 133, 244, 0.1);
+}
+
+.social-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0; /* 긴 이메일 처리 */
+}
+
+.social-provider {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--dark-text-primary);
+  white-space: nowrap;
+}
+
+.social-email {
+  font-size: 0.9rem;
+  color: var(--dark-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Disconnect Button */
+.disconnect-form {
+  margin: 0;
+}
+
+.btn-disconnect {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--dark-text-secondary);
+  border: 2px solid var(--dark-border-color);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-disconnect:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #f44336;
+  color: #f44336;
+  transform: translateY(-2px);
+}
+
+.btn-disconnect i {
+  font-size: 1.1rem;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--dark-text-muted);
+  background: var(--dark-bg-secondary);
+  border: 2px dashed var(--dark-border-color);
+  border-radius: 12px;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Social Login Section (Add New Account) */
+.social-login {
+  margin-top: 2rem;
+}
+
+.social-login .section-title {
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .social-account-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-disconnect {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .social-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .social-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
