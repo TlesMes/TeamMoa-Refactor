@@ -5,7 +5,7 @@ Django 기반 팀 프로젝트 관리 시스템
 - 팀 관리, 스케줄링, 마인드맵, 공유 게시판, TODO 관리
 - 총 28개 핵심 페이지 보유
 
-## 🎯 현재 상태 (2025.10.17)
+## 🎯 현재 상태 (2025.10.18)
 
 ### ✅ 완료된 작업
 1. **UI 현대화 완료** (28개 페이지 100%)
@@ -48,13 +48,23 @@ Django 기반 팀 프로젝트 관리 시스템
    - **소셜 계정 관리 페이지** - 다중 소셜 계정 연결/해제 UI
    - **EmailAddress 연동 삭제** - 소셜 계정 해제 시 EmailAddress 테이블 정리
 
+7. **🎉 레거시 코드 정리 완료** (2025.10.18)
+   - **REST API 클린업** - Teams 미사용 액션 2개 삭제 (verify_code, join)
+   - **AJAX 뷰 정리** - Members 미사용 뷰 4개 삭제 (move_todo, assign_todo, complete_todo, return_to_board)
+   - **SSR 뷰 정리** - Mindmaps 미사용 뷰 3개 삭제 (create_node, node_vote, node_recommend)
+   - **API 클라이언트 최적화** - 미사용 메서드 7개 삭제 (GET 엔드포인트)
+   - **Serializer 정리** - Teams 미사용 Serializer 2개 삭제
+   - **URL 패턴 정리** - 총 9개 미사용 URL 패턴 제거
+   - **최종 API 수**: 26개 → 24개 (8% 감소)
+
 ## 🚀 다음 단계 (우선순위순)
 1. ✅ **마인드맵 연결선 개선** - 화살표 렌더링, 둥근 모서리 반영 완료
 2. ✅ **Shares 검색 기능** - 제목/내용/작성자 검색, 페이지네이션 완료
 3. ✅ **Shares 드래그 앤 드롭 업로드** - 파일 업로드 UX 개선 완료
 4. ✅ **OAuth 2.0 소셜 로그인** - Google + GitHub OAuth 구현 완료 (포트폴리오)
-5. **테스트 커버리지 확대** - API 엔드포인트 및 서비스 레이어 단위 테스트
-6. **성능 최적화** - 서비스 레이어 기반 쿼리 최적화 및 캐싱
+5. ✅ **레거시 코드 정리** - 미사용 API/뷰/Serializer 삭제 완료 (총 16개 항목)
+6. **테스트 커버리지 확대** - API 엔드포인트 및 서비스 레이어 단위 테스트
+7. **성능 최적화** - 서비스 레이어 기반 쿼리 최적화 및 캐싱
 
 ## 🛠️ 기술 스택
 - Backend: Django 4.x, Python, Django REST Framework, django-allauth
@@ -201,12 +211,41 @@ Read docs/architecture/service_layer/service_layer_guidelines.md  # 패턴 가�
 Read docs/architecture/service_layer/migration_roadmap.md         # 진행 계획
 ```
 
-- 앞으로 docs/README.md에서:
+### 5. API vs SSR 사용 현황 확인
+```bash
+Read docs/architecture/detailed_api_ssr_mapping.md
+```
+
+## 📁 주요 문서 경로 색인
+
+### 아키텍처 문서
+- **API/SSR 아키텍처 매핑**:
+  - `docs/architecture/detailed_api_ssr_mapping.md`
+  - **기능별 URL 패턴, 뷰 이름, HTTP 메서드**
+  - **JavaScript 함수와 API 엔드포인트 정확한 매핑**
+  - **WebSocket 이벤트 타입 및 데이터 구조**
+  - **레거시 코드 정리 완료** (2025.10.18)
+  - 총 24개 REST API, 3개 AJAX 엔드포인트, 34개 SSR 뷰, 1개 WebSocket
+
+- **서비스 레이어**:
+  - `docs/architecture/service_layer/service_layer_guidelines.md` - 패턴 가이드
+  - `docs/architecture/service_layer/migration_roadmap.md` - 진행 계획
+
+### 설정 가이드
+- **OAuth 설정**: `docs/oauth_setup_guide.md`
+- **환경 변수**: `.env.example`
+
+### 프로젝트 대시보드
+- **전체 진행상황**: `docs/README.md`
+
+---
+
+**참고**: docs/README.md에서:
   1. 프로젝트 진행상황 실시간 업데이트
   2. 각 단계별 완료 현황 기록
   3. 성과 지표 및 통계 갱신
   4. 다음 목표 및 계획 명시
 
-  
+
 ---
-*최종 업데이트: 2025.10.17*
+*최종 업데이트: 2025.10.18*
