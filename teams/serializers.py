@@ -73,28 +73,6 @@ class TeamUpdateSerializer(serializers.Serializer):
         return value
 
 
-class TeamJoinVerifySerializer(serializers.Serializer):
-    """팀 코드 검증용 직렬화"""
-    invitecode = serializers.CharField(max_length=50)
-
-    def validate_invitecode(self, value):
-        """초대코드 검증"""
-        if not value or not value.strip():
-            raise serializers.ValidationError('팀 코드를 입력해주세요.')
-        return value.strip()
-
-
-class TeamJoinSerializer(serializers.Serializer):
-    """팀 가입용 직렬화"""
-    teampasswd = serializers.CharField(max_length=100)
-
-    def validate_teampasswd(self, value):
-        """비밀번호 검증"""
-        if not value or not value.strip():
-            raise serializers.ValidationError('팀 비밀번호를 입력해주세요.')
-        return value.strip()
-
-
 class TeamSerializer(serializers.ModelSerializer):
     """팀 기본 정보 직렬화 (하위 호환성 유지)"""
     host_username = serializers.CharField(source='host.username', read_only=True)

@@ -107,43 +107,6 @@ class MindmapDeleteView(TeamHostRequiredMixin, View):
         return redirect('mindmaps:mindmap_list_page', pk=pk)
 
 
-class MindmapCreateNodeView(TeamMemberRequiredMixin, TemplateView):
-    def __init__(self):
-        super().__init__()
-        self.mindmap_service = MindmapService()
-    
-    def post(self, request, pk, mindmap_id, *args, **kwargs):
-        # 요청 데이터 준비
-        node_data = {
-            'posX': request.POST.get('posX'),
-            'posY': request.POST.get('posY'),
-            'title': request.POST.get('title'),
-            'content': request.POST.get('content'),
-            'parent': request.POST.get('parent')
-        }
-        
-        try:
-            node, connection_message = self.mindmap_service.create_node(
-                mindmap_id=mindmap_id,
-                node_data=node_data,
-                creator=request.user
-            )
-            
-            success_message = f'노드 "{node.title}"이 성공적으로 생성되었습니다.'
-            if connection_message:
-                success_message += connection_message
-            
-            messages.success(request, success_message)
-            
-        except ValueError as e:
-            messages.error(request, str(e))
-        except Exception as e:
-            logging.error(f'노드 생성 오류: {e}')
-            messages.error(request, '노드 생성 중 오류가 발생했습니다.')
-        
-        return redirect('mindmaps:mindmap_detail_page', pk=pk, mindmap_id=mindmap_id)
-
-
 class MindmapDeleteNodeView(TeamMemberRequiredMixin, View):
     def __init__(self):
         super().__init__()
@@ -203,27 +166,6 @@ class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
         return redirect('mindmaps:node_detail_page', pk=self.kwargs['pk'], node_id=node.id)
 
 
-class NodeRecommendView(TeamMemberRequiredMixin, View):
-    def __init__(self):
-        super().__init__()
-        self.mindmap_service = MindmapService()
-    
-    def post(self, request, pk, node_id, *args, **kwargs):
-        try:
-            action, recommendation_count = self.mindmap_service.toggle_node_recommendation(
-                node_id=node_id,
-                user_id=request.user.id
-            )
-            
-            action_text = "추가" if action == "added" else "취소"
-            messages.success(request, f'추천이 {action_text}되었습니다. (현재: {recommendation_count}개)')
-            
-        except Exception as e:
-            messages.error(request, '추천 처리 중 오류가 발생했습니다.')
-        
-        return redirect('mindmaps:node_detail_page', pk=pk, node_id=node_id)
-
-
 class MindmapEmpowerView(TeamMemberRequiredMixin, View):
     def post(self, request, pk, mindmap_id, user_id, *args, **kwargs):
         # 향후 구현
@@ -236,9 +178,6 @@ mindmap_list_page = MindmapListPageView.as_view()
 mindmap_detail_page = MindmapDetailPageView.as_view()
 mindmap_create = MindmapCreateView.as_view()
 mindmap_delete = MindmapDeleteView.as_view()
-mindmap_create_node = MindmapCreateNodeView.as_view()
 mindmap_delete_node = MindmapDeleteNodeView.as_view()
 mindmap_empower = MindmapEmpowerView.as_view()
 node_detail_page = NodeDetailPageView.as_view()
-node_vote = NodeRecommendView.as_view()  # 하위 호환성 유지
-node_recommend = NodeRecommendView.as_view()  # 새 이름

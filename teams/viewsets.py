@@ -9,7 +9,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Team, Milestone
 from .serializers import (
     TeamListSerializer, TeamDetailSerializer, TeamCreateSerializer,
-    TeamUpdateSerializer, TeamJoinVerifySerializer, TeamJoinSerializer,
+    TeamUpdateSerializer,
     MilestoneSerializer, MilestoneCreateSerializer, MilestoneUpdateSerializer
 )
 from .services import TeamService, MilestoneService
@@ -128,52 +128,6 @@ class TeamViewSet(viewsets.ModelViewSet):
             return api_error_response(request, str(e), status_code=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    @extend_schema(request=TeamJoinVerifySerializer)
-    @action(detail=False, methods=['post'], url_path='verify-code')
-    def verify_code(self, request):
-        """팀 코드 검증"""
-        serializer = TeamJoinVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            team_info = self.team_service.verify_team_code(
-                invite_code=serializer.validated_data['invitecode'],
-                user=request.user
-            )
-
-            return Response({
-                'success': True,
-                'message': '유효한 팀 코드입니다.',
-                'data': {'team': team_info}
-            })
-
-        except ValueError as e:
-            return api_error_response(request, str(e))
-
-    @extend_schema(request=TeamJoinSerializer)
-    @action(detail=True, methods=['post'])
-    def join(self, request, pk=None):
-        """팀 가입"""
-        team = self.get_object()
-        serializer = TeamJoinSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            self.team_service.join_team(
-                user=request.user,
-                team_id=team.id,
-                password=serializer.validated_data['teampasswd']
-            )
-
-            return api_success_response(
-                request,
-                f'"{team.title}" 팀에 가입되었습니다.',
-                data={'team_id': team.id}
-            )
-
-        except ValueError as e:
-            return api_error_response(request, str(e))
 
     @action(detail=True, methods=['get'])
     def statistics(self, request, pk=None):
