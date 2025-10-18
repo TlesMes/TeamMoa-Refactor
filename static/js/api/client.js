@@ -166,13 +166,6 @@ class TodoApiClient {
     }
 
     /**
-     * 팀의 TODO 목록 조회
-     */
-    async getTodos(teamId) {
-        return this.api.get(`/teams/${teamId}/todos/`);
-    }
-
-    /**
      * TODO 생성
      */
     async createTodo(teamId, content) {
@@ -243,13 +236,6 @@ class ScheduleApiClient {
     async getTeamAvailability(teamId, startDate, endDate) {
         return this.api.get(`/teams/${teamId}/schedules/team-availability/?start_date=${startDate}&end_date=${endDate}`);
     }
-
-    /**
-     * 내 스케줄 조회
-     */
-    async getMySchedule(teamId, startDate, endDate) {
-        return this.api.get(`/teams/${teamId}/schedules/my-schedule/?start_date=${startDate}&end_date=${endDate}`);
-    }
 }
 
 /**
@@ -268,13 +254,6 @@ class TeamApiClient {
      */
     async removeMember(teamId, userId) {
         return this.api.delete(`/teams/${teamId}/members/${userId}/`);
-    }
-
-    /**
-     * 팀 멤버 목록 조회
-     */
-    async getMembers(teamId) {
-        return this.api.get(`/teams/${teamId}/members/`);
     }
 
     // ==================== 마일스톤 관리 ====================
@@ -307,20 +286,6 @@ class TeamApiClient {
 class MindmapApiClient {
     constructor(apiClient) {
         this.api = apiClient;
-    }
-
-    /**
-     * 팀의 마인드맵 목록 조회
-     */
-    async getMindmaps(teamId) {
-        return this.api.get(`/teams/${teamId}/mindmaps/`);
-    }
-
-    /**
-     * 마인드맵 상세 조회 (노드 및 연결선 포함)
-     */
-    async getMindmap(teamId, mindmapId) {
-        return this.api.get(`/teams/${teamId}/mindmaps/${mindmapId}/`);
     }
 
     /**
@@ -368,22 +333,6 @@ class MindmapApiClient {
      */
     async toggleNodeRecommend(teamId, mindmapId, nodeId) {
         return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/recommend/`, {});
-    }
-
-    /**
-     * 노드 댓글 조회
-     */
-    async getNodeComments(teamId, mindmapId, nodeId) {
-        return this.api.get(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/comments/`);
-    }
-
-    /**
-     * 노드 댓글 작성
-     */
-    async createNodeComment(teamId, mindmapId, nodeId, comment) {
-        return this.api.post(`/teams/${teamId}/mindmaps/${mindmapId}/nodes/${nodeId}/comments/`, {
-            comment: comment
-        });
     }
 
     /**
