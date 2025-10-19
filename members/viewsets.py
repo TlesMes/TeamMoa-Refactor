@@ -18,7 +18,15 @@ from api.utils import api_response, api_success_response, api_error_response
 
 
 class TodoViewSet(viewsets.ModelViewSet):
-    """팀 TODO 관리 ViewSet"""
+    """
+    팀 TODO 관리 ViewSet
+
+    참고:
+    - list, create, retrieve, update 액션은 구현되어 있지만 프론트엔드에서 미사용
+    - TODO 생성은 SSR Form 방식 사용 (TeamMembersPageView POST)
+    - TODO 목록은 초기 렌더링 시 서버에서 제공
+    - 실제 사용 중인 액션: destroy, assign, complete, move_to_todo, move_to_done
+    """
     serializer_class = TodoSerializer
     permission_classes = [IsAuthenticated, IsTeamMember]
 

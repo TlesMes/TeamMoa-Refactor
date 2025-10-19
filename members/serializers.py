@@ -13,7 +13,7 @@ class TodoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Todo
-        fields = ['id', 'content', 'is_completed', 'assignee', 'assignee_id',
+        fields = ['id', 'content', 'is_completed', 'assignee_id',
                  'assignee_name', 'order', 'created_at', 'completed_at']
         read_only_fields = ['id', 'created_at', 'completed_at', 'assignee_name', 'assignee_id']
 
@@ -24,7 +24,7 @@ class TodoSerializer(serializers.ModelSerializer):
         return None
 
     def get_assignee_id(self, obj):
-        """할당자 ID 반환"""
+        """할당자 ID 반환 (TeamUser.id)"""
         return obj.assignee.id if obj.assignee else None
 
 
