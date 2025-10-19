@@ -1,9 +1,18 @@
 // 스케줄 업로드 페이지 전용 JavaScript
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const weekInput = document.getElementById('week');
     const scheduleForm = document.querySelector('.form-container');
     const teamId = window.TEAM_ID || window.location.pathname.match(/\/scheduler_upload_page\/(\d+)\//)?.[1];
+
+    // 1. 주차 입력란을 현재 주차로 자동 설정
+    if (weekInput && !weekInput.value) {
+        weekInput.value = getCurrentWeekValue();
+        updateWeekDates(weekInput.value);
+    }
+
+    // 2. 현재 주차 스케줄 불러오기
+    await loadExistingSchedule(teamId, weekInput);
 
     // 폼 제출 이벤트를 API 호출로 대체
     if (scheduleForm) {
@@ -45,13 +54,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 주차 입력 변경 시 날짜 업데이트 및 에러 상태 제거
     if (weekInput) {
-        weekInput.addEventListener('change', function() {
+        weekInput.addEventListener('change', async function() {
             // 값이 입력되면 에러 상태 제거
             if (this.value) {
                 clearFieldError(this);
             }
 
             updateWeekDates(this.value);
+
+            // 주차 변경 시 해당 주차의 스케줄 불러오기
+            await loadScheduleForWeek(teamId, this.value);
         });
 
         // 초기값이 있으면 업데이트
@@ -385,4 +397,134 @@ function getWeekStartDate(weekValue) {
     const dd = String(mondayOfTargetWeek.getDate()).padStart(2, '0');
 
     return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * 페이지 로드 시 현재 주차 스케줄 불러오기
+ */
+async function loadExistingSchedule(teamId, weekInput) {
+    if (!teamId || !weekInput || !weekInput.value) return;
+
+    try {
+        // 선택된 주차의 날짜 범위 계산
+        const startDate = getWeekStartDate(weekInput.value);
+        const endDate = new Date(startDate);
+        endDate.setDate(new Date(startDate).getDate() + 6);
+
+        // 해당 주차 스케줄 조회
+        const response = await scheduleApi.getMySchedule(
+            teamId,
+            startDate,
+            formatDate(endDate)
+        );
+
+        if (response.success && response.data && response.data.length > 0) {
+            fillScheduleFromData(response.data);
+            showDjangoToast('기존 스케줄을 불러왔습니다.', 'info');
+        }
+    } catch (error) {
+        // 스케줄이 없으면 빈 폼 유지 (에러 메시지 표시 안 함)
+        console.log('No existing schedule found:', error);
+    }
+}
+
+/**
+ * 특정 주차의 스케줄 불러오기
+ */
+async function loadScheduleForWeek(teamId, weekValue) {
+    if (!teamId || !weekValue) return;
+
+    try {
+        // 주차 값을 날짜 범위로 변환
+        const startDate = getWeekStartDate(weekValue);
+        const endDate = new Date(startDate);
+        endDate.setDate(new Date(startDate).getDate() + 6);
+
+        const endDateStr = formatDate(endDate);
+
+        // 해당 주차의 스케줄 조회
+        const response = await scheduleApi.getMySchedule(teamId, startDate, endDateStr);
+
+        // 기존 체크박스 모두 해제
+        clearAllSlots();
+
+        if (response.success && response.data && response.data.length > 0) {
+            fillScheduleFromData(response.data);
+            showDjangoToast('기존 스케줄을 불러왔습니다.', 'info');
+        }
+    } catch (error) {
+        // 스케줄이 없으면 빈 폼 유지
+        console.log('No schedule found for this week:', error);
+    }
+}
+
+/**
+ * API 응답 데이터를 폼에 채우기
+ */
+function fillScheduleFromData(scheduleData) {
+    if (!scheduleData || scheduleData.length === 0) return;
+
+    // 각 날짜별 스케줄 데이터 처리
+    scheduleData.forEach(daySchedule => {
+        const date = new Date(daySchedule.date);
+        const dayOfWeek = date.getDay(); // 0(일) ~ 6(토)
+        const dayIndex = dayOfWeek === 0 ? 7 : dayOfWeek; // 1(월) ~ 7(일)
+
+        // available_hours 배열 (예: [9, 10, 14, 18])
+        const availableHours = daySchedule.available_hours || [];
+
+        // 각 시간대별 체크박스 설정
+        availableHours.forEach(hour => {
+            // 체크박스 ID: id_time_9_1 (9시, 월요일)
+            const checkbox = document.getElementById(`id_time_${hour}_${dayIndex}`);
+            if (checkbox) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+}
+
+/**
+ * 날짜를 YYYY-MM-DD 형식으로 포맷
+ */
+function formatDate(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * 주어진 날짜가 포함된 주의 월요일 반환
+ */
+function getStartOfWeek(date) {
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // 일요일이면 -6, 그 외는 +1
+    return new Date(date.setDate(diff));
+}
+
+/**
+ * 현재 주차를 ISO week format (YYYY-W##)으로 반환
+ */
+function getCurrentWeekValue() {
+    const today = new Date();
+    const year = today.getFullYear();
+
+    // ISO 주차 규칙: 1월 4일이 포함된 주가 Week 1
+    const jan4 = new Date(year, 0, 4);
+    const jan4Day = jan4.getDay() || 7; // 일요일 = 7
+    const mondayOfWeek1 = new Date(jan4);
+    mondayOfWeek1.setDate(jan4.getDate() - jan4Day + 1);
+
+    // 오늘이 포함된 주의 월요일
+    const todayMonday = new Date(today);
+    const todayDay = today.getDay() || 7;
+    todayMonday.setDate(today.getDate() - todayDay + 1);
+
+    // 주차 계산 (Week 1 월요일부터 며칠 지났는지 / 7)
+    const daysDiff = Math.floor((todayMonday - mondayOfWeek1) / (24 * 60 * 60 * 1000));
+    const weekNumber = Math.floor(daysDiff / 7) + 1;
+
+    return `${year}-W${String(weekNumber).padStart(2, '0')}`;
 }

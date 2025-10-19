@@ -236,6 +236,13 @@ class ScheduleApiClient {
     async getTeamAvailability(teamId, startDate, endDate) {
         return this.api.get(`/teams/${teamId}/schedules/team-availability/?start_date=${startDate}&end_date=${endDate}`);
     }
+
+    /**
+     * 내 개인 스케줄 조회
+     */
+    async getMySchedule(teamId, startDate, endDate) {
+        return this.api.get(`/teams/${teamId}/schedules/my-schedule/?start_date=${startDate}&end_date=${endDate}`);
+    }
 }
 
 /**
