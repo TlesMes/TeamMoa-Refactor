@@ -181,28 +181,37 @@
 
 ### 사용 방식: **하이브리드** (SSR + API)
 
-### 3.1 멤버 페이지 (SSR - 초기 로드)
+### 3.1 멤버 페이지 (SSR - 초기 로드 + TODO 생성)
 
 | 기능 | URL 패턴 | 뷰 함수 | HTTP 메서드 | 템플릿 | 설명 |
 |------|----------|---------|-------------|--------|------|
-| **팀 멤버 관리** | `/members/team_members_page/<int:pk>/` | `team_members_page` | GET | `members/team_members_page.html` | 멤버 목록 + TODO 보드 (TODO/멤버별/DONE) |
+| **팀 멤버 페이지** | `/members/team_members_page/<int:pk>/` | `team_members_page` | GET | `members/team_members_page.html` | 멤버 목록 + TODO 보드 초기 렌더링 |
+| **TODO 생성 (Form)** | `/members/team_members_page/<int:pk>/` | `team_members_page` | POST | (리다이렉트) | Django Form으로 TODO 생성 후 페이지 새로고침 |
 
 **서버 렌더링 데이터**:
 - 팀 멤버 목록 (권한 포함)
 - TODO 보드 (미할당, 멤버별 할당, 완료)
 - 현재 사용자 권한 정보
+- TODO 생성 폼 (CreateTodoForm)
+
+**TODO 생성 방식**:
+- **SSR Form 사용** (API 미사용)
+- 이유: 단일 필드 입력, Django Messages 활용, 코드 간결성
+- `<form method="POST">` → `TeamMembersPageView.post()` → 리다이렉트
 
 ---
 
-### 3.2 TODO 관리 (API - 실시간 CRUD)
+### 3.2 TODO 기본 CRUD (REST API)
 
 | 기능 | API 엔드포인트 | HTTP 메서드 | ViewSet | JavaScript 함수 | 설명 |
 |------|----------------|-------------|---------|------------------|------|
-| **TODO 목록 조회** | `/api/v1/teams/<team_pk>/todos/` | GET | `TodoViewSet.list` | N/A | 초기 로드 시 서버 렌더링 |
-| **TODO 생성** | `/api/v1/teams/<team_pk>/todos/` | POST | `TodoViewSet.create` | N/A | 템플릿 Form 사용 |
-| **TODO 조회** | `/api/v1/teams/<team_pk>/todos/<pk>/` | GET | `TodoViewSet.retrieve` | N/A | 미사용 |
-| **TODO 수정** | `/api/v1/teams/<team_pk>/todos/<pk>/` | PUT, PATCH | `TodoViewSet.update` | N/A | 미사용 |
-| **TODO 삭제** | `/api/v1/teams/<team_pk>/todos/<pk>/` | DELETE | `TodoViewSet.destroy` | `todoApi.deleteTodo()` | 삭제 버튼 클릭 |
+| ~~**TODO 목록 조회**~~ | `/api/v1/teams/<team_pk>/todos/` | GET | `TodoViewSet.list` | N/A | **미사용** (초기 로드는 SSR) |
+| ~~**TODO 생성**~~ | `/api/v1/teams/<team_pk>/todos/` | POST | `TodoViewSet.create` | N/A | **미사용** (SSR Form 사용) |
+| ~~**TODO 조회**~~ | `/api/v1/teams/<team_pk>/todos/<pk>/` | GET | `TodoViewSet.retrieve` | N/A | **미사용** |
+| ~~**TODO 수정**~~ | `/api/v1/teams/<team_pk>/todos/<pk>/` | PUT, PATCH | `TodoViewSet.update` | N/A | **미사용** |
+| **TODO 삭제** | `/api/v1/teams/<team_pk>/todos/<pk>/` | DELETE | `TodoViewSet.destroy` | `todoApi.deleteTodo()` | ✅ **사용 중** (삭제 버튼) |
+
+**참고**: ModelViewSet 기본 액션(list, create, retrieve, update)은 구현되어 있지만 실제로는 사용하지 않음
 
 ---
 
@@ -231,28 +240,25 @@
 
 ---
 
-### 3.4 미사용 뷰 (레거시 - 삭제 권장)
+### 3.4 레거시 뷰 정리 완료 ✅
 
-#### SSR 뷰 (페이지 리다이렉트 방식)
+#### SSR 뷰 - **삭제 완료**
 
-| 기능 | URL 패턴 | 뷰 클래스 | 대체 REST API |
-|------|----------|----------|---------------|
-| ❌ **TODO 완료 (SSR)** | `/members/member_complete_Todo/<pk>/<todo_id>` | `MemberCompleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` |
-| ❌ **TODO 삭제 (SSR)** | `/members/member_delete_Todo/<pk>/<todo_id>` | `MemberDeleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/` (DELETE) |
+| 기능 | URL 패턴 | 뷰 클래스 | 대체 REST API | 삭제일 |
+|------|----------|----------|---------------|--------|
+| ✅ **TODO 완료 (SSR)** | `/members/member_complete_Todo/<pk>/<todo_id>` | `MemberCompleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` | 2025.10.19 |
+| ✅ **TODO 삭제 (SSR)** | `/members/member_delete_Todo/<pk>/<todo_id>` | `MemberDeleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/` (DELETE) | 2025.10.19 |
 
-#### AJAX 엔드포인트 (`members/urls.py` 정의, 미사용)
+#### AJAX 엔드포인트 - **삭제 완료**
 
-| 기능 | URL 패턴 | 뷰 클래스 | 대체 REST API |
-|------|----------|----------|---------------|
-| ❌ **TODO 이동** | `/members/api/<pk>/move-todo/` | `MoveTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-todo/` |
-| ❌ **TODO 할당** | `/members/api/<pk>/assign-todo/` | `AssignTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/assign/` |
-| ❌ **TODO 완료** | `/members/api/<pk>/complete-todo/` | `CompleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` |
-| ❌ **TODO 복귀** | `/members/api/<pk>/return-to-board/` | `ReturnToBoardView` | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-done/` |
+| 기능 | URL 패턴 | 뷰 클래스 | 대체 REST API | 삭제일 |
+|------|----------|----------|---------------|--------|
+| ✅ **TODO 이동** | `/members/api/<pk>/move-todo/` | `MoveTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-todo/` | 2025.10.18 |
+| ✅ **TODO 할당** | `/members/api/<pk>/assign-todo/` | `AssignTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/assign/` | 2025.10.18 |
+| ✅ **TODO 완료** | `/members/api/<pk>/complete-todo/` | `CompleteTodoView` | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` | 2025.10.18 |
+| ✅ **TODO 복귀** | `/members/api/<pk>/return-to-board/` | `ReturnToBoardView` | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-done/` | 2025.10.18 |
 
-**참고**:
-- 위 AJAX 엔드포인트들은 `views.py`에 구현되어 있으나 JavaScript에서 호출하지 않음
-- DRF ViewSet (`members/viewsets.py` - `TodoViewSet`)으로 완전히 대체됨
-- `members/urls.py`에서 제거 권장
+**참고**: Members App 레거시 코드 완전 정리 완료 (총 6개 뷰 삭제)
 
 ---
 
@@ -417,13 +423,15 @@
 
 ---
 
-### 5.4 미사용 뷰 (레거시 - 삭제 권장)
+### 5.4 미사용 뷰 (레거시) - **✅ 삭제 완료**
 
-| 기능 | URL 패턴 | 뷰 함수 | 이유 |
-|------|----------|---------|------|
-| ❌ **노드 생성 (SSR)** | `/mindmaps/mindmap_create_node/<pk>/<mindmap_id>` | `mindmap_create_node` | API로 대체 (`POST /api/.../nodes/`) |
-| ❌ **노드 투표 (SSR)** | `/mindmaps/node_vote/<pk>/<node_id>` | `node_vote` | API로 대체 (`POST /api/.../nodes/<pk>/recommend/`) |
-| ❌ **노드 추천 (SSR)** | `/mindmaps/node_recommend/<pk>/<node_id>` | `node_recommend` | 하위 호환성 유지용, 실제 사용 안 함 |
+| 기능 | URL 패턴 | 뷰 함수 | 이유 | 상태 |
+|------|----------|---------|------|------|
+| ✅ **노드 생성 (SSR)** | `/mindmaps/mindmap_create_node/<pk>/<mindmap_id>` | `mindmap_create_node` | API로 대체 (`POST /api/.../nodes/`) | **삭제됨** |
+| ✅ **노드 투표 (SSR)** | `/mindmaps/node_vote/<pk>/<node_id>` | `node_vote` | API로 대체 (`POST /api/.../nodes/<pk>/recommend/`) | **삭제됨** |
+| ✅ **노드 추천 (SSR)** | `/mindmaps/node_recommend/<pk>/<node_id>` | `node_recommend` | 하위 호환성 유지용, 실제 사용 안 함 | **삭제됨** |
+
+**참고**: Mindmaps 미사용 뷰 3개는 2025.10.18에 삭제 완료
 
 ---
 
@@ -502,16 +510,16 @@
 
 ## 📊 전체 통계
 
-### REST API 엔드포인트 (총 24개)
+### REST API 엔드포인트 (총 24개, 실제 사용 19개)
 
-| 앱 | REST API 수 | 주요 기능 |
-|----|-------------|-----------|
-| **Teams** | 4개 | 마일스톤 CRUD (3), 멤버 제거/탈퇴 (1) |
-| **Members** | 7개 | TODO CRUD, 상태 관리 (할당, 완료, 이동) |
-| **Schedules** | 3개 | 개인 스케줄 저장, 팀 가용성 조회, 내 스케줄 조회 |
-| **Mindmaps** | 10개 | 노드 CRUD (4), 연결선 CRUD (2), 추천 (1), 댓글 CRUD (3) |
-| **Shares** | 0개 | (SSR 중심) |
-| **Accounts** | 0개 | (SSR + AJAX 엔드포인트) |
+| 앱 | REST API 수 | 실제 사용 | 주요 기능 |
+|----|-------------|----------|-----------|
+| **Teams** | 4개 | 4개 ✅ | 마일스톤 CRUD (3), 멤버 제거/탈퇴 (1) |
+| **Members** | 7개 | 5개 ⚠️ | TODO 상태 관리 (할당, 완료, 이동, 삭제) / **미사용**: list, create, retrieve, update |
+| **Schedules** | 3개 | 2개 ⚠️ | 개인 스케줄 저장, 팀 가용성 조회 / **미사용**: 내 스케줄 조회(SSR 대체) |
+| **Mindmaps** | 10개 | 10개 ✅ | 노드 CRUD (4), 연결선 CRUD (2), 추천 (1), 댓글 CRUD (3) |
+| **Shares** | 0개 | 0개 | (SSR 중심) |
+| **Accounts** | 0개 | 0개 | (SSR + AJAX 엔드포인트) |
 
 ---
 
@@ -547,15 +555,18 @@
 
 ---
 
-### ✅ 레거시 코드 정리 완료 (2025.10.18)
+### ✅ 레거시 코드 정리 완료
 
-**모든 미사용 코드가 삭제되었습니다.**
-
-**삭제된 항목**:
+**2025.10.18 삭제**:
 - **Teams**: REST API 2개 (팀 코드 검증, 가입 액션), Serializer 2개
 - **Members**: AJAX 뷰 4개, URL 패턴 4개
 - **Mindmaps**: SSR 뷰 3개 (노드 생성, 노드 투표, 노드 추천), URL 패턴 3개
 - **API 클라이언트**: 미사용 메서드 7개 (GET 엔드포인트)
+
+**2025.10.19 추가 삭제**:
+- **Members**: SSR 뷰 2개 (`MemberCompleteTodoView`, `MemberDeleteTodoView`), URL 패턴 2개
+
+**총 정리**: 18개 레거시 항목 삭제 완료 ✅
 
 
 ---
@@ -580,6 +591,6 @@
 
 ---
 
-**최종 업데이트**: 2025.10.18 (레거시 코드 정리 완료)
+**최종 업데이트**: 2025.10.19 (Members App 레거시 SSR 뷰 정리 완료)
 **작성자**: Claude Code
-**버전**: 2.0
+**버전**: 2.1

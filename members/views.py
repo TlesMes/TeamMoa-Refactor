@@ -61,45 +61,6 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
 
 team_members_page = TeamMembersPageView.as_view()
 
-class MemberCompleteTodoView(TeamMemberRequiredMixin, View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.todo_service = TodoService()
-        
-    def post(self, request, pk, todo_id):
-        try:
-            team = get_object_or_404(Team, pk=pk)
-            todo, new_status = self.todo_service.complete_todo(todo_id, team, request.user)
-            
-            status_display = "완료" if new_status == 'done' else "미완료"
-            messages.success(request, f'할 일 상태가 "{status_display}"로 변경되었습니다.')
-            
-        except ValueError as e:
-            messages.error(request, str(e))
-            
-        return redirect(TEAM_MEMBERS_PAGE, pk=pk)
-
-
-class MemberDeleteTodoView(TeamMemberRequiredMixin, View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.todo_service = TodoService()
-        
-    def post(self, request, pk, todo_id):
-        try:
-            team = get_object_or_404(Team, pk=pk)
-            todo_content = self.todo_service.delete_todo(todo_id, team)
-            messages.success(request, f'"{todo_content}" 할 일이 삭제되었습니다.')
-            
-        except Exception as e:
-            messages.error(request, '할 일 삭제 중 오류가 발생했습니다.')
-            
-        return redirect(TEAM_MEMBERS_PAGE, pk=pk)
-
-
-member_complete_Todo = MemberCompleteTodoView.as_view()
-member_delete_Todo = MemberDeleteTodoView.as_view()
-
 
 
 
