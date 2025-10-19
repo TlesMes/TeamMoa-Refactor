@@ -5,66 +5,34 @@ Django 기반 팀 프로젝트 관리 시스템
 - 팀 관리, 스케줄링, 마인드맵, 공유 게시판, TODO 관리
 - 총 28개 핵심 페이지 보유
 
-## 🎯 현재 상태 (2025.10.18)
+## 🎯 현재 진행 중인 작업
 
-### ✅ 완료된 작업
-1. **UI 현대화 완료** (28개 페이지 100%)
-   - 일관된 디자인 시스템 구축
-   - 반응형 디자인 적용
-   - **CSS 모듈화 100% 완료** - 6개 앱, 21개 모듈 파일로 분리
-   - **🎉 Members App API 기반 실시간 UI** - REST API 호출 기반 실시간 TODO 관리 시스템
+### 🧪 테스트 커버리지 구축 (2025.10.19~)
 
-2. **백엔드 리팩토링 완료**
-   - 네이밍 컨벤션 통일 (`Team_User` → `TeamUser` 등)
-   - 모델 구조 정리 (중복 필드 제거)
-   - **CBV 전환 100% 완료** - 6개 앱, 47개 뷰 모두 전환
-   - **스케줄 모델 재설계 완료** - JSON 기반 구조로 전환
+| 앱 | 테스트 수 | 상태 | 커버리지 |
+|---|---------|------|---------|
+| **Teams** | 66개 | ✅ 완료 | 서비스(36) + API(17) + SSR(13) |
+| **Members** | 33개 | ✅ 완료 | 서비스(20) + API(10) + SSR(3) |
+| **Schedules** | 0개 | ⏳ 예정 | 서비스 + API + SSR |
+| **Mindmaps** | 0개 | ⏳ 예정 | 서비스 + API + WebSocket + SSR |
+| **Shares** | 0개 | ⏳ 예정 | 서비스 + SSR |
+| **Accounts** | 0개 | ⏳ 예정 | OAuth + SSR |
+| **총계** | **99개** | **33%** | 2/6 앱 완료 |
 
-3. **🎉 서비스 레이어 도입 100% 완료**
-   - **전체 6개 앱 완료** - Accounts, Teams, Members, Schedules, Mindmaps, Shares
-   - **총 59개 서비스 메서드** 구현 (7개 서비스 클래스)
-   - **평균 뷰 복잡도 31% 감소** 달성
-   - 모든 비즈니스 로직의 서비스 레이어 중앙화 완료
-   - 권한 관리, 트랜잭션 보장, 데이터 검증 체계 통합
+**테스트 전략**:
+- pytest + DRF TestClient 활용
+- fixture 기반 공통 설정 재사용 (conftest.py)
+- 서비스 레이어 우선 테스트 (비즈니스 로직 검증)
+- 실제 사용 중인 API만 테스트 (미사용 API 제외)
 
-4. **마인드맵 시스템 현대화**
-   - **가상 캔버스 시스템** 구현 (5400×3600 픽셀)
-   - **동적 그리드 및 시각적 피드백** 시스템
-   - **모던 노드 디자인** - 둥근 모서리, 그라데이션, 드롭 섀도우
-   - 실시간 협업 기능 완성
+## 🚀 다음 단계
 
-5. **문서화 체계 구축**
-   - docs 디렉토리 카테고리별 구조화 (15개 문서)
-   - 서비스 레이어 가이드라인 및 마이그레이션 로드맵 완성
-   - CBV 전환 종합 보고서 작성
-   - **모든 문서 최신화 완료** (2025.09.16)
+1. **테스트 커버리지 확대** - ⏳ 진행 중 (2/6 앱 완료, 99개 테스트)
+   - ✅ Teams App (66개)
+   - ✅ Members App (33개)
+   - ⏳ Schedules, Mindmaps, Shares, Accounts 예정
 
-6. **🎉 OAuth 2.0 소셜 로그인 완료** (Google + GitHub)
-   - **Google OAuth 2.0** - 프로필 자동 매핑 (given_name, name, email)
-   - **GitHub OAuth 2.0** - 프로필 자동 매핑 (name, login, email)
-   - **CustomSocialAccountAdapter** - 이메일 기반 자동 계정 연결, 프로바이더별 프로필 처리
-   - **CustomAccountAdapter** - allauth 메시지 시스템 한글화
-   - **이메일 중복 방지** - 일반 계정 ↔ 소셜 계정 간 이메일 충돌 방지
-   - **소셜 계정 관리 페이지** - 다중 소셜 계정 연결/해제 UI
-   - **EmailAddress 연동 삭제** - 소셜 계정 해제 시 EmailAddress 테이블 정리
-
-7. **🎉 레거시 코드 정리 완료** (2025.10.18)
-   - **REST API 클린업** - Teams 미사용 액션 2개 삭제 (verify_code, join)
-   - **AJAX 뷰 정리** - Members 미사용 뷰 4개 삭제 (move_todo, assign_todo, complete_todo, return_to_board)
-   - **SSR 뷰 정리** - Mindmaps 미사용 뷰 3개 삭제 (create_node, node_vote, node_recommend)
-   - **API 클라이언트 최적화** - 미사용 메서드 7개 삭제 (GET 엔드포인트)
-   - **Serializer 정리** - Teams 미사용 Serializer 2개 삭제
-   - **URL 패턴 정리** - 총 9개 미사용 URL 패턴 제거
-   - **최종 API 수**: 26개 → 24개 (8% 감소)
-
-## 🚀 다음 단계 (우선순위순)
-1. ✅ **마인드맵 연결선 개선** - 화살표 렌더링, 둥근 모서리 반영 완료
-2. ✅ **Shares 검색 기능** - 제목/내용/작성자 검색, 페이지네이션 완료
-3. ✅ **Shares 드래그 앤 드롭 업로드** - 파일 업로드 UX 개선 완료
-4. ✅ **OAuth 2.0 소셜 로그인** - Google + GitHub OAuth 구현 완료 (포트폴리오)
-5. ✅ **레거시 코드 정리** - 미사용 API/뷰/Serializer 삭제 완료 (총 16개 항목)
-6. **테스트 커버리지 확대** - API 엔드포인트 및 서비스 레이어 단위 테스트
-7. **성능 최적화** - 서비스 레이어 기반 쿼리 최적화 및 캐싱
+2. **성능 최적화** - 서비스 레이어 기반 쿼리 최적화 및 캐싱
 
 ## 🛠️ 기술 스택
 - Backend: Django 4.x, Python, Django REST Framework, django-allauth
@@ -72,6 +40,7 @@ Django 기반 팀 프로젝트 관리 시스템
 - Database: SQLite (개발), MySQL (운영)
 - Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 - Authentication: OAuth 2.0 (Google, GitHub)
+- Testing: pytest, DRF TestClient
 
 ## 📋 개발 가이드라인
 
@@ -105,11 +74,6 @@ Django 기반 팀 프로젝트 관리 시스템
 - JSON 기반 통신
 - 실시간 상태 업데이트
 
-**장점**:
-- 각 기능의 특성에 맞는 최적의 방식 선택
-- 점진적 마이그레이션 가능
-- 기존 코드 재사용 (서비스 레이어)
-
 ### 🏗️ Base 템플릿 구조
 - **base_team.html**: 팀 내부 페이지 (팀 네비게이션 포함 - 홈, 시간표, 마인드맵, 공유게시판)
 - **base_user.html**: 사용자 페이지 (로그인된 사용자용, 팀 메뉴 불필요 - 인증, 팀 관리)
@@ -117,7 +81,7 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ### 🔧 공통 JavaScript 함수 (`ui-utils.js`)
 - **위치**: `static/js/common/ui-utils.js`
-- **자동 로드**: 모든 base 템플릿에서 자동 로드됨 (`base_team.html`, `base_user.html`, `base_public.html`)
+- **자동 로드**: 모든 base 템플릿에서 자동 로드됨
 
 **주요 함수들**:
 
@@ -177,6 +141,7 @@ showDjangoMessages();  // Django messages를 토스트로 자동 표시 (DOMCont
 - `teams`: 팀 관리 관련
 - `shares`: 공유 게시판 관련
 - `schedules`: 스케줄 관련
+- `members`: 멤버 관리 관련
 - `ui`: 전체 UI 관련
 
 ### 🔧 환경 설정 관리
@@ -200,36 +165,26 @@ git log --oneline -10  # 최근 커밋 확인
 git status            # 현재 작업 중인 파일
 ```
 
-### 3. 서비스 레이어 진행상황 체크
-```bash
-find . -name "services.py" -not -path "./venv/*"  # 구현된 서비스 확인
-```
-
-### 4. 다음 작업 가이드라인 참고
-```bash
-Read docs/architecture/service_layer/service_layer_guidelines.md  # 패턴 가이드
-Read docs/architecture/service_layer/migration_roadmap.md         # 진행 계획
-```
-
-### 5. API vs SSR 사용 현황 확인
+### 3. API vs SSR 사용 현황 확인
 ```bash
 Read docs/architecture/detailed_api_ssr_mapping.md
+```
+
+### 4. 서비스 레이어 가이드라인 참고
+```bash
+Read docs/architecture/service_layer/service_layer_guidelines.md
 ```
 
 ## 📁 주요 문서 경로 색인
 
 ### 아키텍처 문서
-- **API/SSR 아키텍처 매핑**:
-  - `docs/architecture/detailed_api_ssr_mapping.md`
-  - **기능별 URL 패턴, 뷰 이름, HTTP 메서드**
-  - **JavaScript 함수와 API 엔드포인트 정확한 매핑**
-  - **WebSocket 이벤트 타입 및 데이터 구조**
-  - **레거시 코드 정리 완료** (2025.10.18)
+- **API/SSR 아키텍처 매핑**: `docs/architecture/detailed_api_ssr_mapping.md`
+  - 기능별 URL 패턴, 뷰 이름, HTTP 메서드
+  - JavaScript 함수와 API 엔드포인트 정확한 매핑
+  - WebSocket 이벤트 타입 및 데이터 구조
   - 총 24개 REST API, 3개 AJAX 엔드포인트, 34개 SSR 뷰, 1개 WebSocket
 
-- **서비스 레이어**:
-  - `docs/architecture/service_layer/service_layer_guidelines.md` - 패턴 가이드
-  - `docs/architecture/service_layer/migration_roadmap.md` - 진행 계획
+- **서비스 레이어**: `docs/architecture/service_layer/service_layer_guidelines.md`
 
 ### 설정 가이드
 - **OAuth 설정**: `docs/oauth_setup_guide.md`
@@ -248,4 +203,4 @@ Read docs/architecture/detailed_api_ssr_mapping.md
 
 
 ---
-*최종 업데이트: 2025.10.18*
+*최종 업데이트: 2025.10.19*
