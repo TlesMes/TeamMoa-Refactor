@@ -173,14 +173,15 @@ class PostEditView(TeamMemberRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=kwargs['pk'])
         post = get_object_or_404(Post, id=kwargs['post_id'])
-        
+
         # 권한 검증
         if not self.share_service.check_post_author(kwargs['post_id'], self.request.user):
             from django.core.exceptions import PermissionDenied
             raise PermissionDenied('본인 게시글이 아닙니다.')
-        
+
         context.update({
             'form': PostWriteForm(instance=post),
+            'post': post,
             'edit': '수정하기',
             'team': team
         })

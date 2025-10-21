@@ -259,18 +259,18 @@ class ShareService:
     def check_post_author(self, post_id, user):
         """
         사용자가 게시글의 작성자인지 또는 관리자인지 확인합니다.
-        
+
         Args:
             post_id (int): 게시글 ID
             user (User): 확인할 사용자
-            
+
         Returns:
             bool: 작성자이거나 관리자인 경우 True
         """
         post = get_object_or_404(Post, pk=post_id)
-        
+
         # 작성자 본인이거나 관리자 권한 확인
-        return post.writer == user or user.level == '0'
+        return post.writer == user or user.is_superuser
     
     # ================================
     # 파일 관리 메서드
