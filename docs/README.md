@@ -69,7 +69,7 @@ Django REST Framework 기반 API 인프라 및 앱별 API 전환 작업
 | **UI/UX 개선** | 4/4 (100%) | ✅ 완료 | 모달 시스템 + Mindmaps 현대화 + 노드 디자인 + Members API 기반 UI 완료 |
 | **CSS 모듈화** | 6/6 (100%) | ✅ 완료 | 모든 앱 CSS 모듈화 + Header 컴포넌트 분리 완료 |
 | **API 레이어 도입** | 4/4 (100%) | ✅ 완료 | 하이브리드 전략 완성 (동적 기능 API화, 정적 기능 SSR 유지) |
-| **테스트 커버리지** | 3/6 (50%) | 🔄 진행중 | Teams, Members, Schedules 완료 (129개 테스트) |
+| **테스트 커버리지** | 4/6 (67%) | 🔄 진행중 | Teams, Members, Schedules, Shares 완료 (153개 테스트) |
 
 ### 📈 주요 성과 지표
 
@@ -87,14 +87,15 @@ Django REST Framework 기반 API 인프라 및 앱별 API 전환 작업
 - **코드 재사용성**: API, CLI, 테스트에서 동일 서비스 로직 활용
 
 #### 테스트 커버리지 구축 성과 (2025.10.19~ 진행 중)
-- **총 테스트 수**: 129개 (진행률 50%, 3/6 앱 완료)
+- **총 테스트 수**: 153개 (진행률 75%, 4/6 앱 완료)
 - **테스트 완료 앱**:
   - Teams App: 66개 (서비스 36 + API 17 + SSR 13)
   - Members App: 33개 (서비스 20 + API 10 + SSR 3)
   - Schedules App: 30개 (서비스 15 + API 10 + SSR 5)
-- **테스트 품질**: 고정 날짜 사용(재현성 확보), 명명된 상수(가독성 향상), scope 최적화(성능 개선)
+  - Shares App: 24개 (서비스 13 + SSR 11)
+- **테스트 품질**: pytest.mark.parametrize 활용(중복 제거), 명명된 상수(가독성 향상), scope 최적화(성능 개선)
 - **테스트 전략**: pytest + DRF TestClient, fixture 재사용(conftest.py), 서비스 레이어 우선 테스트
-- **예정 앱**: Mindmaps, Shares, Accounts (75개 예상)
+- **예정 앱**: Mindmaps, Accounts (51개 예상)
 
 #### 사용성 분석 및 개선 성과 (2025.09.16 완료)
 - **분석 대상**: 6개 앱 전체 사용자 경험 평가
@@ -202,7 +203,8 @@ Django REST Framework 기반 API 인프라 및 앱별 API 전환 작업
 2. ✅ **Shares 게시판 검색 기능** - 제목/내용/작성자 검색, Q 객체 활용 완료
 3. ✅ **Shares 파일 업로드 개선** - 드래그 앤 드롭, 파일 미리보기 완료
 4. ✅ **Schedules App 테스트 구축** - 서비스/API/SSR 30개 테스트 완료 (2025.10.20)
-5. **테스트 커버리지 확대** - Mindmaps, Shares, Accounts 앱 테스트 작성 (75개 예상)
+5. ✅ **Shares App 테스트 구축** - 서비스/SSR 24개 테스트 완료 (2025.10.20)
+6. **테스트 커버리지 확대** - Mindmaps, Accounts 앱 테스트 작성 (51개 예상)
 
 ### 🚀 장기 목표 (2-3개월)
 1. **성능 모니터링 시스템** - 서비스별 성능 지표 추적 및 최적화
