@@ -62,6 +62,10 @@ def team(db, user):
     return team
 
 
+# ================================
+# API 테스트용 Clients (DRF)
+# ================================
+
 @pytest.fixture
 def api_client():
     """DRF API 테스트 클라이언트"""
@@ -70,7 +74,33 @@ def api_client():
 
 
 @pytest.fixture
-def authenticated_client(api_client, user):
-    """인증된 API 클라이언트"""
+def authenticated_api_client(api_client, user):
+    """인증된 API 클라이언트 (DRF)"""
     api_client.force_authenticate(user=user)
     return api_client
+
+
+# 하위 호환성을 위한 별칭 (deprecated)
+@pytest.fixture
+def authenticated_client(api_client, user):
+    """[DEPRECATED] authenticated_api_client 사용 권장"""
+    api_client.force_authenticate(user=user)
+    return api_client
+
+
+# ================================
+# SSR 테스트용 Clients (Django)
+# ================================
+
+@pytest.fixture
+def web_client():
+    """Django 웹 클라이언트 (SSR 테스트용)"""
+    from django.test import Client
+    return Client()
+
+
+@pytest.fixture
+def authenticated_web_client(web_client, user):
+    """인증된 웹 클라이언트 (user로 로그인)"""
+    web_client.force_login(user)
+    return web_client
