@@ -53,3 +53,12 @@ urllib3==2.5.0
 webencodings==0.5.1
 whitenoise==6.10.0
 zope.interface==8.0
+
+# Production Server
+gunicorn==23.0.0
+
+# Testing & Coverage
+pytest==8.3.4
+pytest-django==4.9.0
+pytest-cov==6.0.0
+coverage==7.6.9

@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: teammoa_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-teammoa_db}
+      MYSQL_USER: ${DB_USER:-teammoa_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teammoa_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for Django Channels)
+  redis:
+    image: redis:7-alpine
+    container_name: teammoa_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Django Application (Development Mode)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teammoa_web
+    restart: unless-stopped
+    command: daphne -b 0.0.0.0 -p 8000 TeamMoa.asgi:application
+    volumes:
+      # Mount code for hot-reload in development
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=TeamMoa.settings.dev
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mysql_data:
+    name: teammoa_mysql_data
+  redis_data:
+    name: teammoa_redis_data
+  static_volume:
+    name: teammoa_static
+  media_volume:
+    name: teammoa_media
+
+networks:
+  default:
+    name: teammoa_network

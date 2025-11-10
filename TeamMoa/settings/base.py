@@ -187,9 +187,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-# WhiteNoise 설정 - Daphne에서 static 파일 서빙용
-#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Static files collection for production
+# STATIC_ROOT is where collectstatic will collect files
+# Overridden in prod.py for production deployment
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 WSGI_APPLICATION = 'TeamMoa.wsgi.application'
 
