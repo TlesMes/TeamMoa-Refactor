@@ -50,17 +50,18 @@ cd TeamMoa
 cp .env.example .env
 ```
 
-`.env` 파일을 편집하여 개발 환경 설정:
+**Docker 개발 환경**을 사용하는 경우, `.env` 파일에서 다음 항목만 수정:
 
 ```env
-DEBUG=True
-SECRET_KEY=your-dev-secret-key
-DB_NAME=teammoa_db
-DB_USER=teammoa_user
+# DB_HOST를 'db'로 변경 (Docker 컨테이너 이름)
+DB_HOST=db
+
+# (선택) 개발용 비밀번호 설정
 DB_PASSWORD=dev_password
 DB_ROOT_PASSWORD=dev_root_password
-ALLOWED_HOSTS=localhost,127.0.0.1
 ```
+
+**로컬 개발 환경**(venv 사용)인 경우, 기본값(`DB_HOST=localhost`) 그대로 사용하면 됩니다.
 
 ### 3단계: Docker Compose 실행
 
@@ -117,32 +118,51 @@ docker-compose down -v
 
 ### 1단계: 프로덕션 환경 변수 설정
 
-`.env.production.example` 파일을 복사하여 `.env.production` 파일 생성:
+`.env.example` 파일을 복사하여 `.env.production` 파일 생성:
 
 ```bash
-cp .env.production.example .env.production
+cp .env.example .env.production
 ```
 
-**중요**: 반드시 다음 값들을 변경해야 합니다:
+`.env.production` 파일을 열어서 **프로덕션 섹션의 주석을 해제**하고 값을 변경:
 
 ```env
-# 강력한 시크릿 키 생성
-SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
+# ================================================================
+# 개발 환경 설정 주석 처리
+# ================================================================
+# DEBUG=True
+# ALLOWED_HOSTS=localhost,127.0.0.1
+# DB_HOST=localhost
 
-# 프로덕션 도메인 설정
+# ================================================================
+# 프로덕션 환경 설정 주석 해제
+# ================================================================
+DEBUG=False
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-
-# 강력한 데이터베이스 비밀번호
-DB_PASSWORD=strong_database_password
+DB_HOST=db
 DB_ROOT_PASSWORD=strong_root_password
+DB_CONN_MAX_AGE=600
 
-# Redis 비밀번호
+# Redis Settings
+REDIS_HOST=redis
+REDIS_PORT=6379
 REDIS_PASSWORD=strong_redis_password
 
-# 실제 OAuth 설정
-GOOGLE_OAUTH_CLIENT_ID=your-production-client-id
-GOOGLE_OAUTH_CLIENT_SECRET=your-production-secret
+# Security Settings
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
 ```
+
+**필수 변경 사항**:
+1. **SECRET_KEY**: 새로 생성 (보안)
+   ```bash
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+2. **ALLOWED_HOSTS**: 실제 도메인
+3. **DB_PASSWORD, DB_ROOT_PASSWORD**: 강력한 비밀번호
+4. **REDIS_PASSWORD**: 강력한 비밀번호
+5. **OAuth 설정**: 프로덕션용 Client ID/Secret
 
 ### 2단계: SSL 인증서 설정 (선택사항)
 

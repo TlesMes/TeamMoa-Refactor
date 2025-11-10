@@ -37,7 +37,6 @@ Thumbs.db
 .env
 *.env
 !.env.example
-!.env.production.example
 local_settings.py
 
 # 테스트 및 커버리지
