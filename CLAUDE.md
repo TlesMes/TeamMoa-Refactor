@@ -7,6 +7,49 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
+### ☁️ AWS EC2 프로덕션 배포 (2025.11.18 완료)
+
+**배포 완료**:
+- ✅ AWS EC2 인스턴스 구축 (t3.micro, Ubuntu 22.04)
+- ✅ Elastic IP 할당: `3.34.102.12`
+- ✅ Docker Hub 이미지 배포: `tlesmes/teammoa:latest`
+- ✅ 4개 컨테이너 프로덕션 배포 (MySQL, Redis, Django, Nginx)
+- ✅ HTTP 접속 성공: `http://3.34.102.12`
+- ✅ Django superuser 생성 완료
+- ⏳ HTTPS 설정 대기 중 (도메인 필요)
+
+**배포 상세**:
+```
+EC2 Instance: 3.34.102.12
+- teammoa_db_prod (MySQL 8.0) - Healthy
+- teammoa_redis_prod (Redis 7) - Healthy
+- teammoa_web_prod (Django + Daphne) - Running
+- teammoa_nginx_prod (Nginx 1.25) - Running
+
+접속 URL: http://3.34.102.12
+관리자: http://3.34.102.12/admin/
+```
+
+**해결한 이슈**:
+- `/app/logs/` 디렉토리 생성
+- `ALLOWED_HOSTS`에 `web` 컨테이너명 추가
+- SECRET_KEY `$up2` 환경변수 경고 해결 (재생성)
+- 컨테이너 환경변수 반영을 위한 재생성 필요성 확인
+
+**환경 설정** (`.env`):
+- `DEBUG=False`
+- `ALLOWED_HOSTS=3.34.102.12,localhost,web`
+- `DB_HOST=db`, `REDIS_HOST=redis`
+- `SECURE_SSL_REDIRECT=False` (HTTPS 설정 전까지)
+
+**다음 단계**: HTTPS 설정 (Let's Encrypt)
+- 도메인 필요 (IP 주소로는 인증서 발급 불가)
+- Certbot 설치 및 SSL 인증서 발급
+- Nginx HTTPS 설정 활성화
+- Django 보안 설정 활성화
+
+---
+
 ### 🐳 Docker 배포 환경 구축 (2025.10.23 완료)
 
 **구축 완료**:
@@ -49,19 +92,21 @@ Django 기반 팀 프로젝트 관리 시스템
 
 1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 207개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
+3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
 
 ### 📋 다음 목표 (우선순위 순)
 
-1. **CI/CD 파이프라인 구축** (2-3시간)
-   - GitHub Actions 기반 자동 테스트 실행
-   - Docker 이미지 자동 빌드
-   - 코드 품질 체크 (linting)
+1. **HTTPS 설정** (1-2시간) - ⏳ 다음 작업
+   - 도메인 구매 또는 무료 도메인 서비스 (DuckDNS 등)
+   - Let's Encrypt SSL 인증서 발급
+   - Nginx HTTPS 설정 활성화
+   - Django 보안 설정 활성화 (`SECURE_SSL_REDIRECT=True`)
 
-2. **프로덕션 배포** (4-5시간)
-   - 클라우드 서버 선택 및 설정
-   - Docker Compose 프로덕션 배포
-   - HTTPS 설정 (Let's Encrypt)
-   - 도메인 연결
+2. **CI/CD 파이프라인 구축** (2-3시간)
+   - GitHub Actions 기반 자동 테스트 실행
+   - Docker 이미지 자동 빌드 및 Docker Hub 푸시
+   - EC2 자동 배포 (SSH를 통한 컨테이너 재시작)
+   - 코드 품질 체크 (linting)
 
 3. **성능 최적화** (3-4시간)
    - 서비스 레이어 기반 쿼리 최적화
@@ -70,20 +115,21 @@ Django 기반 팀 프로젝트 관리 시스템
    - 데이터베이스 인덱스 추가
 
 4. **모니터링 시스템 구축** (2-3시간)
-   - Health check 활용
-   - 로깅 시스템
-   - 에러 추적
+   - Health check 개선 (Django health 엔드포인트 추가)
+   - 로깅 시스템 강화
+   - 에러 추적 (Sentry 연동)
    - 성능 메트릭 수집
 
 ## 🛠️ 기술 스택
 - Backend: Django 4.x, Python, Django REST Framework, django-allauth
 - Frontend: HTML5, CSS3, JavaScript (Canvas API)
 - Database: MySQL 8.0
-- Infrastructure: Docker, Docker Compose, Nginx
+- Infrastructure: Docker, Docker Compose, Nginx, AWS EC2
 - Cache & WebSocket: Redis 7
 - Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 - Authentication: OAuth 2.0 (Google, GitHub)
 - Testing: pytest, DRF TestClient (207 tests)
+- Deployment: Docker Hub, AWS EC2 (3.34.102.12)
 
 ## 📋 개발 가이드라인
 
@@ -239,6 +285,31 @@ Read docs/architecture/service_layer/service_layer_guidelines.md
 
 ---
 
+## 🔧 배포 파일 위치
+
+### 로컬
+- **환경변수**: `d:\github\TeamMoa\.env.ec2`
+- **Docker Compose**: `d:\github\TeamMoa\docker-compose.prod.yml`
+
+### EC2 서버 (SSH: `ssh teammoa`)
+- **환경변수**: `~/TeamMoa/.env`
+- **Docker Compose**: `~/TeamMoa/docker-compose.prod.yml`
+- **Nginx 설정**: `~/TeamMoa/deploy/nginx-site.conf`
+
+### 명령어
+```bash
+# EC2 접속
+ssh teammoa
+
+# 작업 디렉토리
+cd ~/TeamMoa
+
+# 컨테이너 상태
+docker compose -f docker-compose.prod.yml ps
+```
+
+---
+
 **참고**: docs/README.md에서:
   1. 프로젝트 진행상황 실시간 업데이트
   2. 각 단계별 완료 현황 기록
@@ -247,4 +318,4 @@ Read docs/architecture/service_layer/service_layer_guidelines.md
 
 
 ---
-*최종 업데이트: 2025.10.23*
+*최종 업데이트: 2025.11.18*
