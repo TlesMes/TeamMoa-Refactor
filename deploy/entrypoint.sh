@@ -42,8 +42,9 @@ done
 echo "✅ Database connection established"
 
 # Create logs directory if it doesn't exist
-mkdir -p logs
-echo "✅ Logs directory created"
+mkdir -p /app/logs
+chmod 755 /app/logs
+echo "✅ Logs directory created at /app/logs"
 
 # Run database migrations
 echo "Running database migrations..."

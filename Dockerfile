@@ -44,7 +44,7 @@ COPY --from=builder /opt/venv /opt/venv
 
 # Create app user (non-root for security)
 RUN useradd -m -u 1000 appuser && \
-    mkdir -p /app/staticfiles /app/media && \
+    mkdir -p /app/staticfiles /app/media /app/logs && \
     chown -R appuser:appuser /app
 
 # Set working directory
