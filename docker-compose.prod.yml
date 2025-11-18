@@ -38,7 +38,7 @@ services:
 
   # Django Application (Production Mode)
   web:
-    image: tlesmes/teammoa:latest  # Docker Hub 이미지 사용 (빌드 대신)
+    image: tlesmes/teammoa-web:latest  # Docker Hub 이미지 사용 (빌드 대신)
     # build:  # 서버에서 빌드하지 않고 이미지 다운로드
     #   context: .
     #   dockerfile: Dockerfile
