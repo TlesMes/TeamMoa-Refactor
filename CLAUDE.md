@@ -7,46 +7,48 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
-### ☁️ AWS EC2 프로덕션 배포 (2025.11.18 완료)
+### 🎉 프로덕션 배포 완료! (2025.11.20)
 
-**배포 완료**:
+**✅ 모든 핵심 인프라 구축 완료**:
 - ✅ AWS EC2 인스턴스 구축 (t3.micro, Ubuntu 22.04)
 - ✅ Elastic IP 할당: `3.34.102.12`
-- ✅ Docker Hub 이미지 배포: `tlesmes/teammoa:latest`
-- ✅ 4개 컨테이너 프로덕션 배포 (MySQL, Redis, Django, Nginx)
-- ✅ HTTP 접속 성공: `http://3.34.102.12`
-- ✅ Django superuser 생성 완료
-- ⏳ HTTPS 설정 대기 중 (도메인 필요)
+- ✅ Docker Hub 이미지: `tlesmes/teammoa-web:latest`
+- ✅ 4개 컨테이너 모두 **Healthy 상태** (MySQL, Redis, Django, Nginx)
+- ✅ HTTPS 적용 완료: `https://teammoa.duckdns.org`
+- ✅ OAuth 2.0 인증 (Google, GitHub) 정상 작동
+- ✅ Let's Encrypt SSL 인증서 자동 갱신 설정 (crontab)
 
 **배포 상세**:
 ```
-EC2 Instance: 3.34.102.12
-- teammoa_db_prod (MySQL 8.0) - Healthy
-- teammoa_redis_prod (Redis 7) - Healthy
-- teammoa_web_prod (Django + Daphne) - Running
-- teammoa_nginx_prod (Nginx 1.25) - Running
+도메인: https://teammoa.duckdns.org
+IP: 3.34.102.12
 
-접속 URL: http://3.34.102.12
-관리자: http://3.34.102.12/admin/
+컨테이너 상태 (모두 Healthy):
+- teammoa_db_prod (MySQL 8.0) ✅
+- teammoa_redis_prod (Redis 7) ✅
+- teammoa_web_prod (Django + Daphne) ✅
+- teammoa_nginx_prod (Nginx 1.25 + SSL) ✅
+
+SSL 인증서: Let's Encrypt (자동 갱신)
 ```
 
-**해결한 이슈**:
-- `/app/logs/` 디렉토리 생성
-- `ALLOWED_HOSTS`에 `web` 컨테이너명 추가
-- SECRET_KEY `$up2` 환경변수 경고 해결 (재생성)
-- 컨테이너 환경변수 반영을 위한 재생성 필요성 확인
+**주요 해결 이슈**:
+- ✅ HTTPS 리디렉션 루프 해결 (`SECURE_PROXY_SSL_HEADER` 설정)
+- ✅ Docker 로그 디렉토리 권한 문제 해결
+- ✅ Health check 엔드포인트 분리 (`/nginx-health`, `/health/`)
+- ✅ IPv6 localhost 해결 (`127.0.0.1` 명시)
+- ✅ `ALLOWED_HOSTS`에 `127.0.0.1` 추가 (health check용)
+- ✅ Docker 이미지 네이밍 통일 (`tlesmes/teammoa-web`)
 
 **환경 설정** (`.env`):
-- `DEBUG=False`
-- `ALLOWED_HOSTS=3.34.102.12,localhost,web`
-- `DB_HOST=db`, `REDIS_HOST=redis`
-- `SECURE_SSL_REDIRECT=False` (HTTPS 설정 전까지)
-
-**다음 단계**: HTTPS 설정 (Let's Encrypt)
-- 도메인 필요 (IP 주소로는 인증서 발급 불가)
-- Certbot 설치 및 SSL 인증서 발급
-- Nginx HTTPS 설정 활성화
-- Django 보안 설정 활성화
+```bash
+DEBUG=False
+ALLOWED_HOSTS=3.34.102.12,localhost,127.0.0.1,teammoa.duckdns.org,web
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
+```
 
 ---
 
@@ -88,21 +90,16 @@ EC2 Instance: 3.34.102.12
 - DB 상태 기반 검증으로 서비스 구현 의존도 최소화
 - 통일된 클라이언트 fixture 구조 (`authenticated_api_client`, `authenticated_web_client`)
 
-## 🚀 다음 단계
+## 🚀 완료된 단계
 
 1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 207개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
 3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
+4. **HTTPS 설정** - ✅ 완료 (Let's Encrypt + DuckDNS, 2025.11.20)
 
 ### 📋 다음 목표 (우선순위 순)
 
-1. **HTTPS 설정** (1-2시간) - ⏳ 다음 작업
-   - 도메인 구매 또는 무료 도메인 서비스 (DuckDNS 등)
-   - Let's Encrypt SSL 인증서 발급
-   - Nginx HTTPS 설정 활성화
-   - Django 보안 설정 활성화 (`SECURE_SSL_REDIRECT=True`)
-
-2. **CI/CD 파이프라인 구축** (2-3시간)
+1. **CI/CD 파이프라인 구축** (2-3시간) - ⏳ 다음 작업 추천
    - GitHub Actions 기반 자동 테스트 실행
    - Docker 이미지 자동 빌드 및 Docker Hub 푸시
    - EC2 자동 배포 (SSH를 통한 컨테이너 재시작)
@@ -318,4 +315,4 @@ docker compose -f docker-compose.prod.yml ps
 
 
 ---
-*최종 업데이트: 2025.11.18*
+*최종 업데이트: 2025.11.20 - HTTPS 프로덕션 배포 완료*
