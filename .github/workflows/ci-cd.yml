@@ -171,20 +171,31 @@ jobs:
             # Restart web container only (zero-downtime)
             docker compose -f docker-compose.prod.yml up -d web
 
-            # Wait for health check
+            # Wait for initial startup
             echo "Waiting for health check..."
             sleep 30
 
-            # Show container status
-            docker compose -f docker-compose.prod.yml ps
+            # Check health status with retry (3 attempts, 10s interval)
+            for i in 1 2 3; do
+              echo "Health check attempt $i/3..."
+              docker compose -f docker-compose.prod.yml ps
 
-            # Check if web container is healthy
-            if docker compose -f docker-compose.prod.yml ps | grep -q "teammoa_web_prod.*healthy"; then
-              echo "✅ Deployment successful!"
-            else
-              echo "⚠️ Warning: Web container is not healthy yet. Check logs."
-              docker logs teammoa_web_prod --tail 50
-            fi
+              if docker compose -f docker-compose.prod.yml ps | grep -q "teammoa_web_prod.*healthy"; then
+                echo "✅ Deployment successful! Container is healthy."
+                exit 0
+              fi
+
+              if [ $i -lt 3 ]; then
+                echo "Container not healthy yet. Waiting 10 seconds..."
+                sleep 10
+              fi
+            done
+
+            # All attempts failed
+            echo "❌ Deployment failed! Web container is not healthy after 3 attempts."
+            echo "Showing container logs:"
+            docker logs teammoa_web_prod --tail 50 2>&1 || echo "Container not found"
+            exit 1
 
 
       - name: Remove GitHub Actions IP from security group

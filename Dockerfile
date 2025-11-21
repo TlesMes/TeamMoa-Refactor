@@ -53,6 +53,9 @@ WORKDIR /app
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+# Set execute permission for entrypoint script
+RUN chmod +x /app/deploy/entrypoint.sh
+
 # Switch to non-root user
 USER appuser
 
