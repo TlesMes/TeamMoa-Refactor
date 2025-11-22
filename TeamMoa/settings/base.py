@@ -329,5 +329,3 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-
-#CI/CD paths-ignore 테스트 - python 파일 변경으로, workflow 실행되어야 함
