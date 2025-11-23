@@ -1,5 +1,5 @@
 {% extends 'base_team.html' %}
-{% load static %}
+{% load static user_filters %}
 
 {% block title %}{{ node.title }} - 노드 상세{% endblock %}
 
@@ -53,7 +53,7 @@
         {% for comment in comments %}
         <div class="node-detail-comment-item">
           <div class="node-detail-comment-header">
-            <span class="node-detail-comment-author">{{ comment.user.nickname }}</span>
+            <span class="node-detail-comment-author">{% user_display_name comment.user team %}</span>
             <span class="node-detail-comment-date">{{ comment.commented_at|date:'Y-m-d H:i' }}</span>
           </div>
           <p class="node-detail-comment-content">{{ comment.comment }}</p>

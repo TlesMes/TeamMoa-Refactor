@@ -165,4 +165,61 @@ class AuthService:
         last_sent_key = f'activation_email_sent_{user_id}'
         request.session[last_sent_key] = timezone.now().isoformat()
 
+    @transaction.atomic
+    def deactivate_user(self, user, password=None):
+        """
+        사용자 계정을 비활성화합니다 (Soft Delete).
+
+        처리 순서:
+        1. 비밀번호 확인 (소셜 로그인 전용 계정은 생략)
+        2. 팀 소유권 이전
+        3. 개인정보 익명화
+        4. 멤버십 해제 (TeamUser 삭제)
+        5. 소셜 계정 연결 해제
+        6. 계정 비활성화
+
+        Args:
+            user: 비활성화할 사용자
+            password: 비밀번호 (확인용, 소셜 전용 계정은 None)
+
+        Returns:
+            User: 비활성화된 사용자 객체
+
+        Raises:
+            ValueError: 비밀번호 불일치 등
+        """
+        from teams.models import TeamUser
+        from teams.services import TeamService
+        from allauth.socialaccount.models import SocialAccount
+        from allauth.account.models import EmailAddress
+
+        # 1. 비밀번호 확인 (사용 가능한 비밀번호가 있을 경우만)
+        if user.has_usable_password():
+            if not password:
+                raise ValueError('비밀번호를 입력해주세요.')
+            if not user.check_password(password):
+                raise ValueError('비밀번호가 올바르지 않습니다.')
+
+        # 2. 팀 소유권 이전 (팀 서비스에 위임)
+        team_service = TeamService()
+        team_service.transfer_ownership_on_user_deactivation(user)
+
+        # 3. 개인정보 익명화
+        user.username = f"deleted_user_{user.id}"
+        user.email = None  # unique 제약으로 NULL 처리
+        user.nickname = "탈퇴한 사용자"
+        user.profile = ""
+        user.set_unusable_password()
+        user.is_active = False
+        user.save()
+
+        # 4. 멤버십 해제 (TODO의 assignee는 SET_NULL로 자동 처리됨)
+        TeamUser.objects.filter(user=user).delete()
+
+        # 5. 소셜 계정 연결 해제
+        SocialAccount.objects.filter(user=user).delete()
+        EmailAddress.objects.filter(user=user).delete()
+
+        return user
+
 

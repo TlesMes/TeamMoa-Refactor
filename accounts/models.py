@@ -33,7 +33,41 @@ class User(AbstractUser):
         blank=True
     )
 
-    REQUIRED_FIELDS = ['email', 'nickname'] 
+    REQUIRED_FIELDS = ['email', 'nickname']
 
     def __str__(self): #어드민 페이지에서 username으로 표시
         return self.username
+
+    @classmethod
+    def get_display_name_in_team(cls, user_or_none, team):
+        """
+        팀 컨텍스트에서 사용자 이름을 안전하게 반환 (None-safe)
+
+        Args:
+            user_or_none: User 인스턴스 또는 None (hard delete된 경우)
+            team: Team 인스턴스
+
+        Returns:
+            str: 표시할 이름
+
+        처리 케이스:
+        1. user=None (hard delete, SET_NULL 결과) → "탈퇴한 사용자"
+        2. user.is_active=False (계정 비활성화) → "탈퇴한 사용자"
+        3. TeamUser 없음 (팀 탈퇴) → "탈퇴한 사용자"
+        4. 정상 → user.nickname
+        """
+        from teams.models import TeamUser
+
+        # 1. None 체크 (hard delete 또는 SET_NULL)
+        if user_or_none is None:
+            return "탈퇴한 사용자"
+
+        # 2. 계정 비활성화 체크
+        if not user_or_none.is_active:
+            return "탈퇴한 사용자"
+
+        # 3. 팀 탈퇴 체크
+        if not TeamUser.objects.filter(team=team, user=user_or_none).exists():
+            return "탈퇴한 사용자"
+
+        return user_or_none.nickname

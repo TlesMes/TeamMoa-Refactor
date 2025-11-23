@@ -1,4 +1,4 @@
-{% extends "base_team.html" %} {% load static humanize %}
+{% extends "base_team.html" %} {% load static humanize user_filters %}
 
 {% block mobileView %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -61,7 +61,7 @@
         </h3>
       </div>
       <div class="post-meta">
-        <span class="post-author">{{ post.writer }}</span>
+        <span class="post-author">{% user_display_name post.writer team %}</span>
         <span class="post-date">{{ post.registered_date|date:'Y. m. d' }}</span>
       </div>
     </div>
@@ -75,7 +75,7 @@
         <h3 class="post-title">{{ post.title|truncatechars:50 }}</h3>
       </div>
       <div class="post-meta">
-        <span class="post-author">{{ post.writer.nickname }}</span>
+        <span class="post-author">{% user_display_name post.writer team %}</span>
         <span class="post-date">{{ post.registered_date|date:'Y. m. d' }}</span>
       </div>
     </div>

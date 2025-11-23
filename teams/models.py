@@ -11,7 +11,14 @@ class Team(models.Model):
     currentuser = models.PositiveIntegerField()
     
     members = models.ManyToManyField('accounts.User', related_name='joined_teams', through="TeamUser")
-    host = models.ForeignKey('accounts.User', on_delete=models.CASCADE) #호스트 유저 지정 
+    host = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='owned_teams',
+        help_text='팀 호스트 (탈퇴 시 NULL, 자동 승계 처리)'
+    ) 
     
     # milestone은 별도 Milestone 모델로 관리됨
 

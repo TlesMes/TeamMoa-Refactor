@@ -302,6 +302,90 @@ class TeamService:
             codecs.encode(uuid.uuid4().bytes, "base64").rstrip()
         ).decode()[:16]
 
+    @transaction.atomic
+    def transfer_ownership_on_user_deactivation(self, user):
+        """
+        사용자 탈퇴 시 소유 팀의 호스트 권한을 자동 이전합니다.
+
+        전략:
+        1. 가장 오래된 멤버에게 자동 승계 (TeamUser.id 오름차순)
+        2. 멤버가 없으면 팀 삭제
+
+        Args:
+            user: 탈퇴하는 사용자
+
+        Returns:
+            dict: 처리 결과 (이전된 팀 수, 삭제된 팀 수)
+        """
+        owned_teams = Team.objects.filter(host=user)
+        transferred_count = 0
+        deleted_count = 0
+
+        for team in owned_teams:
+            # 다음 호스트 후보 찾기 (자신 제외, 가입일 순)
+            next_host_membership = TeamUser.objects.filter(team=team)\
+                                                   .exclude(user=user)\
+                                                   .order_by('id')\
+                                                   .first()
+
+            if next_host_membership:
+                # 호스트 자동 승계
+                team.host = next_host_membership.user
+                team.save()
+                transferred_count += 1
+            else:
+                # 혼자인 팀은 삭제
+                team.delete()
+                deleted_count += 1
+
+        return {
+            'transferred': transferred_count,
+            'deleted': deleted_count
+        }
+
+    @transaction.atomic
+    def transfer_host(self, team_id, current_host, new_host_user_id):
+        """
+        팀 호스트 권한을 다른 팀원에게 수동으로 양도합니다.
+
+        Args:
+            team_id: 팀 ID
+            current_host: 현재 호스트 (권한 검증용)
+            new_host_user_id: 새 호스트가 될 User ID
+
+        Returns:
+            Team: 업데이트된 팀 객체
+
+        Raises:
+            ValueError: 권한 없음, 대상이 팀원 아님 등
+        """
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        # 팀 조회
+        team = get_object_or_404(Team, pk=team_id)
+
+        # 권한 검증: 현재 호스트만 양도 가능
+        if team.host != current_host:
+            raise ValueError('팀장만 권한을 양도할 수 있습니다.')
+
+        # 새 호스트 조회
+        new_host = get_object_or_404(User, pk=new_host_user_id)
+
+        # 자기 자신에게 양도 방지
+        if team.host == new_host:
+            raise ValueError('이미 팀장입니다.')
+
+        # 새 호스트가 팀 멤버인지 확인
+        if not TeamUser.objects.filter(team=team, user=new_host).exists():
+            raise ValueError('팀 멤버에게만 권한을 양도할 수 있습니다.')
+
+        # 호스트 변경
+        team.host = new_host
+        team.save()
+
+        return team
+
 
 class MilestoneService:
     """마일스톤 관련 비즈니스 로직을 처리하는 서비스 클래스"""

@@ -31,7 +31,14 @@ class Node(models.Model):
 class Comment(models.Model):
     comment = models.TextField(null=True, blank=True)
     node = models.ForeignKey('Node', on_delete = models.CASCADE)
-    user = models.ForeignKey('accounts.User',on_delete = models.CASCADE)
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='mindmap_comments',
+        help_text='댓글 작성자 (탈퇴 시 NULL)'
+    )
     commented_at = models.DateTimeField(default=datetime.now, blank=True)
     def __str__(self):
         return self.comment
