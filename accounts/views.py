@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import FormView, TemplateView, RedirectView
+from django.views.generic import FormView, TemplateView, RedirectView, View
 from django.urls import reverse_lazy, reverse
 from .models import User
 from django.contrib.sites.shortcuts import get_current_site
