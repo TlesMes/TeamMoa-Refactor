@@ -397,3 +397,59 @@ class SocialConnectionsView(LoginRequiredMixin, TemplateView):
 social_connections = SocialConnectionsView.as_view()
 
 
+class DeactivateConfirmView(LoginRequiredMixin, TemplateView):
+    """회원 탈퇴 확인 페이지"""
+    template_name = 'accounts/deactivate_confirm.html'
+    login_url = '/accounts/login/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 소유한 팀 개수 조회
+        from teams.models import Team
+        owned_teams_count = Team.objects.filter(host=self.request.user).count()
+        context['owned_teams_count'] = owned_teams_count
+        return context
+
+
+deactivate_confirm = DeactivateConfirmView.as_view()
+
+
+class DeactivateUserView(LoginRequiredMixin, View):
+    """회원 탈퇴 처리"""
+    login_url = '/accounts/login/'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.auth_service = AuthService()
+
+    def post(self, request, *args, **kwargs):
+        password = request.POST.get('password')
+        confirm = request.POST.get('confirm')
+
+        # 확인 체크박스 검증
+        if not confirm:
+            messages.error(request, '탈퇴 동의에 체크해주세요.')
+            return redirect('accounts:deactivate_confirm')
+
+        try:
+            # 회원 탈퇴 처리
+            self.auth_service.deactivate_user(request.user, password)
+
+            # 로그아웃
+            auth.logout(request)
+
+            # 성공 메시지
+            messages.success(request, '회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.')
+            return redirect('accounts:login')
+
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('accounts:deactivate_confirm')
+        except Exception as e:
+            messages.error(request, '탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+            return redirect('accounts:deactivate_confirm')
+
+
+deactivate_user = DeactivateUserView.as_view()
+
+

@@ -122,8 +122,37 @@
           <span class="info-value">{{ user.last_login|date:"Y년 m월 d일 H:i" }}</span>
         </div>
       </div>
+
+      <!-- 위험 영역 -->
+      <div class="danger-zone" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f0f0f0;">
+        <h3 style="color: #dc3545; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="ri-error-warning-line"></i>
+          위험 영역
+        </h3>
+        <p style="color: #6c757d; margin-bottom: 1rem; font-size: 0.9rem;">
+          이 작업은 되돌릴 수 없습니다. 신중하게 결정해주세요.
+        </p>
+        <a href="{% url 'accounts:deactivate_confirm' %}"
+           class="btn-danger-outline"
+           style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;
+                  border: 2px solid #dc3545; color: #dc3545; background: white;
+                  text-decoration: none; border-radius: 8px; font-weight: 600;
+                  transition: all 0.3s ease;">
+          <i class="ri-user-unfollow-line"></i>
+          회원 탈퇴
+        </a>
+      </div>
     </div>
 
   </div>
 </section>
+
+<style>
+.btn-danger-outline:hover {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+</style>
 {% endblock %}
