@@ -332,7 +332,6 @@ git commit -m "feat(api): Teams Milestone Timeline API 전환 완료"
 
 ---
 
-**작성자:** Claude Code
 **일시:** 2025-09-30 22:00 KST
 **상태:** ✅ Ready for Commit
 **커밋 예정:** `feat(api): Teams Milestone Timeline API 전환 완료`
