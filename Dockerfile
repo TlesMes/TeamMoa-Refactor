@@ -58,9 +58,9 @@ WORKDIR /app
 COPY --chown=appuser:appuser . .
 
 # Copy crontab file and setup
+# /etc/cron.d/ 파일은 cron 데몬이 자동으로 읽음
 COPY deploy/crontab /etc/cron.d/django-tasks
-RUN chmod 0644 /etc/cron.d/django-tasks && \
-    crontab -u appuser /etc/cron.d/django-tasks
+RUN chmod 0644 /etc/cron.d/django-tasks
 
 # Set execute permission for entrypoint script
 RUN chmod +x /app/deploy/entrypoint.sh

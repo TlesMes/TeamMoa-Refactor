@@ -3,6 +3,7 @@ SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
 
 # 매일 새벽 3시에 3일 이상 미인증 계정 삭제
-0 3 * * * cd /app && python manage.py delete_unverified_users >> /var/log/cron.log 2>&1
+# 형식: 분 시 일 월 요일 사용자 명령어
+0 3 * * * appuser bash -c "cd /app && /opt/venv/bin/python manage.py delete_unverified_users" >> /var/log/cron.log 2>&1
 
 # 빈 줄 (cron 요구사항)

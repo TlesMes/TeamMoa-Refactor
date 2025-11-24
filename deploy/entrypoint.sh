@@ -48,6 +48,7 @@ echo "✅ Database connection established"
 
 # Create logs directory if it doesn't exist
 mkdir -p /app/logs
+chown -R appuser:appuser /app/logs
 chmod 755 /app/logs
 echo "✅ Logs directory created at /app/logs"
 
