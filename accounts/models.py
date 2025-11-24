@@ -33,6 +33,18 @@ class User(AbstractUser):
         blank=True
     )
 
+    # 탈퇴 관련 필드
+    is_deleted = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="회원 탈퇴 여부"
+    )
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="회원 탈퇴 시점"
+    )
+    
     REQUIRED_FIELDS = ['email', 'nickname']
 
     def __str__(self): #어드민 페이지에서 username으로 표시

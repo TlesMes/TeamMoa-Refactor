@@ -211,6 +211,8 @@ class AuthService:
         user.profile = ""
         user.set_unusable_password()
         user.is_active = False
+        user.is_deleted = True
+        user.deleted_at = timezone.now()
         user.save()
 
         # 4. 멤버십 해제 (TODO의 assignee는 SET_NULL로 자동 처리됨)
