@@ -8,134 +8,7 @@
 <link rel="stylesheet" href="{% static 'css/pages/accounts/auth_forms.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/accounts/auth_buttons.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/accounts/auth_messages.css' %}" />
-<style>
-.deactivate-warnings {
-  background: #fff3cd;
-  border: 2px solid #ffc107;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.deactivate-warnings h3 {
-  color: #856404;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.deactivate-warnings ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.deactivate-warnings li {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-  position: relative;
-  color: #856404;
-  line-height: 1.6;
-}
-
-.deactivate-warnings li i {
-  position: absolute;
-  left: 0;
-  top: 2px;
-  color: #ffc107;
-  font-size: 1.2rem;
-}
-
-.deactivate-warnings li strong {
-  color: #664d03;
-}
-
-.checkbox-group {
-  margin-top: 1.5rem;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  color: #dc3545;
-  font-weight: 500;
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: 1.2rem;
-  height: 1.2rem;
-  cursor: pointer;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-}
-
-.btn-danger:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-  transform: translateY(-2px);
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.danger-zone-header {
-  color: #dc3545;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.danger-zone-header i {
-  font-size: 2rem;
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/accounts/deactivate.css' %}" />
 {% endblock %}
 
 {% block contents %}
@@ -214,6 +87,16 @@
           </div>
           <small class="help-text">본인 확인을 위해 비밀번호를 입력해주세요.</small>
         </div>
+        {% else %}
+        <div class="form-group">
+          <div class="social-auth-notice">
+            <i class="ri-information-line"></i>
+            <div>
+              <strong>소셜 로그인 계정</strong>
+              <p>소셜 로그인으로 가입한 계정입니다. 아래 체크박스에 동의하시면 탈퇴가 진행됩니다.</p>
+            </div>
+          </div>
+        </div>
         {% endif %}
 
         <div class="form-group checkbox-group">
@@ -246,7 +129,18 @@ document.getElementById('confirm').addEventListener('change', function() {
 
 // 폼 제출 시 최종 확인
 document.getElementById('deactivate-form').addEventListener('submit', function(e) {
-  if (!confirm('정말로 탈퇴하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.')) {
+  const isSocialUser = {{ user.has_usable_password|yesno:"false,true" }};
+  let confirmMessage = '정말로 탈퇴하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.';
+
+  if (isSocialUser) {
+    confirmMessage = '소셜 로그인 계정 탈퇴를 진행하시겠습니까?\n\n' +
+                     '- 연결된 소셜 계정이 해제됩니다.\n' +
+                     '- 작성한 게시글/댓글은 "탈퇴한 사용자"로 표시됩니다.\n' +
+                     '- 이 작업은 되돌릴 수 없습니다.\n\n' +
+                     '정말 탈퇴하시겠습니까?';
+  }
+
+  if (!confirm(confirmMessage)) {
     e.preventDefault();
   }
 });

@@ -446,6 +446,11 @@ class DeactivateUserView(LoginRequiredMixin, View):
             messages.error(request, str(e))
             return redirect('accounts:deactivate_confirm')
         except Exception as e:
+            # 에러 로그 남기기
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'User deactivation failed: {str(e)}', exc_info=True)
+
             messages.error(request, '탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
             return redirect('accounts:deactivate_confirm')
 

@@ -206,7 +206,7 @@ class AuthService:
 
         # 3. 개인정보 익명화
         user.username = f"deleted_user_{user.id}"
-        user.email = None  # unique 제약으로 NULL 처리
+        user.email = f"deleted_{user.id}@deleted.local"
         user.nickname = "탈퇴한 사용자"
         user.profile = ""
         user.set_unusable_password()

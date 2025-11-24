@@ -1,5 +1,5 @@
 """
-Accounts 앱 서비스 레이어 테스트 (14개)
+Accounts 앱 서비스 레이어 테스트 (18개)
 
 역할: HTTP와 무관한 순수 비즈니스 로직 검증
 """
@@ -199,3 +199,74 @@ class TestSessionManagement:
 
         # 외부 도메인은 저장되지 않음
         assert 'return_url' not in request.session
+
+
+class TestUserDeactivation:
+    """회원 탈퇴 테스트 (4개)"""
+
+    def test_deactivate_user_anonymizes_personal_info(self, auth_service, db):
+        """탈퇴 시 개인정보 익명화"""
+        user = create_active_user(username='deactivate_test', email='deactivate@example.com', password=TEST_PASSWORD)
+        user_id = user.id
+
+        deactivated_user = auth_service.deactivate_user(user, TEST_PASSWORD)
+
+        # 계정 비활성화
+        assert deactivated_user.is_active is False
+
+        # 개인정보 익명화 검증
+        assert deactivated_user.username == f"deleted_user_{user_id}"
+        assert deactivated_user.email == f"deleted_{user_id}@deleted.local"
+        assert deactivated_user.nickname == "탈퇴한 사용자"
+        assert deactivated_user.profile == ""
+        assert not deactivated_user.has_usable_password()
+
+    def test_deactivate_user_with_wrong_password(self, auth_service, db):
+        """잘못된 비밀번호로 탈퇴 실패"""
+        user = create_active_user(username='wrong_password_test', password=TEST_PASSWORD)
+
+        with pytest.raises(ValueError, match='비밀번호가 올바르지 않습니다'):
+            auth_service.deactivate_user(user, 'WrongPassword123!')
+
+        user.refresh_from_db()
+        assert user.is_active is True
+
+    def test_deactivate_social_user_without_password(self, auth_service, db):
+        """소셜 로그인 사용자는 비밀번호 없이 탈퇴 가능"""
+        user = create_active_user(username='social_user', email='social@example.com')
+        user.set_unusable_password()  # 소셜 로그인 사용자
+        user.save()
+
+        deactivated_user = auth_service.deactivate_user(user, None)
+
+        assert deactivated_user.is_active is False
+
+    def test_deactivate_user_removes_all_team_memberships(self, auth_service, db):
+        """탈퇴 시 모든 팀 멤버십 제거"""
+        from teams.models import Team, TeamUser
+
+        user = create_active_user(username='multi_team_user', email='multi@example.com', password=TEST_PASSWORD)
+
+        # 3개 팀에 멤버로 가입
+        for i in range(3):
+            host = create_active_user(username=f'host_{i}', email=f'host{i}@example.com')
+            team = Team.objects.create(
+                title=f'Team {i}',
+                host=host,
+                maxuser=10,
+                currentuser=2,
+                invitecode=f'code{i}',
+                teampasswd='password',
+                introduction='Test'
+            )
+            TeamUser.objects.create(team=team, user=host)
+            TeamUser.objects.create(team=team, user=user)
+
+        # 탈퇴 전 멤버십 확인
+        assert TeamUser.objects.filter(user=user).count() == 3
+
+        # 탈퇴
+        auth_service.deactivate_user(user, TEST_PASSWORD)
+
+        # 모든 멤버십이 제거되었는지 확인
+        assert TeamUser.objects.filter(user=user).count() == 0
