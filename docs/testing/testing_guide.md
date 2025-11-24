@@ -2,7 +2,7 @@
 
 ## 📊 테스트 개요
 
-**총 테스트 수**: 207개
+**총 테스트 수**: 221개
 **테스트 프레임워크**: pytest + Django Test + DRF TestClient
 **테스트 전략**: 서비스 레이어 우선 테스트 → API → SSR 뷰
 
@@ -51,15 +51,16 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 
 ## 📁 테스트 구조 및 분류
 
-### 1️⃣ Accounts App (24개 테스트)
+### 1️⃣ Accounts App (28개 테스트)
 
-#### `test_auth_service.py` (14개) - 인증 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestRegistrationAndEmail` | 회원가입 및 이메일 인증 | 사용자 생성, 이메일 발송, 인증 처리 |
-| `TestResendActivationAndRateLimiting` | 재전송 제한 및 Rate Limiting | 재전송 제한 시간, 중복 요청 방지 |
-| `TestAuthenticationAndLogin` | 로그인 인증 로직 | 비밀번호 검증, 활성 계정 확인 |
-| `TestSessionManagement` | 세션 관리 | 로그아웃, 세션 만료 처리 |
+#### `test_auth_service.py` (18개) - 인증 비즈니스 로직
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestRegistrationAndEmail` | 5개 | 회원가입 및 이메일 인증 | 사용자 생성, 이메일 발송, 인증 처리, 토큰 검증 |
+| `TestResendActivationAndRateLimiting` | 4개 | 재전송 제한 및 Rate Limiting | 재전송 제한 시간, 중복 요청 방지, 5분 Rate Limit |
+| `TestAuthenticationAndLogin` | 3개 | 로그인 인증 로직 | 비밀번호 검증, 활성 계정 확인, 인증 실패 처리 |
+| `TestSessionManagement` | 2개 | 세션 관리 | 이전 URL 저장, 외부 도메인 차단 (보안) |
+| `TestUserDeactivation` | 4개 | 회원 탈퇴 (Soft Delete) | 개인정보 익명화, is_deleted 처리, 팀 멤버십 제거, 소셜 계정 처리 |
 
 #### `test_auth_views.py` (10개) - 인증 SSR 뷰
 | 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |

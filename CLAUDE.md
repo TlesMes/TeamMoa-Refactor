@@ -7,11 +7,40 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
+### 🔐 회원 탈퇴 및 미인증 계정 관리 개선 완료! (2025.11.24)
+
+**✅ 문제 해결: username/email 영구 점유 방지**:
+- ✅ User 모델에 `is_deleted`, `deleted_at` 필드 추가
+- ✅ 미인증 계정(`is_active=False`, `is_deleted=False`)과 탈퇴 계정 구분
+- ✅ 3일 이상 미인증 계정 자동 삭제 Management Command 구현
+- ✅ Admin 페이지에서 계정 상태 확인 및 필터링 기능 추가
+- ✅ 회원 탈퇴 서비스 로직 개선 (Soft Delete 적용)
+
+**구현 내용**:
+```python
+# Management Command 사용법
+python manage.py delete_unverified_users              # 3일 기준 삭제
+python manage.py delete_unverified_users --days 7     # 7일 기준 삭제
+python manage.py delete_unverified_users --dry-run    # 삭제 대상 확인만
+python manage.py delete_unverified_users --verbose    # 상세 정보 출력
+```
+
+**개선 효과**:
+- 이메일 잘못 입력 시 username/email 영구 점유 문제 해결
+- 미인증 계정 자동 정리로 DB 용량 최적화
+- 탈퇴/미인증 계정 상태 명확히 구분 가능
+
+**테스트 커버리지**:
+- 회원 탈퇴 서비스 테스트에 `is_deleted`, `deleted_at` 검증 추가
+- 모든 테스트 통과 (221개)
+
+---
+
 ### 🚀 CI/CD 파이프라인 구축 완료! (2025.11.21)
 
 **✅ 완전 자동화된 배포 시스템 구축**:
 - ✅ GitHub Actions 기반 3-stage 파이프라인 (Test → Build → Deploy)
-- ✅ 207개 테스트 자동 실행
+- ✅ 221개 테스트 자동 실행
 - ✅ Docker 이미지 자동 빌드 및 Docker Hub 푸시
 - ✅ EC2 자동 배포 (무중단 배포)
 - ✅ Dynamic Security Group (배포 시에만 SSH 포트 개방)
@@ -102,9 +131,9 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 | **Members** | 33개 | ✅ 완료 | 서비스(20) + API(10) + SSR(3) |
 | **Schedules** | 30개 | ✅ 완료 | 서비스(15) + API(10) + SSR(5) |
 | **Shares** | 24개 | ✅ 완료 | 서비스(13) + SSR(11) |
-| **Accounts** | 24개 | ✅ 완료 | 서비스(14) + SSR(10) |
-| **Mindmaps** | 30개 | ✅ 완료 | 서비스(16) + API(8) + SSR(6) |
-| **총계** | **207개** | **100%** | 6/6 앱 완료 ✨ |
+| **Accounts** | 28개 | ✅ 완료 | 서비스(18) + SSR(10) |
+| **Mindmaps** | 40개 | ✅ 완료 | 서비스(16) + API(8) + SSR(6) + 기타(10) |
+| **총계** | **221개** | **100%** | 6/6 앱 완료 ✨ |
 
 **테스트 전략**:
 - pytest + DRF TestClient 활용
@@ -116,26 +145,22 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 
 ## 🚀 완료된 단계
 
-1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 207개 테스트, 2025.10.22)
+1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 221개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
 3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
 4. **HTTPS 설정** - ✅ 완료 (Let's Encrypt + DuckDNS, 2025.11.20)
+5. **CI/CD 파이프라인 구축** - ✅ 완료 (GitHub Actions 자동 배포, 2025.11.21)
+6. **회원 탈퇴 및 미인증 계정 관리 개선** - ✅ 완료 (Soft Delete + 자동 정리, 2025.11.24)
 
 ### 📋 다음 목표 (우선순위 순)
 
-1. **CI/CD 파이프라인 구축** (2-3시간) - ⏳ 다음 작업 추천
-   - GitHub Actions 기반 자동 테스트 실행
-   - Docker 이미지 자동 빌드 및 Docker Hub 푸시
-   - EC2 자동 배포 (SSH를 통한 컨테이너 재시작)
-   - 코드 품질 체크 (linting)
-
-3. **성능 최적화** (3-4시간)
+1. **성능 최적화** (3-4시간) - ⏳ 다음 작업 추천
    - 서비스 레이어 기반 쿼리 최적화
    - N+1 쿼리 해결
    - 캐싱 전략 구현 (Redis 활용)
    - 데이터베이스 인덱스 추가
 
-4. **모니터링 시스템 구축** (2-3시간)
+2. **모니터링 시스템 구축** (2-3시간)
    - Health check 개선 (Django health 엔드포인트 추가)
    - 로깅 시스템 강화
    - 에러 추적 (Sentry 연동)
@@ -339,4 +364,4 @@ docker compose -f docker-compose.prod.yml ps
 
 
 ---
-*최종 업데이트: 2025.11.20 - HTTPS 프로덕션 배포 완료*
+*최종 업데이트: 2025.11.24 - 회원 탈퇴 및 미인증 계정 관리 개선 완료*
