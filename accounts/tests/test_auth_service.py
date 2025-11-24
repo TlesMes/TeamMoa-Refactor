@@ -213,6 +213,8 @@ class TestUserDeactivation:
 
         # 계정 비활성화
         assert deactivated_user.is_active is False
+        assert deactivated_user.is_deleted is True
+        assert deactivated_user.deleted_at is not None
 
         # 개인정보 익명화 검증
         assert deactivated_user.username == f"deleted_user_{user_id}"
@@ -240,6 +242,8 @@ class TestUserDeactivation:
         deactivated_user = auth_service.deactivate_user(user, None)
 
         assert deactivated_user.is_active is False
+        assert deactivated_user.is_deleted is True
+        assert deactivated_user.deleted_at is not None
 
     def test_deactivate_user_removes_all_team_memberships(self, auth_service, db):
         """탈퇴 시 모든 팀 멤버십 제거"""
