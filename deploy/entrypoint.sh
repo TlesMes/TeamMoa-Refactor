@@ -5,6 +5,11 @@ echo "========================================"
 echo "TeamMoa Deployment Entrypoint Script"
 echo "========================================"
 
+# Start cron daemon (runs as root, but jobs run as appuser)
+echo "Starting cron daemon..."
+service cron start
+echo "✅ Cron daemon started"
+
 # Wait for database to be ready
 echo "Waiting for database connection..."
 until python << END
@@ -79,5 +84,5 @@ echo "========================================"
 echo "🚀 Starting TeamMoa Application..."
 echo "========================================"
 
-# Execute the main command (Daphne or Gunicorn)
-exec "$@"
+# Execute the main command as appuser (Daphne or Gunicorn)
+exec gosu appuser "$@"

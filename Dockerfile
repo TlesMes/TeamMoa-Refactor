@@ -37,6 +37,8 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-libmysqlclient-dev \
     curl \
+    cron \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment from builder
@@ -45,7 +47,9 @@ COPY --from=builder /opt/venv /opt/venv
 # Create app user (non-root for security)
 RUN useradd -m -u 1000 appuser && \
     mkdir -p /app/staticfiles /app/media /app/logs && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    touch /var/log/cron.log && \
+    chown appuser:appuser /var/log/cron.log
 
 # Set working directory
 WORKDIR /app
@@ -53,11 +57,16 @@ WORKDIR /app
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+# Copy crontab file and setup
+COPY deploy/crontab /etc/cron.d/django-tasks
+RUN chmod 0644 /etc/cron.d/django-tasks && \
+    crontab -u appuser /etc/cron.d/django-tasks
+
 # Set execute permission for entrypoint script
 RUN chmod +x /app/deploy/entrypoint.sh
 
-# Switch to non-root user
-USER appuser
+# Note: USER appuser는 entrypoint.sh에서 처리
+# entrypoint가 cron을 시작한 후 Django는 appuser로 실행
 
 # Collect static files (will be run in entrypoint, but can pre-collect here)
 # RUN python manage.py collectstatic --noinput
