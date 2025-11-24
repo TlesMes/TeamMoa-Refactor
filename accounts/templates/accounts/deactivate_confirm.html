@@ -129,20 +129,25 @@ document.getElementById('confirm').addEventListener('change', function() {
 
 // 폼 제출 시 최종 확인
 document.getElementById('deactivate-form').addEventListener('submit', function(e) {
+  e.preventDefault(); // 기본 제출 막기
+
   const isSocialUser = {{ user.has_usable_password|yesno:"false,true" }};
-  let confirmMessage = '정말로 탈퇴하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.';
+  const form = this;
+
+  let confirmMessage = '정말로 탈퇴하시겠습니까?<br><br>이 작업은 되돌릴 수 없습니다.';
 
   if (isSocialUser) {
-    confirmMessage = '소셜 로그인 계정 탈퇴를 진행하시겠습니까?\n\n' +
-                     '- 연결된 소셜 계정이 해제됩니다.\n' +
-                     '- 작성한 게시글/댓글은 "탈퇴한 사용자"로 표시됩니다.\n' +
-                     '- 이 작업은 되돌릴 수 없습니다.\n\n' +
+    confirmMessage = '소셜 로그인 계정 탈퇴를 진행하시겠습니까?<br><br>' +
+                     '• 연결된 소셜 계정이 해제됩니다.<br>' +
+                     '• 작성한 게시글/댓글은 "탈퇴한 사용자"로 표시됩니다.<br>' +
+                     '• 이 작업은 되돌릴 수 없습니다.<br><br>' +
                      '정말 탈퇴하시겠습니까?';
   }
 
-  if (!confirm(confirmMessage)) {
-    e.preventDefault();
-  }
+  // 공통 모달 사용
+  showConfirmModal(confirmMessage, function() {
+    form.submit(); // 확인 시 폼 제출
+  });
 });
 </script>
 {% endblock %}

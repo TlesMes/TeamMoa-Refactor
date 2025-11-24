@@ -80,6 +80,8 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Django Sites Framework (allauth 필수)
 SITE_ID = 1
+SITE_DOMAIN = env('SITE_DOMAIN', default='localhost:8000')
+SITE_NAME = env('SITE_NAME', default='TeamMoa')
 
 # Django Allauth 설정
 AUTHENTICATION_BACKENDS = [
