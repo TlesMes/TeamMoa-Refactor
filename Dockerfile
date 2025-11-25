@@ -62,6 +62,10 @@ COPY --chown=appuser:appuser . .
 COPY deploy/crontab /etc/cron.d/django-tasks
 RUN chmod 0644 /etc/cron.d/django-tasks
 
+# Copy cron wrapper script
+COPY deploy/cron_run.sh /app/cron_run.sh
+RUN chmod +x /app/cron_run.sh
+
 # Set execute permission for entrypoint script
 RUN chmod +x /app/deploy/entrypoint.sh
 
