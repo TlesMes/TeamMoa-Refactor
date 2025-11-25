@@ -4,6 +4,7 @@ PATH=/usr/local/bin:/usr/bin:/bin
 
 # 매일 새벽 3시에 3일 이상 미인증 계정 삭제
 # 형식: 분 시 일 월 요일 사용자 명령어
-0 3 * * * appuser bash -c "cd /app && /opt/venv/bin/python manage.py delete_unverified_users" >> /var/log/cron.log 2>&1
+# set -a: 환경변수 자동 export, source: .env 로드, set +a: export 해제
+0 3 * * * appuser bash -c "set -a && source /app/.env && set +a && cd /app && /opt/venv/bin/python manage.py delete_unverified_users" >> /var/log/cron.log 2>&1
 
 # 빈 줄 (cron 요구사항)
