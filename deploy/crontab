@@ -2,7 +2,7 @@
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
 
-# 매일 새벽 3시에 3일 이상 미인증 계정 삭제
-0 3 * * * appuser /app/cron_run.sh >> /var/log/cron.log 2>&1
+# 매일 새벽 3시(KST)에 3일 이상 미인증 계정 삭제 (UTC 18:00 = KST 03:00)
+0 18 * * * appuser /app/cron_run.sh >> /var/log/cron.log 2>&1
 
 # 빈 줄 (cron 요구사항)
