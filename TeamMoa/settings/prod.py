@@ -30,12 +30,21 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Redis Channel Layer for production
+# URL 형식: redis://[:password@]host[:port][/db]
+redis_host = env('REDIS_HOST', default='redis')
+redis_port = env.int('REDIS_PORT', default=6379)
+redis_password = env('REDIS_PASSWORD', default=None)
+
+if redis_password:
+    redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/0"
+else:
+    redis_url = f"redis://{redis_host}:{redis_port}/0"
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [(env('REDIS_HOST', default='redis'), env.int('REDIS_PORT', default=6379))],
-            "password": env('REDIS_PASSWORD', default=None),
+            "hosts": [redis_url],
         },
     },
 }
