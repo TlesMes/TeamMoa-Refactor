@@ -35,7 +35,7 @@ def health_check(request):
 @require_GET
 def favicon(request):
     """Serve favicon.ico from static files"""
-    favicon_path = os.path.join(settings.BASE_DIR, 'static', 'assets', 'img', 'LogoB.svg')
+    favicon_path = os.path.join(settings.BASE_DIR, 'static', 'assets', 'img', 'favicon.svg')
     try:
         with open(favicon_path, 'rb') as f:
             return HttpResponse(f.read(), content_type='image/svg+xml')
@@ -65,3 +65,7 @@ urlpatterns = [
     path('mindmaps/', include('mindmaps.urls')),
 
 ]
+
+# Serve static files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))
