@@ -68,10 +68,13 @@ class MindmapEditor {
     const maxWidth = window.innerWidth * 0.95;
     const maxHeight = window.innerHeight - 250;
 
-    this.canvas.width = maxWidth;
-    this.canvas.height = maxHeight;
+    // CSS 표시 크기 설정 (실제 보이는 크기)
     this.canvas.style.width = maxWidth + 'px';
     this.canvas.style.height = maxHeight + 'px';
+
+    // 캔버스 논리적 크기 설정 (CSS 크기와 동일하게)
+    this.canvas.width = maxWidth;
+    this.canvas.height = maxHeight;
 
     this.render();
   }
@@ -223,8 +226,11 @@ class MindmapEditor {
   // 마우스 이벤트 핸들러
   onMouseDown(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - this.translateX) / this.scale;
-    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const canvasX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    const x = (canvasX - this.translateX) / this.scale;
+    const y = (canvasY - this.translateY) / this.scale;
 
     const node = this.getNodeAt(x, y);
 
@@ -251,8 +257,11 @@ class MindmapEditor {
 
   onMouseMove(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - this.translateX) / this.scale;
-    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const canvasX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    const x = (canvasX - this.translateX) / this.scale;
+    const y = (canvasY - this.translateY) / this.scale;
 
     // 커서 위치 전송 (스로틀링)
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -364,8 +373,11 @@ class MindmapEditor {
 
   async onMouseUp(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - this.translateX) / this.scale;
-    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const canvasX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    const x = (canvasX - this.translateX) / this.scale;
+    const y = (canvasY - this.translateY) / this.scale;
 
     if (this.isConnecting) {
       // 연결 모드 종료: 대상 노드 확인 및 연결 생성
@@ -394,8 +406,9 @@ class MindmapEditor {
     e.preventDefault();
 
     const rect = this.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const mouseX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const mouseY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
 
     const wheel = e.deltaY < 0 ? 1.1 : 0.9;
 
@@ -426,8 +439,11 @@ class MindmapEditor {
 
   onClick(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - this.translateX) / this.scale;
-    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const canvasX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    const x = (canvasX - this.translateX) / this.scale;
+    const y = (canvasY - this.translateY) / this.scale;
 
     const connection = this.getConnectionAt(x, y);
 
@@ -442,8 +458,11 @@ class MindmapEditor {
 
   onDoubleClick(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - this.translateX) / this.scale;
-    const y = (e.clientY - rect.top - this.translateY) / this.scale;
+    // 캔버스 좌표로 변환 (CSS 크기 = 캔버스 크기이므로 비율 보정)
+    const canvasX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+    const x = (canvasX - this.translateX) / this.scale;
+    const y = (canvasY - this.translateY) / this.scale;
 
     const node = this.getNodeAt(x, y);
     const connection = this.getConnectionAt(x, y);
@@ -1029,28 +1048,29 @@ class MindmapEditor {
     this.ctx.setLineDash([5, 5]); // 점선
 
     const fromNode = this.connectingFromNode;
-    const toX = this.tempConnectionEnd.x;
-    const toY = this.tempConnectionEnd.y;
+    const mouseX = this.tempConnectionEnd.x;
+    const mouseY = this.tempConnectionEnd.y;
 
-    // 곡선으로 그리기
-    const fromX = fromNode.x;
-    const fromY = fromNode.y;
-    const dx = toX - fromX;
-    const dy = toY - fromY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const offset = Math.min(distance * 0.3, 80);
+    // 노드 중심에서 마우스 포인터 방향으로 경계점 계산
+    const centerX = fromNode.x;
+    const centerY = fromNode.y;
+    const dx = mouseX - centerX;
+    const dy = mouseY - centerY;
 
-    const midX = (fromX + toX) / 2;
-    const midY = (fromY + toY) / 2;
-    const normalX = -dy / distance;
-    const normalY = dx / distance;
-    const cp1X = midX + normalX * offset;
-    const cp1Y = midY + normalY * offset;
+    // 노드 경계점 계산 (실제 연결선 시작점)
+    const start = this.getRoundRectConnectionPoint(fromNode, dx, dy);
 
+    // 직선으로 연결 (마우스 포인터까지)
     this.ctx.beginPath();
-    this.ctx.moveTo(fromX, fromY);
-    this.ctx.quadraticCurveTo(cp1X, cp1Y, toX, toY);
+    this.ctx.moveTo(start.x, start.y);
+    this.ctx.lineTo(mouseX, mouseY);
     this.ctx.stroke();
+
+    // 마우스 포인터 위치에 작은 원 표시 (시각적 가이드)
+    this.ctx.beginPath();
+    this.ctx.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
+    this.ctx.fillStyle = '#4dabf7';
+    this.ctx.fill();
 
     // 점선 초기화
     this.ctx.setLineDash([]);
