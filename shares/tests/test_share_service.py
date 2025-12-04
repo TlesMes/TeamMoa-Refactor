@@ -1,5 +1,14 @@
 """
-Shares 앱 서비스 레이어 테스트 (14개)
+Shares 서비스 레이어 테스트 (16개)
+
+테스트 구성:
+- TestPostCRUD: 6개 - 게시글 생성/수정/삭제, 파일 첨부
+- TestSearchFunctionality: 4개 - 제목/내용/작성자/전체 검색 (parametrize)
+- TestFileHandling: 2개 - 파일 다운로드, 정리
+- TestPermissionsAndRetrieval: 4개 - 권한 및 상세 조회
+
+사용 위치:
+- SSR 뷰: post_list, post_detail, post_write, post_edit 등
 """
 import pytest
 from django.core.exceptions import PermissionDenied

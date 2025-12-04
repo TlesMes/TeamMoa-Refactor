@@ -1,8 +1,12 @@
 """
-MilestoneViewSet API 엔드포인트 테스트
+Teams 마일스톤 API 테스트 (9개)
 
-✅ 실제 사용 중 - 전체 테스트 유지
-JavaScript: static/js/pages/milestone_timeline.js
+테스트 구성:
+- TestMilestoneViewSet: 9개 - 목록, 생성, 수정, 삭제 API
+
+사용 위치:
+- JavaScript: static/js/pages/milestone_timeline.js
+- API 엔드포인트: /api/v1/teams/{pk}/milestones/
 
 사용 현황:
 - list: ❌ 미사용 (서버 렌더링) - 테스트는 유지 (API 정합성 확인)

@@ -1,17 +1,18 @@
 """
-TeamService 단위 테스트
+Teams 서비스 레이어 테스트 (25개)
 
-✅ 전체 테스트 유지 - 비즈니스 로직 핵심
-TeamService는 SSR 뷰와 API ViewSet 양쪽에서 모두 사용됩니다.
+테스트 구성:
+- TestTeamServiceCreateTeam: 5개 - 팀 생성, 유효성 검증
+- TestTeamServiceVerifyTeamCode: 5개 - 초대 코드 검증, 정원 초과
+- TestTeamServiceJoinTeam: 5개 - 팀 가입, 비밀번호 체크
+- TestTeamServiceGetUserTeams: 2개 - 사용자 팀 목록
+- TestTeamServiceGetTeamStatistics: 2개 - 팀 통계 계산
+- TestTeamServiceDisbandTeam: 2개 - 팀 해체, 권한 확인
+- TestTeamServiceRemoveMember: 4개 - 멤버 제거/탈퇴
 
-사용 현황:
-- create_team: ✅ SSR Form (team_create 뷰)
-- verify_team_code: ✅ SSR AJAX (/teams/ajax/team-verify/)
-- join_team: ✅ SSR AJAX (/teams/ajax/team-join/)
-- get_user_teams: ✅ SSR 템플릿 (main_page 뷰)
-- get_team_statistics: ✅ SSR 템플릿 (team_main_page 뷰)
-- disband_team: ✅ SSR Form POST (team_disband 뷰)
-- remove_member: ✅ API (TeamViewSet.remove_member)
+사용 위치:
+- SSR 뷰: team_create, team_verify_code, team_join_process, main_page 등
+- API: TeamViewSet.remove_member
 """
 import pytest
 from teams.services import TeamService

@@ -1,5 +1,8 @@
 """
-ScheduleViewSet API 테스트
+Schedules API 테스트 (13개)
+
+테스트 구성:
+- TestScheduleViewSet: 13개 - 개인 스케줄 저장, 팀 가용성 조회, 내 스케줄 조회
 
 REST API 엔드포인트:
 - POST /api/v1/teams/{team_pk}/schedules/save-personal/

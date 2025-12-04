@@ -1,5 +1,8 @@
 """
-ScheduleService 서비스 레이어 테스트
+Schedules 서비스 레이어 테스트 (12개)
+
+테스트 구성:
+- TestScheduleService: 12개 - 주간 스케줄 저장, 팀 가용성 계산, 날짜 범위 쿼리 최적화
 
 비즈니스 로직:
 - 주간 스케줄 저장 (JSON 기반)

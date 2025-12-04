@@ -73,63 +73,54 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 
 ### 2️⃣ Teams App (66개 테스트)
 
-#### `test_team_service.py` (23개) - 팀 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestTeamServiceCreateTeam` | 팀 생성 | 팀 데이터 생성, 호스트 설정, 초대 코드 생성 |
-| `TestTeamServiceVerifyTeamCode` | 팀 코드 검증 | 초대 코드 유효성, 중복 가입 방지 |
-| `TestTeamServiceJoinTeam` | 팀 가입 | 멤버 추가, 인원수 업데이트 |
-| `TestTeamServiceGetUserTeams` | 사용자 팀 조회 | 소속 팀 목록 반환 |
-| `TestTeamServiceGetTeamStatistics` | 팀 통계 계산 | 멤버 수, 마일스톤 수, 할 일 통계 |
-| `TestTeamServiceDisbandTeam` | 팀 해체 | 호스트 권한 확인, 팀 삭제 |
-| `TestTeamServiceRemoveMember` | 멤버 추방 | 리더 권한 확인, 멤버 제거 |
+#### `test_team_service.py` (25개) - 팀 비즈니스 로직
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestTeamServiceCreateTeam` | 5개 | 팀 생성 | 팀 데이터 생성, 호스트 설정, 초대 코드 생성, 유효성 검증 |
+| `TestTeamServiceVerifyTeamCode` | 5개 | 팀 코드 검증 | 초대 코드 유효성, 중복 가입 방지, 정원 초과 체크 |
+| `TestTeamServiceJoinTeam` | 5개 | 팀 가입 | 멤버 추가, 인원수 업데이트, 비밀번호 검증 |
+| `TestTeamServiceGetUserTeams` | 2개 | 사용자 팀 조회 | 소속 팀 목록 반환, 빈 목록 처리 |
+| `TestTeamServiceGetTeamStatistics` | 2개 | 팀 통계 계산 | 마일스톤 통계, 진행 상태 집계 |
+| `TestTeamServiceDisbandTeam` | 2개 | 팀 해체 | 호스트 권한 확인, 팀 삭제 |
+| `TestTeamServiceRemoveMember` | 4개 | 멤버 추방/탈퇴 | 호스트 추방 권한, 본인 탈퇴, 권한 검증 |
 
-#### `test_milestone_service.py` (13개) - 마일스톤 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestMilestoneServiceCreateMilestone` | 마일스톤 생성 | 마일스톤 데이터 생성, 팀 멤버 권한 확인 |
-| `TestMilestoneServiceUpdateMilestone` | 마일스톤 수정 | 데이터 업데이트, 권한 검증 |
-| `TestMilestoneServiceDeleteMilestone` | 마일스톤 삭제 | 삭제 처리, 권한 검증 |
-| `TestMilestoneServiceGetTeamMilestones` | 팀 마일스톤 조회 | 목록 조회, 필터링, 정렬 |
+#### `test_milestone_service.py` (14개) - 마일스톤 비즈니스 로직
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestMilestoneServiceCreateMilestone` | 3개 | 마일스톤 생성 | 마일스톤 데이터 생성, 날짜 유효성 검증, 당일 마일스톤 허용 |
+| `TestMilestoneServiceUpdateMilestone` | 7개 | 마일스톤 수정 | 시작일/종료일/진행률 수정, 진행률 100% 시 완료 처리, 날짜 범위 검증 |
+| `TestMilestoneServiceDeleteMilestone` | 1개 | 마일스톤 삭제 | 마일스톤 삭제 처리 |
+| `TestMilestoneServiceGetTeamMilestones` | 3개 | 팀 마일스톤 조회 | 우선순위 정렬, 종료일 정렬, 커스텀 정렬 |
 
-#### `test_team_viewset.py` (17개) - 팀 API 엔드포인트
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestTeamViewSetRemoveMember` | 멤버 추방 API | API 응답, 권한 체크, 상태 코드 |
+#### `test_team_viewset.py` (3개) - 팀 API 엔드포인트
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestTeamViewSetRemoveMember` | 3개 | 멤버 추방/탈퇴 API | 호스트 추방, 본인 탈퇴, 권한 체크 |
 
-#### `test_milestone_viewset.py` (4개) - 마일스톤 API 엔드포인트
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestMilestoneViewSetList` | 마일스톤 목록 조회 API | 필터링, 정렬, JSON 응답 |
-| `TestMilestoneViewSetCreate` | 마일스톤 생성 API | 데이터 검증, 생성 처리 |
-| `TestMilestoneViewSetUpdate` | 마일스톤 수정 API | 부분 업데이트, 전체 업데이트 |
-| `TestMilestoneViewSetDestroy` | 마일스톤 삭제 API | 삭제 처리, 204 응답 |
+#### `test_milestone_viewset.py` (9개) - 마일스톤 API 엔드포인트
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestMilestoneViewSet` | 9개 | 마일스톤 API | 목록 조회, 생성, 부분 수정, 삭제, 유효성 검증 |
 
-#### `test_team_views.py` (13개) - 팀 SSR 뷰
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestMainPageView` | 메인 페이지 | 팀 목록, 통계 표시 |
-| `TestTeamCreateView` | 팀 생성 페이지 | 폼 렌더링, 팀 생성 처리 |
-| `TestTeamSearchView` | 팀 검색 | 검색 결과, 페이지네이션 |
-| `TestTeamVerifyCodeAjax` | 팀 코드 검증 AJAX | 비동기 코드 검증 |
-| `TestTeamJoinProcessAjax` | 팀 가입 처리 AJAX | 비동기 가입 처리 |
-| `TestTeamInfoChangeView` | 팀 정보 수정 | 팀 정보 업데이트 |
-| `TestTeamDisbandView` | 팀 해체 | 팀 삭제 처리 |
+#### `test_team_views.py` (15개) - 팀 SSR 뷰
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestTeamViews` | 15개 | 팀 SSR 페이지 | 메인, 생성, 검색, 코드 검증 AJAX, 가입 AJAX, 정보 수정, 해체 |
 
 ---
 
 ### 3️⃣ Members App (33개 테스트)
 
 #### `test_todo_service.py` (20개) - TODO 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestTodoServiceCreateTodo` | TODO 생성 | 할 일 생성, 순서 설정 |
-| `TestTodoServiceAssignTodo` | TODO 할당 | 담당자 지정, 권한 확인 |
-| `TestTodoServiceCompleteTodo` | TODO 완료 처리 | 상태 변경, 완료 시간 기록 |
-| `TestTodoServiceMoveToTodo` | DONE → TODO 복원 | 상태 롤백, 순서 재조정 |
-| `TestTodoServiceMoveToDone` | TODO → DONE 이동 | 완료 처리, 순서 조정 |
-| `TestTodoServiceDeleteTodo` | TODO 삭제 | 삭제 처리, 권한 확인 |
-| `TestTodoServiceGetTeamTodosWithStats` | 팀 TODO 조회 및 통계 | 목록 조회, 통계 계산 |
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestTodoServiceCreateTodo` | 2개 | TODO 생성 | 할 일 생성, 빈 내용 검증 |
+| `TestTodoServiceAssignTodo` | 5개 | TODO 할당 | 호스트 할당, 본인 할당, 권한 체크, 순서 계산, 비팀원 할당 거부 |
+| `TestTodoServiceCompleteTodo` | 3개 | TODO 완료 처리 | 완료 상태 변경, 완료 시간 기록, 권한 확인 |
+| `TestTodoServiceMoveToTodo` | 3개 | DONE → TODO 복원 | 상태 롤백, 순서 재조정, 권한 확인 |
+| `TestTodoServiceMoveToDone` | 3개 | TODO → DONE 이동 | 완료 처리, 순서 조정, 권한 확인 |
+| `TestTodoServiceDeleteTodo` | 2개 | TODO 삭제 | 삭제 처리, 권한 확인 |
+| `TestTodoServiceGetTeamTodosWithStats` | 2개 | 팀 TODO 조회 및 통계 | 목록 조회, 통계 계산 |
 
 #### `test_todo_viewset.py` (10개) - TODO API 엔드포인트
 | 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
@@ -146,69 +137,65 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 
 ---
 
-### 4️⃣ Schedules App (30개 테스트)
+### 4️⃣ Schedules App (34개 테스트)
 
-#### `test_schedule_service.py` (15개) - 스케줄 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestScheduleService` | 스케줄 CRUD 및 계산 | JSON 스케줄 저장, 팀 가용성 계산, 최적 시간대 추천 |
+#### `test_schedule_service.py` (12개) - 스케줄 비즈니스 로직
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestScheduleService` | 12개 | 스케줄 CRUD 및 계산 | 개인 스케줄 저장, 덮어쓰기, 팀 가용성 계산, 날짜 범위 조회, 쿼리 최적화 |
 
-#### `test_schedule_viewset.py` (10개) - 스케줄 API 엔드포인트
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestScheduleViewSet` | 스케줄 API | 저장, 조회, 팀 가용성 API |
+#### `test_schedule_viewset.py` (13개) - 스케줄 API 엔드포인트
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestScheduleViewSet` | 13개 | 스케줄 API | 저장, 조회, 팀 가용성 API, 인증/권한, 날짜 유효성 검증 |
 
-#### `test_schedule_views.py` (5개) - 스케줄 SSR 뷰
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestScheduleViews` | 스케줄 페이지 | 주간 스케줄 표시, UI 렌더링 |
-
----
-
-### 5️⃣ Shares App (24개 테스트)
-
-#### `test_share_service.py` (13개) - 게시판 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestPostCRUD` | 게시글 CRUD | 생성, 조회, 수정, 삭제 |
-| `TestSearchFunctionality` | 검색 기능 | 제목, 내용, 작성자 검색 |
-| `TestFileHandling` | 파일 처리 | 업로드, 다운로드, 파일 관리 |
-| `TestPermissionsAndRetrieval` | 권한 및 조회 | 팀 멤버 권한, 목록 조회 |
-
-#### `test_share_views.py` (11개) - 게시판 SSR 뷰
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestPostListAndRetrieval` | 게시글 목록 및 상세 | 목록 페이지, 상세 페이지 |
-| `TestSearchUI` | 검색 UI | 검색 결과 표시 |
-| `TestPostWriteAndEdit` | 게시글 작성 및 수정 | 폼 렌더링, 작성/수정 처리 |
-| `TestDeleteAndDownload` | 삭제 및 다운로드 | 삭제 처리, 파일 다운로드 |
-| `TestPermissions` | 권한 검증 | 팀 멤버 전용 접근 제어 |
+#### `test_schedule_views.py` (9개) - 스케줄 SSR 뷰
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestScheduleViews` | 9개 | 스케줄 페이지 | 조회 페이지, 업로드 페이지 GET/POST, 유효성 검증, 권한 체크 |
 
 ---
 
-### 6️⃣ Mindmaps App (30개 테스트)
+### 5️⃣ Shares App (29개 테스트)
+
+#### `test_share_service.py` (16개) - 게시판 비즈니스 로직
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestPostCRUD` | 6개 | 게시글 CRUD | 파일 첨부/없이 생성, 대용량 파일 검증, 작성자 권한 수정, 파일 포함 삭제 |
+| `TestSearchFunctionality` | 4개 | 검색 기능 | 제목/내용/작성자/전체 검색 (parametrize 활용) |
+| `TestFileHandling` | 2개 | 파일 처리 | 파일 없을 때 다운로드 에러, 파일 정리 메서드 |
+| `TestPermissionsAndRetrieval` | 4개 | 권한 및 조회 | 게시글 상세 조회, 작성자 확인, 팀 권한 체크 |
+
+#### `test_share_views.py` (13개) - 게시판 SSR 뷰
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestShareViews` | 13개 | 게시판 SSR 페이지 | 목록, 상세, 페이지네이션, 검색 필터링, 작성/수정 폼, 삭제, 파일 업로드, 권한 체크 |
+
+---
+
+### 6️⃣ Mindmaps App (31개 테스트)
 
 #### `test_mindmap_service.py` (16개) - 마인드맵 비즈니스 로직
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestMindmapCRUD` | 마인드맵 CRUD | 마인드맵 생성, 수정, 삭제 |
-| `TestNodeCRUD` | 노드 CRUD | 노드 생성, 이동, 삭제 |
-| `TestConnectionCRUD` | 연결선 CRUD | 연결선 생성, 수정, 삭제 |
-| `TestCommentAndPermission` | 댓글 및 권한 | 댓글 작성, 권한 검증 |
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestMindmapCRUD` | 4개 | 마인드맵 CRUD | 마인드맵 생성, 수정, 삭제, 중복 제목 검증 |
+| `TestNodeCRUD` | 5개 | 노드 CRUD | 노드 생성, 이동, 삭제, 권한 검증 |
+| `TestConnectionCRUD` | 4개 | 연결선 CRUD | 연결선 생성, 수정, 삭제, 권한 검증 |
+| `TestCommentAndPermission` | 3개 | 댓글 및 권한 | 댓글 작성, 권한 검증 |
 
 #### `test_mindmap_viewset.py` (8개) - 마인드맵 API 엔드포인트
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestNodeViewSet` | 노드 API | 노드 CRUD, 드래그 이동 API |
-| `TestConnectionViewSet` | 연결선 API | 연결선 CRUD API |
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestNodeViewSet` | 5개 | 노드 API | 노드 CRUD, 드래그 이동, 권한 체크 |
+| `TestConnectionViewSet` | 3개 | 연결선 API | 연결선 생성, 삭제, 권한 체크 |
 
-#### `test_mindmap_views.py` (6개) - 마인드맵 SSR 뷰
-| 테스트 클래스 | 테스트 목적 | 주요 검증 사항 |
-|-------------|-----------|-------------|
-| `TestMindmapListAndCreate` | 마인드맵 목록 및 생성 | 목록 페이지, 생성 모달 |
-| `TestMindmapDelete` | 마인드맵 삭제 | 삭제 처리 |
-| `TestMindmapEditor` | 마인드맵 에디터 | Canvas 에디터 페이지 |
-| `TestNodeDetail` | 노드 상세 페이지 | 노드 내용, 댓글 표시 |
+#### `test_mindmap_views.py` (7개) - 마인드맵 SSR 뷰
+| 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
+|-------------|---------|-----------|-------------|
+| `TestMindmapListAndCreate` | 2개 | 목록 및 생성 | 마인드맵 목록, 생성/중복 제목 처리 |
+| `TestMindmapDelete` | 1개 | 마인드맵 삭제 | 호스트 전용 삭제 권한 |
+| `TestMindmapEditor` | 2개 | 에디터 페이지 | Canvas 에디터 렌더링, 권한 체크 |
+| `TestNodeDetail` | 2개 | 노드 상세 페이지 | 노드 상세 표시, 댓글 추가 |
 
 ---
 
@@ -277,14 +264,14 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 
 | 앱 | 서비스 | API | SSR | 합계 |
 |---|---------|-----|-----|------|
-| Accounts | 14 | - | 10 | 24 |
-| Teams | 36 | 17 | 13 | 66 |
+| Accounts | 18 | - | 10 | 28 |
+| Teams | 39 | 12 | 15 | 66 |
 | Members | 20 | 10 | 3 | 33 |
-| Schedules | 15 | 10 | 5 | 30 |
-| Shares | 13 | - | 11 | 24 |
-| Mindmaps | 16 | 8 | 6 | 30 |
-| **총계** | **114** | **45** | **48** | **207** |
+| Schedules | 12 | 13 | 9 | 34 |
+| Shares | 16 | - | 13 | 29 |
+| Mindmaps | 16 | 8 | 7 | 31 |
+| **총계** | **121** | **43** | **57** | **221** |
 
 ---
 
-*최종 업데이트: 2025.10.23*
+*최종 업데이트: 2025.12.04*

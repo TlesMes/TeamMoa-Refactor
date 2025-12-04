@@ -1,15 +1,16 @@
 """
-TeamViewSet API 엔드포인트 테스트
+Teams API 테스트 (3개)
 
-✅ 테스트 대상:
-- TeamViewSet.remove_member: 팀 메인 페이지에서 사용 (team_main.js)
-  엔드포인트: DELETE /api/v1/teams/<pk>/members/<user_id>/
+테스트 구성:
+- TestTeamViewSetRemoveMember: 3개 - 멤버 추방/탈퇴 API
 
-❌ 테스트 제외 (SSR로 처리):
+사용 위치:
+- JavaScript: static/js/pages/team_main.js
+- API 엔드포인트: DELETE /api/v1/teams/<pk>/members/<user_id>/
+
+테스트 제외 (SSR로 처리):
 - list/create/retrieve/update/destroy → Form 기반 SSR 뷰
 - statistics → 템플릿에서 직접 계산
-
-참고: MilestoneViewSet 테스트는 test_milestone_viewset.py 참고
 """
 import pytest
 from rest_framework import status

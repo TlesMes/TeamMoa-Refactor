@@ -1,5 +1,16 @@
 """
-Shares 앱 SSR 뷰 테스트 (12개)
+Shares SSR 뷰 테스트 (13개)
+
+테스트 구성:
+- TestPostListAndRetrieval: 3개 - 목록, 상세, 페이지네이션
+- TestSearchUI: 3개 - 검색 필터링 (parametrize)
+- TestPostWriteAndEdit: 3개 - 작성, 수정
+- TestDeleteAndPermissions: 4개 - 삭제, 권한 체크
+
+페이지:
+- post_list: 게시판 목록
+- post_detail: 게시글 상세
+- post_write/edit: 작성/수정
 """
 import pytest
 from django.urls import reverse

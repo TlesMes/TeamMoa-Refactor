@@ -1,12 +1,13 @@
 """
-Teams App SSR/AJAX 뷰 테스트
+Teams SSR/AJAX 뷰 테스트 (15개)
 
-핵심 Form 기반 뷰와 AJAX 엔드포인트만 테스트합니다.
+테스트 구성:
+- TestTeamViews: 15개 - 메인, 생성, 검색, AJAX 코드 검증/가입, 정보 수정, 해체
 
 테스트 대상:
-✅ Form 기반 뷰: team_create, team_info_change, team_disband
-✅ AJAX 엔드포인트: team_verify_code, team_join_process
-✅ 렌더링 확인: main_page, team_search
+- Form 기반 뷰: team_create, team_info_change, team_disband
+- AJAX 엔드포인트: team_verify_code, team_join_process
+- 렌더링 확인: main_page, team_search
 """
 import pytest
 from django.urls import reverse

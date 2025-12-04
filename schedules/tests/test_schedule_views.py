@@ -1,5 +1,8 @@
 """
-Schedules SSR 뷰 테스트
+Schedules SSR 뷰 테스트 (9개)
+
+테스트 구성:
+- TestScheduleViews: 9개 - 조회 페이지, 업로드 페이지 GET/POST, 유효성 검증, 권한 체크
 
 템플릿 뷰:
 - scheduler_page: 팀 스케줄 조회 페이지

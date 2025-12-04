@@ -1,14 +1,15 @@
 """
-MilestoneService 단위 테스트
+Teams 마일스톤 서비스 레이어 테스트 (14개)
 
-✅ 전체 테스트 유지 - 비즈니스 로직 핵심
-MilestoneService는 MilestoneViewSet에서 사용됩니다.
+테스트 구성:
+- TestMilestoneServiceCreateMilestone: 3개 - 마일스톤 생성, 날짜 유효성 검증
+- TestMilestoneServiceUpdateMilestone: 7개 - 날짜/진행률 수정, 완료 처리
+- TestMilestoneServiceDeleteMilestone: 1개 - 마일스톤 삭제
+- TestMilestoneServiceGetTeamMilestones: 3개 - 목록 조회, 정렬
 
-사용 현황:
-- create_milestone: ✅ API (MilestoneViewSet.create)
-- update_milestone: ✅ API (MilestoneViewSet.partial_update)
-- delete_milestone: ✅ API (MilestoneViewSet.destroy)
-- get_team_milestones: ✅ API + SSR (MilestoneViewSet.list, team_milestone_timeline 뷰)
+사용 위치:
+- API: MilestoneViewSet (create, partial_update, destroy, list)
+- SSR: team_milestone_timeline 뷰
 """
 import pytest
 from datetime import date, timedelta
