@@ -7,6 +7,54 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
+### 📚 포트폴리오 문서 작성 진행 중 (2025.12.04)
+
+**✅ 작성 완료** (5개 문서):
+- ✅ **프로젝트 개요** (overview.md) - 8페이지 - 작성 & 검증 완료
+- ✅ **아키텍처 설계** (architecture.md) - 10페이지 - 작성 & 검증 완료
+- ✅ **인프라 & 배포** (infrastructure.md) - 12페이지 - 작성 & 검증 완료
+- ✅ **테스트 전략** (testing.md) - 12페이지 - 작성 & 검증 완료 (2025.12.04)
+- ✅ **포트폴리오 README** (README.md) - 문서 가이드
+
+**📝 코드 검증만 완료** (2개 문서, 내용 검토 대기):
+- ⏳ 트러블슈팅 (troubleshooting.md) - 12페이지 - 코드 검증 완료
+- ⏳ 실시간 마인드맵 (features/realtime-mindmap.md) - 13페이지 - 코드 검증 완료
+
+**✅ 전체 문서 코드 검증 완료** (100% 검증):
+- ✅ **overview.md**: JSON 구조 수정 (1곳)
+  - `{"time_9-1": true}` → `{"date": "...", "available_hours": [9, 10, ...]}`
+- ✅ **testing.md**: Milestone 모델 존재 확인 (수정 불필요)
+- ✅ **troubleshooting.md**: 경로 수정 (8곳)
+  - `config.asgi` → `TeamMoa.asgi`
+  - `config/settings` → `TeamMoa/settings`
+  - `config/urls.py` → `TeamMoa/urls.py`
+- ✅ **features/realtime-mindmap.md**: ASGI 코드 및 경로 수정 (4곳)
+- ✅ **infrastructure.md**: Dockerfile 코드 수정 (이전 세션)
+- ✅ **architecture.md**: 모델명 및 경로 수정 (6곳)
+  - `TeamMember` → `TeamUser`
+  - `team_code` → `invitecode`
+  - `role='leader'` → `host=user`
+  - `config/urls.py` → `TeamMoa/urls.py`
+
+**검증 통계**:
+- 총 문서 수: 7개
+- 코드 스니펫: 100개 이상
+- 총 수정 사항: 20곳
+- 검증률: 100%
+
+**작성 원칙**:
+- ✅ 검증 가능한 수치만 사용 (221개 테스트, 50ms 스로틀링 등)
+- ✅ 기술 중심 톤 유지 (마케팅 문구 제거)
+- ✅ 문제 → 해결 → 성과 스토리 구성
+- ✅ 모든 코드는 실제 프로젝트 코드와 일치
+
+**다음 작업**:
+- ERD 다이어그램 추가
+- UI 스크린샷 추가
+- 추가 기능 문서 작성 (OAuth 2.0, 성능 최적화)
+
+---
+
 ### 🔐 회원 탈퇴 및 미인증 계정 관리 개선 완료! (2025.11.24)
 
 **✅ 문제 해결: username/email 영구 점유 방지**:
@@ -45,7 +93,7 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 - ✅ EC2 자동 배포 (무중단 배포)
 - ✅ Dynamic Security Group (배포 시에만 SSH 포트 개방)
 
-**성과**: 개발자 배포 작업 시간 **15분 → 10초** (git push로 EC2배포까지 한번에 완료)
+**성과**: 수동 배포 → 완전 자동화 (git push로 EC2배포까지 한번에 완료)
 
 **파이프라인 구조**:
 ```
