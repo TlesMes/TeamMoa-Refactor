@@ -7,40 +7,27 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
-### 📚 포트폴리오 문서 작성 진행 중 (2025.12.04)
+### 📚 포트폴리오 문서 작성 진행 중 (2025.12.07)
 
-**✅ 작성 완료** (5개 문서):
+**✅ 작성 완료** (6개 문서):
 - ✅ **프로젝트 개요** (overview.md) - 8페이지 - 작성 & 검증 완료
 - ✅ **아키텍처 설계** (architecture.md) - 10페이지 - 작성 & 검증 완료
 - ✅ **인프라 & 배포** (infrastructure.md) - 12페이지 - 작성 & 검증 완료
-- ✅ **테스트 전략** (testing.md) - 12페이지 - 작성 & 검증 완료 (2025.12.04)
+- ✅ **테스트 전략** (testing.md) - 12페이지 - 작성 & 검증 완료
+- ✅ **트러블슈팅** (troubleshooting.md) - 8건 - 작성 & 최적화 완료 (2025.12.07)
 - ✅ **포트폴리오 README** (README.md) - 문서 가이드
 
-**📝 코드 검증만 완료** (2개 문서, 내용 검토 대기):
-- ⏳ 트러블슈팅 (troubleshooting.md) - 12페이지 - 코드 검증 완료
+**📝 코드 검증만 완료** (1개 문서, 내용 검토 대기):
 - ⏳ 실시간 마인드맵 (features/realtime-mindmap.md) - 13페이지 - 코드 검증 완료
 
-**✅ 전체 문서 코드 검증 완료** (100% 검증):
-- ✅ **overview.md**: JSON 구조 수정 (1곳)
-  - `{"time_9-1": true}` → `{"date": "...", "available_hours": [9, 10, ...]}`
-- ✅ **testing.md**: Milestone 모델 존재 확인 (수정 불필요)
-- ✅ **troubleshooting.md**: 경로 수정 (8곳)
-  - `config.asgi` → `TeamMoa.asgi`
-  - `config/settings` → `TeamMoa/settings`
-  - `config/urls.py` → `TeamMoa/urls.py`
-- ✅ **features/realtime-mindmap.md**: ASGI 코드 및 경로 수정 (4곳)
-- ✅ **infrastructure.md**: Dockerfile 코드 수정 (이전 세션)
-- ✅ **architecture.md**: 모델명 및 경로 수정 (6곳)
-  - `TeamMember` → `TeamUser`
-  - `team_code` → `invitecode`
-  - `role='leader'` → `host=user`
-  - `config/urls.py` → `TeamMoa/urls.py`
+**✅ 트러블슈팅 문서 최적화 완료** (2025.12.07):
+- 15건 → 8건으로 축소 (기초 설정 오류 제거)
+- 중요도별 분류 (🔴 Critical 3건, 🟡 High 3건, 🟢 Medium 2건)
+- 재발 방지 항목 통일, 검증 가능한 수치만 사용
 
 **검증 통계**:
-- 총 문서 수: 7개
-- 코드 스니펫: 100개 이상
-- 총 수정 사항: 20곳
-- 검증률: 100%
+- 총 문서 수: 7개 (6개 완료, 1개 검토 대기)
+- 코드 검증률: 100%
 
 **작성 원칙**:
 - ✅ 검증 가능한 수치만 사용 (221개 테스트, 50ms 스로틀링 등)
