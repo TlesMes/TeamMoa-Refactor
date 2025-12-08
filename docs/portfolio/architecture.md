@@ -549,22 +549,126 @@ def post_write_view(request, pk):
 
 ### 테이블 관계 개요
 
-> **📌 TODO: ERD 도구로 작성한 이미지를 여기에 추가**
-> - 도구: ERDCloud, dbdiagram.io, draw.io 등
-> - 포함 내용: 주요 모델과 관계(1:N, N:M)만 표시
-> - 파일명: `docs/portfolio/images/erd-diagram.png`
-
 프로젝트의 핵심 엔터티는 User, Team, Mindmap, Node이며, Team을 중심으로 협업 관련 데이터가 1:N 관계로 연결되는 구조이다.
 
-```
-User ──1:N── TeamUser ──N:1── Team (host: FK→User)
-                                  │
-                                  ├─1:N─ Milestone
-                                  ├─1:N─ Todo (assignee: FK→TeamUser)
-                                  ├─1:N─ PersonalDaySchedule (owner: FK→TeamUser)
-                                  ├─1:N─ Mindmap ──1:N─ Node ──M2M(self)─ NodeConnection
-                                  │                      └─1:N─ Comment (user: FK→User)
-                                  └─1:N─ Post (writer: FK→User)
+```mermaid
+erDiagram
+    User ||--o{ TeamUser : "가입"
+    User ||--o{ Team : "소유(host)"
+    User ||--o{ Comment : "작성"
+    User ||--o{ Post : "작성"
+
+    Team ||--o{ TeamUser : "멤버십"
+    Team ||--o{ Milestone : "포함"
+    Team ||--o{ Todo : "포함"
+    Team ||--o{ PersonalDaySchedule : "포함"
+    Team ||--o{ Mindmap : "포함"
+    Team ||--o{ Post : "포함"
+
+    TeamUser ||--o{ Todo : "할당(assignee)"
+    TeamUser ||--o{ PersonalDaySchedule : "소유(owner)"
+
+    Mindmap ||--o{ Node : "포함"
+
+    Node ||--o{ NodeConnection : "출발(from_node)"
+    Node ||--o{ NodeConnection : "도착(to_node)"
+    Node ||--o{ Comment : "댓글"
+
+    Mindmap ||--o{ NodeConnection : "연결선 그룹"
+
+    User {
+        int id PK
+        string username UK
+        string email UK
+        string nickname
+        text profile
+        boolean is_deleted
+        datetime deleted_at
+    }
+
+    Team {
+        int id PK
+        string title
+        int maxuser
+        int currentuser
+        int host_id FK
+        string invitecode
+        text teampasswd
+        text introduction
+    }
+
+    TeamUser {
+        int id PK
+        int team_id FK
+        int user_id FK
+    }
+
+    Milestone {
+        int id PK
+        int team_id FK
+        string title
+        text description
+        date startdate
+        date enddate
+        boolean is_completed
+        int progress_percentage
+        string priority
+    }
+
+    Todo {
+        int id PK
+        int team_id FK
+        int assignee_id FK
+        text content
+        boolean is_completed
+        int order
+        datetime created_at
+        datetime completed_at
+    }
+
+    PersonalDaySchedule {
+        int id PK
+        int team_id FK
+        int owner_id FK
+    }
+
+    Mindmap {
+        int id PK
+        int team_id FK
+        string title
+    }
+
+    Node {
+        int id PK
+        int mindmap_id FK
+        int posX
+        int posY
+        string title
+        text content
+        json recommended_users
+        int recommendation_count
+    }
+
+    NodeConnection {
+        int id PK
+        int mindmap_id FK
+        int from_node_id FK
+        int to_node_id FK
+    }
+
+    Comment {
+        int id PK
+        int node_id FK
+        int user_id FK
+        text comment
+        datetime commented_at
+    }
+
+    Post {
+        int id PK
+        int team_id FK
+        int writer_id FK
+    }
 ```
 
 **주요 관계**:

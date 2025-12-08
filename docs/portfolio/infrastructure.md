@@ -34,39 +34,44 @@
 
 ### 아키텍처 구성도 및 흐름
 
-```
-[개발자] → git push origin main
-                ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    GitHub Actions                           │
-│  ┌────────┐    ┌────────┐    ┌────────┐                     │
-│  │ Test   │ →  │ Build  │ →  │ Deploy │                     │
-│  │ 221개  │    │ Docker │    │ EC2    │                     │
-│  │ pytest │    │ Hub    │    │ SSH    │                     │
-│  └────────┘    └────────┘    └────────┘                     │
-│      ↓              ↓              ↓                        │
-│  실패→중단     성공→push    Health Check                      │
-└─────────────────────────┬───────────────────────────────────┘
-                          │ Docker Hub
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│              AWS EC2 (Ubuntu 22.04)                         │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │               Docker Compose                        │    │
-│  │  ┌──────────┐  ┌───────┐  ┌───────┐  ┌──────────┐   │    │
-│  │  │  MySQL   │←→│ Redis │←→│Django │←→│  Nginx   │   │    │
-│  │  │  8.0     │  │ 7(WS) │  │Daphne │  │ (SSL 종료)│   │    │
-│  │  └──────────┘  └───────┘  └───────┘  └──────────┘   │    │
-│  │      ↓             ↓          ↓           ↓         │    │
-│  │   Volume       Channel       ASGI       443/80      │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-                        ↓
-                HTTPS (Let's Encrypt)
-                        ↓
-            https://teammoa.duckdns.org
-                        ↓
-                     [사용자]
+```mermaid
+flowchart TD
+    Dev[개발자] -->|git push origin main| GHA[GitHub Actions]
+
+    subgraph GitHub Actions
+        Test[Test Stage<br/>221개 테스트<br/>pytest]
+        Build[Build Stage<br/>Docker 빌드]
+        Deploy[Deploy Stage<br/>EC2 배포<br/>SSH]
+
+        Test -->|성공| Build
+        Test -->|실패| Stop[중단]
+        Build -->|성공→push| DockerHub[Docker Hub]
+        Build --> Deploy
+    end
+
+    DockerHub -->|Pull Image| EC2
+
+    subgraph EC2[AWS EC2 - Ubuntu 22.04]
+        subgraph DockerCompose[Docker Compose]
+            MySQL[(MySQL 8.0<br/>Volume)]
+            Redis[(Redis 7<br/>Channel Layer)]
+            Django[Django<br/>Daphne ASGI]
+            Nginx[Nginx<br/>SSL 종료]
+
+            MySQL <-->|DB| Django
+            Redis <-->|WebSocket| Django
+            Django <-->|Proxy| Nginx
+        end
+    end
+
+    Deploy -->|Health Check| EC2
+    Nginx -->|HTTPS<br/>Let's Encrypt| Domain[https://teammoa.duckdns.org]
+    Domain --> User[사용자]
+
+    style Test fill:#e1f5e1
+    style Build fill:#e3f2fd
+    style Deploy fill:#fff3e0
+    style Stop fill:#ffebee
 ```
 
 **흐름 설명 (2가지)**:

@@ -128,26 +128,40 @@
 
 ### 아키텍처 개요
 
-```
-[클라이언트 A]     [클라이언트 B]     [클라이언트 C]
-     |                  |                  |
-     └─────── WebSocket ────────┬──────────┘
-                                |
-                         [Django Channels]
-                         (Daphne ASGI)
-                                |
-                    ┌───────────┴───────────┐
-                    |                       |
-              [Redis Pub/Sub]          [MySQL]
-              (Channel Layer)      (영속성 저장)
+```mermaid
+sequenceDiagram
+    participant A as 클라이언트 A
+    participant B as 클라이언트 B
+    participant C as 클라이언트 C
+    participant Channels as Django Channels<br/>(Daphne ASGI)
+    participant Redis as Redis Pub/Sub<br/>(Channel Layer)
+    participant MySQL as MySQL<br/>(영속성 저장)
+
+    Note over A,C: 실시간 협업 시작
+    A->>Channels: WebSocket 연결
+    B->>Channels: WebSocket 연결
+    C->>Channels: WebSocket 연결
+
+    Note over A,MySQL: 노드 이동 이벤트
+    A->>Channels: node_move<br/>{node_id: 123, x: 100, y: 200}
+    Channels->>MySQL: DB 업데이트<br/>UPDATE nodes SET posX=100, posY=200
+    MySQL-->>Channels: 저장 완료
+    Channels->>Redis: Pub/Sub 브로드캐스트
+    Redis-->>Channels: 모든 채널에 전달
+    Channels-->>B: node_moved<br/>{node_id: 123, x: 100, y: 200}
+    Channels-->>C: node_moved<br/>{node_id: 123, x: 100, y: 200}
+
+    Note over B,C: 화면 실시간 업데이트
+    B->>B: 노드 위치 갱신
+    C->>C: 노드 위치 갱신
 ```
 
 **데이터 흐름**:
-1. 클라이언트 A가 노드 이동
-2. WebSocket으로 서버 전송
-3. Django Channels가 MySQL에 저장
-4. Redis Pub/Sub으로 브로드캐스트
-5. 클라이언트 B, C가 수신 → 화면 업데이트
+1. **클라이언트 A**가 노드 이동
+2. **WebSocket**으로 서버 전송 (`node_move`)
+3. **Django Channels**가 **MySQL**에 저장 (영속성)
+4. **Redis Pub/Sub**으로 브로드캐스트
+5. **클라이언트 B, C**가 수신 → 화면 실시간 업데이트
 
 ---
 
