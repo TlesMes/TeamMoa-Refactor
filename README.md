@@ -33,10 +33,12 @@
 - **[아키텍처 설계](./docs/portfolio/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
 - **[인프라 및 배포](./docs/portfolio/infrastructure.md)** - Docker, CI/CD, AWS EC2
 - **[테스트 전략](./docs/portfolio/testing.md)** - 221개 테스트, fixture 패턴
-- **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 15건 문제 해결 사례
+- **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 8건 문제 해결 사례
 
 ### 기능 상세
 - **[실시간 마인드맵](./docs/portfolio/features/realtime-mindmap.md)** - WebSocket + Canvas API
+- **[OAuth 2.0 인증](./docs/portfolio/features/oauth-authentication.md)** - django-allauth, 계정 병합
+- **[성능 최적화](./docs/portfolio/features/performance-optimization.md)** - N+1 쿼리 해결, 81% 감소
 
 ---
 
@@ -113,10 +115,16 @@ TeamMoa/
 ├── config/             # Django 설정 (settings, urls, asgi)
 ├── static/             # 정적 파일 (CSS 모듈, JavaScript)
 ├── templates/          # 템플릿 (base_team, base_user, base_public)
-├── docs/               # 프로젝트 문서
+├── docs/               # 프로젝트 문서 (96p, 150+ 코드 예시)
 │   ├── portfolio/      # 포트폴리오 문서 (아키텍처, 인증, 실시간, CI/CD)
-│   ├── architecture/   # 리팩토링 기록 (CBV, 서비스 레이어)
-│   └── performance/    # 성능 최적화 보고서
+│   ├── architecture/   # 아키텍처 설계 & 리팩토링 히스토리
+│   │   ├── design/     # 정적 구조 (API 매핑, 가이드라인)
+│   │   ├── refactoring/# 시간의 흐름 (CBV, 서비스, API, Mindmaps)
+│   │   └── migration/  # 마이그레이션 로드맵
+│   ├── guides/         # 설정 가이드 (OAuth, 배포, 테스트)
+│   ├── development/    # 성능, UI/UX, 기능 개선
+│   ├── troubleshooting/# 문제 해결 사례
+│   └── archive/        # 구버전 문서 (참고용)
 ├── .github/workflows/  # GitHub Actions CI/CD 파이프라인
 ├── docker-compose.yml  # 개발 환경 Docker 설정
 ├── docker-compose.prod.yml # 프로덕션 환경 Docker 설정

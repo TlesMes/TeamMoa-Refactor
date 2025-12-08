@@ -528,7 +528,7 @@ def post_write_view(request, pk):
 | **Mindmaps** | 8개 | 10개 | 0개 | 하이브리드 (관리 SSR, 에디터 API+WS) |
 | **Shares** | 6개 | 0개 | 0개 | SSR 중심 (게시판 CRUD) |
 
-**상세 매핑**: [`docs/architecture/detailed_api_ssr_mapping.md`](../architecture/detailed_api_ssr_mapping.md)
+**상세 매핑**: [`docs/architecture/design/api_ssr_mapping.md`](../architecture/design/api_ssr_mapping.md)
 
 ---
 
@@ -726,5 +726,5 @@ const todoApi = {
 **작성일**: 2025년 12월 2일
 **버전**: 1.0
 **참고 문서**:
-- [상세 API/SSR 매핑](../architecture/detailed_api_ssr_mapping.md)
-- [서비스 레이어 가이드라인](../architecture/service_layer/service_layer_guidelines.md)
+- [상세 API/SSR 매핑](../architecture/design/api_ssr_mapping.md)
+- [서비스 레이어 가이드라인](../architecture/design/service_layer_guidelines.md)

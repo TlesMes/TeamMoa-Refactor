@@ -101,10 +101,12 @@
 | [아키텍처 설계](./architecture.md) | 10p | 서비스 레이어 패턴, API vs SSR 전략, DB 설계 | 백엔드 아키텍처 관심자 |
 | [인프라 및 배포](./infrastructure.md) | 12p | Docker, CI/CD, AWS EC2, Nginx + SSL | DevOps/인프라 관심자 |
 | [테스트 전략](./testing.md) | 12p | 221개 테스트 구축 과정, pytest fixture 패턴 | 테스트 전략 관심자 |
-| [트러블슈팅](./troubleshooting.md) | 12p | 15건 이상 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
+| [트러블슈팅](./troubleshooting.md) | 12p | 8건 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
 | [실시간 마인드맵](./features/realtime-mindmap.md) | 13p | Canvas API, WebSocket, 커서 공유 (50ms 스로틀링) | 실시간 협업 기능 상세 |
+| [OAuth 2.0 인증](./features/oauth-authentication.md) | 15p | django-allauth, 이메일 기반 계정 병합, 중복 연결 차단 | 소셜 로그인 구현 |
+| [성능 최적화](./features/performance-optimization.md) | 14p | N+1 쿼리 해결, annotate + prefetch, 쿼리 수 81% 감소 | Django ORM 최적화 |
 
-**총 분량**: 67페이지 (A4 기준) | **코드 예시**: 100개 이상 | **코드 검증**: 100% 완료
+**총 분량**: 96페이지 (A4 기준) | **코드 예시**: 150개 이상 | **코드 검증**: 100% 완료
 
 ---
 
@@ -209,7 +211,7 @@
 ### 문서 개선
 - [ ] ERD 다이어그램 추가 (dbdiagram.io)
 - [ ] UI 스크린샷 추가 (주요 기능)
-- [ ] 추가 기능 문서 작성 (OAuth 2.0, 성능 최적화)
+- [x] 추가 기능 문서 작성 (OAuth 2.0, 성능 최적화)
 
 ### 기능 확장
 - [ ] 마인드맵 버전 관리 (Git 스타일)
@@ -223,5 +225,5 @@
 
 ---
 
-**최종 업데이트**: 2025년 12월 5일
+**최종 업데이트**: 2025년 12월 8일
 **버전**: 2.0

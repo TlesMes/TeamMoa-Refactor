@@ -325,7 +325,7 @@ git commit -m "feat(api): Teams Milestone Timeline API 전환 완료"
 
 ## 📚 참고 자료
 
-- [Members App API 기반 실시간 UI 시스템 문서](../architecture/members-api-realtime-ui.md)
+- [Members App API 기반 실시간 UI 시스템 문서](../../../development/ui_ux/members_realtime_ui.md)
 - [Django REST Framework 공식 문서](https://www.django-rest-framework.org/)
 - [API Client 구현](../../static/js/api/client.js)
 - [TodoDOMUtils 참고 구현](../../static/js/utils/todo-dom-utils.js)
