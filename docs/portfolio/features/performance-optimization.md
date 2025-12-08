@@ -154,87 +154,68 @@ TeamUser.objects.filter(team=team) \
 
 ## 시스템 설계
 
-### 최적화 전략 흐름도
+### 최적화 전략: AS-IS vs TO-BE
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AS-IS (N+1 쿼리 패턴)                     │
-├─────────────────────────────────────────────────────────────┤
-│ 1. TeamUser 조회                   → 1 query                │
-│ 2. for member in members:                                   │
-│      - member.user.nickname       → N query (N명)           │
-│      - todos.filter(assignee=member) → N query              │
-│      - filtered_todos.count()     → N query                 │
-│                                                              │
-│ 총 쿼리: 1 + 3N = 16개 (N=5)                                │
-│ 시간 복잡도: O(N × M) (템플릿 필터링)                        │
-└─────────────────────────────────────────────────────────────┘
+#### AS-IS (N+1 쿼리 패턴)
 
-                            ↓ 최적화
+```python
+# 1. TeamUser 조회 (1개 쿼리)
+members = TeamUser.objects.filter(team=team)
 
-┌─────────────────────────────────────────────────────────────┐
-│                    TO-BE (최적화 패턴)                       │
-├─────────────────────────────────────────────────────────────┤
-│ 1. TeamUser.objects.filter(team=team)                       │
-│    .annotate(                                                │
-│        todo_count=Count('todo_set', filter=Q(...)),         │
-│        completed_count=Count('todo_set', filter=Q(...))     │
-│    )                                   → 1 query (통계 포함) │
-│    .select_related('user')             → JOIN (추가 쿼리 없음)│
-│    .prefetch_related('todo_set')       → 1 query (Todo 전체)│
-│                                                              │
-│ 2. 미할당 Todo 조회                     → 1 query            │
-│ 3. 완료 Todo 조회                       → 1 query            │
-│                                                              │
-│ 총 쿼리: 3개 (고정)                                          │
-│ 시간 복잡도: O(N) (DB가 그룹핑 처리)                         │
-└─────────────────────────────────────────────────────────────┘
+# 2. 템플릿에서 반복 접근 시 추가 쿼리 발생
+# {% for member in members %}  <!-- 5명 -->
+#     {{ member.user.nickname }}  <!-- DB 쿼리 5회 -->
+#     {% for todo in todos %}  <!-- 50개 할일 -->
+#         {% if todo.assignee == member %}  <!-- Python 필터링: 5 × 50 = 250회 -->
+#             {{ todo.title }}
+#         {% endif %}
+#     {% endfor %}
+# {% endfor %}
+
+# 총 쿼리: 1 + N (User) + N (Todo 필터링) = 1 + 5 + 5 = 11개 이상
+# 시간 복잡도: O(N × M) - 템플릿에서 250회 비교 연산
 ```
 
-### 쿼리 비교 (SQL)
+**문제점**:
+- `member.user.nickname` 접근 시: N개 추가 쿼리
+- 템플릿에서 `{% if todo.assignee == member %}`: 250회 Python 비교 (5명 × 50개)
+- 완료/미완료 카운트: 템플릿 반복문으로 계산
 
-#### AS-IS (N+1 쿼리)
+---
 
-```sql
--- 1. TeamUser 조회
-SELECT * FROM teams_teamuser WHERE team_id = 1;
+#### TO-BE (최적화 패턴)
 
--- 2. 각 멤버마다 User 조회 (N번)
-SELECT * FROM accounts_user WHERE id = 10;
-SELECT * FROM accounts_user WHERE id = 11;
-...
+```python
+# 1. 단일 쿼리로 모든 데이터 + 통계 조회 (1개 쿼리)
+members = TeamUser.objects.filter(team=team) \
+    .annotate(
+        # DB 레벨에서 통계 계산 (GROUP BY + COUNT)
+        todo_count=Count('todo_set', filter=Q(todo_set__team=team)),
+        completed_count=Count('todo_set',
+            filter=Q(todo_set__team=team, todo_set__is_completed=True))
+    ) \
+    .select_related('user') \      # JOIN으로 User 조회 (추가 쿼리 없음)
+    .prefetch_related('todo_set')  # Todo 사전 로딩 (1개 쿼리)
 
--- 3. 각 멤버마다 Todo 조회 (N번)
-SELECT * FROM members_todo WHERE assignee_id = 10 AND team_id = 1;
-SELECT * FROM members_todo WHERE assignee_id = 11 AND team_id = 1;
-...
+# 2. 미할당 Todo 조회 (1개 쿼리)
+todos_unassigned = Todo.objects.filter(
+    team=team,
+    assignee__isnull=True,
+    is_completed=False
+)
 
--- 4. 각 멤버마다 완료 카운트 (N번)
-SELECT COUNT(*) FROM members_todo WHERE assignee_id = 10 AND is_completed = TRUE;
-...
+# 3. 완료 Todo 조회 (1개 쿼리)
+todos_done = Todo.objects.filter(team=team, is_completed=True)
+
+# 총 쿼리: 3개 (고정) - 팀원 수와 무관
+# 시간 복잡도: O(N) - DB가 GROUP BY로 통계 계산
 ```
 
-#### TO-BE (최적화)
-
-```sql
--- 1. TeamUser + User JOIN + Todo 통계 (1개 쿼리)
-SELECT
-    tu.*,
-    u.nickname,
-    COUNT(CASE WHEN t.team_id = 1 THEN 1 END) AS todo_count,
-    COUNT(CASE WHEN t.team_id = 1 AND t.is_completed = TRUE THEN 1 END) AS completed_count
-FROM teams_teamuser tu
-LEFT JOIN accounts_user u ON tu.user_id = u.id
-LEFT JOIN members_todo t ON t.assignee_id = tu.id
-WHERE tu.team_id = 1
-GROUP BY tu.id, u.id;
-
--- 2. 모든 Todo 사전 로딩 (1개 쿼리)
-SELECT * FROM members_todo WHERE team_id = 1 ORDER BY order, created_at;
-
--- 3. 미할당 Todo (1개 쿼리)
-SELECT * FROM members_todo WHERE team_id = 1 AND assignee_id IS NULL AND is_completed = FALSE;
-```
+**개선 효과**:
+- **쿼리 수**: 16개 → 3개 (81% 감소)
+- **시간 복잡도**: O(N × M) → O(N)
+- **DB 계산**: 완료/미완료 통계를 DB GROUP BY로 처리
+- **추가 쿼리 제거**: `member.user` 접근 시 JOIN으로 이미 로드됨
 
 ---
 
@@ -677,34 +658,6 @@ members = TeamUser.objects.prefetch_related(
 ```
 
 ---
-
-### 4. select_related 체인 깊이 제한
-
-**문제**:
-```python
-# 의도: Todo → TeamUser → User 3단계 JOIN
-todos = Todo.objects.select_related('assignee__user__profile')
-# 결과: 쿼리 복잡도 급증, 성능 저하
-```
-
-**원인**:
-- 깊은 JOIN은 쿼리 플랜 복잡도 증가
-- MySQL 옵티마이저 한계
-
-**해결**:
-```python
-# 필요한 관계만 선택적 JOIN (2단계 이내)
-todos = Todo.objects.select_related('assignee', 'assignee__user')
-# profile은 필요 시에만 별도 쿼리
-```
-
-**권장 사항**:
-- select_related 깊이: 2-3단계 이내
-- 불필요한 관계는 제거
-- Django Debug Toolbar로 실행 계획 확인
-
----
-
 ## 참고 자료
 
 ### 공식 문서

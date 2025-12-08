@@ -35,7 +35,6 @@
 **정량적 목표**:
 - 회원가입 시간: 5분 → 30초 (90% 단축)
 - 회원가입 완료율: 60% → 85% 증가
-- 비밀번호 분실 문의: 월 10건 → 2건 이하
 
 **정성적 목표**:
 - 신뢰할 수 있는 OAuth 제공자(Google, GitHub) 보안 위임
@@ -122,40 +121,40 @@
 ### 아키텍처 다이어그램
 
 ```
-┌─────────────┐         OAuth 인증          ┌──────────────┐
-│   사용자     │ ────────────────────────> │ Google/GitHub │
-│  (브라우저)  │ <──────────────────────── │   OAuth 2.0   │
-└──────┬──────┘    Access Token + Profile   └──────────────┘
+┌─────────────┐         OAuth 인증          ┌───────────────┐
+│   사용자     │ ─────────────────────────> │ Google/GitHub │
+│  (브라우저)  │ <───────────────────────── │   OAuth 2.0   │
+└──────┬──────┘    Access Token + Profile  └───────────────┘
        │
        │ HTTP Request (callback)
        ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   Django Application                     │
+│                   Django Application                    │
 ├─────────────────────────────────────────────────────────┤
 │  ┌───────────────────────────────────────────────────┐  │
-│  │         django-allauth (SocialAccount)           │  │
+│  │         django-allauth (SocialAccount)            │  │
 │  ├───────────────────────────────────────────────────┤  │
 │  │ • OAuth 콜백 처리                                  │  │
-│  │ • State 검증 (CSRF 방지)                          │  │
-│  │ • Access Token 교환                                │  │
-│  │ • 프로필 정보 조회                                 │  │
+│  │ • State 검증 (CSRF 방지)                           │  │
+│  │ • Access Token 교환                               │  │
+│  │ • 프로필 정보 조회                                  │  │
 │  └─────────────────┬─────────────────────────────────┘  │
 │                    │ pre_social_login() 훅              │
-│                    ▼                                     │
+│                    ▼                                    │
 │  ┌───────────────────────────────────────────────────┐  │
-│  │    CustomSocialAccountAdapter (커스텀 로직)       │  │
+│  │    CustomSocialAccountAdapter (커스텀 로직)         │  │
 │  ├───────────────────────────────────────────────────┤  │
-│  │ 1. 이메일 기반 계정 병합 (비로그인)                │  │
-│  │ 2. 중복 연결 차단 (로그인)                         │  │
+│  │ 1. 이메일 기반 계정 병합 (비로그인)                   │  │
+│  │ 2. 중복 연결 차단 (로그인)                           │  │
 │  │ 3. username/nickname 자동 생성                     │  │
 │  └─────────────────┬─────────────────────────────────┘  │
-│                    │                                     │
-│                    ▼                                     │
+│                    │                                    │
+│                    ▼                                    │
 │  ┌───────────────────────────────────────────────────┐  │
-│  │           Database (MySQL)                         │  │
+│  │           Database (MySQL)                        │  │
 │  ├───────────────────────────────────────────────────┤  │
 │  │ • accounts_user (사이트 계정)                      │  │
-│  │ • socialaccount_socialaccount (소셜 연결)         │  │
+│  │ • socialaccount_socialaccount (소셜 연결)          │  │
 │  │ • socialaccount_socialtoken (Access Token)        │  │
 │  └───────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
@@ -567,8 +566,8 @@ urlpatterns = [
 - 직접 구현 대비: 4주 → 2일 (93% 단축)
 
 **사용자 경험**:
-- 회원가입 시간: 5분 → 30초 (90% 단축)
-- 로그인 클릭 수: 5회 (폼 입력) → 1회 (Google 버튼)
+- 회원가입 시: 회원가입 폼 입력 및 이메일 인증 → OAuth 서비스 제공자 로그인 (90% 단축)
+- 로그인 시: 로그인 폼 입력 → 소셜 로그인 버튼
 
 **보안**:
 - CSRF 공격 차단: OAuth State 파라미터 자동 검증
@@ -641,30 +640,7 @@ Google Cloud Console → Credentials → OAuth 2.0 Client IDs
 
 ---
 
-### 2. Site matching query does not exist 오류
-
-**문제**:
-```python
-django.contrib.sites.models.DoesNotExist: Site matching query does not exist.
-```
-
-**원인**:
-- SITE_ID=1 설정했지만 DB에 Site 객체 없음
-- 마이그레이션 후 Site 생성 누락
-
-**해결**:
-```python
-# Django shell
-from django.contrib.sites.models import Site
-site = Site.objects.get_or_create(pk=1)[0]
-site.domain = 'localhost:8000'
-site.name = 'TeamMoa Local'
-site.save()
-```
-
----
-
-### 3. 소셜 계정 연결 후 성공 메시지 중복
+### 2. 소셜 계정 연결 후 성공 메시지 중복
 
 **문제**:
 - 연결 차단 후 "이미 다른 계정에 연결됨" 에러 메시지 표시
@@ -698,33 +674,6 @@ def pre_social_login(self, request, sociallogin):
 
 ---
 
-### 4. 운영 환경 HTTPS 적용 시 무한 리다이렉트
-
-**문제**:
-- Nginx → Django HTTPS 리다이렉트 루프
-- OAuth 콜백 후 `/accounts/login/` → `/accounts/google/login/callback/` 반복
-
-**원인**:
-- Nginx에서 HTTPS 종료 (SSL Termination)
-- Django는 `request.is_secure()` 체크 시 HTTP로 인식
-- `SECURE_SSL_REDIRECT=True` 설정으로 HTTPS 강제 리다이렉트 발생
-
-**해결**:
-```python
-# TeamMoa/settings/production.py
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-```
-
-**Nginx 설정** (`deploy/nginx-site.conf`):
-```nginx
-location / {
-    proxy_pass http://web:8000;
-    proxy_set_header X-Forwarded-Proto $scheme;  # https 전달
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $host;
-}
-```
 
 ---
 
@@ -737,8 +686,7 @@ location / {
 
 ### 관련 프로젝트 문서
 - [OAuth 설정 가이드](../../guides/oauth_setup_guide.md)
-- [인프라 & 배포](../infrastructure.md)
-- [트러블슈팅](../troubleshooting.md)
+
 
 ---
 
