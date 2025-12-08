@@ -7,7 +7,7 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
-### 📚 문서 재구성 완료! (2025.12.08)
+### 📚 포트폴리오 문서화 완료! (2025.12.08)
 
 **✅ 포트폴리오 문서 완료** (9개 문서, 96페이지, 150+ 코드):
 - ✅ **핵심 문서 5개**: overview, architecture, infrastructure, testing, troubleshooting
@@ -21,19 +21,24 @@ Django 기반 팀 프로젝트 관리 시스템
 - ✅ **가독성 대폭 개선**: 수평선 구분, 인용구 설명, 들여쓰기 단순화
 - ✅ **구버전 정리**: archive/ 삭제, oauth_account_design.md 삭제
 
+**✅ Mermaid 다이어그램 4개 추가** (2025.12.08):
+- ✅ **ERD 다이어그램** (architecture.md) - 10개 핵심 엔터티, 관계 시각화
+- ✅ **CI/CD 파이프라인** (infrastructure.md) - 3-stage 배포 흐름, 색상 코딩
+- ✅ **WebSocket 아키텍처** (realtime-mindmap.md) - Sequence Diagram, 실시간 협업 프로세스
+- ✅ **서비스 레이어 흐름도** (README.md) - 4계층 구조, SSR/API 병행
+
 **🎯 핵심 성과**:
 - **문서 체계화**: 복잡한 디렉토리 구조 → 명확한 6단계 카테고리
 - **네비게이션 개선**: 프로젝트 대시보드 → 독자 중심 문서 가이드
 - **유지보수성 향상**: 정적 구조(design) vs 시간의 흐름(refactoring) 분리
+- **시각화 완성**: 텍스트 다이어그램 → Mermaid (GitHub 자동 렌더링)
 - **코드 검증률**: 100% (모든 코드 스니펫 실제 프로젝트 코드 일치)
 
 **다음 작업** (우선순위 순):
-1. **다이어그램 추가** (Figma 또는 그래픽 도구 사용)
-   - ERD 다이어그램 (architecture.md line 552 가이드 참고)
-   - CI/CD 파이프라인 다이어그램 → PNG (infrastructure.md 라인 38-70)
-   - WebSocket 아키텍처 다이어그램 → PNG (realtime-mindmap.md 라인 132-143)
-   - 포트폴리오 문서 구조도 → PNG (README.md 라인 11~)
-   - UI 스크린샷
+1. **UI 스크린샷 추가** (선택 사항)
+   - 주요 페이지 캡처 (로그인, 팀 관리, TODO, 마인드맵 등)
+   - `docs/portfolio/images/` 디렉토리 생성
+   - README.md 또는 overview.md에 삽입
 
 ---
 
