@@ -18,7 +18,7 @@
 
 - **견고한 아키텍처** - 서비스 레이어 패턴으로 비즈니스 로직 완전 분리
 - **실시간 협업** - Django Channels + WebSocket 기반 동시 편집
-- **높은 품질** - 221개 테스트 구축 및 자동화
+- **높은 품질** - 225개 테스트 구축 및 자동화
 - **자동화** - GitHub Actions CI/CD 파이프라인 구축
 - **성능 최적화** - N+1 쿼리 해결 및 DB 최적화
 
@@ -32,7 +32,7 @@
 - **[프로젝트 개요](./docs/portfolio/overview.md)** - 배경, 핵심 기능, 성과, 학습 내용
 - **[아키텍처 설계](./docs/portfolio/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
 - **[인프라 및 배포](./docs/portfolio/infrastructure.md)** - Docker, CI/CD, AWS EC2
-- **[테스트 전략](./docs/portfolio/testing.md)** - 221개 테스트, fixture 패턴
+- **[테스트 전략](./docs/portfolio/testing.md)** - 225개 테스트, fixture 패턴
 - **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 8건 문제 해결 사례
 
 ### 기능 상세
@@ -60,8 +60,135 @@ Backend:   Django 5.2.4 | Django Channels | Django REST Framework | MySQL 8.0 | 
 Frontend:  HTML, CSS, JavaScript
 DevOps:    Docker Compose | GitHub Actions | AWS EC2 | Nginx
 Architecture: Service Layer Pattern | Class-Based Views (CBV)
-Testing:   pytest (221 tests)
+Testing:   pytest (225 tests)
 ```
+
+### 아키텍처 다이어그램
+
+#### 1. 시스템 아키텍처 (Infrastructure)
+> 프로덕션 배포 환경: AWS ALB + Multi-AZ EC2 + Docker + CI/CD 파이프라인
+
+```mermaid
+graph TB
+    subgraph "External Services"
+        GitHub[GitHub Repository]
+        DuckDNS[DuckDNS Domain<br/>teammoa.duckdns.org]
+        DockerHub[Docker Hub<br/>tlesmes/teammoa-web]
+    end
+
+    subgraph "CI/CD Pipeline"
+        GitHubActions[GitHub Actions<br/>Test → Build → Deploy]
+    end
+
+    subgraph "AWS Cloud - ap-northeast-2 (Seoul)"
+        ACM[AWS Certificate Manager<br/>SSL/TLS Certificate]
+
+        subgraph "VPC (10.0.0.0/16)"
+            subgraph "Public Subnet (Multi-AZ)"
+                ALB[Application Load Balancer<br/>Port 80/443<br/>HTTPS Listener]
+            end
+
+            subgraph "Private Subnet A (AZ-A)"
+                EC2_1[EC2 Instance 1<br/>t3.micro<br/>EIP: 3.34.102.12]
+
+                subgraph "Docker Containers (EC2-1)"
+                    Nginx1[Nginx 1.25]
+                    Web1[Django + Daphne<br/>:8000]
+                    MySQL1[MySQL 8.0]
+                    Redis1[Redis 7]
+                end
+            end
+
+            subgraph "Private Subnet B (AZ-B)"
+                EC2_2[EC2 Instance 2<br/>t3.micro<br/>New Instance]
+
+                subgraph "Docker Containers (EC2-2)"
+                    Nginx2[Nginx 1.25]
+                    Web2[Django + Daphne<br/>:8000]
+                    MySQL2[MySQL 8.0]
+                    Redis2[Redis 7]
+                end
+            end
+        end
+
+        subgraph "Security & Monitoring"
+            SG_ALB[Security Group: ALB<br/>0.0.0.0/0 → 80, 443]
+            SG_EC2[Security Group: EC2<br/>ALB → 8000, GitHub → 22]
+            CloudWatch[CloudWatch<br/>Logs + Metrics + Alarms]
+        end
+
+        TargetGroup[Target Group<br/>Health Check: /health/<br/>EC2-1:8000, EC2-2:8000]
+    end
+
+    subgraph "User Facing"
+        Client[Browser/Client<br/>HTTPS Only]
+    end
+
+    %% CI/CD Flow
+    GitHub -->|git push| GitHubActions
+    GitHubActions -->|pytest 221 tests| GitHubActions
+    GitHubActions -->|docker build| DockerHub
+    GitHubActions -->|rolling deploy| EC2_1
+    GitHubActions -->|rolling deploy| EC2_2
+
+    %% External Services
+    DuckDNS -.->|DNS Resolution| ALB
+    DockerHub -->|pull image| EC2_1
+    DockerHub -->|pull image| EC2_2
+    ACM -.->|SSL Certificate| ALB
+
+    %% Network Flow
+    Client -->|HTTPS 443| DuckDNS
+    Client -->|HTTPS 443| ALB
+    ALB -->|HTTP 8000| TargetGroup
+    TargetGroup -->|50% traffic| EC2_1
+    TargetGroup -->|50% traffic| EC2_2
+
+    %% Container Communication (EC2-1)
+    EC2_1 --> Nginx1
+    Nginx1 -->|proxy_pass| Web1
+    Web1 -->|TCP 3306| MySQL1
+    Web1 -->|TCP 6379| Redis1
+
+    %% Container Communication (EC2-2)
+    EC2_2 --> Nginx2
+    Nginx2 -->|proxy_pass| Web2
+    Web2 -->|TCP 3306| MySQL2
+    Web2 -->|TCP 6379| Redis2
+
+    %% Security & Monitoring
+    SG_ALB -.->|controls| ALB
+    SG_EC2 -.->|controls| EC2_1
+    SG_EC2 -.->|controls| EC2_2
+    ALB -->|metrics| CloudWatch
+    EC2_1 -->|logs| CloudWatch
+    EC2_2 -->|logs| CloudWatch
+
+    %% Styling
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#fff
+    classDef docker fill:#2496ED,stroke:#1D63ED,stroke-width:2px,color:#fff
+    classDef external fill:#4CAF50,stroke:#2E7D32,stroke-width:2px,color:#fff
+    classDef cicd fill:#2088FF,stroke:#0366D6,stroke-width:2px,color:#fff
+    classDef security fill:#E91E63,stroke:#880E4F,stroke-width:2px,color:#fff
+
+    class ALB,ACM,CloudWatch aws
+    class EC2_1,EC2_2,TargetGroup aws
+    class Nginx1,Web1,MySQL1,Redis1,Nginx2,Web2,MySQL2,Redis2 docker
+    class GitHub,DuckDNS,DockerHub external
+    class GitHubActions cicd
+    class SG_ALB,SG_EC2 security
+```
+
+#### 2. AWS 인프라 아키텍처
+> ALB(Application Load Balancer)를 중심으로 한 Multi-AZ 구성
+
+![aws](/docs/images/aws_diagram.png)
+
+#### 3. CI/CD 파이프라인 흐름
+
+![CI/CD](/docs/images/CI_CD_Pipeline.png)
+#### 4. 데이터베이스 ERD
+![DB_ERD](/docs/images/DB_erd.png)
 
 ---
 

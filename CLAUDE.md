@@ -35,10 +35,85 @@ Django 기반 팀 프로젝트 관리 시스템
 - **코드 검증률**: 100% (모든 코드 스니펫 실제 프로젝트 코드 일치)
 
 **다음 작업** (우선순위 순):
-1. **UI 스크린샷 추가** (선택 사항)
+1. **AWS ALB + Multi-AZ 고가용성 인프라 구축** ⏳ 다음 목표 (2025.12.09)
+   - AWS Application Load Balancer 도입
+   - EC2 2대 구성 (Multi-AZ)
+   - Rolling Update 무중단 배포
+   - CloudWatch 모니터링 및 알람 설정
+   - 예상 소요: 4~6시간 (학습 + 구현)
+
+2. **UI 스크린샷 추가** (선택 사항)
    - 주요 페이지 캡처 (로그인, 팀 관리, TODO, 마인드맵 등)
    - `docs/portfolio/images/` 디렉토리 생성
    - README.md 또는 overview.md에 삽입
+
+---
+
+### 🚀 AWS ALB 도입 계획 수립! (2025.12.09)
+
+**✅ 설계 및 문서화 완료**:
+- ✅ **AWS 인프라 다이어그램 4개 작성**:
+  - 전체 아키텍처 (ALB + 2 EC2 + Multi-AZ)
+  - 네트워크 및 보안 상세 (VPC, Subnet, Security Group)
+  - 배포 흐름 (Rolling Update 시퀀스)
+  - 트래픽 흐름 및 Health Check
+- ✅ **README.md 다이어그램 업데이트**: 단일 EC2 → ALB + Multi-AZ 구조
+- ✅ **infrastructure.md ALB 섹션 추가**: 500줄, 도입 배경/구성/트러블슈팅
+- ✅ **ALB 구축 가이드 작성**: 단계별 실습 가이드 (10개 섹션, 800줄)
+
+**🎯 다음 단계 (실제 구현)**:
+1. **VPC 및 Subnet 구성** (1시간)
+   - VPC 10.0.0.0/16 생성
+   - Public Subnet 2개 (Multi-AZ)
+   - Internet Gateway 연결
+
+2. **EC2-2 인스턴스 생성** (1시간)
+   - 현재 EC2의 AMI 생성 (백업)
+   - AMI로 EC2-2 인스턴스 복제
+   - Elastic IP 할당 및 설정
+
+3. **ALB 생성 및 Target Group 설정** (1.5시간)
+   - Application Load Balancer 생성
+   - Target Group 생성 (HTTP:8000, Health Check /health/)
+   - 2개 EC2 인스턴스 등록
+   - Security Group 구성 (ALB ↔ EC2)
+
+4. **ACM SSL 인증서 및 HTTPS** (1시간)
+   - ACM 인증서 발급 (*.teammoa.duckdns.org)
+   - DNS 검증 (Route 53 또는 Email)
+   - HTTPS Listener 추가 (443)
+   - HTTP → HTTPS 리디렉션 (80)
+
+5. **Django 설정 변경** (30분)
+   - ALLOWED_HOSTS에 ALB DNS 추가
+   - Health Check 엔드포인트 개선 (DB/Redis 상태 확인)
+   - WebSocket Sticky Session 설정
+
+6. **CI/CD 파이프라인 수정** (1시간)
+   - Rolling Update 배포 로직 구현
+   - Target Group에서 Deregister → 배포 → Register
+   - GitHub Secrets 추가 (EC2_1_ID, EC2_2_ID, TARGET_GROUP_ARN)
+
+7. **테스트 및 검증** (1시간)
+   - Target Group Health 확인 (2개 모두 healthy)
+   - 로드밸런싱 테스트 (트래픽 분산 확인)
+   - 무중단 배포 검증 (200 응답 유지)
+   - WebSocket 연결 안정성 테스트
+
+**📊 예상 성과**:
+- **고가용성**: 99.9% 가용성 달성 (Multi-AZ)
+- **무중단 배포**: 배포 중 다운타임 0초
+- **학습 효과**: AWS 핵심 서비스 (ALB, Target Group, ACM, CloudWatch)
+- **포트폴리오 강화**: "AWS 로드밸런서 기반 고가용성 아키텍처 구축"
+
+**💰 비용**:
+- 프리티어 기간 (1년): 월 $22 (ALB만)
+- 프리티어 종료 후: 월 $40~$50 (ALB + EC2 2대)
+
+**📚 참고 문서**:
+- [ALB 구축 가이드](./docs/guides/alb_deployment_guide.md)
+- [infrastructure.md - ALB 섹션](./docs/portfolio/infrastructure.md#aws-application-load-balancer-alb)
+- [README.md - 시스템 아키텍처](./README.md#1-시스템-아키텍처-infrastructure)
 
 ---
 
@@ -67,7 +142,8 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 
 **테스트 커버리지**:
 - 회원 탈퇴 서비스 테스트에 `is_deleted`, `deleted_at` 검증 추가
-- 모든 테스트 통과 (221개)
+- Shares 앱에 탈퇴한 작성자 처리 테스트 4개 추가
+- 모든 테스트 통과 (225개)
 
 ---
 
@@ -75,7 +151,7 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 
 **✅ 완전 자동화된 배포 시스템 구축**:
 - ✅ GitHub Actions 기반 3-stage 파이프라인 (Test → Build → Deploy)
-- ✅ 221개 테스트 자동 실행
+- ✅ 225개 테스트 자동 실행
 - ✅ Docker 이미지 자동 빌드 및 Docker Hub 푸시
 - ✅ EC2 자동 배포 (무중단 배포)
 - ✅ Dynamic Security Group (배포 시에만 SSH 포트 개방)
@@ -165,10 +241,10 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 | **Teams** | 66개 | ✅ 완료 | 서비스(36) + API(17) + SSR(13) |
 | **Members** | 33개 | ✅ 완료 | 서비스(20) + API(10) + SSR(3) |
 | **Schedules** | 30개 | ✅ 완료 | 서비스(15) + API(10) + SSR(5) |
-| **Shares** | 24개 | ✅ 완료 | 서비스(13) + SSR(11) |
+| **Shares** | 28개 | ✅ 완료 | 서비스(13) + SSR(11) + 탈퇴 작성자(4) |
 | **Accounts** | 28개 | ✅ 완료 | 서비스(18) + SSR(10) |
 | **Mindmaps** | 40개 | ✅ 완료 | 서비스(16) + API(8) + SSR(6) + 기타(10) |
-| **총계** | **221개** | **100%** | 6/6 앱 완료 ✨ |
+| **총계** | **225개** | **100%** | 6/6 앱 완료 ✨ |
 
 **테스트 전략**:
 - pytest + DRF TestClient 활용
@@ -180,7 +256,7 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 
 ## 🚀 완료된 단계
 
-1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 221개 테스트, 2025.10.22)
+1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 225개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
 3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
 4. **HTTPS 설정** - ✅ 완료 (Let's Encrypt + DuckDNS, 2025.11.20)

@@ -156,15 +156,16 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 
 ---
 
-### 5️⃣ Shares App (29개 테스트)
+### 5️⃣ Shares App (33개 테스트)
 
-#### `test_share_service.py` (16개) - 게시판 비즈니스 로직
+#### `test_share_service.py` (20개) - 게시판 비즈니스 로직
 | 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
 |-------------|---------|-----------|-------------|
 | `TestPostCRUD` | 6개 | 게시글 CRUD | 파일 첨부/없이 생성, 대용량 파일 검증, 작성자 권한 수정, 파일 포함 삭제 |
 | `TestSearchFunctionality` | 4개 | 검색 기능 | 제목/내용/작성자/전체 검색 (parametrize 활용) |
 | `TestFileHandling` | 2개 | 파일 처리 | 파일 없을 때 다운로드 에러, 파일 정리 메서드 |
 | `TestPermissionsAndRetrieval` | 4개 | 권한 및 조회 | 게시글 상세 조회, 작성자 확인, 팀 권한 체크 |
+| `TestDeletedAuthorHandling` | 4개 | 탈퇴 작성자 처리 | 탈퇴 작성자 게시물 상세 조회, 권한 확인, 목록 포함, 팀 확인 |
 
 #### `test_share_views.py` (13개) - 게시판 SSR 뷰
 | 테스트 클래스 | 테스트 수 | 테스트 목적 | 주요 검증 사항 |
@@ -268,9 +269,9 @@ pytest --cov=teams --cov-report=term-missing teams/tests/
 | Teams | 39 | 12 | 15 | 66 |
 | Members | 20 | 10 | 3 | 33 |
 | Schedules | 12 | 13 | 9 | 34 |
-| Shares | 16 | - | 13 | 29 |
+| Shares | 20 | - | 13 | 33 |
 | Mindmaps | 16 | 8 | 7 | 31 |
-| **총계** | **121** | **43** | **57** | **221** |
+| **총계** | **125** | **43** | **57** | **225** |
 
 ---
 
