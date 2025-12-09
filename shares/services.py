@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.conf import settings
 
 from .models import Post
-from teams.models import Team
+from teams.models import Team, TeamUser
 from accounts.models import User
 
 
@@ -30,47 +30,48 @@ class ShareService:
     # ================================
     
     @transaction.atomic
-    def create_post(self, team_id, post_data, files_data, writer):
+    def create_post(self, team_id, post_data, files_data, user):
         """
         새로운 게시글을 생성합니다.
-        
+
         Args:
             team_id (int): 팀 ID
             post_data (dict): {'title': str, 'article': str}
             files_data (dict): 업로드 파일 정보
-            writer (User): 작성자
-            
+            user (User): 작성자
+
         Returns:
             Post: 생성된 게시글 객체
-            
+
         Raises:
             ValueError: 필수 필드가 누락되거나 유효하지 않은 경우
-            ValidationError: 팀이 존재하지 않는 경우
+            ValidationError: 팀이 존재하지 않거나 사용자가 팀 멤버가 아닌 경우
         """
         # 필수 필드 검증
         if not post_data.get('title') or not post_data.get('title').strip():
             raise ValueError('제목을 입력해주세요.')
-        
+
         if not post_data.get('article') or not post_data.get('article').strip():
             raise ValueError('내용을 입력해주세요.')
-        
-        team = get_object_or_404(Team, pk=team_id)
-        
+
+        # TeamUser 조회 (팀 멤버 검증)
+        teamuser = get_object_or_404(TeamUser, team_id=team_id, user=user)
+
         # 게시글 생성
         post = Post.objects.create(
             title=post_data['title'].strip(),
             article=post_data['article'].strip(),
-            writer=writer,
-            team=team
+            team_id=team_id,  # 팀 직접 지정
+            teamuser=teamuser  # 작성자 정보
         )
-        
+
         # 파일 업로드 처리
         if files_data and 'upload_files' in files_data:
             upload_file = files_data['upload_files']
             post.upload_files = upload_file
             post.filename = upload_file.name
             post.save()
-        
+
         return post
     
     def update_post(self, post_id, post_data, user):
@@ -153,8 +154,9 @@ class ShareService:
         """
         team = get_object_or_404(Team, pk=team_id)
 
-        # 최적화된 쿼리: 게시글과 작성자 정보 사전 로딩
-        posts_queryset = Post.objects.filter(team=team).select_related('writer').order_by('-id')
+        # 최적화된 쿼리: 팀 필터 + 작성자 정보 사전 로딩
+        # team FK를 직접 사용하여 teamuser=None인 게시물도 조회 가능
+        posts_queryset = Post.objects.filter(team=team).select_related('teamuser__user').order_by('-id')
 
         # 페이지네이션 적용
         paginator = Paginator(posts_queryset, per_page)
@@ -194,7 +196,8 @@ class ShareService:
         query = query.strip()
 
         # 기본 쿼리셋: 팀 필터 + 작성자 정보 사전 로딩
-        posts_queryset = Post.objects.filter(team=team).select_related('writer')
+        # team FK를 직접 사용하여 teamuser=None인 게시물도 검색 가능
+        posts_queryset = Post.objects.filter(team=team).select_related('teamuser__user')
 
         # 검색 타입별 필터링
         if search_type == 'title':
@@ -205,7 +208,7 @@ class ShareService:
             posts_queryset = posts_queryset.filter(article__icontains=query)
         elif search_type == 'writer':
             # 작성자 닉네임 검색
-            posts_queryset = posts_queryset.filter(writer__nickname__icontains=query)
+            posts_queryset = posts_queryset.filter(teamuser__user__nickname__icontains=query)
         elif search_type == 'title_content':
             # 제목 또는 내용 검색
             posts_queryset = posts_queryset.filter(
@@ -216,7 +219,7 @@ class ShareService:
             posts_queryset = posts_queryset.filter(
                 Q(title__icontains=query) |
                 Q(article__icontains=query) |
-                Q(writer__nickname__icontains=query)
+                Q(teamuser__user__nickname__icontains=query)
             )
 
         # 정렬: 최신순
@@ -238,22 +241,22 @@ class ShareService:
     def get_post_detail(self, post_id, user):
         """
         게시글 상세 정보를 조회합니다.
-        
+
         Args:
             post_id (int): 게시글 ID
             user (User): 조회하는 사용자
-            
+
         Returns:
             dict: {
                 'post': Post 객체,
                 'is_author': bool (작성자 여부)
             }
         """
-        post = get_object_or_404(Post, pk=post_id)
-        
+        post = get_object_or_404(Post.objects.select_related('teamuser__user'), pk=post_id)
+
         return {
             'post': post,
-            'is_author': post.writer == user
+            'is_author': bool(post.teamuser and post.teamuser.user == user)
         }
     
     def check_post_author(self, post_id, user):
@@ -267,10 +270,10 @@ class ShareService:
         Returns:
             bool: 작성자이거나 관리자인 경우 True
         """
-        post = get_object_or_404(Post, pk=post_id)
+        post = get_object_or_404(Post.objects.select_related('teamuser__user'), pk=post_id)
 
         # 작성자 본인이거나 관리자 권한 확인
-        return post.writer == user or user.is_superuser
+        return (post.teamuser and post.teamuser.user == user) or user.is_superuser
     
     # ================================
     # 파일 관리 메서드
@@ -346,20 +349,21 @@ class ShareService:
     def get_post_with_team_check(self, post_id, team_id):
         """
         게시글이 특정 팀에 속하는지 확인하며 조회합니다.
-        
+
         Args:
             post_id (int): 게시글 ID
             team_id (int): 팀 ID
-            
+
         Returns:
             Post: 게시글 객체
-            
+
         Raises:
             ValidationError: 게시글이 해당 팀에 속하지 않는 경우
         """
-        post = get_object_or_404(Post, pk=post_id)
-        
+        post = get_object_or_404(Post.objects.select_related('team'), pk=post_id)
+
+        # team FK로 직접 확인 (teamuser와 무관하게 팀 검증 가능)
         if post.team_id != team_id:
             raise ValidationError('해당 팀의 게시글이 아닙니다.')
-        
+
         return post

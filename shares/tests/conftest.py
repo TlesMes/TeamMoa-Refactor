@@ -149,7 +149,7 @@ def sample_post(db, host_teamuser):
     """
     return Post.objects.create(
         team=host_teamuser.team,
-        writer=host_teamuser.user,
+        teamuser=host_teamuser,
         title='테스트 게시물',
         article='테스트 내용입니다.'
     )
@@ -169,7 +169,7 @@ def post_with_file(db, host_teamuser, small_test_file):
     """
     return Post.objects.create(
         team=host_teamuser.team,
-        writer=host_teamuser.user,
+        teamuser=host_teamuser,
         title='파일 첨부 게시물',
         article='파일이 첨부된 게시물입니다.',
         upload_files=small_test_file,
@@ -200,7 +200,7 @@ def multiple_posts(db, host_teamuser, member_teamuser):
     for i in range(6):
         post = Post.objects.create(
             team=host_teamuser.team,
-            writer=host_teamuser.user,
+            teamuser=host_teamuser,
             title=f'호스트 게시물 {i+1}',
             article=f'호스트가 작성한 내용 {i+1}'
         )
@@ -210,10 +210,30 @@ def multiple_posts(db, host_teamuser, member_teamuser):
     for i in range(5):
         post = Post.objects.create(
             team=member_teamuser.team,
-            writer=member_teamuser.user,
+            teamuser=member_teamuser,
             title=f'멤버 게시물 {i+1}',
             article=f'멤버가 작성한 내용 {i+1}'
         )
         posts.append(post)
 
     return posts
+
+
+@pytest.fixture
+def post_with_deleted_author(db, team):
+    """
+    탈퇴한 작성자의 게시물 (teamuser=None)
+
+    사용 시나리오:
+    - 작성자 탈퇴 후 게시물 조회 테스트
+    - teamuser=None 처리 테스트
+
+    Note:
+        team FK는 유지되어 팀 목록에서 조회 가능
+    """
+    return Post.objects.create(
+        team=team,
+        teamuser=None,
+        title='탈퇴한 사용자의 게시물',
+        article='작성자가 탈퇴했습니다.'
+    )

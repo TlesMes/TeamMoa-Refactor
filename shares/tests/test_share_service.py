@@ -30,8 +30,8 @@ class TestPostCRUD:
 
         assert post.title == '테스트 게시물'
         assert post.article == '테스트 내용입니다.'
-        assert post.writer == user
-        assert post.team == team
+        assert post.teamuser.user == user
+        assert post.teamuser.team == team
         assert not post.upload_files  # 파일 없음
 
     def test_create_post_with_file(self, share_service, team, user, small_test_file):
@@ -74,7 +74,7 @@ class TestPostCRUD:
         updated_post = share_service.update_post(
             sample_post.id,
             updated_data,
-            sample_post.writer
+            sample_post.teamuser.user
         )
 
         assert updated_post.title == '수정된 제목'
@@ -95,7 +95,7 @@ class TestPostCRUD:
         post_id = post_with_file.id
         post_title = post_with_file.title
 
-        deleted_title = share_service.delete_post(post_id, post_with_file.writer)
+        deleted_title = share_service.delete_post(post_id, post_with_file.teamuser.user)
 
         assert deleted_title == post_title
         assert not Post.objects.filter(id=post_id).exists()
@@ -137,7 +137,7 @@ class TestFileHandling:
     def test_file_download_no_file_raises_error(self, share_service, sample_post):
         """파일이 없는 게시물에서 다운로드 시도 시 에러"""
         with pytest.raises(ValueError, match='다운로드할 파일이 없습니다'):
-            share_service.handle_file_download(sample_post.id, sample_post.writer)
+            share_service.handle_file_download(sample_post.id, sample_post.teamuser.user)
 
     def test_cleanup_post_files(self, share_service, post_with_file):
         """게시물 삭제 시 파일 정리 메서드 호출"""
@@ -170,7 +170,7 @@ class TestPermissionsAndRetrieval:
     def test_check_post_author(self, share_service, sample_post, another_user):
         """작성자 확인 메서드"""
         # 작성자 본인
-        assert share_service.check_post_author(sample_post.id, sample_post.writer) is True
+        assert share_service.check_post_author(sample_post.id, sample_post.teamuser.user) is True
 
         # 비작성자
         assert share_service.check_post_author(sample_post.id, another_user) is False
@@ -183,3 +183,39 @@ class TestPermissionsAndRetrieval:
         )
 
         assert post == sample_post
+
+
+class TestDeletedAuthorHandling:
+    """탈퇴한 작성자 처리 테스트 (4개)"""
+
+    def test_get_post_detail_with_deleted_author(self, share_service, post_with_deleted_author, user):
+        """탈퇴한 작성자의 게시물 상세 조회"""
+        result = share_service.get_post_detail(post_with_deleted_author.id, user)
+
+        assert result['post'].teamuser is None
+        assert result['is_author'] is False  # 작성자가 없으므로 False
+
+    def test_check_post_author_with_deleted_author(self, share_service, post_with_deleted_author, user):
+        """탈퇴한 작성자의 게시물 권한 확인 (일반 사용자)"""
+        # 일반 사용자는 작성자가 아님
+        is_author = share_service.check_post_author(post_with_deleted_author.id, user)
+        assert is_author is False
+
+    def test_get_team_posts_includes_deleted_author_posts(self, share_service, post_with_deleted_author):
+        """팀 게시물 목록에 탈퇴한 작성자의 게시물 포함됨"""
+        result = share_service.get_team_posts(post_with_deleted_author.team.id, page=1, per_page=10)
+
+        # team FK가 있으므로 목록에 포함됨
+        post_ids = [p.id for p in result['posts']]
+        assert post_with_deleted_author.id in post_ids
+
+    def test_get_post_with_team_check_deleted_author(self, share_service, post_with_deleted_author):
+        """탈퇴한 작성자의 게시물 팀 확인"""
+        # team FK로 직접 확인하므로 정상 작동
+        post = share_service.get_post_with_team_check(
+            post_with_deleted_author.id,
+            post_with_deleted_author.team.id
+        )
+
+        assert post == post_with_deleted_author
+        assert post.teamuser is None

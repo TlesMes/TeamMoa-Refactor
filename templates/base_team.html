@@ -86,7 +86,10 @@
       {% endfor %}
     </div>
   {% endif %}
-  
+
+  <!-- jQuery (전역) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   {% block extra_js %}{% endblock %}
     <script src="{% static 'js/common/ui-utils.js' %}"></script>
   {% block contents %} {% endblock %}

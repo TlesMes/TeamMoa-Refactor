@@ -17,7 +17,13 @@
     <div class="post-detail-header">
       <h1 class="post-detail-title">{{ post.title }}</h1>
       <div class="post-detail-meta">
-        <span><i class="fas fa-user-edit"></i>&nbsp;작성자: {% user_display_name post.writer team %}</span>
+        <span><i class="fas fa-user-edit"></i>&nbsp;작성자:
+          {% if post.teamuser %}
+            {% user_display_name post.teamuser.user team %}
+          {% else %}
+            탈퇴한 사용자
+          {% endif %}
+        </span>
         <span class="post-detail__meta-date">등록일: {{ post.registered_date|date:'Y년 m월 d일' }}</span>
       </div>
     </div>

@@ -131,7 +131,7 @@ class PostWriteView(TeamMemberRequiredMixin, TemplateView):
                     team_id=pk,
                     post_data=post_data,
                     files_data=request.FILES,
-                    writer=request.user
+                    user=request.user
                 )
                 
                 messages.success(request, '성공적으로 등록되었습니다.')
