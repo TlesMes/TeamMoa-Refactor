@@ -34,45 +34,7 @@
 
 ### 아키텍처 구성도 및 흐름
 
-```mermaid
-flowchart TD
-    Dev[개발자] -->|git push origin main| GHA[GitHub Actions]
-
-    subgraph GitHub Actions
-        Test[Test Stage<br/>221개 테스트<br/>pytest]
-        Build[Build Stage<br/>Docker 빌드]
-        Deploy[Deploy Stage<br/>EC2 배포<br/>SSH]
-
-        Test -->|성공| Build
-        Test -->|실패| Stop[중단]
-        Build -->|성공→push| DockerHub[Docker Hub]
-        Build --> Deploy
-    end
-
-    DockerHub -->|Pull Image| EC2
-
-    subgraph EC2[AWS EC2 - Ubuntu 22.04]
-        subgraph DockerCompose[Docker Compose]
-            MySQL[(MySQL 8.0<br/>Volume)]
-            Redis[(Redis 7<br/>Channel Layer)]
-            Django[Django<br/>Daphne ASGI]
-            Nginx[Nginx<br/>SSL 종료]
-
-            MySQL <-->|DB| Django
-            Redis <-->|WebSocket| Django
-            Django <-->|Proxy| Nginx
-        end
-    end
-
-    Deploy -->|Health Check| EC2
-    Nginx -->|HTTPS<br/>Let's Encrypt| Domain[https://teammoa.duckdns.org]
-    Domain --> User[사용자]
-
-    style Test fill:#e1f5e1
-    style Build fill:#e3f2fd
-    style Deploy fill:#fff3e0
-    style Stop fill:#ffebee
-```
+![CI/CD Pipeline](../images/CI_CD_Pipeline.png)
 
 **흐름 설명 (2가지)**:
 
@@ -563,238 +525,31 @@ git push origin main
 
 ### GitHub Actions 워크플로우
 
+전체 워크플로우 정의는 [`.github/workflows/ci-cd.yml`](../../.github/workflows/ci-cd.yml) 참조.
+
+**주요 구성**:
+- **3-stage 파이프라인**: Test → Build → Deploy
+- **트리거**: `main` 브랜치 push 시 자동 실행 (문서 변경은 제외)
+- **테스트**: 221개 pytest 자동 검증 (MySQL 8.0 + Redis 7 서비스 컨테이너)
+- **빌드**: Docker 이미지 빌드 및 Docker Hub 푸시 (레이어 캐싱 최적화)
+- **배포**: EC2 무중단 배포 (Dynamic Security Group + Health Check 재시도)
+
+**핵심 특징**:
 ```yaml
-# .github/workflows/ci-cd.yml
-name: CI/CD Pipeline
+# 테스트 실패 시 배포 중단
+needs: test  # test Job 성공 시에만 build-and-push 실행
 
-on:
-  push:
-    branches: [main]
-    paths-ignore:  # 문서 변경 시 배포 스킵 (비용 절감)
-      - 'docs/**'
-      - '*.md'
-      - '.gitignore'
-      - 'LICENSE'
-  pull_request:  # PR 생성 시에도 테스트 실행
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.gitignore'
-      - 'LICENSE'
+# 배포 시에만 SSH 포트 개방 (Dynamic Security Group)
+- Add GitHub Actions IP to security group
+- Deploy to EC2 via SSH
+- Remove GitHub Actions IP from security group (always)
 
-env:
-  DOCKER_IMAGE: tlesmes/teammoa-web  # Docker Hub 리포지토리
-  DOCKER_TAG: latest
-
-jobs:
-  # Stage 1: 테스트 (pytest 자동 실행)
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-
-    services:
-      # MySQL 8.0 서비스 컨테이너 (테스트용 DB)
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: test_root_pass
-          MYSQL_DATABASE: test_db
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-      # Redis 7 서비스 컨테이너 (캐싱 & Channels Layer)
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Create .env file for testing
-        run: |
-          cat > .env << EOF
-          SECRET_KEY=test-secret-key-for-github-actions
-          DEBUG=True
-          ALLOWED_HOSTS=localhost,127.0.0.1
-
-          # Database
-          DB_ENGINE=django.db.backends.mysql
-          DB_NAME=test_db
-          DB_USER=root
-          DB_PASSWORD=test_root_pass
-          DB_HOST=127.0.0.1
-          DB_PORT=3306
-
-          # Redis
-          REDIS_HOST=127.0.0.1
-          REDIS_PORT=6379
-          REDIS_PASSWORD=
-
-          # Email (dummy for testing)
-          EMAIL_HOST=smtp.gmail.com
-          EMAIL_PORT=587
-          EMAIL_HOST_USER=test@example.com
-          EMAIL_HOST_PASSWORD=test_password
-
-          # OAuth (dummy for testing)
-          GOOGLE_OAUTH_CLIENT_ID=dummy
-          GOOGLE_OAUTH_CLIENT_SECRET=dummy
-          GITHUB_OAUTH_CLIENT_ID=dummy
-          GITHUB_OAUTH_CLIENT_SECRET=dummy
-          EOF
-
-      - name: Run migrations
-        env:
-          DJANGO_SETTINGS_MODULE: TeamMoa.settings.dev
-        run: |
-          python manage.py migrate --noinput
-
-      - name: Run tests
-        env:
-          DJANGO_SETTINGS_MODULE: TeamMoa.settings.dev
-        run: |
-          pytest -v --tb=short
-
-  # Stage 2: 빌드 & 푸시 (테스트 성공 시에만)
-  build-and-push:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    needs: test  # test Job 성공 시에만 실행
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # PR은 빌드 스킵
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3  # 멀티 플랫폼 빌드 지원
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # Docker 이미지 빌드 및 푸시 (레이어 캐싱으로 빌드 속도 최적화)
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}  # 커밋 SHA 태그 (버전 추적)
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
-
-  # Stage 3: EC2 배포 (Dynamic Security Group)
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    needs: build-and-push  # 빌드 성공 시에만 실행
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      # 1. GitHub Actions Runner의 공인 IP 조회
-      - name: Get Public IP
-        id: ip
-        uses: haythem/public-ip@v1.3
-
-      # 2. AWS 자격 증명 설정
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-northeast-2'
-
-      # 3. Security Group에 임시로 IP 추가 (배포 시에만 SSH 허용)
-      - name: Add GitHub Actions IP to security group
-        run: |
-          aws ec2 authorize-security-group-ingress \
-              --group-id ${{ secrets.AWS_SECURITY_GROUP_ID }} \
-              --protocol tcp \
-              --port 22 \
-              --cidr ${{ steps.ip.outputs.ipv4 }}/32
-
-      # 4. SSH로 EC2에 접속하여 배포 (무중단 배포)
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~/TeamMoa
-
-            # 최신 Docker 이미지 풀 (Docker Hub에서)
-            docker compose -f docker-compose.prod.yml pull web
-
-            # Web 컨테이너만 재시작 (DB, Redis는 계속 실행)
-            docker compose -f docker-compose.prod.yml up -d web
-
-            # 초기 시작 대기 (30초)
-            echo "Waiting for health check..."
-            sleep 30
-
-            # Health check 재시도 (3회, 10초 간격)
-            for i in 1 2 3; do
-              echo "Health check attempt $i/3..."
-              docker compose -f docker-compose.prod.yml ps
-
-              if docker compose -f docker-compose.prod.yml ps | grep -q "teammoa_web_prod.*healthy"; then
-                echo "✅ Deployment successful! Container is healthy."
-                exit 0
-              fi
-
-              if [ $i -lt 3 ]; then
-                echo "Container not healthy yet. Waiting 10 seconds..."
-                sleep 10
-              fi
-            done
-
-            # 3회 모두 실패 시 에러 로그 출력
-            echo "❌ Deployment failed! Web container is not healthy after 3 attempts."
-            echo "Showing container logs:"
-            docker logs teammoa_web_prod --tail 50 2>&1 || echo "Container not found"
-            exit 1
-
-
-      # 5. Security Group에서 IP 제거 (항상 실행 - 성공/실패 무관)
-      - name: Remove GitHub Actions IP from security group
-        if: always()  # 배포 성공/실패와 무관하게 항상 실행
-        run: |
-          aws ec2 revoke-security-group-ingress \
-              --group-id ${{ secrets.AWS_SECURITY_GROUP_ID }} \
-              --protocol tcp \
-              --port 22 \
-              --cidr ${{ steps.ip.outputs.ipv4 }}/32
-        continue-on-error: true  # IP 제거 실패해도 워크플로우는 계속
+# Health check 재시도 (3회, 10초 간격)
+for i in 1 2 3; do
+  if docker compose ps | grep -q "teammoa_web_prod.*healthy"; then
+    exit 0
+  fi
+done
 ```
 
 ---
@@ -1012,6 +767,410 @@ ssl_certificate_key /etc/letsencrypt/live/teammoa.duckdns.org/privkey.pem;
 - 무료 (상용 인증서는 연 $50~$200)
 - 자동 갱신 지원
 - 모든 브라우저에서 신뢰
+
+---
+
+---
+
+## AWS Application Load Balancer (ALB)
+
+### 도입 배경
+
+**문제 (ALB 도입 전)**:
+1. **단일 장애점 (SPOF)** - EC2 1대 다운 시 전체 서비스 중단
+2. **수평 확장 불가** - 트래픽 증가 시 대응 어려움
+3. **무중단 배포 제한** - 배포 중 1~2초 다운타임 불가피
+4. **SSL 관리 복잡** - Let's Encrypt 수동 갱신, Nginx 설정
+
+**해결 (ALB 도입 후)**:
+- ✅ 고가용성: Multi-AZ 배포로 한 쪽 다운돼도 서비스 유지
+- ✅ 로드밸런싱: 2개 EC2에 트래픽 자동 분산 (Round Robin)
+- ✅ 무중단 배포: Rolling Update로 트래픽 차단 없이 배포
+- ✅ SSL 간소화: ACM 인증서 자동 갱신, ALB에서 SSL Termination
+
+---
+
+### 아키텍처 구성도
+
+![AWS ALB Architecture](../images/aws_diagram.png)
+
+---
+
+### ALB 핵심 구성 요소
+
+#### 1. Listener (리스너)
+
+**HTTPS Listener (Port 443)**:
+```yaml
+Listener: HTTPS:443
+Protocol: HTTPS
+Certificate: ACM 인증서 (*.teammoa.duckdns.org)
+Default Action: Forward to teammoa-tg (Target Group)
+```
+
+**HTTP Listener (Port 80)**:
+```yaml
+Listener: HTTP:80
+Protocol: HTTP
+Default Action: Redirect to HTTPS:443 (301 Permanent)
+```
+
+**이유**:
+- SSL Termination을 ALB에서 처리 → Django는 HTTP만 처리
+- 모든 트래픽을 HTTPS로 강제 (보안)
+- Nginx에서 SSL 설정 제거 가능 (단순화)
+
+---
+
+#### 2. Target Group (타겟 그룹)
+
+**기본 설정**:
+```yaml
+Name: teammoa-tg
+Target Type: instance
+Protocol: HTTP
+Port: 8000
+VPC: teammoa-vpc (10.0.0.0/16)
+
+Targets:
+  - EC2-1 (i-0123456789abcdef0):8000
+  - EC2-2 (i-0fedcba9876543210):8000
+
+Load Balancing Algorithm: Round Robin
+```
+
+**Health Check 설정**:
+```yaml
+Protocol: HTTP
+Path: /health/
+Port: 8000
+Interval: 30 seconds
+Timeout: 5 seconds
+Healthy Threshold: 2 consecutive successes
+Unhealthy Threshold: 3 consecutive failures
+Success Codes: 200
+```
+
+**Health Check 동작**:
+```
+1. ALB가 30초마다 EC2-1:8000/health/ 요청
+2. Django에서 200 OK 응답
+3. 2번 연속 성공 → healthy 상태 전환
+4. 3번 연속 실패 → unhealthy 상태 전환 (트래픽 차단)
+```
+
+**코드 (Django Health Check 엔드포인트)**:
+```python
+# config/urls.py
+from django.http import JsonResponse
+
+def health_check(request):
+    """ALB Target Group Health Check endpoint"""
+    return JsonResponse({
+        'status': 'healthy',
+        'database': check_database_connection(),
+        'redis': check_redis_connection()
+    })
+
+urlpatterns = [
+    path('health/', health_check, name='health_check'),
+    # ...
+]
+```
+
+---
+
+#### 3. Security Groups (보안 그룹)
+
+**SG-ALB (ALB 전용)**:
+```yaml
+Inbound Rules:
+  - Type: HTTP (80)
+    Source: 0.0.0.0/0
+    Description: Allow HTTP from internet (redirect to HTTPS)
+
+  - Type: HTTPS (443)
+    Source: 0.0.0.0/0
+    Description: Allow HTTPS from internet
+
+Outbound Rules:
+  - Type: Custom TCP (8000)
+    Destination: sg-ec2-instances
+    Description: Forward to EC2 target group
+```
+
+**SG-EC2 (EC2 인스턴스용)**:
+```yaml
+Inbound Rules:
+  - Type: Custom TCP (8000)
+    Source: sg-alb
+    Description: Allow traffic from ALB only
+
+  - Type: SSH (22)
+    Source: GitHub Actions IP (Dynamic)
+    Description: SSH for deployment (Dynamic Security Group)
+
+Outbound Rules:
+  - Type: All Traffic
+    Destination: 0.0.0.0/0
+    Description: Allow outbound for package updates, Docker pull
+```
+
+**보안 원칙**:
+- ✅ EC2는 ALB에서만 트래픽 수신 (8000번 포트)
+- ✅ SSH는 배포 시에만 일시적으로 개방 (Dynamic SG)
+- ✅ EC2를 Private Subnet에 배치 (공인 IP 불필요, 선택사항)
+
+---
+
+### Rolling Update 배포 전략
+
+**무중단 배포 흐름**:
+
+```mermaid
+sequenceDiagram
+    participant GHA as GitHub Actions
+    participant ALB as ALB + Target Group
+    participant EC2_1 as EC2-1
+    participant EC2_2 as EC2-2
+
+    Note over GHA: Deploy to EC2-1 first
+    GHA->>ALB: aws elbv2 deregister-targets<br/>(EC2-1 제거)
+    ALB->>ALB: Connection Draining (300s)<br/>기존 연결 처리 완료 대기
+    Note over ALB,EC2_2: 모든 트래픽이 EC2-2로 전환
+
+    GHA->>EC2_1: SSH + docker compose pull
+    GHA->>EC2_1: docker compose up -d
+    EC2_1->>EC2_1: Health Check 통과 확인
+
+    GHA->>ALB: aws elbv2 register-targets<br/>(EC2-1 등록)
+    ALB->>EC2_1: Health Check /health/
+    EC2_1-->>ALB: 200 OK (2회 연속)
+    Note over ALB: EC2-1 healthy 상태 전환
+
+    Note over GHA: Deploy to EC2-2
+    GHA->>ALB: aws elbv2 deregister-targets<br/>(EC2-2 제거)
+    ALB->>ALB: Connection Draining (300s)
+    Note over ALB,EC2_1: 모든 트래픽이 EC2-1로 전환
+
+    GHA->>EC2_2: SSH + docker compose pull
+    GHA->>EC2_2: docker compose up -d
+    EC2_2->>EC2_2: Health Check 통과 확인
+
+    GHA->>ALB: aws elbv2 register-targets<br/>(EC2-2 등록)
+    ALB->>EC2_2: Health Check /health/
+    EC2_2-->>ALB: 200 OK (2회 연속)
+    Note over ALB: EC2-2 healthy 상태 전환
+
+    Note over ALB: 배포 완료<br/>두 인스턴스 모두 healthy
+```
+
+**GitHub Actions 배포 스크립트** (예시):
+```bash
+# .github/workflows/ci-cd.yml
+
+# 1. EC2-1 Deregister
+aws elbv2 deregister-targets \
+  --target-group-arn $TARGET_GROUP_ARN \
+  --targets Id=$EC2_1_INSTANCE_ID,Port=8000
+
+# 2. Wait for Connection Draining
+aws elbv2 wait target-deregistered \
+  --target-group-arn $TARGET_GROUP_ARN \
+  --targets Id=$EC2_1_INSTANCE_ID,Port=8000
+
+# 3. Deploy to EC2-1
+ssh ec2-user@$EC2_1_IP << 'EOF'
+  cd ~/TeamMoa
+  docker compose -f docker-compose.prod.yml pull web
+  docker compose -f docker-compose.prod.yml up -d web
+  docker compose -f docker-compose.prod.yml ps | grep healthy
+EOF
+
+# 4. EC2-1 Register
+aws elbv2 register-targets \
+  --target-group-arn $TARGET_GROUP_ARN \
+  --targets Id=$EC2_1_INSTANCE_ID,Port=8000
+
+# 5. Wait for Healthy
+aws elbv2 wait target-in-service \
+  --target-group-arn $TARGET_GROUP_ARN \
+  --targets Id=$EC2_1_INSTANCE_ID,Port=8000
+
+# 6~9. Repeat for EC2-2
+```
+
+**무중단 배포 달성**:
+- ✅ 배포 중에도 항상 1개 이상의 인스턴스가 트래픽 처리
+- ✅ Connection Draining으로 기존 연결 우아하게 종료 (최대 300초)
+- ✅ Health Check 통과 후에만 트래픽 전송 (실패 시 자동 롤백)
+
+---
+
+### AWS CLI를 통한 ALB 관리
+
+**Target Group 상태 확인**:
+```bash
+aws elbv2 describe-target-health \
+  --target-group-arn arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/teammoa-tg/1234567890abcdef
+
+# Output:
+{
+  "TargetHealthDescriptions": [
+    {
+      "Target": {
+        "Id": "i-0123456789abcdef0",
+        "Port": 8000
+      },
+      "HealthCheckPort": "8000",
+      "TargetHealth": {
+        "State": "healthy"
+      }
+    },
+    {
+      "Target": {
+        "Id": "i-0fedcba9876543210",
+        "Port": 8000
+      },
+      "HealthCheckPort": "8000",
+      "TargetHealth": {
+        "State": "healthy"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### 비용 분석 (ALB 도입 후)
+
+**월 예상 비용**:
+```
+[AWS 프리티어 종료 후]
+
+1. Application Load Balancer
+   - LCU-Hour: $0.008 × 730시간 = $5.84
+   - ALB-Hour: $0.0225 × 730시간 = $16.43
+   - 총: $22.27/월
+
+2. EC2 Instances (t3.micro × 2)
+   - On-Demand: $0.0104 × 730 × 2 = $15.18/월
+   - Reserved (1년 예약): $10.95/월 (28% 절감)
+
+3. Elastic IP (2개)
+   - 사용 중인 EIP: 무료
+   - 미사용 EIP: $0.005/시간 (주의!)
+
+4. Data Transfer Out
+   - 첫 10TB: $0.126/GB
+   - 예상: ~10GB/월 = $1.26
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+총 예상 비용: $40~$50/월 (프리티어 종료 후)
+프리티어 기간 (1년): $22/월 (ALB만)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**비용 최적화 전략**:
+1. **Reserved Instances** - 1년 예약 시 28% 절감
+2. **Savings Plans** - Compute Savings Plans 적용
+3. **EIP 정리** - 미사용 EIP 즉시 삭제
+4. **ALB Idle Timeout 조정** - 60초 → 30초 (불필요한 연결 조기 종료)
+
+---
+
+### 트러블슈팅 사례
+
+#### 1. Target Health Check 실패
+
+**증상**:
+```
+Target Health: unhealthy
+Reason: Health checks failed with these codes: [502]
+```
+
+**원인 분석**:
+1. Django 앱이 `/health/` 엔드포인트 미구현
+2. Security Group에서 ALB → EC2:8000 차단
+3. Django `ALLOWED_HOSTS`에 ALB DNS 미등록
+
+**해결**:
+```python
+# config/settings/prod.py
+ALLOWED_HOSTS = [
+    '3.34.102.12',  # EC2-1 EIP
+    'new-eip',      # EC2-2 EIP
+    'teammoa.duckdns.org',
+    'teammoa-alb-1234567890.ap-northeast-2.elb.amazonaws.com',  # ALB DNS
+    '10.0.10.10',   # EC2-1 Private IP
+    '10.0.11.10',   # EC2-2 Private IP
+]
+```
+
+**검증**:
+```bash
+# EC2 내부에서 Health Check 테스트
+curl http://localhost:8000/health/
+
+# ALB에서 Health Check 시뮬레이션
+curl -H "Host: teammoa.duckdns.org" http://10.0.10.10:8000/health/
+```
+
+---
+
+#### 2. WebSocket 연결 끊김
+
+**증상**:
+- 마인드맵 실시간 협업 중 연결 끊김
+- ALB 로그: `502 Bad Gateway`
+
+**원인**:
+- ALB Idle Timeout 기본값 60초
+- WebSocket 연결이 60초 이상 유지 필요
+
+**해결**:
+```bash
+# ALB Idle Timeout 증가 (60초 → 3600초)
+aws elbv2 modify-load-balancer-attributes \
+  --load-balancer-arn arn:aws:elasticloadbalancing:... \
+  --attributes Key=idle_timeout.timeout_seconds,Value=3600
+```
+
+**추가 설정** (Target Group):
+```yaml
+Stickiness: Enabled
+Stickiness Type: Application-based (app_cookie)
+Cookie Name: sessionid (Django session cookie)
+Duration: 1 day (86400 seconds)
+```
+
+**이유**:
+- WebSocket 연결은 동일한 EC2 인스턴스 유지 필요
+- Sticky Session으로 세션 유지 보장
+
+---
+
+#### 3. 배포 중 502 에러
+
+**증상**:
+- Rolling Update 배포 중 일부 사용자에게 502 에러
+
+**원인**:
+- Connection Draining Timeout 부족 (기본 300초)
+- 긴 요청(파일 업로드 등)이 강제 종료됨
+
+**해결**:
+```bash
+# Connection Draining Timeout 증가
+aws elbv2 modify-target-group-attributes \
+  --target-group-arn arn:aws:elasticloadbalancing:... \
+  --attributes Key=deregistration_delay.timeout_seconds,Value=600
+```
+
+**Best Practice**:
+- 배포 전 Health Check로 긴 요청 완료 대기
+- 배포 시간대를 트래픽 낮은 시간대로 조정 (새벽 2~4시)
 
 ---
 
