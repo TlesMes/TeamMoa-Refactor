@@ -17,15 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_http_methods
 from django.conf import settings
 from django.conf.urls.static import static
 import os
 
 
-@require_GET
+@require_http_methods(["GET", "HEAD"])
 def health_check(request):
-    """Health check endpoint for Docker and monitoring"""
+    """Health check endpoint for Docker and ALB monitoring"""
     return JsonResponse({
         'status': 'healthy',
         'service': 'TeamMoa',
