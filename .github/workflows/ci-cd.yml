@@ -192,6 +192,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            sed -i 's/\r$//' ~/TeamMoa/scripts/deploy_web_server.sh
             chmod +x ~/TeamMoa/scripts/deploy_web_server.sh
             ~/TeamMoa/scripts/deploy_web_server.sh
 
@@ -244,6 +245,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            sed -i 's/\r$//' ~/TeamMoa/scripts/deploy_web_server.sh
             chmod +x ~/TeamMoa/scripts/deploy_web_server.sh
             ~/TeamMoa/scripts/deploy_web_server.sh
 

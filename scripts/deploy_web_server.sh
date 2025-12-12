@@ -25,7 +25,19 @@ echo ""
 
 # 2. Docker 이미지 Pull
 echo "🐳 Step 1: Pulling latest Docker image..."
-docker compose -f docker-compose.prod.yml pull web
+
+# Docker Compose 파일 자동 감지
+if [ -f "docker-compose.prod.yml" ]; then
+    COMPOSE_FILE="docker-compose.prod.yml"
+elif [ -f "docker-compose.web.yml" ]; then
+    COMPOSE_FILE="docker-compose.web.yml"
+else
+    echo "❌ Docker Compose file not found"
+    exit 1
+fi
+
+echo "Using Docker Compose file: $COMPOSE_FILE"
+docker compose -f $COMPOSE_FILE pull web
 
 if [ $? -ne 0 ]; then
     echo "❌ Failed to pull Docker image"
@@ -37,7 +49,7 @@ echo ""
 
 # 3. Web 컨테이너 재시작 (Nginx는 유지)
 echo "🔄 Step 2: Restarting web container..."
-docker compose -f docker-compose.prod.yml up -d web
+docker compose -f $COMPOSE_FILE up -d web
 
 if [ $? -ne 0 ]; then
     echo "❌ Failed to restart web container"
@@ -100,7 +112,7 @@ if [ $SUCCESS_COUNT -lt $REQUIRED_SUCCESSES ]; then
     echo "❌ Health Check FAILED after $MAX_ATTEMPTS attempts"
     echo ""
     echo "📋 Container Status:"
-    docker compose -f docker-compose.prod.yml ps
+    docker compose -f $COMPOSE_FILE ps
     echo ""
     echo "📋 Container Logs (last 50 lines):"
     docker logs teammoa_web_prod --tail 50 2>&1 || echo "No logs available"
@@ -112,7 +124,7 @@ fi
 # 7. 최종 상태 확인
 echo ""
 echo "📊 Final Container Status:"
-docker compose -f docker-compose.prod.yml ps
+docker compose -f $COMPOSE_FILE ps
 
 echo ""
 echo "=================================================="
