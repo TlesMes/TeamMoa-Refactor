@@ -26,8 +26,8 @@ services:
       - mysql_data_prod:/var/lib/mysql
     # bind-address=0.0.0.0: 외부(Web 서버)에서 접속 가능하도록 설정
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --bind-address=0.0.0.0
-    expose:
-      - "3306"  # Web 서버에서 EC2-DB Private IP:3306으로 접속
+    ports:
+      - "3306:3306"  # Web 서버에서 EC2-DB Private IP:3306으로 접속
     networks:
       - teammoa_db_network
     healthcheck:
@@ -45,8 +45,8 @@ services:
       - redis_data_prod:/data
     # bind 0.0.0.0: 외부(Web 서버)에서 접속 가능하도록 설정
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} --bind 0.0.0.0
-    expose:
-      - "6379"  # Web 서버에서 EC2-DB Private IP:6379로 접속
+    ports:
+      - "6379:6379"  # Web 서버에서 EC2-DB Private IP:6379로 접속
     networks:
       - teammoa_db_network
     healthcheck:
