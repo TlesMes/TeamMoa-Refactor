@@ -175,6 +175,16 @@ jobs:
       # ========================================
       # Web1 배포
       # ========================================
+      - name: "📦 Deploy Web1: Get Public IP"
+        id: web1_ip
+        run: |
+          WEB1_IP=$(aws ec2 describe-instances \
+              --instance-ids ${{ secrets.EC2_WEB1_ID }} \
+              --query 'Reservations[0].Instances[0].PublicIpAddress' \
+              --output text)
+          echo "Web1 Public IP: $WEB1_IP"
+          echo "ip=$WEB1_IP" >> $GITHUB_OUTPUT
+
       - name: "📦 Deploy Web1: Deregister from Target Group"
         run: |
           echo "🔄 Removing Web1 from Target Group..."
@@ -190,7 +200,7 @@ jobs:
       - name: "📦 Deploy Web1: Deploy via SSH"
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_WEB1_HOST }}
+          host: ${{ steps.web1_ip.outputs.ip }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
@@ -228,6 +238,16 @@ jobs:
       # ========================================
       # Web2 배포
       # ========================================
+      - name: "📦 Deploy Web2: Get Public IP"
+        id: web2_ip
+        run: |
+          WEB2_IP=$(aws ec2 describe-instances \
+              --instance-ids ${{ secrets.EC2_WEB2_ID }} \
+              --query 'Reservations[0].Instances[0].PublicIpAddress' \
+              --output text)
+          echo "Web2 Public IP: $WEB2_IP"
+          echo "ip=$WEB2_IP" >> $GITHUB_OUTPUT
+
       - name: "📦 Deploy Web2: Deregister from Target Group"
         run: |
           echo "🔄 Removing Web2 from Target Group..."
@@ -243,7 +263,7 @@ jobs:
       - name: "📦 Deploy Web2: Deploy via SSH"
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_WEB2_HOST }}
+          host: ${{ steps.web2_ip.outputs.ip }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
