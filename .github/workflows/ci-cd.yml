@@ -169,6 +169,9 @@ jobs:
               --port 22 \
               --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
+          echo "⏳ Waiting for security group rule to propagate (10s)..."
+          sleep 10
+
       # ========================================
       # Web1 배포
       # ========================================
