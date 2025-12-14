@@ -574,5 +574,3 @@ exec "$@"
 ---
 
 **최종 업데이트**: 2025-11-26
-**작성자**: TeamMoa 개발팀
-**관련 이슈**: [미인증 계정 자동 삭제 기능](https://github.com/yourusername/TeamMoa/issues/XXX)

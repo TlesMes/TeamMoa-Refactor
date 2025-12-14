@@ -38,7 +38,7 @@ docker-compose --version
 ### 1단계: 저장소 클론
 
 ```bash
-git clone https://github.com/yourusername/TeamMoa.git
+git clone https://github.com/TlesMes/TeamMoa-Refactor.git
 cd TeamMoa
 ```
 
@@ -422,14 +422,6 @@ docker-compose -f docker-compose.prod.yml logs nginx
 - [ ] 정기 백업 설정
 - [ ] 모니터링 시스템 연동
 
----
-
-## 📞 지원
-
-문제 발생 시:
-1. [GitHub Issues](https://github.com/yourusername/TeamMoa/issues) 등록
-2. 로그 파일 첨부
-3. 환경 정보 제공 (OS, Docker 버전 등)
 
 ---
 

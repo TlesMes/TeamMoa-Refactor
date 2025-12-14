@@ -88,7 +88,7 @@ Testing:   pytest (225 tests)
 
 ```bash
 # 1. 프로젝트 클론
-git clone https://github.com/yourusername/TeamMoa.git
+git clone https://github.com/TlesMes/TeamMoa-Refactor.git
 cd TeamMoa
 
 # 2. 환경 변수 설정
