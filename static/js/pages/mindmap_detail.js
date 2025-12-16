@@ -162,6 +162,21 @@ class MindmapEditor {
   // WebSocket 메시지 처리
   handleWebSocketMessage(data) {
     switch (data.type) {
+      case 'existing_users':
+        // 기존 접속자 목록을 받아서 추가
+        console.log(`기존 접속자 ${data.users.length}명 수신`);
+        data.users.forEach(user => {
+          if (user.user_id !== this.currentUser.userId) {
+            this.activeUsers.set(user.user_id, {
+              username: user.username,
+              x: 0,
+              y: 0,
+              isCurrentUser: false
+            });
+          }
+        });
+        this.updateActiveUsers();
+        break;
       case 'user_joined':
         console.log(`${data.username} 참가`);
         // 새 사용자를 activeUsers Map에 추가 (본인이 아닌 경우만)
@@ -191,6 +206,26 @@ class MindmapEditor {
         break;
       case 'connection_deleted':
         this.removeConnection(data.connection_id);
+        break;
+      case 'node_created':
+        // 다른 사용자가 생성한 노드 추가
+        console.log(`노드 생성됨: ${data.title} by ${data.username}`);
+        this.nodes.push({
+          id: data.node_id,
+          x: data.posX,
+          y: data.posY,
+          title: data.title,
+          content: data.content,
+          width: 120,
+          height: 60
+        });
+        this.render();
+        break;
+      case 'node_deleted':
+        // 다른 사용자가 삭제한 노드 제거
+        console.log(`노드 삭제됨: ${data.node_id} by ${data.username}`);
+        this.nodes = this.nodes.filter(n => n.id !== data.node_id);
+        this.render();
         break;
     }
   }
@@ -504,40 +539,47 @@ class MindmapEditor {
     });
   }
 
-  getConnectionAt(x, y, threshold = 8) {
+  getConnectionAt(x, y, threshold = 15) {
     // 점과 곡선 사이의 거리 계산 (근사값)
+    // threshold를 15로 증가하여 클릭 영역 확대
     return this.connections.find(conn => {
       const fromNode = this.nodes.find(n => n.id === conn.fromNodeId);
       const toNode = this.nodes.find(n => n.id === conn.toNodeId);
 
       if (!fromNode || !toNode) return false;
 
-      // 곡선의 여러 지점을 샘플링하여 거리 계산
-      const samples = 20;
+      // 곡선의 여러 지점을 샘플링하여 거리 계산 (샘플 수 증가)
+      const samples = 30;
       for (let i = 0; i <= samples; i++) {
         const t = i / samples;
 
-        // Bezier 곡선 계산
-        const fromX = fromNode.x;
-        const fromY = fromNode.y;
-        const toX = toNode.x;
-        const toY = toNode.y;
+        // drawCurvedConnectionLine과 동일한 로직 사용
+        const centerA = { x: fromNode.x, y: fromNode.y };
+        const centerB = { x: toNode.x, y: toNode.y };
 
-        const dx = toX - fromX;
-        const dy = toY - fromY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const offset = Math.min(distance * 0.3, 80);
+        const dx = centerB.x - centerA.x;
+        const dy = centerB.y - centerA.y;
+        const start = this.getRoundRectConnectionPoint(fromNode, dx, dy);
+        const end = this.getRoundRectConnectionPoint(toNode, -dx, -dy);
 
-        const midX = (fromX + toX) / 2;
-        const midY = (fromY + toY) / 2;
-        const normalX = -dy / distance;
-        const normalY = dx / distance;
-        const cpX = midX + normalX * offset;
-        const cpY = midY + normalY * offset;
+        // 제어점 계산 (렌더링과 동일)
+        const curveStrength = 0.45;
+        const midX = (start.x + end.x) / 2;
+        const midY = (start.y + end.y) / 2;
+
+        const perpX = -(end.y - start.y);
+        const perpY = (end.x - start.x);
+        const len = Math.sqrt(perpX * perpX + perpY * perpY);
+
+        const nx = perpX / len;
+        const ny = perpY / len;
+
+        const controlX = midX + nx * curveStrength * len * 0.2;
+        const controlY = midY + ny * curveStrength * len * 0.2;
 
         // Quadratic Bezier 곡선 상의 점
-        const pointX = (1-t)*(1-t)*fromX + 2*(1-t)*t*cpX + t*t*toX;
-        const pointY = (1-t)*(1-t)*fromY + 2*(1-t)*t*cpY + t*t*toY;
+        const pointX = (1-t)*(1-t)*start.x + 2*(1-t)*t*controlX + t*t*end.x;
+        const pointY = (1-t)*(1-t)*start.y + 2*(1-t)*t*controlY + t*t*end.y;
 
         // 마우스 위치와의 거리
         const dist = Math.sqrt((x - pointX)**2 + (y - pointY)**2);
@@ -1231,12 +1273,23 @@ class MindmapEditor {
       cursor.className = 'user-cursor';
       cursor.setAttribute('data-username', user.username);
 
-      // 화면 좌표로 변환
-      const screenX = user.x * this.scale + this.translateX;
-      const screenY = user.y * this.scale + this.translateY;
+      // 화면 좌표로 변환 (Canvas 좌표계 → Canvas 픽셀 좌표계)
+      const canvasX = user.x * this.scale + this.translateX;
+      const canvasY = user.y * this.scale + this.translateY;
 
-      cursor.style.left = screenX + 'px';
-      cursor.style.top = screenY + 'px';
+      // Canvas의 실제 위치를 getBoundingClientRect()로 가져오기
+      const rect = this.canvas.getBoundingClientRect();
+
+      // Canvas의 CSS 크기와 논리적 크기의 비율 계산
+      const scaleX = rect.width / this.canvas.width;
+      const scaleY = rect.height / this.canvas.height;
+
+      // 절대 좌표 계산 (CSS 크기 비율 적용)
+      const absoluteX = rect.left + canvasX * scaleX;
+      const absoluteY = rect.top + canvasY * scaleY;
+
+      cursor.style.left = absoluteX + 'px';
+      cursor.style.top = absoluteY + 'px';
       cursor.style.color = this.getUserColor(userId);
       cursor.style.borderColor = this.getUserColor(userId);
 

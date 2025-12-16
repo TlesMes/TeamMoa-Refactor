@@ -14,35 +14,57 @@ logger = logging.getLogger(__name__)
 class MindmapConsumer(AsyncWebsocketConsumer):
     """
     마인드맵 실시간 협업을 위한 WebSocket Consumer
-    
+
     기능:
     - 마인드맵 룸 참가/퇴장
     - 실시간 노드 위치 동기화
     - 노드 생성/삭제 동기화
     - 사용자 커서 위치 공유
     """
-    
+
+    # 클래스 변수: 각 룸의 접속자 목록 추적
+    active_users_by_room = {}
+
     async def connect(self):
         """WebSocket 연결 시 실행"""
         self.mindmap_id = self.scope['url_route']['kwargs']['mindmap_id']
         self.team_id = self.scope['url_route']['kwargs']['team_id']
         self.room_group_name = f'mindmap_{self.mindmap_id}'
         self.user = self.scope.get('user', AnonymousUser())
-        
+
         # 사용자 인증 및 권한 확인
         if not await self.check_permissions():
             await self.close()
             return
-        
+
         # 룸 그룹에 참가
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
-        
+
         await self.accept()
         logger.info(f"User {self.user.username} joined mindmap {self.mindmap_id}")
-        
+
+        # 룸별 접속자 목록 초기화 (필요한 경우)
+        if self.room_group_name not in MindmapConsumer.active_users_by_room:
+            MindmapConsumer.active_users_by_room[self.room_group_name] = {}
+
+        # 현재 접속자 목록 가져오기 (새 접속자 제외)
+        existing_users = [
+            {'user_id': uid, 'username': uname}
+            for uid, uname in MindmapConsumer.active_users_by_room[self.room_group_name].items()
+        ]
+
+        # 새 접속자를 목록에 추가
+        MindmapConsumer.active_users_by_room[self.room_group_name][self.user.id] = self.user.username
+
+        # 새 접속자에게 기존 접속자 목록 전송
+        await self.send(text_data=json.dumps({
+            'type': 'existing_users',
+            'users': existing_users
+        }))
+
         # 다른 사용자들에게 새 사용자 알림
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -56,6 +78,14 @@ class MindmapConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         """WebSocket 연결 종료 시 실행"""
         if hasattr(self, 'room_group_name'):
+            # 접속자 목록에서 제거
+            if self.room_group_name in MindmapConsumer.active_users_by_room:
+                MindmapConsumer.active_users_by_room[self.room_group_name].pop(self.user.id, None)
+
+                # 룸이 비어있으면 삭제
+                if not MindmapConsumer.active_users_by_room[self.room_group_name]:
+                    del MindmapConsumer.active_users_by_room[self.room_group_name]
+
             # 다른 사용자들에게 사용자 퇴장 알림
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -65,13 +95,13 @@ class MindmapConsumer(AsyncWebsocketConsumer):
                     'username': self.user.username
                 }
             )
-            
+
             # 룸 그룹에서 제거
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
-        
+
         logger.info(f"User {getattr(self.user, 'username', 'Anonymous')} left mindmap {self.mindmap_id}")
     
     async def receive(self, text_data):
@@ -129,13 +159,49 @@ class MindmapConsumer(AsyncWebsocketConsumer):
     
     async def handle_node_create(self, data):
         """노드 생성 처리"""
-        # 향후 구현
-        pass
-    
+        node_id = data.get('node_id')
+        title = data.get('title')
+        content = data.get('content')
+        posX = data.get('posX')
+        posY = data.get('posY')
+
+        if node_id is None or posX is None or posY is None:
+            return
+
+        # 다른 사용자들에게 브로드캐스트
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'node_created',
+                'node_id': node_id,
+                'title': title,
+                'content': content,
+                'posX': posX,
+                'posY': posY,
+                'user_id': self.user.id,
+                'username': self.user.username,
+                'sender_channel': self.channel_name
+            }
+        )
+
     async def handle_node_delete(self, data):
         """노드 삭제 처리"""
-        # 향후 구현
-        pass
+        node_id = data.get('node_id')
+
+        if node_id is None:
+            return
+
+        # 다른 사용자들에게 브로드캐스트
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'node_deleted',
+                'node_id': node_id,
+                'user_id': self.user.id,
+                'username': self.user.username,
+                'sender_channel': self.channel_name
+            }
+        )
     
     async def handle_cursor_move(self, data):
         """커서 이동 처리"""
@@ -262,6 +328,32 @@ class MindmapConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'connection_deleted',
                 'connection_id': event['connection_id'],
+                'user_id': event['user_id'],
+                'username': event['username']
+            }))
+
+    async def node_created(self, event):
+        """노드 생성 알림"""
+        # 발신자에게는 전송하지 않음
+        if event.get('sender_channel') != self.channel_name:
+            await self.send(text_data=json.dumps({
+                'type': 'node_created',
+                'node_id': event['node_id'],
+                'title': event['title'],
+                'content': event['content'],
+                'posX': event['posX'],
+                'posY': event['posY'],
+                'user_id': event['user_id'],
+                'username': event['username']
+            }))
+
+    async def node_deleted(self, event):
+        """노드 삭제 알림"""
+        # 발신자에게는 전송하지 않음
+        if event.get('sender_channel') != self.channel_name:
+            await self.send(text_data=json.dumps({
+                'type': 'node_deleted',
+                'node_id': event['node_id'],
                 'user_id': event['user_id'],
                 'username': event['username']
             }))
