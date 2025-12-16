@@ -4,6 +4,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
+from django.conf import settings
+import redis.asyncio as redis
 
 from .models import Mindmap, Node, NodeConnection
 from teams.models import TeamUser
@@ -20,10 +22,27 @@ class MindmapConsumer(AsyncWebsocketConsumer):
     - 실시간 노드 위치 동기화
     - 노드 생성/삭제 동기화
     - 사용자 커서 위치 공유
+
+    Redis를 사용하여 ALB 다중 서버 환경에서 접속자 정보 동기화
     """
 
-    # 클래스 변수: 각 룸의 접속자 목록 추적
-    active_users_by_room = {}
+    # Redis 클라이언트 (클래스 변수)
+    _redis_client = None
+
+    @classmethod
+    async def get_redis_client(cls):
+        """Redis 클라이언트 싱글톤 패턴"""
+        if cls._redis_client is None:
+            cls._redis_client = await redis.from_url(
+                f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
+                password=settings.REDIS_PASSWORD if settings.REDIS_PASSWORD else None,
+                decode_responses=True
+            )
+        return cls._redis_client
+
+    def get_redis_key(self):
+        """Redis 키 생성 (룸별 접속자 목록)"""
+        return f"mindmap_users:{self.room_group_name}"
 
     async def connect(self):
         """WebSocket 연결 시 실행"""
@@ -46,18 +65,21 @@ class MindmapConsumer(AsyncWebsocketConsumer):
         await self.accept()
         logger.info(f"User {self.user.username} joined mindmap {self.mindmap_id}")
 
-        # 룸별 접속자 목록 초기화 (필요한 경우)
-        if self.room_group_name not in MindmapConsumer.active_users_by_room:
-            MindmapConsumer.active_users_by_room[self.room_group_name] = {}
+        # Redis에서 기존 접속자 목록 가져오기
+        redis_client = await self.get_redis_client()
+        redis_key = self.get_redis_key()
 
-        # 현재 접속자 목록 가져오기 (새 접속자 제외)
+        # 기존 접속자 정보 조회
+        existing_users_data = await redis_client.hgetall(redis_key)
         existing_users = [
-            {'user_id': uid, 'username': uname}
-            for uid, uname in MindmapConsumer.active_users_by_room[self.room_group_name].items()
+            {'user_id': int(uid), 'username': uname}
+            for uid, uname in existing_users_data.items()
         ]
 
-        # 새 접속자를 목록에 추가
-        MindmapConsumer.active_users_by_room[self.room_group_name][self.user.id] = self.user.username
+        # 새 접속자를 Redis에 추가
+        await redis_client.hset(redis_key, self.user.id, self.user.username)
+        # TTL 설정 (24시간 후 자동 삭제)
+        await redis_client.expire(redis_key, 86400)
 
         # 새 접속자에게 기존 접속자 목록 전송
         await self.send(text_data=json.dumps({
@@ -78,13 +100,10 @@ class MindmapConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         """WebSocket 연결 종료 시 실행"""
         if hasattr(self, 'room_group_name'):
-            # 접속자 목록에서 제거
-            if self.room_group_name in MindmapConsumer.active_users_by_room:
-                MindmapConsumer.active_users_by_room[self.room_group_name].pop(self.user.id, None)
-
-                # 룸이 비어있으면 삭제
-                if not MindmapConsumer.active_users_by_room[self.room_group_name]:
-                    del MindmapConsumer.active_users_by_room[self.room_group_name]
+            # Redis에서 접속자 제거
+            redis_client = await self.get_redis_client()
+            redis_key = self.get_redis_key()
+            await redis_client.hdel(redis_key, self.user.id)
 
             # 다른 사용자들에게 사용자 퇴장 알림
             await self.channel_layer.group_send(

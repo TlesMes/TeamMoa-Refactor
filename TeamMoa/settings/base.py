@@ -199,6 +199,11 @@ WSGI_APPLICATION = 'TeamMoa.wsgi.application'
 # Django Channels 설정
 ASGI_APPLICATION = 'TeamMoa.asgi.application'
 
+# Redis 설정 (WebSocket 및 Channel Layer용)
+REDIS_HOST = env('REDIS_HOST', default='localhost')
+REDIS_PORT = env.int('REDIS_PORT', default=6379)
+REDIS_PASSWORD = env('REDIS_PASSWORD', default=None)
+
 # Channel layers - Redis 백엔드 사용
 CHANNEL_LAYERS = {
     'default': {
