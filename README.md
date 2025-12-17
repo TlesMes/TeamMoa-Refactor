@@ -4,23 +4,27 @@
 > WebSocket, 서비스 레이어 아키텍처, CI/CD 자동화를 적용한 프로젝트
 
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-teammoa.duckdns.org-4CAF50?style=flat-square)](https://teammoa.duckdns.org)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-teammoa.shop-4CAF50?style=flat-square)](https://teammoa.shop)
 [![Django](https://img.shields.io/badge/Django-5.2.4-092E20?style=flat&logo=django&logoColor=white)](https://djangoproject.com/) [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/) [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat&logo=mysql&logoColor=white)](https://mysql.com/) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)](https://docker.com/)
 
 ---
 
 ## 💡 프로젝트 소개
 
-**TeamMoa**는 팀 프로젝트 관리를 위한 올인원 협업 플랫폼입니다.
-실시간 마인드맵 협업, 스케줄 조율, TODO 관리 등 팀 프로젝트에 필요한 핵심 기능을 제공합니다.
+**TeamMoa**는 AWS ALB 기반 고가용성 인프라 위에서 실행되는 팀 협업 플랫폼입니다.
+
+### 🤔 왜 TeamMoa가 필요한가?
+
+팀 프로젝트를 진행하다 보면 **"언제 만날 수 있지?", "아이디어를 어떻게 정리하지?", "누가 뭘 하고 있지?"** 같은 고민에 여러 툴을 오가며 시간을 낭비합니다.
+TeamMoa는 이러한 불편함을 해소하기 위해 **스케줄 조율, 마인드맵 협업, TODO 관리를 하나의 플랫폼**에서 제공합니다.
 
 ### 🎯 핵심 가치
 
-- **견고한 아키텍처** - 서비스 레이어 패턴으로 비즈니스 로직 완전 분리
+- **고가용성 인프라** - AWS ALB + Multi-AZ (99.9% 가용성)
+- **성능 검증** - Locust 부하 테스트 (95%ile 70ms, 에러율 0.16%)
+- **무중단 배포** - GitHub Actions Rolling Update (다운타임 0초)
 - **실시간 협업** - Django Channels + WebSocket 기반 동시 편집
-- **높은 품질** - 225개 테스트 구축 및 자동화
-- **자동화** - GitHub Actions CI/CD 파이프라인 구축
-- **성능 최적화** - N+1 쿼리 해결 및 DB 최적화
+- **높은 품질** - 225개 테스트 자동화 (pytest + DRF TestClient)
 
 ---
 
@@ -43,41 +47,56 @@
 ---
 ## 📊 프로덕션 성능 검증
 
-> **AWS ALB + Multi-AZ 고가용성 인프라 부하 테스트 (2025.12.16)**
+> **Locust 부하 테스트** (2025.12.16 실시)
 
-**테스트 환경:**
-- AWS Application Load Balancer + EC2 t3.micro × 2대 (Multi-AZ)
-- Docker Compose (Django + Nginx + MySQL + Redis)
-- HTTPS (Let's Encrypt SSL)
+### 테스트 환경
+- **인프라**: AWS ALB + EC2 t3.micro × 2대 (Multi-AZ)
+- **도구**: Locust (오픈소스 부하 테스트 프레임워크)
+- **전략**: 점진적 부하 증가 (20명 → 50명 → 100명 → 150명)
+- **총 요청 수**: 57,232건 (4회 반복 테스트)
 
-**테스트 전략:**
-- 점진적 부하 증가 (20명 → 50명 → 100명 → 150명)
-- 실제 사용자 행동 시뮬레이션 (Locust)
-- 총 57,232건 요청, 4회 반복 테스트
-
-**📌 이미지 삽입 위치: 메인 README 성능 차트**
-```
-파일명: load_test_main_summary.png
-위치: 여기 (4회 테스트 비교 요약 차트)
-내용: RPS, 응답시간, 에러율 추이 (막대 그래프)
+### 테스트 시나리오 (실제 사용자 행동 시뮬레이션)
+```python
+# locustfile.py
+@task(3)  # 팀 목록 조회 (가중치 3)
+@task(2)  # TODO 조회 및 상태 변경 (가중치 2)
+@task(1)  # 주간 스케줄 조회 (가중치 1)
 ```
 
-**핵심 성과:**
+<!-- 📸 이미지 위치: 부하 테스트 결과 그래프 -->
+```
+필요한 스크린샷:
+파일명: load_test_summary.png
+위치: docs/images/
+내용: 4회 테스트 비교 (RPS, 응답시간, 에러율) - 막대/꺾은선 그래프
+출처: Locust Web UI 또는 Python matplotlib로 생성
+```
+
+### 핵심 성과
 
 | 지표 | 목표 (SLA) | 측정값 | 달성 여부 |
 |------|----------|--------|----------|
 | **95%ile 응답 시간** | ≤ 500ms | **70ms** | ✅ **86% 향상** |
-| **평균 응답 시간** | - | **52ms** | ✅ **안정적** |
+| **평균 응답 시간** | - | **52ms** | ✅ **매우 안정적** |
 | **에러율** | ≤ 1% | **0.16%** | ✅ **84% 향상** |
 | **최대 RPS** | ≥ 10 | **40.34** | ✅ **303% 초과 달성** |
 
-**주요 검증 사항:**
-- ✅ ALB 로드밸런싱 정상 작동 (2대 EC2 균등 분산)
-- ✅ 150명 동시 접속 시에도 평균 70ms 응답 시간 유지
-- ✅ Health Check 0% 에러율 (고가용성 확인)
-- ✅ 선형적 확장성 (20명→150명 부하 증가 시 응답 시간 63% 증가)
+### 테스트별 상세 결과
 
-> 📄 **상세 리포트**: [부하 테스트 전체 결과](./docs/guides/load-testing/load-test-report.md)
+| 테스트 | 동시 사용자 | 총 요청 | 평균 응답 | 95%ile | RPS | 에러율 |
+|--------|-----------|---------|----------|--------|-----|--------|
+| Test 1 | 20명 | 9,018건 | 43ms | 62ms | 30.24 | 0.00% |
+| Test 2 | 50명 | 13,501건 | 53ms | 69ms | 35.01 | 0.17% |
+| Test 3 | 100명 | 15,783건 | 55ms | 70ms | 39.58 | 0.27% |
+| Test 4 | 150명 | 18,930건 | 60ms | 78ms | 40.34 | 0.21% |
+
+### 주요 검증 사항
+- ✅ **로드밸런싱**: EC2-Web1, Web2 트래픽 균등 분산 (약 50:50)
+- ✅ **선형적 확장성**: 20명 → 150명 부하 증가 시 응답 시간 40% 증가 (양호)
+- ✅ **고가용성**: Health Check 0% 에러율
+- ✅ **무중단 배포**: 배포 중 200 응답 유지
+
+> 📄 **상세 리포트**: [Locust 부하 테스트 전체 결과](./docs/guides/load-testing/load-test-report.md)
 
 ---
 ## 🎨 주요 기능
@@ -95,10 +114,11 @@
 
 ```
 Backend:   Django 5.2.4 | Django Channels | Django REST Framework | MySQL 8.0 | Redis 7.0
-Frontend:  HTML, CSS, JavaScript
-DevOps:    Docker Compose | GitHub Actions | AWS EC2 | Nginx
-Architecture: Service Layer Pattern | Class-Based Views (CBV)
-Testing:   pytest (225 tests)
+Frontend:  HTML, CSS, JavaScript (Canvas API, Fetch API)
+Infrastructure: AWS ALB | EC2 (Multi-AZ) | Docker Compose | Nginx | ACM SSL
+DevOps:    GitHub Actions (Rolling Update) | Docker Hub
+Architecture: Service Layer Pattern | Hybrid SSR + API
+Testing:   pytest (225 tests) | Locust (부하 테스트)
 ```
 
 ### 아키텍처 다이어그램
@@ -106,7 +126,22 @@ Testing:   pytest (225 tests)
 #### 1. AWS 인프라 아키텍처
 > 프로덕션 배포 환경: AWS ALB + Multi-AZ EC2 + Docker + CI/CD 파이프라인
 
-![AWS Infrastructure](./docs/images/aws_diagram.png)
+<!-- 📸 이미지 위치: AWS ALB 아키텍처 -->
+```
+필요한 스크린샷:
+파일명: aws_alb_architecture.png
+위치: docs/images/
+내용: ALB → EC2-Web1 (ap-northeast-2a), EC2-Web2 (ap-northeast-2b) → MySQL + Redis
+출처: AWS 콘솔 또는 draw.io로 작성
+```
+![AWS Infrastructure](./docs/images/aws_alb_architecture.png)
+
+**구성**:
+```
+Internet → AWS ALB (HTTPS:443)
+           ├─ EC2-Web1 (ap-northeast-2a)
+           └─ EC2-Web2 (ap-northeast-2b)
+```
 
 #### 2. CI/CD 파이프라인 흐름
 > GitHub Actions 기반 자동화된 테스트, 빌드, 배포 워크플로우

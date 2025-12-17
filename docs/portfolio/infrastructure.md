@@ -792,7 +792,7 @@ ssl_certificate_key /etc/letsencrypt/live/teammoa.duckdns.org/privkey.pem;
 
 ### 아키텍처 구성도
 
-![AWS ALB Architecture](../images/aws_diagram.png)
+![AWS ALB Architecture](../images/aws_alb_architecture.png)
 
 ---
 

@@ -49,71 +49,47 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ---
 
-### 🚀 AWS ALB 도입 계획 수립! (2025.12.09)
+### 🎉 AWS ALB + Multi-AZ 고가용성 인프라 구축 완료! (2025.12.16)
 
-**✅ 설계 및 문서화 완료**:
-- ✅ **AWS 인프라 다이어그램 4개 작성**:
-  - 전체 아키텍처 (ALB + 2 EC2 + Multi-AZ)
-  - 네트워크 및 보안 상세 (VPC, Subnet, Security Group)
-  - 배포 흐름 (Rolling Update 시퀀스)
-  - 트래픽 흐름 및 Health Check
-- ✅ **README.md 다이어그램 업데이트**: 단일 EC2 → ALB + Multi-AZ 구조
-- ✅ **infrastructure.md ALB 섹션 추가**: 500줄, 도입 배경/구성/트러블슈팅
-- ✅ **ALB 구축 가이드 작성**: 단계별 실습 가이드 (10개 섹션, 800줄)
+**✅ 프로덕션 인프라 완전 구축**:
+- ✅ **AWS Application Load Balancer 구축**: 2대 EC2 로드밸런싱
+- ✅ **Multi-AZ 고가용성 아키텍처**: ap-northeast-2a, 2b (가용 영역 분산)
+- ✅ **Rolling Update 무중단 배포**: Target Group Deregister/Register 자동화
+- ✅ **HTTPS 적용**: ACM SSL 인증서 (*.teammoa.shop)
+- ✅ **WebSocket 안정화**: ALB Sticky Session 설정 (app_cookie)
+- ✅ **Security Group 최적화**: Web/DB 분리, 최소 권한 원칙
 
-**🎯 다음 단계 (실제 구현)**:
-1. **VPC 및 Subnet 구성** (1시간)
-   - VPC 10.0.0.0/16 생성
-   - Public Subnet 2개 (Multi-AZ)
-   - Internet Gateway 연결
+**✅ 부하 테스트 및 성능 검증 완료**:
+- ✅ **Locust 부하 테스트 4회 실시** (총 57,232건 요청)
+  - 점진적 부하 증가: 20명 → 50명 → 100명 → 150명
+  - 95%ile 응답 시간: **70ms** (목표 500ms 대비 86% 향상)
+  - 평균 응답 시간: **52ms** (매우 안정적)
+  - 에러율: **0.16%** (목표 1% 대비 84% 향상)
+  - 최대 RPS: **40.34** (목표 10 대비 303% 초과 달성)
+- ✅ **실제 트래픽 검증**: 로드밸런싱 균등 분산 확인
+- ✅ **무중단 배포 검증**: 배포 중 200 응답 유지 (다운타임 0초)
 
-2. **EC2-2 인스턴스 생성** (1시간)
-   - 현재 EC2의 AMI 생성 (백업)
-   - AMI로 EC2-2 인스턴스 복제
-   - Elastic IP 할당 및 설정
+**📊 핵심 성과**:
+- **고가용성**: Multi-AZ 구성으로 99.9% 가용성 달성
+- **무중단 배포**: CI/CD Rolling Update 자동화 (배포 중 서비스 중단 없음)
+- **성능**: SLA 목표 초과 달성 (응답 속도 86% 향상, 에러율 84% 감소)
+- **확장성**: ALB Auto Scaling 준비 완료 (트래픽 증가 시 EC2 추가 가능)
 
-3. **ALB 생성 및 Target Group 설정** (1.5시간)
-   - Application Load Balancer 생성
-   - Target Group 생성 (HTTP:8000, Health Check /health/)
-   - 2개 EC2 인스턴스 등록
-   - Security Group 구성 (ALB ↔ EC2)
-
-4. **ACM SSL 인증서 및 HTTPS** (1시간)
-   - ACM 인증서 발급 (*.teammoa.duckdns.org)
-   - DNS 검증 (Route 53 또는 Email)
-   - HTTPS Listener 추가 (443)
-   - HTTP → HTTPS 리디렉션 (80)
-
-5. **Django 설정 변경** (30분)
-   - ALLOWED_HOSTS에 ALB DNS 추가
-   - Health Check 엔드포인트 개선 (DB/Redis 상태 확인)
-   - WebSocket Sticky Session 설정
-
-6. **CI/CD 파이프라인 수정** (1시간)
-   - Rolling Update 배포 로직 구현
-   - Target Group에서 Deregister → 배포 → Register
-   - GitHub Secrets 추가 (EC2_1_ID, EC2_2_ID, TARGET_GROUP_ARN)
-
-7. **테스트 및 검증** (1시간)
-   - Target Group Health 확인 (2개 모두 healthy)
-   - 로드밸런싱 테스트 (트래픽 분산 확인)
-   - 무중단 배포 검증 (200 응답 유지)
-   - WebSocket 연결 안정성 테스트
-
-**📊 예상 성과**:
-- **고가용성**: 99.9% 가용성 달성 (Multi-AZ)
-- **무중단 배포**: 배포 중 다운타임 0초
-- **학습 효과**: AWS 핵심 서비스 (ALB, Target Group, ACM, CloudWatch)
-- **포트폴리오 강화**: "AWS 로드밸런서 기반 고가용성 아키텍처 구축"
+**🏗️ 인프라 구조**:
+```
+Internet → ALB (HTTPS:443)
+           ├─ EC2-Web1 (ap-northeast-2a) → MySQL + Redis
+           └─ EC2-Web2 (ap-northeast-2b) → MySQL + Redis
+```
 
 **💰 비용**:
-- 프리티어 기간 (1년): 월 $22 (ALB만)
+- 현재: 월 약 $22 (ALB만, EC2는 프리티어)
 - 프리티어 종료 후: 월 $40~$50 (ALB + EC2 2대)
 
 **📚 참고 문서**:
+- [부하 테스트 리포트](./docs/guides/load-testing/load-test-report.md)
 - [ALB 구축 가이드](./docs/guides/alb_deployment_guide.md)
 - [infrastructure.md - ALB 섹션](./docs/portfolio/infrastructure.md#aws-application-load-balancer-alb)
-- [README.md - 시스템 아키텍처](./README.md#1-시스템-아키텍처-infrastructure)
 
 ---
 
@@ -264,6 +240,8 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 6. **회원 탈퇴 및 미인증 계정 관리 개선** - ✅ 완료 (Soft Delete + 자동 정리, 2025.11.24)
 7. **포트폴리오 문서 작성** - ✅ 완료 (9개 문서, 96페이지, 150+ 코드, 2025.12.08)
 8. **문서 구조 재구성** - ✅ 완료 (6단계 카테고리, 64% 간소화, 2025.12.08)
+9. **AWS ALB + Multi-AZ 고가용성 인프라 구축** - ✅ 완료 (2025.12.16)
+   - ALB 로드밸런싱, Rolling Update, 부하 테스트 완료
 
 ### 📋 다음 목표 (우선순위 순)
 
@@ -283,12 +261,13 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 - Backend: Django 4.x, Python, Django REST Framework, django-allauth
 - Frontend: HTML5, CSS3, JavaScript (Canvas API)
 - Database: MySQL 8.0
-- Infrastructure: Docker, Docker Compose, Nginx, AWS EC2
+- Infrastructure: Docker, Docker Compose, Nginx, AWS EC2, **AWS ALB (Application Load Balancer)**
 - Cache & WebSocket: Redis 7
 - Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 - Authentication: OAuth 2.0 (Google, GitHub)
-- Testing: pytest, DRF TestClient (207 tests)
-- Deployment: Docker Hub, AWS EC2 (3.34.102.12)
+- Testing: pytest, DRF TestClient (225 tests), Locust (부하 테스트)
+- Deployment: Docker Hub, AWS ALB + EC2 Multi-AZ (고가용성 구성)
+- CI/CD: GitHub Actions (Rolling Update 무중단 배포)
 
 ## 📋 개발 가이드라인
 
@@ -477,4 +456,4 @@ docker compose -f docker-compose.prod.yml ps
 
 
 ---
-*최종 업데이트: 2025.12.08 - 문서 구조 재구성 완료 (6단계 카테고리 체계, 64% 간소화)*
+*최종 업데이트: 2025.12.16 - AWS ALB + Multi-AZ 고가용성 인프라 구축 및 부하 테스트 완료*
