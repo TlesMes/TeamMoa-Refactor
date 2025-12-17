@@ -142,7 +142,7 @@ DOCKER_PASSWORD            # Docker Hub 비밀번호
 ### GitHub Secrets 등록 방법
 
 1. **GitHub 저장소 접속**
-   - `https://github.com/your-username/TeamMoa`
+   - `https://github.com/TlesMes/TeamMoa-Refactor`
 
 2. **Settings → Secrets and variables → Actions**
    - `New repository secret` 클릭
@@ -220,7 +220,7 @@ git push origin main
 ### 2. GitHub Actions 자동 실행
 
 **Actions 탭에서 진행 상황 확인:**
-1. `https://github.com/your-username/TeamMoa/actions`
+1. `https://github.com/TlesMes/TeamMoa-Refactor/actions`
 2. 최신 워크플로우 클릭
 3. 3개 Job 확인:
    - ✅ Run Tests

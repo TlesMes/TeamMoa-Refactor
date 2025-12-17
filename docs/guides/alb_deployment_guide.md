@@ -612,12 +612,12 @@ TARGET_GROUP_ARN="arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targe
 # EC2-1 등록
 aws elbv2 register-targets \
   --target-group-arn $TARGET_GROUP_ARN \
-  --targets Id=i-xxxxxxxxxxxxxxxxx,Port=8000
+  --targets Id=i-xxxxxxxxxxxxxxxxx,Port=80
 
 # EC2-2 등록
 aws elbv2 register-targets \
   --target-group-arn $TARGET_GROUP_ARN \
-  --targets Id=$EC2_2_ID,Port=8000
+  --targets Id=$EC2_2_ID,Port=80
 
 # Target Health 확인 (1~2분 후)
 aws elbv2 describe-target-health \
@@ -1140,13 +1140,13 @@ jobs:
         run: |
           aws elbv2 deregister-targets \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=80
 
       - name: Wait for EC2-1 to drain connections
         run: |
           aws elbv2 wait target-deregistered \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=80
 
       - name: Deploy to EC2-1
         uses: appleboy/ssh-action@v1.0.0
@@ -1175,13 +1175,13 @@ jobs:
         run: |
           aws elbv2 register-targets \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=80
 
       - name: Wait for EC2-1 to be healthy
         run: |
           aws elbv2 wait target-in-service \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_1_INSTANCE_ID }},Port=80
 
       # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       # Deploy to EC2-2
@@ -1190,13 +1190,13 @@ jobs:
         run: |
           aws elbv2 deregister-targets \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=80
 
       - name: Wait for EC2-2 to drain connections
         run: |
           aws elbv2 wait target-deregistered \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=80
 
       - name: Deploy to EC2-2
         uses: appleboy/ssh-action@v1.0.0
@@ -1225,13 +1225,13 @@ jobs:
         run: |
           aws elbv2 register-targets \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=80
 
       - name: Wait for EC2-2 to be healthy
         run: |
           aws elbv2 wait target-in-service \
             --target-group-arn ${{ secrets.TARGET_GROUP_ARN }} \
-            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=8000
+            --targets Id=${{ secrets.EC2_2_INSTANCE_ID }},Port=80
 
       - name: Verify deployment
         run: |
@@ -1266,9 +1266,9 @@ aws elbv2 describe-target-health \
     {
       "Target": {
         "Id": "i-xxxxxxxxxxxxxxxxx",
-        "Port": 8000
+        "Port": 80
       },
-      "HealthCheckPort": "8000",
+      "HealthCheckPort": "80",
       "TargetHealth": {
         "State": "healthy"
       }
@@ -1276,9 +1276,9 @@ aws elbv2 describe-target-health \
     {
       "Target": {
         "Id": "i-yyyyyyyyyyyyyyyyy",
-        "Port": 8000
+        "Port": 80
       },
-      "HealthCheckPort": "8000",
+      "HealthCheckPort": "80",
       "TargetHealth": {
         "State": "healthy"
       }
