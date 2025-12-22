@@ -7,9 +7,6 @@
 
 ## 목차
 - [배포 관련](#배포-관련)
-  - [1. HTTPS 리디렉션 루프](#1--https-리디렉션-루프-무한-리디렉션)
-  - [2. Docker Health Check 실패](#2--docker-health-check-실패-502-bad-gateway)
-  - [9. ALB 무중단 배포 중 502 Bad Gateway](#9--alb-무중단-배포-중-502-bad-gateway-connection-draining)
 - [Django 관련](#django-관련)
 - [WebSocket 관련](#websocket-관련)
 - [데이터베이스 관련](#데이터베이스-관련)
