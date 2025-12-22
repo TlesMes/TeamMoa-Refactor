@@ -37,12 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * ISO week 형식(YYYY-Www)을 시작일/종료일로 변환
-     * @param {string} weekString - ISO week 형식 (예: "2025-W40")
-     * @returns {{startDate: string, endDate: string}} - ISO 형식 날짜 (YYYY-MM-DD)
+     * ISO week format (YYYY-W##) → YYYY-MM-DD (월요일)
+     * scheduler_upload.js의 getWeekStartDate()와 동일한 로직
      */
-    function weekToDateRange(weekString) {
-        const [year, week] = weekString.split('-W').map(Number);
+    function getWeekStartDate(weekValue) {
+        const [year, week] = weekValue.split('-W').map(Number);
 
         // ISO 주차 규칙: 1월 4일이 포함된 주가 Week 1
         const simple = new Date(year, 0, 4); // 1월 4일
@@ -54,13 +53,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const mondayOfTargetWeek = new Date(mondayOfWeek1);
         mondayOfTargetWeek.setDate(mondayOfWeek1.getDate() + (week - 1) * 7);
 
-        // 일요일 (월요일 + 6일)
-        const sundayOfTargetWeek = new Date(mondayOfTargetWeek);
-        sundayOfTargetWeek.setDate(mondayOfTargetWeek.getDate() + 6);
+        // YYYY-MM-DD 형식으로 반환
+        const yyyy = mondayOfTargetWeek.getFullYear();
+        const mm = String(mondayOfTargetWeek.getMonth() + 1).padStart(2, '0');
+        const dd = String(mondayOfTargetWeek.getDate()).padStart(2, '0');
+
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    /**
+     * ISO week 형식(YYYY-Www)을 시작일/종료일로 변환
+     * @param {string} weekString - ISO week 형식 (예: "2025-W40")
+     * @returns {{startDate: string, endDate: string}} - ISO 형식 날짜 (YYYY-MM-DD)
+     */
+    function weekToDateRange(weekString) {
+        const startDate = getWeekStartDate(weekString);
+        const endDate = new Date(startDate);
+        endDate.setDate(new Date(startDate).getDate() + 6);
+
+        const yyyy = endDate.getFullYear();
+        const mm = String(endDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(endDate.getDate()).padStart(2, '0');
 
         return {
-            startDate: mondayOfTargetWeek.toISOString().split('T')[0],
-            endDate: sundayOfTargetWeek.toISOString().split('T')[0]
+            startDate: startDate,
+            endDate: `${yyyy}-${mm}-${dd}`
         };
     }
 
