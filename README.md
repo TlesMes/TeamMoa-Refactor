@@ -131,22 +131,7 @@ Testing:   pytest (225 tests) | Locust (부하 테스트)
 #### 1. AWS 인프라 아키텍처
 > 프로덕션 배포 환경: AWS ALB + Multi-AZ EC2 + Docker + CI/CD 파이프라인
 
-<!-- 📸 이미지 위치: AWS ALB 아키텍처 -->
-```
-필요한 스크린샷:
-파일명: aws_alb_architecture.png
-위치: docs/images/
-내용: ALB → EC2-Web1 (ap-northeast-2a), EC2-Web2 (ap-northeast-2b) → MySQL + Redis
-출처: AWS 콘솔 또는 draw.io로 작성
-```
 ![AWS Infrastructure](./docs/images/aws_alb_architecture.png)
-
-**구성**:
-```
-Internet → AWS ALB (HTTPS:443)
-           ├─ EC2-Web1 (ap-northeast-2a)
-           └─ EC2-Web2 (ap-northeast-2b)
-```
 
 #### 2. CI/CD 파이프라인 흐름
 > GitHub Actions 기반 자동화된 테스트, 빌드, 배포 워크플로우
