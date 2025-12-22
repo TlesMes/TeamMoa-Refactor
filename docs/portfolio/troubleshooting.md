@@ -1,12 +1,15 @@
 # 트러블슈팅
 
-> **8건의 핵심 문제 해결 과정**
+> **9건의 핵심 문제 해결 과정**
 > 문제 정의 → 원인 분석 → 해결 과정 → 재발 방지
 
 ---
 
 ## 목차
 - [배포 관련](#배포-관련)
+  - [1. HTTPS 리디렉션 루프](#1--https-리디렉션-루프-무한-리디렉션)
+  - [2. Docker Health Check 실패](#2--docker-health-check-실패-502-bad-gateway)
+  - [9. ALB 무중단 배포 중 502 Bad Gateway](#9--alb-무중단-배포-중-502-bad-gateway-connection-draining)
 - [Django 관련](#django-관련)
 - [WebSocket 관련](#websocket-관련)
 - [데이터베이스 관련](#데이터베이스-관련)
@@ -109,7 +112,109 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ---
 
-### 3. 🟡 GitHub Actions Dynamic Security Group IP 제거 실패
+### 3. 🟡 ALB 무중단 배포 중 502 Bad Gateway (Connection Draining)
+
+**중요도**: High | **영향 범위**: 무중단 배포 실패, 배포 중 약 5% 요청 실패
+
+#### 문제 상황
+
+CI/CD 파이프라인을 통한 자동 배포 중 1~2초간 502 Bad Gateway 에러 발생. Multi-AZ (2대 EC2 서버) 환경에서 Rolling Update 방식으로 배포 시 일부 요청이 실패하는 문제.
+
+#### 원인 분석
+
+1. **Target Deregister 직후 즉시 컨테이너 재시작**
+   - ALB에서 서버를 제거한 직후 바로 Django 컨테이너 재시작
+   - 진행 중인 요청이 강제 종료됨
+
+2. **Connection Draining 설정 누락**
+   - ALB Target Group에서 Connection Draining (대기 시간) 미설정
+   - 기존 연결이 완전히 종료되기 전에 서버가 내려감
+
+3. **Health Check 전 트래픽 유입**
+   - 컨테이너 재시작 후 Health Check 통과 전에 트래픽 라우팅
+   - 아직 준비되지 않은 서버로 요청 전달 → 502 에러
+
+#### 해결 과정
+
+**1. ALB Connection Draining 300초 설정**
+```bash
+# Target Group Deregistration Delay 설정
+aws elbv2 modify-target-group-attributes \
+  --target-group-arn $TARGET_GROUP_ARN \
+  --attributes Key=deregistration_delay.timeout_seconds,Value=300
+```
+
+**2. Rolling Update 배포 순서 조정**
+```bash
+# GitHub Actions Workflow에서 자동화
+1. 서버 1번 Target Deregister
+2. 300초 대기 (Connection Draining)
+3. 서버 1번 컨테이너 재시작
+4. Health Check 통과 확인 (3회, 10초 간격)
+5. 서버 1번 Target Register
+6. 서버 2번도 동일 순서로 반복
+```
+
+**3. 배포 스크립트 자동화**
+```yaml
+# .github/workflows/deploy.yml
+- name: Rolling Update - Server 1
+  run: |
+    # Deregister
+    aws elbv2 deregister-targets --target-group-arn $TG_ARN \
+      --targets Id=$EC2_1_ID
+
+    # Wait for Connection Draining
+    sleep 300
+
+    # Deploy
+    ssh ec2-server-1 "cd ~/TeamMoa && docker compose down && docker compose up -d"
+
+    # Wait for Health Check
+    for i in {1..3}; do
+      sleep 10
+      # Health check logic
+    done
+
+    # Register
+    aws elbv2 register-targets --target-group-arn $TG_ARN \
+      --targets Id=$EC2_1_ID
+```
+
+#### 검증 결과
+
+**Locust 부하 테스트 (배포 중)**
+- 총 요청: 15,000건
+- 502 에러: **0건** (개선 전: 약 750건, 5%)
+- 다운타임: **0초**
+- 평균 응답 시간: 52ms
+
+**결과**: 완전한 무중단 배포 달성
+
+#### 재발 방지
+
+1. **배포 스크립트 표준화**
+   - GitHub Actions Workflow에 Connection Draining 대기 로직 필수화
+   - 모든 배포는 자동화된 파이프라인을 통해서만 실행
+
+2. **부하 테스트 통합**
+   - 배포 후 자동 부하 테스트 실시 (Locust)
+   - 502 에러 0건 확인 후 다음 서버로 진행
+
+3. **모니터링 강화**
+   - CloudWatch Alarms: ALB 502 에러 발생 시 즉시 알림
+   - Nginx/Django 로그에서 배포 중 에러율 추적
+
+#### 배운 점
+
+- **"무중단 배포"의 정의**: 단순히 서버를 끄지 않는 것이 아니라, **진행 중인 요청까지 안전하게 처리**하는 것
+- **인프라 레이어의 세밀함**: Target Deregister, Connection Draining, Health Check 순서의 중요성
+- **데이터 기반 검증**: 부하 테스트 없이는 "무중단"을 증명할 수 없음
+- **운영과 개발의 차이**: 튜토리얼 수준 구현과 프로덕션 수준 구현의 차이 체감
+
+---
+
+### 4. 🟡 GitHub Actions Dynamic Security Group IP 제거 실패
 
 **중요도**: High | **영향 범위**: CI/CD 파이프라인 중단, 배포 불가
 
@@ -382,11 +487,16 @@ for team in teams:
    - 서비스 중단 → 즉시 복구
    - `SECURE_PROXY_SSL_HEADER` 설정으로 프록시 환경 이해
 
-2. **username/email 영구 점유** (#4)
+2. **ALB 무중단 배포 중 502 에러** (#3)
+   - 5% 요청 실패 → 완전한 무중단 배포 달성
+   - Connection Draining 300초 대기 로직으로 진행 중인 요청 안전 처리
+   - Locust 부하 테스트로 "무중단"을 정량적으로 검증
+
+3. **username/email 영구 점유** (#4)
    - 재가입 불가 → 자동 정리 시스템 구축
    - Soft Delete + 조건부 Unique 제약으로 DB 설계 개선
 
-3. **N+1 쿼리** (#8)
+4. **N+1 쿼리** (#8)
    - 11번 쿼리 → 1번 쿼리로 최적화 (10배 쿼리 감소)
    - `select_related()`로 ORM 최적화 학습
 
@@ -394,11 +504,11 @@ for team in teams:
 
 **중요도별 분포**
 1. 🔴 **Critical** (3건): 서비스 중단, 사용자 경험 직접 영향
-2. 🟡 **High** (3건): 배포 안정성, 핵심 기능 장애
+2. 🟡 **High** (4건): 배포 안정성, 무중단 배포, 핵심 기능 장애
 3. 🟢 **Medium** (2건): 데이터 정합성, 개발 환경
 
 **기술 영역별 분포**
-1. **인프라 계층** (3건): HTTPS, Health Check, Security Group
+1. **인프라 계층** (4건): HTTPS, Health Check, Security Group, ALB Connection Draining
 2. **데이터 계층** (3건): username/email, 트랜잭션, N+1 쿼리
 3. **실시간 통신** (2건): WebSocket 연결, Nginx 프록시
 
@@ -408,25 +518,29 @@ for team in teams:
 - Health check 엔드포인트 표준화
 - CI/CD cleanup 단계 `if: always()` 적용
 - Management Command 크론 자동화
+- ALB Connection Draining 300초 대기 로직 자동화
 
 **모니터링**
 - Django Debug Toolbar로 쿼리 수 실시간 확인
 - Docker logs로 컨테이너 상태 추적
 - Browser DevTools Network 탭으로 WebSocket 연결 검증
+- Locust 부하 테스트로 배포 중 에러율 측정
 
 **문서화**
-- 트러블슈팅 8건 문서화로 지식 체계화
+- 트러블슈팅 9건 문서화로 지식 체계화
 - 코드 위치 링크로 추적성 확보
 
 ### 기술적 성장
 
 - **프로덕션 환경 이해**: 개발과 배포 환경의 차이 (프록시, HTTPS, Health Check)
+- **무중단 배포 설계**: ALB Connection Draining, Rolling Update 순서의 중요성
 - **트랜잭션 설계**: 원자성, 일관성, 격리 수준 고려
 - **성능 최적화**: N+1 쿼리 해결, ORM 최적화 기법
 - **실시간 통신**: ASGI, WebSocket, Nginx 프로토콜 협상
+- **데이터 기반 검증**: 부하 테스트로 추상적 목표("무중단")를 구체적 숫자로 증명
 
 ---
 
-**작성일**: 2025년 12월 7일
-**버전**: 2.0
-**총 트러블슈팅 건수**: 8건
+**작성일**: 2025년 12월 23일
+**버전**: 2.1
+**총 트러블슈팅 건수**: 9건
