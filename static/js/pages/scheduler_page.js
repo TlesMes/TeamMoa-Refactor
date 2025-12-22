@@ -42,30 +42,25 @@ document.addEventListener('DOMContentLoaded', function() {
      * @returns {{startDate: string, endDate: string}} - ISO 형식 날짜 (YYYY-MM-DD)
      */
     function weekToDateRange(weekString) {
-        // "2025-W40" -> year: 2025, week: 40
-        const [yearStr, weekStr] = weekString.split('-W');
-        const year = parseInt(yearStr, 10);
-        const week = parseInt(weekStr, 10);
+        const [year, week] = weekString.split('-W').map(Number);
 
-        // ISO 8601 기준: Week 1 = 1월 4일이 포함된 주
-        const jan4 = new Date(year, 0, 4); // 1월 4일
-        const jan4DayOfWeek = jan4.getDay() || 7; // 일요일=0 -> 7로 변환
+        // ISO 주차 규칙: 1월 4일이 포함된 주가 Week 1
+        const simple = new Date(year, 0, 4); // 1월 4일
+        const dayOfWeek = simple.getDay() || 7; // 일요일 = 7
+        const mondayOfWeek1 = new Date(simple);
+        mondayOfWeek1.setDate(simple.getDate() - dayOfWeek + 1); // 첫 주 월요일
 
-        // Week 1의 월요일
-        const week1Monday = new Date(jan4);
-        week1Monday.setDate(jan4.getDate() - (jan4DayOfWeek - 1));
+        // 목표 주의 월요일 계산
+        const mondayOfTargetWeek = new Date(mondayOfWeek1);
+        mondayOfTargetWeek.setDate(mondayOfWeek1.getDate() + (week - 1) * 7);
 
-        // 선택한 주의 월요일
-        const targetMonday = new Date(week1Monday);
-        targetMonday.setDate(week1Monday.getDate() + (week - 1) * 7);
-
-        // 일요일
-        const targetSunday = new Date(targetMonday);
-        targetSunday.setDate(targetMonday.getDate() + 6);
+        // 일요일 (월요일 + 6일)
+        const sundayOfTargetWeek = new Date(mondayOfTargetWeek);
+        sundayOfTargetWeek.setDate(mondayOfTargetWeek.getDate() + 6);
 
         return {
-            startDate: targetMonday.toISOString().split('T')[0],
-            endDate: targetSunday.toISOString().split('T')[0]
+            startDate: mondayOfTargetWeek.toISOString().split('T')[0],
+            endDate: sundayOfTargetWeek.toISOString().split('T')[0]
         };
     }
 
