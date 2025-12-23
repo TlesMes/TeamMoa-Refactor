@@ -295,7 +295,7 @@ TeamMoa/
 ├── .github/workflows/  # GitHub Actions CI/CD 파이프라인
 ├── docker-compose.yml  # 개발 환경 Docker 설정
 ├── docker-compose.prod.yml # 프로덕션 환경 Docker 설정
-└── pytest.ini          # 테스트 설정 (221개 테스트)
+└── pytest.ini          # 테스트 설정 (225개 테스트)
 ```
 
 ---
