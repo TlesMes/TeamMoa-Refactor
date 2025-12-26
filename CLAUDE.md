@@ -7,6 +7,46 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
+### 🚀 마일스톤-TODO 연동 기능 개선 (2025.12.26)
+
+**📋 계획 수립 완료**:
+- ✅ **비즈니스 설계**: 마일스톤-TODO 연동 및 자동 진행률 관리 시스템
+- ✅ **진행률 관리 방식**: 수동 모드 + AUTO 모드 (기본값: `auto`)
+- ✅ **구현 계획**: 5단계 7일 계획 수립 완료
+- ✅ **문서 작성**: milestone_improvement_plan.md, milestone_scenario_and_db_changes.md
+
+**🎯 핵심 기능**:
+1. **진행률 관리 방식 선택**
+   - 수동 모드: 팀장이 슬라이더로 직접 조정 (주관적 추정)
+   - AUTO 모드: TODO 완료율로 자동 계산 (객관적 지표)
+
+2. **TODO-마일스톤 연결**
+   - TODO를 마일스톤에 할당
+   - TODO 완료 시 마일스톤 진행률 자동 갱신 (AUTO 모드)
+   - 100% 도달 시 마일스톤 자동 완료
+
+3. **모드 전환 정책**
+   - 수동 → AUTO: 즉시 TODO 기반 재계산
+   - AUTO → 수동: 기존 진행률 유지
+
+**📦 구현 계획** (5단계):
+- Phase 1 (Day 1): 모델 및 마이그레이션
+  - Milestone.progress_mode (CharField, default='auto')
+  - Todo.milestone (ForeignKey, SET_NULL)
+- Phase 2 (Day 2): 서비스 레이어 확장
+- Phase 3 (Day 3): API 레이어
+- Phase 4 (Day 4-6): 프론트엔드 구현
+- Phase 5 (Day 7): 테스트 및 배포
+
+**📚 참고 문서**:
+- [마일스톤 개선 계획](./docs/architecture/design/milestone_improvement_plan.md)
+- [시나리오 및 DB 변경](./docs/architecture/design/milestone_scenario_and_db_changes.md)
+- [구현 계획 파일](~/.claude/plans/rosy-wondering-tide.md)
+
+**다음 작업**: Phase 1 구현 시작 - 모델 및 마이그레이션
+
+---
+
 ### 📚 포트폴리오 문서화 완료! (2025.12.08)
 
 **✅ 포트폴리오 문서 완료** (9개 문서, 96페이지, 150+ 코드):
@@ -229,16 +269,25 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 8. **문서 구조 재구성** - ✅ 완료 (6단계 카테고리, 64% 간소화, 2025.12.08)
 9. **AWS ALB + Multi-AZ 고가용성 인프라 구축** - ✅ 완료 (2025.12.16)
    - ALB 로드밸런싱, Rolling Update, 부하 테스트 완료
+10. **마일스톤-TODO 연동 기능 개선 계획 수립** - ✅ 완료 (2025.12.26)
+   - 비즈니스 설계, 구현 계획 문서화, 5단계 7일 계획 수립
 
 ### 📋 다음 목표 (우선순위 순)
 
-1. **성능 최적화** (3-4시간) - ⏳ 다음 작업 추천
+1. **마일스톤-TODO 연동 기능 구현** (7일) - ⏳ 다음 작업
+   - Phase 1: 모델 및 마이그레이션
+   - Phase 2: 서비스 레이어 확장
+   - Phase 3: API 레이어
+   - Phase 4: 프론트엔드 구현
+   - Phase 5: 테스트 및 배포
+
+2. **성능 최적화** (3-4시간)
    - 서비스 레이어 기반 쿼리 최적화
    - N+1 쿼리 해결
    - 캐싱 전략 구현 (Redis 활용)
    - 데이터베이스 인덱스 추가
 
-2. **모니터링 시스템 구축** (2-3시간)
+3. **모니터링 시스템 구축** (2-3시간)
    - Health check 개선 (Django health 엔드포인트 추가)
    - 로깅 시스템 강화
    - 에러 추적 (Sentry 연동)

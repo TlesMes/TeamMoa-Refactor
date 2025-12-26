@@ -1,6 +1,6 @@
 # 트러블슈팅
 
-> **9건의 핵심 문제 해결 과정**
+> **10건의 핵심 문제 해결 과정**
 > 문제 정의 → 원인 분석 → 해결 과정 → 재발 방지
 
 ---
@@ -437,9 +437,146 @@ location /ws/ {
 
 ---
 
+### 8. 🟡 Multi-AZ 환경에서 WebSocket 연결 끊김 (ALB Sticky Session)
+
+**중요도**: High | **영향 범위**: 실시간 마인드맵 협업 중 연결 끊김, 사용자 작업 손실
+
+#### 문제 상황
+
+AWS ALB + Multi-AZ (2대 EC2) 환경에서 WebSocket 연결이 불규칙하게 끊기는 현상 발생. 사용자가 마인드맵을 편집하는 중 갑자기 연결이 끊겨 작업 내용이 유실되는 문제.
+
+**증상**:
+```javascript
+// 브라우저 콘솔
+WebSocket connection to 'wss://teammoa.shop/ws/mindmap/1/1/' closed unexpectedly
+Code: 1006 (Abnormal Closure)
+```
+
+**발생 빈도**: 약 30초~1분마다 랜덤하게 발생
+
+#### 원인 분석
+
+**1. ALB의 Round-Robin 라우팅**
+- ALB는 기본적으로 요청을 두 서버에 균등 분배 (Round-Robin)
+- WebSocket 연결 후 추가 HTTP 요청(API 호출)이 다른 서버로 라우팅될 수 있음
+- 예: 연결은 Server 1, API 요청은 Server 2
+
+**2. WebSocket의 Stateful 특성**
+- WebSocket은 **지속 연결(persistent connection)** 프로토콜
+- 연결이 맺어진 서버와 계속 통신해야 함
+- 서버가 바뀌면 세션 컨텍스트 손실 → 연결 끊김
+
+**3. Redis Channels Layer만으로는 불충분**
+```python
+# TeamMoa/settings/base.py
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {"hosts": [(REDIS_HOST, 6379)]},
+    },
+}
+```
+- Redis는 **서버 간 메시지 전달**(Pub/Sub)만 담당
+- **연결 유지**는 각 서버의 Daphne가 담당
+- 사용자가 Server 1에 연결되어 있는데, 다음 요청이 Server 2로 가면 Redis가 메시지를 전달해도 연결 자체가 끊김
+
+#### 해결 과정
+
+**ALB Target Group에 Sticky Session 활성화**
+
+```bash
+# AWS Console 설정
+1. EC2 > Target Groups > teammoa-tg 선택
+2. Attributes 탭 > Edit
+3. Stickiness 활성화
+   - Stickiness type: Application-based cookie
+   - Cookie name: app_cookie
+   - Duration: 1 hour (3600초)
+```
+
+**Sticky Session 동작 원리**:
+```
+[사용자A - 첫 요청]
+└─ ALB → Server 1 선택 (Round-Robin)
+   └─ Set-Cookie: app_cookie=server1_identifier
+   └─ WebSocket 연결 맺음
+
+[사용자A - 후속 요청]
+└─ Cookie: app_cookie=server1_identifier 포함
+   └─ ALB → Server 1로 고정 라우팅 (쿠키 기반)
+   └─ 기존 WebSocket 연결 유지
+```
+
+#### 검증 결과
+
+**테스트 시나리오**:
+1. 마인드맵 페이지 접속 (WebSocket 연결)
+2. 5분간 연속 노드 생성/이동/삭제 (총 100회 작업)
+3. 브라우저 콘솔에서 연결 상태 모니터링
+
+**Before (Sticky Session 미설정)**:
+- WebSocket 연결 끊김: **약 7~10회** (1분마다)
+- 작업 손실: 약 10~15%
+- 사용자 경험: 매우 불안정
+
+**After (Sticky Session 활성화)**:
+- WebSocket 연결 끊김: **0회**
+- 작업 손실: 0%
+- 세션 지속 시간: 1시간 (설정값)
+- 사용자 경험: 안정적
+
+#### 기술 스택별 역할 정리
+
+**1. ALB Sticky Session**
+- **목적**: 같은 사용자를 같은 서버로 고정
+- **방식**: 쿠키 기반 라우팅 (`app_cookie`)
+- **효과**: WebSocket 연결이 끊기지 않음
+
+**2. Redis Channels Layer**
+- **목적**: 서버 간 메시지 브로드캐스팅
+- **방식**: Pub/Sub 패턴
+- **효과**: 다른 서버의 사용자에게도 실시간 업데이트 전달
+
+**예시**:
+```
+[사용자A - Server 1에 연결]
+└─ 노드 생성 이벤트 발생
+   └─ Redis Pub/Sub → Server 2로 메시지 전달
+      └─ Server 2의 사용자B에게 실시간 업데이트
+
+[사용자A의 후속 요청]
+└─ ALB Sticky Session → Server 1로 라우팅 (연결 유지)
+```
+
+#### 재발 방지
+
+**1. 인프라 체크리스트**
+- [ ] ALB + Multi-AZ 구성 시 WebSocket용 Sticky Session 필수 활성화
+- [ ] Target Group Stickiness Duration 설정 (권장: 1시간)
+- [ ] Cookie 이름은 애플리케이션에서 이미 사용하지 않는 이름 선택
+
+**2. 모니터링**
+- CloudWatch Alarms: WebSocket 연결 끊김 로그 추적
+- Django 로그에서 `websocket.disconnect` 이벤트 빈도 모니터링
+- 1시간 이상 지속되는 세션 사용자 비율 추적 (Sticky Session 만료 대비)
+
+**3. 문서화**
+- 배포 가이드에 "Multi-AZ + WebSocket 사용 시 Sticky Session 필수" 명시
+- 인프라 다이어그램에 Sticky Session 설정 표시
+- 트러블슈팅 문서에 증상-원인-해결 기록
+
+#### 배운 점
+
+- **"서버 간 통신"과 "연결 유지"의 차이**: Redis는 메시지 전달만 하며, 연결 유지는 별개 문제
+- **WebSocket의 Stateful 특성**: HTTP와 달리 연결이 유지되어야 하므로 로드밸런싱 전략이 달라야 함
+- **인프라 레이어의 중요성**: 코드 레벨(Django Channels, Redis)만으로는 불충분하며, ALB 설정까지 고려해야 함
+- **쿠키 기반 라우팅**: Sticky Session은 단순하지만 강력한 솔루션
+
+---
+
 ## 데이터베이스 관련
 
-### 8. 🔴 N+1 쿼리 문제 (느린 페이지 로딩)
+### 9. 🔴 N+1 쿼리 문제 (느린 페이지 로딩)
 
 **중요도**: Critical | **영향 범위**: 팀 목록 페이지 성능 저하
 
@@ -478,7 +615,7 @@ for team in teams:
 
 ### Critical 이슈 해결 성과
 
-**🔴 3건의 Critical 이슈 해결로 서비스 안정화**
+**🔴 4건의 Critical 이슈 해결로 서비스 안정화**
 
 1. **HTTPS 리디렉션 루프** (#1)
    - 서비스 중단 → 즉시 복구
@@ -493,21 +630,21 @@ for team in teams:
    - 재가입 불가 → 자동 정리 시스템 구축
    - Soft Delete + 조건부 Unique 제약으로 DB 설계 개선
 
-4. **N+1 쿼리** (#8)
+4. **N+1 쿼리** (#9)
    - 11번 쿼리 → 1번 쿼리로 최적화 (10배 쿼리 감소)
    - `select_related()`로 ORM 최적화 학습
 
 ### 문제 해결 패턴 분석
 
 **중요도별 분포**
-1. 🔴 **Critical** (3건): 서비스 중단, 사용자 경험 직접 영향
-2. 🟡 **High** (4건): 배포 안정성, 무중단 배포, 핵심 기능 장애
+1. 🔴 **Critical** (4건): 서비스 중단, 사용자 경험 직접 영향
+2. 🟡 **High** (5건): 배포 안정성, 무중단 배포, 핵심 기능 장애
 3. 🟢 **Medium** (2건): 데이터 정합성, 개발 환경
 
 **기술 영역별 분포**
 1. **인프라 계층** (4건): HTTPS, Health Check, Security Group, ALB Connection Draining
 2. **데이터 계층** (3건): username/email, 트랜잭션, N+1 쿼리
-3. **실시간 통신** (2건): WebSocket 연결, Nginx 프록시
+3. **실시간 통신** (3건): WebSocket 연결, Nginx 프록시, ALB Sticky Session
 
 ### 재발 방지 전략
 
@@ -522,9 +659,10 @@ for team in teams:
 - Docker logs로 컨테이너 상태 추적
 - Browser DevTools Network 탭으로 WebSocket 연결 검증
 - Locust 부하 테스트로 배포 중 에러율 측정
+- CloudWatch Alarms로 WebSocket 연결 끊김 추적
 
 **문서화**
-- 트러블슈팅 9건 문서화로 지식 체계화
+- 트러블슈팅 10건 문서화로 지식 체계화
 - 코드 위치 링크로 추적성 확보
 
 ### 기술적 성장
@@ -533,11 +671,12 @@ for team in teams:
 - **무중단 배포 설계**: ALB Connection Draining, Rolling Update 순서의 중요성
 - **트랜잭션 설계**: 원자성, 일관성, 격리 수준 고려
 - **성능 최적화**: N+1 쿼리 해결, ORM 최적화 기법
-- **실시간 통신**: ASGI, WebSocket, Nginx 프로토콜 협상
+- **실시간 통신**: ASGI, WebSocket, Nginx 프로토콜 협상, ALB Sticky Session
 - **데이터 기반 검증**: 부하 테스트로 추상적 목표("무중단")를 구체적 숫자로 증명
+- **로드밸런싱 전략**: Stateful 프로토콜(WebSocket)과 Stateless 프로토콜(HTTP)의 차이 이해
 
 ---
 
-**작성일**: 2025년 12월 23일
-**버전**: 2.1
-**총 트러블슈팅 건수**: 9건
+**작성일**: 2025년 12월 26일
+**버전**: 2.2
+**총 트러블슈팅 건수**: 10건
