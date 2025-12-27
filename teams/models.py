@@ -73,9 +73,18 @@ class Milestone(models.Model):
     is_completed = models.BooleanField(default=False)
     completed_date = models.DateTimeField(null=True, blank=True)
     progress_percentage = models.IntegerField(default=0)
+    progress_mode = models.CharField(
+        max_length=20,
+        choices=[
+            ('manual', '수동 입력'),
+            ('auto', 'TODO 기반 자동 계산')
+        ],
+        default='auto',
+        help_text='진행률 관리 방식: 수동 입력 또는 TODO 기반 자동 계산'
+    )
     priority = models.CharField(max_length=20, choices=[
         ('critical', '최우선'),
-        ('high', '중요'), 
+        ('high', '중요'),
         ('medium', '보통'),
         ('low', '낮음'),
         ('minimal', '미미')
@@ -119,3 +128,89 @@ class Milestone(models.Model):
             'overdue': '지연됨'
         }
         return status_map.get(status, '알 수 없음')
+
+    def calculate_progress_from_todos(self):
+        """연결된 TODO들의 완료율을 계산하여 진행률 반환 (0-100)"""
+        from django.db.models import Count, Q
+
+        stats = self.todos.aggregate(
+            total=Count('id'),
+            completed=Count('id', filter=Q(is_completed=True))
+        )
+
+        total = stats['total']
+        if total == 0:
+            return 0
+
+        completed = stats['completed']
+        return int((completed / total) * 100)
+
+    def update_progress_from_todos(self):
+        """
+        AUTO 모드일 때 TODO 완료율로 진행률 갱신
+        Returns: (old_progress, new_progress) or (None, None) if not AUTO mode
+        """
+        if self.progress_mode != 'auto':
+            return None, None
+
+        from django.utils import timezone
+
+        old_progress = self.progress_percentage
+        new_progress = self.calculate_progress_from_todos()
+
+        self.progress_percentage = new_progress
+
+        # 100% 도달 시 자동 완료
+        if new_progress == 100 and not self.is_completed:
+            self.is_completed = True
+            self.completed_date = timezone.now()
+        # 100% 미만으로 떨어지면 완료 상태 해제
+        elif new_progress < 100 and self.is_completed:
+            self.is_completed = False
+            self.completed_date = None
+
+        self.save()
+        return old_progress, new_progress
+
+    def get_todo_stats(self):
+        """마일스톤에 연결된 TODO 통계 반환"""
+        from django.db.models import Count, Q
+
+        stats = self.todos.aggregate(
+            total=Count('id'),
+            completed=Count('id', filter=Q(is_completed=True)),
+            in_progress=Count('id', filter=Q(is_completed=False))
+        )
+
+        return {
+            'total': stats['total'],
+            'completed': stats['completed'],
+            'in_progress': stats['in_progress'],
+            'completion_rate': self.calculate_progress_from_todos()
+        }
+
+    def switch_progress_mode(self, new_mode):
+        """
+        진행률 모드 전환
+        - manual → auto: TODO 기반으로 즉시 재계산
+        - auto → manual: 기존 진행률 유지
+        """
+        if new_mode not in ['manual', 'auto']:
+            raise ValueError(f"Invalid progress_mode: {new_mode}")
+
+        old_mode = self.progress_mode
+
+        if old_mode == new_mode:
+            return  # 변경 없음
+
+        self.progress_mode = new_mode
+
+        # manual → auto: 즉시 재계산
+        if new_mode == 'auto':
+            old_progress, new_progress = self.update_progress_from_todos()
+            self.save()
+            return old_progress, new_progress
+
+        # auto → manual: 기존 진행률 유지
+        self.save()
+        return None, None
