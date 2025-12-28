@@ -52,17 +52,20 @@ Docker Hub (이미지 저장소)
    ↓
 2. GitHub Actions Trigger
    ↓
-3. Test (pytest 225개 테스트)
+<!-- AUTO:TEST_COUNT -->
+3. Test (pytest 249개 테스트)
    ↓
-4. Build (Docker 이미지 빌드 + Docker Hub 푸시)
+4. Update Documentation (테스트 통계 자동 업데이트)
    ↓
-5. Deploy (Rolling Update)
+5. Build (Docker 이미지 빌드 + Docker Hub 푸시)
+   ↓
+6. Deploy (Rolling Update)
    ├─ Web1 Deregister → Deploy → Health Check → Register
    └─ Web2 Deregister → Deploy → Health Check → Register
    ↓
-6. Verify (최종 확인)
+7. Verify (최종 확인)
    ↓
-7. Complete ✅
+8. Complete ✅
 ```
 
 ---
@@ -97,9 +100,11 @@ ALB → Web1 (50%) + Web2 (50%)  ← Web2 Register
 
 ### ⏱️ 배포 소요 시간
 
+<!-- AUTO:TEST_COUNT -->
 | 단계 | 소요 시간 | 설명 |
 |-----|---------|-----|
-| Test | 2~3분 | pytest 225개 테스트 실행 |
+| Test | 2~3분 | pytest 249개 테스트 실행 |
+| Update Docs | ~10초 | 테스트 통계 자동 업데이트 (변경 시 커밋) |
 | Build | 3~5분 | Docker 이미지 빌드 + 푸시 |
 | **Deploy Web1** | **3분** | Deregister(30s) + Deploy(1m) + Health Check(90s) |
 | **Deploy Web2** | **3분** | Deregister(30s) + Deploy(1m) + Health Check(90s) |
@@ -223,7 +228,7 @@ git push origin main
 1. `https://github.com/TlesMes/TeamMoa-Refactor/actions`
 2. 최신 워크플로우 클릭
 3. 3개 Job 확인:
-   - ✅ Run Tests
+   - ✅ Run Tests (테스트 + 문서 자동 업데이트 포함)
    - ✅ Build and Push Docker Image
    - 🔄 Deploy to ALB (Rolling Update)
 
@@ -495,6 +500,101 @@ aws ec2 revoke-security-group-ingress \
 **예방:**
 - CI/CD 파일에서 `if: always()` 사용 (이미 적용됨)
 - `continue-on-error: true` 사용 (이미 적용됨)
+
+---
+
+## 테스트 통계 자동 업데이트
+
+### 📊 자동 문서 업데이트 기능
+
+**개요:**
+- 테스트 실행 후 테스트 통계를 자동으로 문서에 반영
+- `README.md`, `CLAUDE.md`, `docs/portfolio/testing.md` 등 자동 업데이트
+- `[skip ci]` 태그로 무한 루프 방지
+
+### 🔄 동작 방식
+
+**1. 테스트 통계 생성:**
+```bash
+# pytest 실행 시 --generate-stats 플래그로 통계 생성
+pytest -v --tb=short --generate-stats
+
+# 결과: test_stats.json 생성 (gitignore에 포함)
+{
+  "accounts": {"service": 18, "api": 0, "ssr": 10, "total": 28},
+  "teams": {"service": 51, "api": 12, "ssr": 15, "total": 78},
+  ...
+}
+```
+
+**2. 문서 자동 업데이트:**
+```bash
+# scripts/update_test_docs.py 실행
+python scripts/update_test_docs.py
+
+# AUTO 마커가 있는 부분만 업데이트
+# <!-- AUTO:TEST_COUNT --> 249 → 새로운 테스트 수
+# <!-- AUTO-GENERATED-TEST-STATS:START --> ... <!-- END --> 테이블 교체
+```
+
+**3. 변경 감지 및 커밋:**
+```yaml
+- name: Check for documentation changes
+  id: check_docs
+  run: |
+    git diff --quiet docs/ README.md CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+- name: Commit and push documentation updates
+  if: steps.check_docs.outputs.changed == 'true'
+  run: |
+    git add docs/ README.md CLAUDE.md
+    git commit -m "docs: 테스트 통계 자동 업데이트 [skip ci]"
+    git push
+```
+
+### 🎯 AUTO 마커 사용법
+
+**테스트 개수 자동 업데이트:**
+```markdown
+Testing: pytest (<!-- AUTO:TEST_COUNT -->249<!-- AUTO:TEST_COUNT --> tests)
+```
+
+**테스트 통계 테이블 자동 업데이트:**
+```markdown
+<!-- AUTO-GENERATED-TEST-STATS:START -->
+| 앱 | 서비스 | API | SSR | 합계 |
+|---|---------|-----|-----|------|
+| Accounts | 18 | - | 10 | 28 |
+| Teams | 51 | 12 | 15 | 78 |
+| **총계** | **149** | **43** | **57** | **249** |
+<!-- AUTO-GENERATED-TEST-STATS:END -->
+```
+
+### ⚠️ 주의사항
+
+**무한 루프 방지:**
+- 문서 업데이트 커밋에 `[skip ci]` 태그 포함
+- `paths-ignore`에 `docs/**`, `*.md` 추가 (이중 안전장치)
+
+**권한 설정:**
+```yaml
+jobs:
+  test:
+    permissions:
+      contents: write  # docs 커밋 및 푸시 권한 필요
+```
+
+**gitignore:**
+```
+test_stats.json  # 자동 생성 파일, git에 포함하지 않음
+```
+
+### 📁 관련 파일
+
+- **스크립트**: `scripts/update_test_docs.py`
+- **워크플로우**: `.github/workflows/ci-cd.yml` (106-127번 라인)
+- **수동 실행**: `.github/workflows/update-test-docs.yml`
+- **마커 포함 문서**: `README.md`, `CLAUDE.md`, `docs/portfolio/testing.md`, `docs/README.md`
 
 ---
 
