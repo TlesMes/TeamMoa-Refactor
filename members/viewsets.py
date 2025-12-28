@@ -157,12 +157,13 @@ class TodoViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            updated_todo, is_completed = self.todo_service.complete_todo(
+            updated_todo, metadata = self.todo_service.complete_todo(
                 todo_id=todo.id,
                 team=team,
                 requester=request.user
             )
 
+            is_completed = metadata['is_completed']
             status_message = '완료되었습니다.' if is_completed else '미완료로 변경되었습니다.'
 
             return api_success_response(
@@ -170,7 +171,11 @@ class TodoViewSet(viewsets.ModelViewSet):
                 status_message,
                 data={
                     'is_completed': is_completed,
-                    'todo': TodoSerializer(updated_todo).data
+                    'todo': TodoSerializer(updated_todo).data,
+                    # 마일스톤 관련 추가 정보 (Phase 2)
+                    'milestone_updated': metadata.get('milestone_updated', False),
+                    'milestone_id': metadata.get('milestone_id'),
+                    'milestone_progress': metadata.get('milestone_progress')
                 }
             )
 

@@ -45,6 +45,7 @@ local_settings.py
 .pytest_cache/
 htmlcov/
 .tox/
+test_stats.json
 
 # 로그 파일
 *.log
@@ -60,4 +61,4 @@ logs/
 
 # Docker
 docker-compose.override.yml
-deploy/ssl/
+deploy/ssl/test_stats.json
