@@ -30,7 +30,8 @@ TeamMoa는 이러한 불편함을 해소하기 위해 **스케줄 조율, 마인
 - **실시간 협업** - WebSocket 기반 마인드맵 동시 편집, 팀원 커서 실시간 표시
 - **직관적인 UX** - 드래그앤드롭으로 TODO 할당, 마일스톤 일정 조정
 - **스마트 스케줄** - 팀원 가용 시간 자동 분석, 최적의 회의 시간 제안
-- **검증된 안정성** - 225개 테스트, 부하 테스트 통과 (95%ile 70ms)
+<!-- AUTO:TEST_COUNT -->
+- **검증된 안정성** - 33개 테스트, 부하 테스트 통과 (95%ile 70ms)
 - **프로덕션 운영** - AWS ALB + Multi-AZ 고가용성, 무중단 배포
 
 ---
@@ -123,7 +124,8 @@ Frontend:  HTML, CSS, JavaScript (Canvas API, Fetch API)
 Infrastructure: AWS ALB | EC2 (Multi-AZ) | Docker Compose | Nginx | ACM SSL
 DevOps:    GitHub Actions (Rolling Update) | Docker Hub
 Architecture: Service Layer Pattern | Hybrid SSR + API
-Testing:   pytest (225 tests) | Locust (부하 테스트)
+<!-- AUTO:TEST_COUNT -->
+Testing:   pytest (33 tests) | Locust (부하 테스트)
 ```
 
 ### 아키텍처 다이어그램
@@ -222,7 +224,8 @@ def view_teams(self):
 - **[프로젝트 개요](./docs/portfolio/overview.md)** - 배경, 핵심 기능, 성과, 학습 내용
 - **[아키텍처 설계](./docs/portfolio/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
 - **[인프라 및 배포](./docs/portfolio/infrastructure.md)** - Docker, CI/CD, AWS EC2
-- **[테스트 전략](./docs/portfolio/testing.md)** - 225개 테스트, fixture 패턴
+<!-- AUTO:TEST_COUNT -->
+- **[테스트 전략](./docs/portfolio/testing.md)** - 33개 테스트, fixture 패턴
 - **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 8건 문제 해결 사례
 
 ### 기능 상세
@@ -295,7 +298,8 @@ TeamMoa/
 ├── .github/workflows/  # GitHub Actions CI/CD 파이프라인
 ├── docker-compose.yml  # 개발 환경 Docker 설정
 ├── docker-compose.prod.yml # 프로덕션 환경 Docker 설정
-└── pytest.ini          # 테스트 설정 (225개 테스트)
+<!-- AUTO:TEST_COUNT -->
+└── pytest.ini          # 테스트 설정 (33개 테스트)
 ```
 
 ---

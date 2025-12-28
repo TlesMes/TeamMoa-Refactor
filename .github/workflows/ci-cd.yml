@@ -103,11 +103,28 @@ jobs:
         run: |
           python manage.py migrate --noinput
 
-      - name: Run tests
+      - name: Run tests and generate stats
         env:
           DJANGO_SETTINGS_MODULE: TeamMoa.settings.dev
         run: |
-          pytest -v --tb=short
+          pytest -v --tb=short --generate-stats
+
+      - name: Update documentation with test stats
+        run: python scripts/update_test_docs.py
+
+      - name: Check for documentation changes
+        id: check_docs
+        run: |
+          git diff --quiet docs/ README.md CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push documentation updates
+        if: steps.check_docs.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/ README.md CLAUDE.md test_stats.json
+          git commit -m "docs: 테스트 통계 자동 업데이트 [skip ci]"
+          git push
 
   build-and-push:
     name: Build and Push Docker Image
