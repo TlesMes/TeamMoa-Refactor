@@ -156,7 +156,7 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 **✅ 완전 자동화된 배포 시스템 구축**:
 - ✅ GitHub Actions 기반 3-stage 파이프라인 (Test → Build → Deploy)
 <!-- AUTO:TEST_COUNT -->
-- ✅ 33개 테스트 자동 실행
+- ✅ 249개 테스트 자동 실행
 - ✅ Docker 이미지 자동 빌드 및 Docker Hub 푸시
 - ✅ EC2 자동 배포 (무중단 배포)
 - ✅ Dynamic Security Group (배포 시에만 SSH 포트 개방)
@@ -244,8 +244,13 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 <!-- AUTO-GENERATED-TEST-STATS:START -->
 | 앱 | 서비스 | API | SSR | 합계 |
 |---|---------|-----|-----|------|
+| Accounts | 18 | - | 10 | 28 |
+| Teams | 51 | 12 | 15 | 78 |
+| Members | 32 | 10 | 3 | 45 |
+| Schedules | 12 | 13 | 9 | 34 |
 | Shares | 20 | - | 13 | 33 |
-| **총계** | **20** | **0** | **13** | **33** |
+| Mindmaps | 16 | 8 | 7 | 31 |
+| **총계** | **149** | **43** | **57** | **249** |
 <!-- AUTO-GENERATED-TEST-STATS:END -->
 
 **테스트 전략**:
@@ -259,7 +264,7 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 ## 🚀 완료된 단계
 
 <!-- AUTO:TEST_COUNT -->
-1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 33개 테스트, 2025.10.22)
+1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 249개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
 3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
 4. **HTTPS 설정** - ✅ 완료 (Let's Encrypt + DuckDNS, 2025.11.20)
@@ -302,7 +307,7 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 - Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 - Authentication: OAuth 2.0 (Google, GitHub)
 <!-- AUTO:TEST_COUNT -->
-- Testing: pytest, DRF TestClient (33 tests), Locust (부하 테스트)
+- Testing: pytest, DRF TestClient (249 tests), Locust (부하 테스트)
 - Deployment: Docker Hub, AWS ALB + EC2 Multi-AZ (고가용성 구성)
 - CI/CD: GitHub Actions (Rolling Update 무중단 배포)
 

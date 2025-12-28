@@ -51,8 +51,13 @@
 <!-- AUTO-GENERATED-TEST-STATS:START -->
 | 앱 | 서비스 | API | SSR | 합계 |
 |---|---------|-----|-----|------|
+| Accounts | 18 | - | 10 | 28 |
+| Teams | 51 | 12 | 15 | 78 |
+| Members | 32 | 10 | 3 | 45 |
+| Schedules | 12 | 13 | 9 | 34 |
 | Shares | 20 | - | 13 | 33 |
-| **총계** | **20** | **0** | **13** | **33** |
+| Mindmaps | 16 | 8 | 7 | 31 |
+| **총계** | **149** | **43** | **57** | **249** |
 <!-- AUTO-GENERATED-TEST-STATS:END -->
 
 ### 🔍 주요 검증 항목
@@ -67,7 +72,7 @@
 | Mindmaps | 노드/연결선 CRUD, 실시간 협업 |
 
 <!-- AUTO:TEST_COUNT -->
-### 왜 33개인가?
+### 왜 249개인가?
 
 **테스트 필요성 판단 기준**:
 
@@ -464,15 +469,15 @@ pytest --cov=. --cov-report=html
 ```bash
 ============================== test session starts ===============================
 <!-- AUTO:TEST_COUNT -->
-collected 33 items
+collected 249 items
 
 accounts/tests/test_auth_service.py::TestAuthService::test_register_user ✓
 accounts/tests/test_auth_service.py::TestAuthService::test_activate_account ✓
 <!-- AUTO:TEST_COUNT -->
-... (33개 테스트)
+... (249개 테스트)
 
 <!-- AUTO:TEST_COUNT -->
-============================== 33 passed in 142.0s ================================
+============================== 249 passed in 142.0s ================================
 ```
 
 ---
