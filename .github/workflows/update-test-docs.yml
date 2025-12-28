@@ -1,0 +1,50 @@
+name: Update Test Documentation (Manual)
+
+on:
+  workflow_dispatch:  # 수동 트리거 전용 (CI/CD에 통합되어 자동 실행됨)
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django
+
+      - name: Run tests and generate stats
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+        run: |
+          pytest --tb=short --maxfail=1 --generate-stats || true
+          # 테스트 실패해도 통계는 생성됨
+
+      - name: Update documentation
+        run: python scripts/update_test_docs.py
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet docs/ README.md CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/ README.md CLAUDE.md test_stats.json
+          git commit -m "docs: 테스트 통계 자동 업데이트 [skip ci]"
+          git push

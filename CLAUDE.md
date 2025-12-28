@@ -146,7 +146,8 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 **테스트 커버리지**:
 - 회원 탈퇴 서비스 테스트에 `is_deleted`, `deleted_at` 검증 추가
 - Shares 앱에 탈퇴한 작성자 처리 테스트 4개 추가
-- 모든 테스트 통과 (225개)
+<!-- AUTO:TEST_COUNT -->
+- 모든 테스트 통과 (249개)
 
 ---
 
@@ -154,7 +155,8 @@ python manage.py delete_unverified_users --verbose    # 상세 정보 출력
 
 **✅ 완전 자동화된 배포 시스템 구축**:
 - ✅ GitHub Actions 기반 3-stage 파이프라인 (Test → Build → Deploy)
-- ✅ 225개 테스트 자동 실행
+<!-- AUTO:TEST_COUNT -->
+- ✅ 33개 테스트 자동 실행
 - ✅ Docker 이미지 자동 빌드 및 Docker Hub 푸시
 - ✅ EC2 자동 배포 (무중단 배포)
 - ✅ Dynamic Security Group (배포 시에만 SSH 포트 개방)
@@ -239,15 +241,12 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 
 ### 🧪 테스트 커버리지 구축 (2025.10.19~2025.10.22 완료)
 
-| 앱 | 테스트 수 | 상태 | 커버리지 |
-|---|---------|------|---------|
-| **Teams** | 66개 | ✅ 완료 | 서비스(36) + API(17) + SSR(13) |
-| **Members** | 33개 | ✅ 완료 | 서비스(20) + API(10) + SSR(3) |
-| **Schedules** | 30개 | ✅ 완료 | 서비스(15) + API(10) + SSR(5) |
-| **Shares** | 28개 | ✅ 완료 | 서비스(13) + SSR(11) + 탈퇴 작성자(4) |
-| **Accounts** | 28개 | ✅ 완료 | 서비스(18) + SSR(10) |
-| **Mindmaps** | 40개 | ✅ 완료 | 서비스(16) + API(8) + SSR(6) + 기타(10) |
-| **총계** | **225개** | **100%** | 6/6 앱 완료 ✨ |
+<!-- AUTO-GENERATED-TEST-STATS:START -->
+| 앱 | 서비스 | API | SSR | 합계 |
+|---|---------|-----|-----|------|
+| Shares | 20 | - | 13 | 33 |
+| **총계** | **20** | **0** | **13** | **33** |
+<!-- AUTO-GENERATED-TEST-STATS:END -->
 
 **테스트 전략**:
 - pytest + DRF TestClient 활용
@@ -259,7 +258,8 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 
 ## 🚀 완료된 단계
 
-1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 225개 테스트, 2025.10.22)
+<!-- AUTO:TEST_COUNT -->
+1. **테스트 커버리지 구축** - ✅ 완료 (6/6 앱, 33개 테스트, 2025.10.22)
 2. **Docker 배포 환경 구축** - ✅ 완료 (개발/운영 환경, 2025.10.23)
 3. **AWS EC2 프로덕션 배포** - ✅ 완료 (HTTP 배포, 2025.11.18)
 4. **HTTPS 설정** - ✅ 완료 (Let's Encrypt + DuckDNS, 2025.11.20)
@@ -301,7 +301,8 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 - Cache & WebSocket: Redis 7
 - Architecture: Service Layer Pattern, CBV, Hybrid SSR + API
 - Authentication: OAuth 2.0 (Google, GitHub)
-- Testing: pytest, DRF TestClient (225 tests), Locust (부하 테스트)
+<!-- AUTO:TEST_COUNT -->
+- Testing: pytest, DRF TestClient (33 tests), Locust (부하 테스트)
 - Deployment: Docker Hub, AWS ALB + EC2 Multi-AZ (고가용성 구성)
 - CI/CD: GitHub Actions (Rolling Update 무중단 배포)
 

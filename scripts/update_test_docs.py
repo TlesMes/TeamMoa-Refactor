@@ -97,16 +97,22 @@ def generate_markdown_table(stats):
     return '\n'.join(table_lines), total
 
 
-def update_test_counts_with_comments(content, total_tests):
+def update_test_counts_with_comments(content, total_tests, stats):
     """<!-- AUTO:TEST_COUNT --> 주석이 있는 곳만 안전하게 치환
 
     Args:
         content: 파일 내용
         total_tests: 총 테스트 수
+        stats: 테스트 통계 딕셔너리 (카테고리별 숫자 치환용)
 
     Returns:
         tuple: (업데이트된 내용, 치환 횟수)
     """
+    # 카테고리별 총계 계산
+    total_service = sum(s.get('service', 0) for s in stats.values())
+    total_api = sum(s.get('api', 0) for s in stats.values())
+    total_ssr = sum(s.get('ssr', 0) for s in stats.values())
+
     lines = content.split('\n')
     updated_lines = []
     replacement_count = 0
@@ -144,6 +150,12 @@ def update_test_counts_with_comments(content, total_tests):
                 next_line = re.sub(r'총 \d+개 테스트', f'총 {total_tests}개 테스트', next_line)
                 # 9. "왜 N개인가?" (제목)
                 next_line = re.sub(r'왜 \d+개인가\?', f'왜 {total_tests}개인가?', next_line)
+                # 10. "서비스 레이어: N개" (코드 블록 내 카테고리별)
+                next_line = re.sub(r'서비스 레이어: \d+개', f'서비스 레이어: {total_service}개', next_line)
+                # 11. "SSR: N개"
+                next_line = re.sub(r'SSR: \d+개', f'SSR: {total_ssr}개', next_line)
+                # 12. "API: N개"
+                next_line = re.sub(r'API: \d+개', f'API: {total_api}개', next_line)
 
                 if next_line != original_line:
                     replacement_count += 1
@@ -157,6 +169,99 @@ def update_test_counts_with_comments(content, total_tests):
             i += 1
 
     return '\n'.join(updated_lines), replacement_count
+
+
+def update_auto_generated_test_stats(content, stats):
+    """AUTO-GENERATED-TEST-STATS 마커 기반 테이블 업데이트
+
+    Args:
+        content: 파일 내용
+        stats: 테스트 통계 딕셔너리
+
+    Returns:
+        tuple: (업데이트된 내용, 치환 여부)
+    """
+    # 마커만 매칭 (줄바꿈 문자에 독립적)
+    pattern = (
+        r'(<!-- AUTO-GENERATED-TEST-STATS:START -->)'
+        r'.*?'
+        r'(<!-- AUTO-GENERATED-TEST-STATS:END -->)'
+    )
+
+    if not re.search(pattern, content, flags=re.DOTALL):
+        return content, False
+
+    # 앱 순서 정의
+    app_order = ['accounts', 'teams', 'members', 'schedules', 'shares', 'mindmaps']
+    app_display = {
+        'accounts': 'Accounts',
+        'teams': 'Teams',
+        'members': 'Members',
+        'schedules': 'Schedules',
+        'shares': 'Shares',
+        'mindmaps': 'Mindmaps'
+    }
+
+    # 통계 누락 체크 (경고 출력)
+    missing = set(app_order) - set(stats.keys())
+    if missing:
+        print(f"[WARN] 테스트 통계 누락 앱: {', '.join(missing)}")
+
+    # 새 테이블 생성
+    table_lines = [
+        "| 앱 | 서비스 | API | SSR | 합계 |",
+        "|---|---------|-----|-----|------|"
+    ]
+
+    total_service = 0
+    total_api = 0
+    total_ssr = 0
+    total = 0
+
+    # 앱별 행 생성
+    for app in app_order:
+        if app not in stats:
+            # 누락된 앱은 건너뛰되, 이미 경고 출력됨
+            continue
+
+        s = stats[app]
+        service = s.get('service', 0)
+        api = s.get('api', 0)
+        ssr = s.get('ssr', 0)
+        app_total = s.get('total', 0)
+
+        # API가 없으면 '-' 표시
+        api_display = str(api) if api > 0 else '-'
+
+        table_lines.append(
+            f"| {app_display[app]} | {service} | {api_display} | {ssr} | {app_total} |"
+        )
+
+        total_service += service
+        total_api += api
+        total_ssr += ssr
+        total += app_total
+
+    # 총계 행
+    table_lines.append(
+        f"| **총계** | **{total_service}** | **{total_api}** | **{total_ssr}** | **{total}** |"
+    )
+
+    new_table = '\n'.join(table_lines)
+
+    # 테이블 교체 (마커 유지, 내용만 교체, 개행 통제, 첫 번째 매칭만)
+    # 운영 규칙: 문서당 AUTO-GENERATED-TEST-STATS 블록은 1개만 허용
+    updated_content = re.sub(
+        pattern,
+        r'\1\n' + new_table + r'\n\2',
+        content,
+        count=1,  # 첫 번째 매칭만 교체 (문서당 1개 규칙)
+        flags=re.DOTALL
+    )
+
+    # 실제 변경 여부 확인
+    was_updated = updated_content != content
+    return updated_content, was_updated
 
 
 def update_markdown_file(file_path, stats, total_tests):
@@ -179,15 +284,17 @@ def update_markdown_file(file_path, stats, total_tests):
     original_content = content
     replacement_count = 0
 
-    # 1. 테이블 교체 (앱 | 서비스 | API | SSR | 합계 패턴)
-    table, _ = generate_markdown_table(stats)
-    table_pattern = r'\| 앱 \| 서비스 \| API \| SSR \| 합계 \|.*?\| \*\*총계\*\* \|.*?\|'
-    if re.search(table_pattern, content, flags=re.DOTALL):
-        content = re.sub(table_pattern, table, content, flags=re.DOTALL)
+    # 1. AUTO-GENERATED-TEST-STATS 마커 기반 테이블 업데이트
+    content, updated = update_auto_generated_test_stats(content, stats)
+    if updated:
         replacement_count += 1
 
-    # 2. 주석 기반 테스트 수 치환 (안전함)
-    content, count = update_test_counts_with_comments(content, total_tests)
+    # 2. 5열 테이블 교체 - 제거됨 (위험성이 너무 높음)
+    # 이유: regex 패턴이 의도하지 않은 텍스트를 매칭하여 파일 손상 가능
+    # 대안: AUTO-GENERATED-TEST-STATS 마커 방식만 사용 (안전함)
+
+    # 3. 주석 기반 테스트 수 치환 (안전함)
+    content, count = update_test_counts_with_comments(content, total_tests, stats)
     replacement_count += count
 
     # 파일 저장 (변경사항이 있을 때만)
