@@ -31,7 +31,7 @@ TeamMoa는 이러한 불편함을 해소하기 위해 **스케줄 조율, 마인
 - **직관적인 UX** - 드래그앤드롭으로 TODO 할당, 마일스톤 일정 조정
 - **스마트 스케줄** - 팀원 가용 시간 자동 분석, 최적의 회의 시간 제안
 <!-- AUTO:TEST_COUNT -->
-- **검증된 안정성** - 249개 테스트, 부하 테스트 통과 (95%ile 70ms)
+- **검증된 안정성** - 262개 테스트, 부하 테스트 통과 (95%ile 70ms)
 - **프로덕션 운영** - AWS ALB + Multi-AZ 고가용성, 무중단 배포
 
 ---
@@ -125,7 +125,7 @@ Infrastructure: AWS ALB | EC2 (Multi-AZ) | Docker Compose | Nginx | ACM SSL
 DevOps:    GitHub Actions (Rolling Update) | Docker Hub
 Architecture: Service Layer Pattern | Hybrid SSR + API
 <!-- AUTO:TEST_COUNT -->
-Testing:   pytest (249 tests) | Locust (부하 테스트)
+Testing:   pytest (262 tests) | Locust (부하 테스트)
 ```
 
 ### 아키텍처 다이어그램
@@ -225,7 +225,7 @@ def view_teams(self):
 - **[아키텍처 설계](./docs/portfolio/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
 - **[인프라 및 배포](./docs/portfolio/infrastructure.md)** - Docker, CI/CD, AWS EC2
 <!-- AUTO:TEST_COUNT -->
-- **[테스트 전략](./docs/portfolio/testing.md)** - 249개 테스트, fixture 패턴
+- **[테스트 전략](./docs/portfolio/testing.md)** - 262개 테스트, fixture 패턴
 - **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 8건 문제 해결 사례
 
 ### 기능 상세
@@ -299,7 +299,7 @@ TeamMoa/
 ├── docker-compose.yml  # 개발 환경 Docker 설정
 ├── docker-compose.prod.yml # 프로덕션 환경 Docker 설정
 <!-- AUTO:TEST_COUNT -->
-└── pytest.ini          # 테스트 설정 (249개 테스트)
+└── pytest.ini          # 테스트 설정 (262개 테스트)
 ```
 
 ---

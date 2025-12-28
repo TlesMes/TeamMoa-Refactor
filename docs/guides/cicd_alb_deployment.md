@@ -53,7 +53,7 @@ Docker Hub (이미지 저장소)
 2. GitHub Actions Trigger
    ↓
 <!-- AUTO:TEST_COUNT -->
-3. Test (pytest 249개 테스트)
+3. Test (pytest 262개 테스트)
    ↓
 4. Update Documentation (테스트 통계 자동 업데이트)
    ↓
@@ -534,39 +534,16 @@ python scripts/update_test_docs.py
 
 # AUTO 마커가 있는 부분만 업데이트
 # <!-- AUTO:TEST_COUNT --> 249 → 새로운 테스트 수
-# <!-- AUTO-GENERATED-TEST-STATS:START --> ... <!-- END --> 테이블 교체
-```
-
-**3. 변경 감지 및 커밋:**
-```yaml
-- name: Check for documentation changes
-  id: check_docs
-  run: |
-    git diff --quiet docs/ README.md CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
-
-- name: Commit and push documentation updates
-  if: steps.check_docs.outputs.changed == 'true'
-  run: |
-    git add docs/ README.md CLAUDE.md
-    git commit -m "docs: 테스트 통계 자동 업데이트 [skip ci]"
-    git push
-```
-
-### 🎯 AUTO 마커 사용법
-
-**테스트 개수 자동 업데이트:**
-```markdown
-Testing: pytest (<!-- AUTO:TEST_COUNT -->249<!-- AUTO:TEST_COUNT --> tests)
-```
-
-**테스트 통계 테이블 자동 업데이트:**
-```markdown
-<!-- AUTO-GENERATED-TEST-STATS:START -->
+# <!-- AUTO-GENERATED-TEST-STATS:START -->
 | 앱 | 서비스 | API | SSR | 합계 |
 |---|---------|-----|-----|------|
 | Accounts | 18 | - | 10 | 28 |
-| Teams | 51 | 12 | 15 | 78 |
-| **총계** | **149** | **43** | **57** | **249** |
+| Teams | 51 | 19 | 15 | 85 |
+| Members | 32 | 16 | 3 | 51 |
+| Schedules | 12 | 13 | 9 | 34 |
+| Shares | 20 | - | 13 | 33 |
+| Mindmaps | 16 | 8 | 7 | 31 |
+| **총계** | **149** | **56** | **57** | **262** |
 <!-- AUTO-GENERATED-TEST-STATS:END -->
 ```
 
