@@ -129,13 +129,14 @@ class TestTodoServiceCompleteTodo:
             assignee=member_teamuser
         )
 
-        result, is_completed = todo_service.complete_todo(
+        result, metadata = todo_service.complete_todo(
             todo_id=todo.id,
             team=team,
             requester=another_user
         )
 
-        assert is_completed is True
+        assert metadata['is_completed'] is True
+        assert metadata['was_completed'] is False
         assert result.completed_at is not None
 
     def test_complete_todo_by_host(self, todo_service, team, user, member_teamuser):
@@ -146,13 +147,14 @@ class TestTodoServiceCompleteTodo:
             assignee=member_teamuser
         )
 
-        result, is_completed = todo_service.complete_todo(
+        result, metadata = todo_service.complete_todo(
             todo_id=todo.id,
             team=team,
             requester=user
         )
 
-        assert is_completed is True
+        assert metadata['is_completed'] is True
+        assert metadata['was_completed'] is False
 
     def test_complete_todo_no_permission(self, todo_service, team, member_teamuser, third_user):
         """다른 멤버의 Todo 완료 시도 (실패)"""
@@ -347,3 +349,312 @@ class TestTodoServiceGetTeamTodosWithStats:
         assert result['todos_unassigned'].count() == 0
         assert result['todos_done'].count() == 0
         assert result['members'].count() == 1  # host만 존재
+
+
+class TestTodoServiceMilestoneIntegration:
+    """TODO-마일스톤 연동 테스트 (12개)"""
+
+    def test_assign_todo_to_milestone(self, todo_service, team):
+        """TODO 할당"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1')
+
+        updated_todo, result = todo_service.assign_to_milestone(todo.id, milestone.id, team)
+
+        assert updated_todo.milestone == milestone
+        assert result['milestone_changed'] is True
+        assert result['new_milestone_id'] == milestone.id
+        assert result['old_milestone_id'] is None
+
+    def test_assign_todo_updates_milestone_progress(self, todo_service, team):
+        """할당 시 진행률 갱신 (AUTO)"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        todo1 = Todo.objects.create(team=team, content='TODO 1', is_completed=True)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', is_completed=False)
+
+        # TODO 1 할당 (완료됨)
+        todo_service.assign_to_milestone(todo1.id, milestone.id, team)
+
+        # TODO 2 할당 (미완료)
+        updated_todo, result = todo_service.assign_to_milestone(todo2.id, milestone.id, team)
+
+        # 진행률 확인 (1/2 = 50%)
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 50
+
+    def test_assign_todo_to_milestone_already_assigned_raises(self, todo_service, team):
+        """중복 할당 에러"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+
+        with pytest.raises(ValueError, match='이미 해당 마일스톤에 할당된 TODO'):
+            todo_service.assign_to_milestone(todo.id, milestone.id, team)
+
+    def test_assign_todo_from_one_milestone_to_another(self, todo_service, team):
+        """마일스톤 변경"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone1 = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        milestone2 = Milestone.objects.create(
+            team=team,
+            title='마일스톤 2',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=14),
+            priority='medium',
+            progress_mode='auto'
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1', milestone=milestone1)
+
+        updated_todo, result = todo_service.assign_to_milestone(todo.id, milestone2.id, team)
+
+        assert updated_todo.milestone == milestone2
+        assert result['old_milestone_id'] == milestone1.id
+        assert result['new_milestone_id'] == milestone2.id
+
+    def test_assign_todo_updates_old_and_new_milestone(self, todo_service, team):
+        """변경 시 양쪽 진행률 갱신"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone1 = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        milestone2 = Milestone.objects.create(
+            team=team,
+            title='마일스톤 2',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=14),
+            priority='medium',
+            progress_mode='auto'
+        )
+
+        # 마일스톤1에 TODO 2개 (1개 완료)
+        todo1 = Todo.objects.create(team=team, content='TODO 1', milestone=milestone1, is_completed=True)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', milestone=milestone1, is_completed=False)
+
+        # todo1을 마일스톤2로 이동
+        updated_todo, result = todo_service.assign_to_milestone(todo1.id, milestone2.id, team)
+
+        # 양쪽 마일스톤 진행률 확인
+        milestone1.refresh_from_db()
+        milestone2.refresh_from_db()
+
+        assert milestone1.progress_percentage == 0  # 0/1 = 0%
+        assert milestone2.progress_percentage == 100  # 1/1 = 100%
+        assert result['old_milestone_updated'] is True
+        assert result['new_milestone_updated'] is True
+
+    def test_detach_todo_from_milestone(self, todo_service, team):
+        """연결 해제"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+
+        updated_todo, result = todo_service.detach_from_milestone(todo.id, team)
+
+        assert updated_todo.milestone is None
+        assert result['detached'] is True
+        assert result['old_milestone_id'] == milestone.id
+
+    def test_detach_todo_not_in_milestone_raises(self, todo_service, team):
+        """연결 안 된 TODO 해제 시도"""
+        todo = Todo.objects.create(team=team, content='TODO 1')
+
+        with pytest.raises(ValueError, match='TODO가 마일스톤에 할당되어 있지 않습니다'):
+            todo_service.detach_from_milestone(todo.id, team)
+
+    def test_complete_todo_updates_milestone_progress(self, todo_service, team, user):
+        """완료 시 진행률 갱신"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        # TODO 3개 생성 (모두 미완료)
+        todo1 = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', milestone=milestone)
+        todo3 = Todo.objects.create(team=team, content='TODO 3', milestone=milestone)
+
+        # todo1 완료
+        updated_todo, result = todo_service.complete_todo(todo1.id, team, user)
+
+        # 검증
+        milestone.refresh_from_db()
+        assert result['milestone_updated'] is True
+        assert result['milestone_id'] == milestone.id
+        assert result['milestone_progress'] == 33  # 1/3 = 33%
+        assert milestone.progress_percentage == 33
+
+    def test_complete_todo_in_manual_mode_no_update(self, todo_service, team, user):
+        """수동 모드는 영향 없음"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='manual',
+            progress_percentage=50
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+
+        # TODO 완료
+        updated_todo, result = todo_service.complete_todo(todo.id, team, user)
+
+        # 검증: 수동 모드는 진행률이 변경되지 않음
+        milestone.refresh_from_db()
+        assert result['milestone_updated'] is False
+        assert milestone.progress_percentage == 50  # 변경 없음
+
+    def test_complete_all_todos_completes_milestone(self, todo_service, team, user):
+        """모든 TODO 완료 시 마일스톤 완료"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        # TODO 2개 생성
+        todo1 = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', milestone=milestone)
+
+        # 모두 완료
+        todo_service.complete_todo(todo1.id, team, user)
+        todo_service.complete_todo(todo2.id, team, user)
+
+        # 검증: 마일스톤 자동 완료
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 100
+        assert milestone.is_completed is True
+        assert milestone.completed_date is not None
+
+    def test_uncomplete_todo_decreases_progress(self, todo_service, team, user):
+        """완료 취소 시 진행률 감소"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        # TODO 2개 생성 (모두 완료)
+        todo1 = Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=True)
+
+        milestone.update_progress_from_todos()
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 100
+
+        # todo1 완료 취소 (토글)
+        updated_todo, result = todo_service.complete_todo(todo1.id, team, user)
+
+        # 검증
+        milestone.refresh_from_db()
+        assert result['was_completed'] is True
+        assert result['is_completed'] is False
+        assert result['milestone_progress'] == 50  # 1/2 = 50%
+        assert milestone.progress_percentage == 50
+
+    def test_assign_none_detaches_milestone(self, todo_service, team):
+        """milestone_id=None 전달 시 해제"""
+        from datetime import date, timedelta
+        from teams.models import Milestone
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='마일스톤 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        todo = Todo.objects.create(team=team, content='TODO 1', milestone=milestone)
+
+        # milestone_id=None으로 assign 호출
+        updated_todo, result = todo_service.assign_to_milestone(todo.id, None, team)
+
+        # detach_from_milestone()이 호출되어야 함
+        assert updated_todo.milestone is None
+        assert result['detached'] is True

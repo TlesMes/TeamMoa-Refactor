@@ -8,7 +8,7 @@ from teams.models import Milestone, TeamUser
 
 @pytest.fixture
 def milestone(db, team):
-    """기본 마일스톤 (진행 중)"""
+    """기본 마일스톤 (진행 중, 수동 모드)"""
     today = date.today()
     return Milestone.objects.create(
         team=team,
@@ -18,13 +18,14 @@ def milestone(db, team):
         enddate=today + timedelta(days=10),
         priority='medium',
         progress_percentage=50,
+        progress_mode='manual',  # 기존 테스트 호환성을 위해 수동 모드
         is_completed=False
     )
 
 
 @pytest.fixture
 def completed_milestone(db, team):
-    """완료된 마일스톤"""
+    """완료된 마일스톤 (수동 모드)"""
     today = date.today()
     return Milestone.objects.create(
         team=team,
@@ -34,6 +35,7 @@ def completed_milestone(db, team):
         enddate=today - timedelta(days=5),
         priority='high',
         progress_percentage=100,
+        progress_mode='manual',  # 기존 테스트 호환성을 위해 수동 모드
         is_completed=True
     )
 
