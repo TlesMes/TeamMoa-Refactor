@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Count, Q, Prefetch, Max
 from .models import Todo
-from teams.models import Team, TeamUser
+from teams.models import Team, TeamUser, Milestone
 
 
 class TodoServiceException(Exception):
@@ -20,7 +20,11 @@ class TodoService:
         'TEAM_NOT_FOUND': '팀을 찾을 수 없습니다.',
         'MEMBER_NOT_FOUND': '팀 멤버를 찾을 수 없습니다.',
         'ALREADY_ASSIGNED': '이미 할당된 할 일입니다.',
-        'SELF_ASSIGN_ONLY': '본인에게만 할당할 수 있습니다.'
+        'SELF_ASSIGN_ONLY': '본인에게만 할당할 수 있습니다.',
+        'MILESTONE_NOT_FOUND': '마일스톤을 찾을 수 없습니다.',
+        'TODO_ALREADY_ASSIGNED_TO_MILESTONE': '이미 해당 마일스톤에 할당된 TODO입니다.',
+        'TODO_NOT_IN_MILESTONE': 'TODO가 마일스톤에 할당되어 있지 않습니다.',
+        'MILESTONE_NOT_IN_SAME_TEAM': '마일스톤과 TODO가 같은 팀에 속해야 합니다.',
     }
     
     def create_todo(self, team, content, creator):
@@ -98,7 +102,15 @@ class TodoService:
             requester: 요청자
 
         Returns:
-            tuple: (Todo 객체, 완료 여부)
+            tuple: (Todo, dict)
+                - Todo: 업데이트된 TODO
+                - dict: {
+                    'was_completed': bool,
+                    'is_completed': bool,
+                    'milestone_updated': bool,
+                    'milestone_id': int or None,
+                    'milestone_progress': int or None
+                }
 
         Raises:
             ValueError: 권한 없음
@@ -110,12 +122,34 @@ class TodoService:
         if not (self._is_team_host(team, requester) or todo.assignee == current_teamuser):
             raise ValueError(self.ERROR_MESSAGES['NO_PERMISSION'])
 
+        # 이전 완료 상태 저장
+        was_completed = todo.is_completed
+
         # 완료 상태 토글
         todo.is_completed = not todo.is_completed
         todo.completed_at = timezone.now() if todo.is_completed else None
 
-        todo.save()
-        return todo, todo.is_completed
+        todo.save()  # save() 훅이 자동으로 마일스톤 진행률 갱신
+
+        # 마일스톤 정보 수집
+        milestone_updated = False
+        milestone_progress = None
+        milestone_id = None
+
+        if todo.milestone:
+            milestone_id = todo.milestone.id
+            if todo.milestone.progress_mode == 'auto':
+                milestone_updated = True
+                milestone_progress = todo.milestone.progress_percentage
+
+        # 확장된 반환값
+        return todo, {
+            'was_completed': was_completed,
+            'is_completed': todo.is_completed,
+            'milestone_updated': milestone_updated,
+            'milestone_id': milestone_id,
+            'milestone_progress': milestone_progress
+        }
     
     @transaction.atomic
     def move_to_todo(self, todo_id, team, requester):
@@ -200,19 +234,123 @@ class TodoService:
     def delete_todo(self, todo_id, team):
         """
         Todo를 삭제합니다.
-        
+
         Args:
             todo_id: Todo ID
             team: 대상 팀
-            
+
         Returns:
             str: 삭제된 Todo 내용
         """
         todo = get_object_or_404(Todo, pk=todo_id, team=team)
         todo_content = todo.content
         todo.delete()
-        
+
         return todo_content
+
+    @transaction.atomic
+    def assign_to_milestone(self, todo_id, milestone_id, team):
+        """
+        TODO를 마일스톤에 할당 (할당/변경/해제 모두 처리)
+
+        Args:
+            todo_id: TODO ID
+            milestone_id: 마일스톤 ID (None이면 연결 해제)
+            team: Team 인스턴스
+
+        Returns:
+            tuple: (Todo, dict)
+                - Todo: 업데이트된 TODO
+                - dict: {
+                    'milestone_changed': bool,
+                    'old_milestone_id': int or None,
+                    'new_milestone_id': int or None,
+                    'old_milestone_updated': bool,
+                    'new_milestone_updated': bool
+                }
+
+        Raises:
+            ValueError: TODO 또는 마일스톤을 찾을 수 없음
+
+        Examples:
+            # 할당
+            >>> assign_to_milestone(1, 5, team)
+            # 변경 (5 → 10)
+            >>> assign_to_milestone(1, 10, team)
+            # 해제
+            >>> assign_to_milestone(1, None, team)  # detach_from_milestone() 호출
+        """
+        # 1. TODO 조회
+        todo = get_object_or_404(Todo, pk=todo_id, team=team)
+
+        # 2. None이면 연결 해제 (detach 메서드 위임)
+        if milestone_id is None:
+            return self.detach_from_milestone(todo_id, team)
+
+        # 3. 마일스톤 조회 및 검증
+        milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
+
+        # 4. 이미 동일한 마일스톤에 할당됨
+        if todo.milestone and todo.milestone.id == milestone_id:
+            raise ValueError(self.ERROR_MESSAGES['TODO_ALREADY_ASSIGNED_TO_MILESTONE'])
+
+        # 5. 기존 마일스톤 저장
+        old_milestone = todo.milestone
+        old_milestone_id = old_milestone.id if old_milestone else None
+
+        # 6. 새 마일스톤 할당
+        todo.milestone = milestone
+        todo.save()  # save() 훅이 자동으로 이전/새 마일스톤 진행률 모두 갱신
+
+        # 7. 메타데이터 반환
+        return todo, {
+            'milestone_changed': True,
+            'old_milestone_id': old_milestone_id,
+            'new_milestone_id': milestone_id,
+            'old_milestone_updated': old_milestone and old_milestone.progress_mode == 'auto',
+            'new_milestone_updated': milestone.progress_mode == 'auto'
+        }
+
+    @transaction.atomic
+    def detach_from_milestone(self, todo_id, team):
+        """
+        TODO의 마일스톤 연결 해제 (명시적 해제 전용)
+
+        Args:
+            todo_id: TODO ID
+            team: Team 인스턴스
+
+        Returns:
+            tuple: (Todo, dict)
+                - Todo: 업데이트된 TODO
+                - dict: {'detached': bool, 'old_milestone_id': int or None}
+
+        Raises:
+            ValueError: TODO를 찾을 수 없음 또는 이미 연결 해제 상태
+
+        Examples:
+            # 연결 해제
+            >>> detach_from_milestone(1, team)
+            # 이미 연결 해제 상태면 에러
+            >>> detach_from_milestone(1, team)  # ValueError 발생
+        """
+        # 1. TODO 조회
+        todo = get_object_or_404(Todo, pk=todo_id, team=team)
+
+        # 2. 이미 연결 해제 상태
+        if not todo.milestone:
+            raise ValueError(self.ERROR_MESSAGES['TODO_NOT_IN_MILESTONE'])
+
+        # 3. 기존 마일스톤 저장
+        old_milestone_id = todo.milestone.id
+
+        # 4. detach_from_milestone() 메서드 호출 (모델 메서드 활용)
+        todo.detach_from_milestone()
+
+        return todo, {
+            'detached': True,
+            'old_milestone_id': old_milestone_id
+        }
     
     def get_team_todos_with_stats(self, team):
         """

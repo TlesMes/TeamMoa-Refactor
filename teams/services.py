@@ -389,11 +389,18 @@ class TeamService:
 
 class MilestoneService:
     """마일스톤 관련 비즈니스 로직을 처리하는 서비스 클래스"""
-    
-    def create_milestone(self, team, title, description, startdate, enddate, priority):
+
+    ERROR_MESSAGES = {
+        'MILESTONE_NOT_FOUND': '마일스톤을 찾을 수 없습니다.',
+        'MILESTONE_PERMISSION_DENIED': '마일스톤을 수정할 권한이 없습니다.',
+        'INVALID_PROGRESS_MODE': '유효하지 않은 진행률 모드입니다.',
+        'CANNOT_SET_PROGRESS_IN_AUTO': 'AUTO 모드에서는 진행률을 수동으로 설정할 수 없습니다.',
+    }
+
+    def create_milestone(self, team, title, description, startdate, enddate, priority, progress_mode='auto'):
         """
         새 마일스톤을 생성합니다.
-        
+
         Args:
             team: 소속 팀
             title: 마일스톤 제목
@@ -401,43 +408,54 @@ class MilestoneService:
             startdate: 시작일
             enddate: 종료일
             priority: 우선순위
-            
+            progress_mode: 진행률 모드 ('manual' 또는 'auto', 기본값: 'auto')
+
         Returns:
             Milestone: 생성된 마일스톤
-            
+
         Raises:
             ValueError: 검증 실패 시
         """
         # 날짜 검증
         self._validate_milestone_dates(startdate, enddate)
-        
+
+        # progress_mode 검증
+        if progress_mode not in ['manual', 'auto']:
+            raise ValueError(self.ERROR_MESSAGES['INVALID_PROGRESS_MODE'])
+
         milestone = Milestone.objects.create(
             team=team,
             title=title,
             description=description,
             startdate=startdate,
             enddate=enddate,
-            priority=priority
+            priority=priority,
+            progress_mode=progress_mode
         )
-        
+
         return milestone
     
     def update_milestone(self, milestone_id, team, **update_data):
         """
         마일스톤을 업데이트합니다.
-        
+
         Args:
             milestone_id: 마일스톤 ID
             team: 소속 팀 (권한 확인용)
             **update_data: 업데이트할 데이터
-            
+
         Returns:
             tuple: (업데이트된 마일스톤, 업데이트된 필드 목록)
-            
+
         Raises:
             ValueError: 검증 실패 시
         """
         milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
+
+        # AUTO 모드 보호: progress_percentage 수동 설정 방지
+        if 'progress_percentage' in update_data and milestone.progress_mode == 'auto':
+            raise ValueError(self.ERROR_MESSAGES['CANNOT_SET_PROGRESS_IN_AUTO'])
+
         updated_fields = []
         
         # 시작일 업데이트
@@ -548,3 +566,89 @@ class MilestoneService:
                 raise ValueError(f'날짜 형식이 올바르지 않습니다. (YYYY-MM-DD 형식 필요)')
 
         raise ValueError(f'날짜는 문자열 또는 date 객체여야 합니다. (받은 타입: {type(date_input)})')
+
+    @transaction.atomic
+    def toggle_progress_mode(self, milestone_id, team, new_mode):
+        """
+        마일스톤 진행률 모드 전환
+
+        Args:
+            milestone_id: 마일스톤 ID
+            team: Team 인스턴스
+            new_mode: 전환할 모드 ('manual' 또는 'auto')
+
+        Returns:
+            tuple: (Milestone, dict)
+                - Milestone: 업데이트된 마일스톤
+                - dict: {'old_mode': str, 'new_mode': str, 'progress_recalculated': bool, 'new_progress': int}
+
+        Raises:
+            ValueError: 유효하지 않은 모드 또는 권한 없음
+        """
+        # 1. 마일스톤 조회
+        milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
+
+        # 2. 모드 검증
+        if new_mode not in ['manual', 'auto']:
+            raise ValueError(self.ERROR_MESSAGES['INVALID_PROGRESS_MODE'])
+
+        old_mode = milestone.progress_mode
+
+        # 3. 이미 동일한 모드면 조기 반환
+        if old_mode == new_mode:
+            return milestone, {
+                'old_mode': old_mode,
+                'new_mode': new_mode,
+                'progress_recalculated': False,
+                'new_progress': milestone.progress_percentage
+            }
+
+        # 4. 모드 전환
+        milestone.progress_mode = new_mode
+        progress_recalculated = False
+
+        # 5. manual → auto: TODO 기반 즉시 재계산
+        if new_mode == 'auto':
+            milestone.update_progress_from_todos()
+            progress_recalculated = True
+
+        # 6. auto → manual: 기존 진행률 유지
+        milestone.save()
+
+        return milestone, {
+            'old_mode': old_mode,
+            'new_mode': new_mode,
+            'progress_recalculated': progress_recalculated,
+            'new_progress': milestone.progress_percentage
+        }
+
+    def get_milestone_with_todo_stats(self, milestone_id, team):
+        """
+        마일스톤과 연결된 TODO 통계 조회
+
+        Args:
+            milestone_id: 마일스톤 ID
+            team: Team 인스턴스
+
+        Returns:
+            dict: {
+                'milestone': Milestone,
+                'todo_stats': {
+                    'total': int,
+                    'completed': int,
+                    'in_progress': int,
+                    'completion_rate': int (0-100)
+                }
+            }
+
+        Raises:
+            ValueError: 마일스톤을 찾을 수 없음
+        """
+        milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
+
+        stats = milestone.get_todo_stats()
+
+        return {
+            'milestone': milestone,
+            'todo_stats': stats
+        }
