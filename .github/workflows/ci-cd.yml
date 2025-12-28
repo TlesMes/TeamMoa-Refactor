@@ -104,6 +104,7 @@ jobs:
           python manage.py migrate --noinput
 
       - name: Run tests and generate stats
+      - name: Run tests and generate stats
         env:
           DJANGO_SETTINGS_MODULE: TeamMoa.settings.dev
         run: |
