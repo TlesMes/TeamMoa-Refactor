@@ -90,14 +90,18 @@ class MilestoneSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
     priority_display = serializers.CharField(source='get_priority_display', read_only=True)
+    progress_mode = serializers.CharField(read_only=True)
+    progress_mode_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Milestone
         fields = ['id', 'team', 'title', 'description', 'startdate', 'enddate',
                  'is_completed', 'completed_date', 'progress_percentage', 'priority',
-                 'priority_display', 'status', 'status_display']
+                 'priority_display', 'status', 'status_display', 'progress_mode',
+                 'progress_mode_display']
         read_only_fields = ['id', 'team', 'is_completed', 'completed_date',
-                           'status', 'status_display', 'priority_display']
+                           'status', 'status_display', 'priority_display',
+                           'progress_mode', 'progress_mode_display']
 
     def get_status(self, obj):
         """현재 상태 반환"""
@@ -107,13 +111,22 @@ class MilestoneSerializer(serializers.ModelSerializer):
         """상태 표시명 반환"""
         return obj.status_display
 
+    def get_progress_mode_display(self, obj):
+        """진행률 모드 표시명 반환"""
+        return obj.get_progress_mode_display()
+
 
 class MilestoneCreateSerializer(serializers.ModelSerializer):
     """마일스톤 생성용 직렬화"""
+    progress_mode = serializers.ChoiceField(
+        choices=['manual', 'auto'],
+        default='auto',
+        required=False
+    )
 
     class Meta:
         model = Milestone
-        fields = ['title', 'description', 'startdate', 'enddate', 'priority']
+        fields = ['title', 'description', 'startdate', 'enddate', 'priority', 'progress_mode']
 
     def validate_title(self, value):
         """제목 검증"""
@@ -144,11 +157,22 @@ class MilestoneUpdateSerializer(serializers.Serializer):
     startdate = serializers.DateField(required=False)
     enddate = serializers.DateField(required=False)
     progress_percentage = serializers.IntegerField(required=False, min_value=0, max_value=100)
+    progress_mode = serializers.ChoiceField(
+        choices=['manual', 'auto'],
+        required=False
+    )
 
     def validate(self, data):
-        """날짜 교차 검증"""
+        """날짜 교차 검증 및 AUTO 모드 보호"""
         startdate = data.get('startdate')
         enddate = data.get('enddate')
+
+        # AUTO 모드 보호: 진행률 수동 설정 방지
+        if self.instance and self.instance.progress_mode == 'auto':
+            if 'progress_percentage' in data:
+                raise serializers.ValidationError({
+                    'progress_percentage': 'AUTO 모드에서는 진행률을 수동으로 설정할 수 없습니다.'
+                })
 
         # 둘 다 제공된 경우에만 검증
         if startdate and enddate:
@@ -172,6 +196,14 @@ class MilestoneUpdateSerializer(serializers.Serializer):
                     })
 
         return data
+
+
+class MilestoneProgressModeSerializer(serializers.Serializer):
+    """마일스톤 진행률 모드 전환용 직렬화"""
+    mode = serializers.ChoiceField(choices=['manual', 'auto'], required=True)
+
+    class Meta:
+        fields = ['mode']
 
 
 class TeamMemberSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Todo
-from teams.models import Team, TeamUser
+from teams.models import Team, TeamUser, Milestone
 
 User = get_user_model()
 
@@ -10,12 +10,16 @@ class TodoSerializer(serializers.ModelSerializer):
     """기본 TODO 직렬화"""
     assignee_name = serializers.SerializerMethodField()
     assignee_id = serializers.SerializerMethodField()
+    milestone_id = serializers.IntegerField(source='milestone.id', read_only=True, allow_null=True)
+    milestone_title = serializers.CharField(source='milestone.title', read_only=True, allow_null=True)
 
     class Meta:
         model = Todo
         fields = ['id', 'content', 'is_completed', 'assignee_id',
-                 'assignee_name', 'order', 'created_at', 'completed_at']
-        read_only_fields = ['id', 'created_at', 'completed_at', 'assignee_name', 'assignee_id']
+                 'assignee_name', 'order', 'created_at', 'completed_at',
+                 'milestone_id', 'milestone_title']
+        read_only_fields = ['id', 'created_at', 'completed_at', 'assignee_name',
+                           'assignee_id', 'milestone_id', 'milestone_title']
 
     def get_assignee_name(self, obj):
         """할당자 이름 반환"""
@@ -97,6 +101,26 @@ class TodoReturnSerializer(serializers.Serializer):
     """TODO 보드 복귀용 직렬화"""
     # 보드 복귀는 추가 데이터가 필요 없음
     pass
+
+
+class TodoMilestoneAssignSerializer(serializers.Serializer):
+    """TODO 마일스톤 할당용 직렬화"""
+    milestone_id = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate_milestone_id(self, value):
+        """마일스톤 존재 검증"""
+        if value is None:
+            return value  # None 허용 (연결 해제)
+
+        # 마일스톤 존재 검증
+        try:
+            Milestone.objects.get(pk=value)
+            return value
+        except Milestone.DoesNotExist:
+            raise serializers.ValidationError('마일스톤을 찾을 수 없습니다.')
+
+    class Meta:
+        fields = ['milestone_id']
 
 
 class TeamMemberSerializer(serializers.ModelSerializer):

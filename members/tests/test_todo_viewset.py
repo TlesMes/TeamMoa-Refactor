@@ -1,10 +1,12 @@
 """
 TodoViewSet API 테스트
-총 10개 테스트:
+총 16개 테스트:
 - assign: 3개
 - complete: 3개
 - move_to_todo: 2개
 - move_to_done: 2개
+- assign_milestone: 3개 (Phase 3)
+- detach_milestone: 3개 (Phase 3)
 
 참고: create, list, retrieve, update 액션은 프론트엔드에서 사용하지 않아 테스트 제외
 """
@@ -148,3 +150,152 @@ class TestTodoViewSetMoveToDone:
 
         unassigned_todo.refresh_from_db()
         assert unassigned_todo.is_completed is True
+
+
+class TestTodoViewSetMilestoneIntegration:
+    """TODO-마일스톤 연동 API 테스트 (Phase 3)"""
+
+    def test_assign_todo_to_milestone(self, authenticated_client, team, user):
+        """TODO를 마일스톤에 할당"""
+        from teams.models import Milestone
+        from members.models import Todo
+        from datetime import date, timedelta
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Sprint 1',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+        todo = Todo.objects.create(team=team, content='Feature A', is_completed=False)
+
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        data = {'milestone_id': milestone.id}
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['todo']['milestone_id'] == milestone.id
+        assert response.data['todo']['milestone_title'] == 'Sprint 1'
+        assert response.data['metadata']['milestone_changed'] is True
+
+        todo.refresh_from_db()
+        assert todo.milestone_id == milestone.id
+
+    def test_assign_todo_to_invalid_milestone(self, authenticated_client, team):
+        """존재하지 않는 마일스톤에 할당 시도"""
+        from members.models import Todo
+
+        todo = Todo.objects.create(team=team, content='Feature B', is_completed=False)
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        data = {'milestone_id': 9999}
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_assign_todo_updates_milestone_progress(self, authenticated_client, team, user):
+        """TODO 할당 시 마일스톤 진행률 자동 갱신 (AUTO 모드)"""
+        from teams.models import Milestone
+        from members.models import Todo
+        from datetime import date, timedelta
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Sprint 2',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto',
+            progress_percentage=0
+        )
+
+        # 기존 TODO 1개 (완료)
+        Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+
+        # 새 TODO 추가
+        new_todo = Todo.objects.create(team=team, content='TODO 2', is_completed=False)
+
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': new_todo.id})
+        data = {'milestone_id': milestone.id}
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 50  # 1/2 = 50%
+
+    def test_detach_todo_from_milestone(self, authenticated_client, team):
+        """TODO를 마일스톤에서 분리"""
+        from teams.models import Milestone
+        from members.models import Todo
+        from datetime import date, timedelta
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Sprint 3',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+        todo = Todo.objects.create(
+            team=team,
+            content='Feature C',
+            milestone=milestone,
+            is_completed=False
+        )
+
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+
+        response = authenticated_client.delete(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['metadata']['detached'] is True
+        assert response.data['todo']['milestone_id'] is None
+
+        todo.refresh_from_db()
+        assert todo.milestone is None
+
+    def test_detach_todo_updates_milestone_progress(self, authenticated_client, team):
+        """TODO 분리 시 마일스톤 진행률 자동 갱신 (AUTO 모드)"""
+        from teams.models import Milestone
+        from members.models import Todo
+        from datetime import date, timedelta
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Sprint 4',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        # TODO 2개 생성 (1개 완료)
+        todo1 = Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        todo2 = Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=False)
+
+        # 진행률: 1/2 = 50%
+        assert milestone.progress_percentage == 50
+
+        # TODO 1개 분리
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo2.id})
+        response = authenticated_client.delete(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 100  # 1/1 = 100%
+
+    def test_detach_todo_with_no_milestone(self, authenticated_client, team):
+        """마일스톤이 없는 TODO 분리 시도"""
+        from members.models import Todo
+
+        todo = Todo.objects.create(team=team, content='Feature D', is_completed=False)
+        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+
+        response = authenticated_client.delete(url)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

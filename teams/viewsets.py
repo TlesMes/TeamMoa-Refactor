@@ -10,7 +10,8 @@ from .models import Team, Milestone
 from .serializers import (
     TeamListSerializer, TeamDetailSerializer, TeamCreateSerializer,
     TeamUpdateSerializer,
-    MilestoneSerializer, MilestoneCreateSerializer, MilestoneUpdateSerializer
+    MilestoneSerializer, MilestoneCreateSerializer, MilestoneUpdateSerializer,
+    MilestoneProgressModeSerializer
 )
 from .services import TeamService, MilestoneService
 from api.permissions import IsTeamMember
@@ -222,13 +223,17 @@ class MilestoneViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
+            # progress_mode 파라미터 추출 (기본값: 'auto')
+            progress_mode = serializer.validated_data.get('progress_mode', 'auto')
+
             milestone = self.milestone_service.create_milestone(
                 team=team,
                 title=serializer.validated_data['title'],
                 description=serializer.validated_data.get('description', ''),
                 startdate=serializer.validated_data['startdate'],
                 enddate=serializer.validated_data['enddate'],
-                priority=serializer.validated_data['priority']
+                priority=serializer.validated_data['priority'],
+                progress_mode=progress_mode
             )
 
             # 생성된 마일스톤을 MilestoneSerializer로 직렬화하여 반환
@@ -301,3 +306,96 @@ class MilestoneViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return api_error_response(request, str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['patch'], url_path='progress-mode')
+    def toggle_progress_mode(self, request, pk=None, team_pk=None):
+        """
+        진행률 모드 전환 (수동 ↔ AUTO)
+
+        요청 본문:
+        {
+            "mode": "auto"  # 또는 "manual"
+        }
+
+        응답:
+        {
+            "milestone": {...},
+            "metadata": {
+                "old_mode": "manual",
+                "new_mode": "auto",
+                "progress_recalculated": true,
+                "new_progress": 33
+            }
+        }
+        """
+        milestone = self.get_object()
+        team = self.get_team()
+        serializer = MilestoneProgressModeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            new_mode = serializer.validated_data['mode']
+
+            # 서비스 레이어 호출
+            updated_milestone, metadata = self.milestone_service.toggle_progress_mode(
+                milestone_id=milestone.id,
+                team=team,
+                new_mode=new_mode
+            )
+
+            # metadata에 display 값 추가
+            mode_display = {
+                'manual': '수동 입력',
+                'auto': 'TODO 기반 자동 계산'
+            }
+            metadata['new_mode_display'] = mode_display.get(metadata['new_mode'], metadata['new_mode'])
+
+            return api_success_response(
+                request,
+                f'진행률 모드가 {metadata["new_mode_display"]}로 변경되었습니다.',
+                data={
+                    'milestone': MilestoneSerializer(updated_milestone).data,
+                    'metadata': metadata
+                }
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    @action(detail=True, methods=['get'], url_path='with-stats')
+    def milestone_with_stats(self, request, pk=None, team_pk=None):
+        """
+        마일스톤 + TODO 통계 조회
+
+        응답:
+        {
+            "milestone": {...},
+            "todo_stats": {
+                "total": 10,
+                "completed": 3,
+                "in_progress": 7,
+                "completion_rate": 30
+            }
+        }
+        """
+        milestone = self.get_object()
+        team = self.get_team()
+
+        try:
+            # 서비스 레이어 호출
+            result = self.milestone_service.get_milestone_with_todo_stats(
+                milestone_id=milestone.id,
+                team=team
+            )
+
+            return api_success_response(
+                request,
+                '',
+                data={
+                    'milestone': MilestoneSerializer(result['milestone']).data,
+                    'todo_stats': result['todo_stats']
+                }
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))

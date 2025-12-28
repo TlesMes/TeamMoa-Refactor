@@ -47,6 +47,10 @@ urlpatterns = [
     path('v1/teams/<int:team_pk>/todos/<int:pk>/complete/', TodoViewSet.as_view({
         'post': 'complete'
     }), name='team-todos-complete'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/milestone/', TodoViewSet.as_view({
+        'post': 'assign_milestone',
+        'delete': 'detach_milestone'
+    }), name='team-todos-milestone'),
 
     # 팀 멤버 엔드포인트
     path('v1/teams/<int:team_pk>/members/', TeamMemberViewSet.as_view({
@@ -64,6 +68,12 @@ urlpatterns = [
         'patch': 'partial_update',
         'delete': 'destroy'
     }), name='team-milestones-detail'),
+    path('v1/teams/<int:team_pk>/milestones/<int:pk>/progress-mode/', MilestoneViewSet.as_view({
+        'patch': 'toggle_progress_mode'
+    }), name='team-milestones-progress-mode'),
+    path('v1/teams/<int:team_pk>/milestones/<int:pk>/with-stats/', MilestoneViewSet.as_view({
+        'get': 'milestone_with_stats'
+    }), name='team-milestones-with-stats'),
 
     # 스케줄 엔드포인트
     path('v1/teams/<int:team_pk>/schedules/', ScheduleViewSet.as_view({

@@ -1,8 +1,9 @@
 """
-Teams 마일스톤 API 테스트 (9개)
+Teams 마일스톤 API 테스트 (16개)
 
 테스트 구성:
 - TestMilestoneViewSet: 9개 - 목록, 생성, 수정, 삭제 API
+- TestMilestoneAPIProgressMode: 7개 - 진행률 모드 관련 API (Phase 3)
 
 사용 위치:
 - JavaScript: static/js/pages/milestone_timeline.js
@@ -13,6 +14,8 @@ Teams 마일스톤 API 테스트 (9개)
 - create: ✅ 사용 (teamApi.createMilestone)
 - partial_update: ✅ 사용 (teamApi.updateMilestone - 드래그 앤 드롭)
 - destroy: ✅ 사용 (teamApi.deleteMilestone)
+- toggle_progress_mode: ✅ 사용 (Phase 3 - 진행률 모드 전환)
+- milestone_with_stats: ✅ 사용 (Phase 3 - TODO 통계 조회)
 """
 import pytest
 from datetime import date, timedelta
@@ -166,3 +169,169 @@ class TestMilestoneViewSetDestroy:
         assert len(response.data['messages']) > 0
         assert '테스트 마일스톤' in response.data['messages'][0]['message']
         assert not Milestone.objects.filter(id=milestone_id).exists()
+
+
+@pytest.mark.api
+class TestMilestoneAPIProgressMode:
+    """MilestoneViewSet 진행률 모드 API 테스트 (Phase 3)"""
+
+    def test_create_milestone_with_auto_mode(self, authenticated_client, team):
+        """AUTO 모드로 마일스톤 생성"""
+        url = reverse('api:team-milestones-list', kwargs={'team_pk': team.id})
+        data = {
+            'title': 'Sprint 1',
+            'description': 'First sprint',
+            'startdate': str(date.today()),
+            'enddate': str(date.today() + timedelta(days=14)),
+            'priority': 'high',
+            'progress_mode': 'auto'
+        }
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['milestone']['progress_mode'] == 'auto'
+        assert response.data['milestone']['progress_mode_display'] == 'TODO 기반 자동 계산'
+        assert response.data['milestone']['progress_percentage'] == 0
+
+    def test_create_milestone_default_mode_is_auto(self, authenticated_client, team):
+        """progress_mode 미지정 시 기본값 'auto'"""
+        url = reverse('api:team-milestones-list', kwargs={'team_pk': team.id})
+        data = {
+            'title': 'Sprint 2',
+            'description': 'Second sprint',
+            'startdate': str(date.today()),
+            'enddate': str(date.today() + timedelta(days=14)),
+            'priority': 'medium'
+            # progress_mode 생략
+        }
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['milestone']['progress_mode'] == 'auto'
+
+    def test_create_milestone_with_manual_mode(self, authenticated_client, team):
+        """수동 모드로 마일스톤 생성"""
+        url = reverse('api:team-milestones-list', kwargs={'team_pk': team.id})
+        data = {
+            'title': 'Sprint 3',
+            'description': 'Third sprint',
+            'startdate': str(date.today()),
+            'enddate': str(date.today() + timedelta(days=14)),
+            'priority': 'low',
+            'progress_mode': 'manual'
+        }
+
+        response = authenticated_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['milestone']['progress_mode'] == 'manual'
+        assert response.data['milestone']['progress_mode_display'] == '수동 입력'
+
+    def test_toggle_progress_mode_manual_to_auto(self, authenticated_client, team, user):
+        """수동 → AUTO 모드 전환 (TODO 기반 재계산)"""
+        from members.models import Todo
+
+        # 수동 모드 마일스톤 생성
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Manual Milestone',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='manual',
+            progress_percentage=50  # 수동 설정
+        )
+
+        # TODO 3개 생성 (1개 완료)
+        Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=False)
+        Todo.objects.create(team=team, content='TODO 3', milestone=milestone, is_completed=False)
+
+        url = reverse('api:team-milestones-progress-mode', kwargs={'team_pk': team.id, 'pk': milestone.id})
+        data = {'mode': 'auto'}
+
+        response = authenticated_client.patch(url, data, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['milestone']['progress_mode'] == 'auto'
+        assert response.data['metadata']['old_mode'] == 'manual'
+        assert response.data['metadata']['new_mode'] == 'auto'
+        assert response.data['metadata']['progress_recalculated'] is True
+        assert response.data['metadata']['new_progress'] == 33  # 1/3 = 33%
+
+    def test_toggle_progress_mode_auto_to_manual(self, authenticated_client, team):
+        """AUTO → 수동 모드 전환 (진행률 유지)"""
+        # AUTO 모드 마일스톤 생성
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Auto Milestone',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto',
+            progress_percentage=40
+        )
+
+        url = reverse('api:team-milestones-progress-mode', kwargs={'team_pk': team.id, 'pk': milestone.id})
+        data = {'mode': 'manual'}
+
+        response = authenticated_client.patch(url, data, format='json')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['milestone']['progress_mode'] == 'manual'
+        assert response.data['metadata']['old_mode'] == 'auto'
+        assert response.data['metadata']['new_mode'] == 'manual'
+        assert response.data['metadata']['progress_recalculated'] is False
+        assert response.data['metadata']['new_progress'] == 40  # 기존 진행률 유지
+
+    def test_get_milestone_with_stats(self, authenticated_client, team, user):
+        """마일스톤 + TODO 통계 조회"""
+        from members.models import Todo
+
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Milestone with TODOs',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        # TODO 5개 생성 (2개 완료)
+        Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 3', milestone=milestone, is_completed=False)
+        Todo.objects.create(team=team, content='TODO 4', milestone=milestone, is_completed=False)
+        Todo.objects.create(team=team, content='TODO 5', milestone=milestone, is_completed=False)
+
+        url = reverse('api:team-milestones-with-stats', kwargs={'team_pk': team.id, 'pk': milestone.id})
+
+        response = authenticated_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['milestone']['id'] == milestone.id
+        assert response.data['todo_stats']['total'] == 5
+        assert response.data['todo_stats']['completed'] == 2
+        assert response.data['todo_stats']['in_progress'] == 3
+        assert response.data['todo_stats']['completion_rate'] == 40
+
+    def test_update_progress_in_auto_mode_raises_error(self, authenticated_client, team):
+        """AUTO 모드에서 진행률 수동 설정 시도 → 에러"""
+        milestone = Milestone.objects.create(
+            team=team,
+            title='Auto Milestone',
+            startdate=date.today(),
+            enddate=date.today() + timedelta(days=7),
+            priority='high',
+            progress_mode='auto'
+        )
+
+        url = reverse('api:team-milestones-detail', kwargs={'team_pk': team.id, 'pk': milestone.id})
+        data = {'progress_percentage': 70}
+
+        response = authenticated_client.patch(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'AUTO 모드에서는 진행률을 수동으로 설정할 수 없습니다' in str(response.data)

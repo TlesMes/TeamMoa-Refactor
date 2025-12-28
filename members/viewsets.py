@@ -9,10 +9,10 @@ from .models import Todo
 from .serializers import (
     TodoSerializer, TodoCreateSerializer,
     TodoAssignSerializer, TodoCompleteSerializer,
-    TeamMemberSerializer
+    TeamMemberSerializer, TodoMilestoneAssignSerializer
 )
 from .services import TodoService
-from teams.models import Team, TeamUser
+from teams.models import Team, TeamUser, Milestone
 from api.permissions import IsTeamMember
 from api.utils import api_response, api_success_response, api_error_response
 
@@ -176,6 +176,104 @@ class TodoViewSet(viewsets.ModelViewSet):
                     'milestone_updated': metadata.get('milestone_updated', False),
                     'milestone_id': metadata.get('milestone_id'),
                     'milestone_progress': metadata.get('milestone_progress')
+                }
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    @action(detail=True, methods=['post'], url_path='milestone')
+    def assign_milestone(self, request, team_pk=None, pk=None):
+        """
+        TODO를 마일스톤에 할당/변경/해제
+
+        요청 본문:
+        {
+            "milestone_id": 5  # 또는 null (해제)
+        }
+
+        응답:
+        {
+            "todo": {...},
+            "metadata": {
+                "milestone_changed": true,
+                "old_milestone_id": 3,
+                "new_milestone_id": 5,
+                "old_milestone_updated": true,
+                "new_milestone_updated": true
+            }
+        }
+        """
+        todo = self.get_object()
+        team = self.get_team()
+        serializer = TodoMilestoneAssignSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        milestone_id = serializer.validated_data.get('milestone_id')
+
+        try:
+            # 마일스톤이 같은 팀 소속인지 검증 (None 아닌 경우)
+            if milestone_id is not None:
+                try:
+                    milestone = Milestone.objects.get(pk=milestone_id, team=team)
+                except Milestone.DoesNotExist:
+                    return api_error_response(
+                        request,
+                        '마일스톤을 찾을 수 없거나 같은 팀에 속하지 않습니다.',
+                        status_code=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                milestone = None
+
+            # 서비스 레이어 호출
+            updated_todo, metadata = self.todo_service.assign_to_milestone(
+                todo_id=todo.id,
+                milestone_id=milestone.id if milestone else None,
+                team=team
+            )
+
+            return api_success_response(
+                request,
+                '마일스톤 할당이 완료되었습니다.',
+                data={
+                    'todo': TodoSerializer(updated_todo).data,
+                    'metadata': metadata
+                }
+            )
+
+        except ValueError as e:
+            return api_error_response(request, str(e))
+
+    @action(detail=True, methods=['delete'], url_path='milestone')
+    def detach_milestone(self, request, team_pk=None, pk=None):
+        """
+        TODO를 마일스톤에서 분리
+
+        응답:
+        {
+            "todo": {...},
+            "metadata": {
+                "detached": true,
+                "old_milestone_id": 5
+            }
+        }
+        """
+        todo = self.get_object()
+        team = self.get_team()
+
+        try:
+            # 서비스 레이어 호출
+            updated_todo, metadata = self.todo_service.detach_from_milestone(
+                todo_id=todo.id,
+                team=team
+            )
+
+            return api_success_response(
+                request,
+                '마일스톤 연결이 해제되었습니다.',
+                data={
+                    'todo': TodoSerializer(updated_todo).data,
+                    'metadata': metadata
                 }
             )
 
