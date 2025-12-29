@@ -12,7 +12,8 @@
 // 팀 데이터를 전역으로 설정 (JS 파일에서 접근 가능하도록)
 window.teamData = {
     id: {{ team.id }},
-    csrfToken: "{{ csrf_token }}"
+    csrfToken: "{{ csrf_token }}",
+    today: "{{ today|date:'Y-m-d' }}"  // 서버 시간 기준 오늘 날짜 (YYYY-MM-DD)
 };
 </script>
 <!-- API 클라이언트 로드 -->
@@ -57,6 +58,11 @@ const apiClient = new ApiClient();
       </button>
     </div>
 
+    <button class="today-btn" id="todayBtn" title="오늘 날짜로 이동">
+      <i class="ri-calendar-check-line"></i>
+      <span>오늘</span>
+    </button>
+
     <button class="primary-btn" id="addMilestoneBtn">
       <i class="ri-add-line"></i>
       마일스톤 추가
@@ -99,6 +105,14 @@ const apiClient = new ApiClient();
 
     <!-- 우측 스크롤 영역: 타임라인 -->
     <div class="timeline-scroll-area">
+      <!-- 좌측 확장 인디케이터 -->
+      <div class="timeline-expand-indicator left" id="expandLeftIndicator" style="display: none;">
+        <div class="indicator-content">
+          <span class="indicator-count" id="leftMilestoneCount"></span>
+          <span class="indicator-label">← 과거</span>
+        </div>
+      </div>
+
       <div class="timeline-scroll-content">
         <!-- 헤더 높이 맞춤용 빈 영역 -->
         <div class="timeline-header-spacer" id="monthHeaders">
@@ -133,8 +147,15 @@ const apiClient = new ApiClient();
 
         <!-- 일별 구분선 (디버깅용) -->
       </div>
+
+      <!-- 우측 확장 인디케이터 -->
+      <div class="timeline-expand-indicator right" id="expandRightIndicator" style="display: none;">
+        <div class="indicator-content">
+          <span class="indicator-label">미래 →</span>
+          <span class="indicator-count" id="rightMilestoneCount"></span>
+        </div>
+      </div>
     </div>
-  </div>
   </div>
 </section>
 

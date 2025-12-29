@@ -571,10 +571,100 @@ pytest
 - [ ] `TodoViewSet.complete` - 응답에 마일스톤 정보 추가
 - [ ] API 테스트 작성 (9개)
 
+### ✅ Phase 3: API 레이어 (완료 - 2025.12.29)
+
+**구현 완료**:
+- [x] Serializer 확장 (progress_mode, todo_stats 필드 추가)
+- [x] `MilestoneViewSet.toggle_progress_mode` 액션 추가
+- [x] `TodoViewSet.assign_milestone` 액션 추가
+- [x] `TodoViewSet.complete` - 응답에 마일스톤 메타데이터 추가
+
+**커밋**: `cf178ba` - feat(milestone): 마일스톤-TODO 연동 API 구현
+
 ### Phase 4: 프론트엔드 구현 (2-3일)
 
+**Day 0: 타임라인 연도 처리 개선 (선행 작업)** ✅ **완료 (2025.12.29)**
+- [x] **Today-based Rolling Window** 구현 (±6개월)
+  - [x] 서버에서 오늘 날짜 전달 ([teams/views.py:266-280](../../teams/views.py#L266-L280))
+  - [x] JavaScript: 동적 범위 계산 (오늘 -6개월 ~ +6개월) ([milestone_timeline.js:39-56](../../static/js/pages/milestone_timeline.js#L39-L56))
+  - [x] 연도 넘어가는 월 헤더 ("2025년 12월", "2026년 1월") ([milestone_timeline.js:59-65](../../static/js/pages/milestone_timeline.js#L59-L65))
+  - [x] 연도 구분선 시각화 (회색, 2px) ([milestone_timeline.js:86-109](../../static/js/pages/milestone_timeline.js#L86-L109))
+  - [x] 오늘 마커 기능 확인 (기존 `scrollToCurrentDate()` 활용)
+- [x] 날짜 변환 함수 수정 (연도 고려) ([milestone_timeline.js:111-181](../../static/js/pages/milestone_timeline.js#L111-L181))
+
+**구현 세부사항**:
+- 서버 시간 기준 `today` 전달 (`window.teamData.today`)
+- 연도 전체 표기 (4자리: 2025년)
+- 연도 구분선: 자연스러운 회색 (#6b7280, 2px)
+- 연도 경계 양쪽에 연도 표시 (예: "2025년 12월", "2026년 1월")
+
+**Day 0-1: 타임라인 범위 확장 기능** (진행 예정)
+
+**목표**: 6개월 이상 지난/미래 마일스톤 확인을 위한 범위 확장 UI 구현
+
+**UI 설계**:
+```
+[← 과거 2개] ━━━━━ 타임라인 (±6개월) ━━━━━ [미래 3개] [오늘]
+```
+
+**핵심 요구사항**:
+1. **확장 버튼 (항상 표시)**:
+   - 좌우 양쪽에 확장 버튼 배치 (타임라인 영역 밖)
+   - 범위 외 마일스톤이 있으면 개수 표시 (예: "← 과거 2개")
+   - 범위 외 마일스톤이 없어도 버튼은 표시 (확장 가능)
+   - 클릭 시 해당 방향으로 6개월씩 확장
+
+2. **확장 제한**:
+   - 각 방향 1회까지만 확장 가능 (총 ±12개월까지)
+   - 1회 확장 후에는 버튼 비활성화 (또는 숨김)
+   - 범위 밖 마일스톤이 있으면 인디케이터만 표시 (확장 불가)
+
+3. **오늘 버튼 (즉시 복귀)**:
+   - 타임라인 중앙 또는 헤더에 "오늘" 버튼 배치
+   - 클릭 시 기존 `scrollToCurrentDate()` 함수 호출
+   - 오늘 날짜 기준선으로 스크롤
+
+4. **상태 관리**:
+   - 확장 상태는 JavaScript 변수로 관리 (백엔드 저장 불필요)
+   - 페이지 새로고침 시 자동으로 원래 뷰(±6개월)로 초기화
+
+**작업 목록**:
+- [ ] 좌우 확장 버튼 HTML 구조 추가
+- [ ] 범위 외 마일스톤 개수 계산 함수 구현
+- [ ] 확장 버튼 클릭 이벤트 핸들러
+- [ ] 확장 상태 추적 변수 (`leftExpanded`, `rightExpanded`)
+- [ ] 1회 확장 제한 로직
+- [ ] 오늘 버튼 추가 및 스타일링
+- [ ] CSS: 확장 버튼 스타일 (호버, 비활성화 상태)
+- [ ] 확장 시 타임라인 재렌더링 (월 헤더, 마일스톤 바)
+
+**기술 구현**:
+```javascript
+// 확장 상태 관리
+let expandedLeft = false;   // 과거 확장 여부
+let expandedRight = false;  // 미래 확장 여부
+
+// 범위 계산 (기본: ±6개월, 확장: ±12개월)
+const leftMonths = expandedLeft ? 12 : 6;
+const rightMonths = expandedRight ? 12 : 6;
+
+// 확장 버튼 클릭
+function expandLeft() {
+    if (!expandedLeft) {
+        expandedLeft = true;
+        renderTimeline();  // 타임라인 재렌더링
+        updateExpandButtons();  // 버튼 상태 업데이트
+    }
+}
+
+// 오늘 버튼 (기존 함수 재사용)
+function scrollToToday() {
+    scrollToCurrentDate();  // 기존 함수 호출
+}
+```
+
 **Day 1: 기본 UI**
-- [ ] API Client 확장 (`static/js/api/client.js`)
+- [x] API Client 확장 (`static/js/api/client.js`)
 - [ ] 진행률 슬라이더 컴포넌트 (`progress-control.js`)
 - [ ] 타임라인 HTML 템플릿 업데이트
 - [ ] CSS 스타일 작성 (`progress-control.css`)

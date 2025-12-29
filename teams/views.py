@@ -264,14 +264,18 @@ class TeamMilestoneTimelineView(TeamMemberRequiredMixin, TemplateView):
         self.milestone_service = MilestoneService()
     
     def get_context_data(self, **kwargs):
+        from datetime import date
+
         context = super().get_context_data(**kwargs)
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        today = date.today()  # 서버 시간 기준
 
         context.update({
             'team': team,
             'milestones': self.milestone_service.get_team_milestones(
                 team, order_by=['startdate', 'enddate', 'priority']  # ← 우선순위 추가
             ),
+            'today': today,  # 타임라인 Rolling Window 기준일
         })
         return context
 
