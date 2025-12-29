@@ -285,6 +285,13 @@ class TeamApiClient {
     async deleteMilestone(teamId, milestoneId) {
         return this.api.delete(`/teams/${teamId}/milestones/${milestoneId}/`);
     }
+
+    /**
+     * 마일스톤 진행률 모드 토글 (manual ↔ auto)
+     */
+    async toggleMilestoneProgressMode(teamId, milestoneId) {
+        return this.api.post(`/teams/${teamId}/milestones/${milestoneId}/toggle-progress-mode/`, {});
+    }
 }
 
 /**

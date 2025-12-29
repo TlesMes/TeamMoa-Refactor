@@ -9,11 +9,16 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ### 🚀 마일스톤-TODO 연동 기능 개선 (2025.12.26)
 
-**📋 계획 수립 완료**:
-- ✅ **비즈니스 설계**: 마일스톤-TODO 연동 및 자동 진행률 관리 시스템
-- ✅ **진행률 관리 방식**: 수동 모드 + AUTO 모드 (기본값: `auto`)
-- ✅ **구현 계획**: 5단계 7일 계획 수립 완료
-- ✅ **문서 작성**: milestone_improvement_plan.md, milestone_scenario_and_db_changes.md
+**📋 백엔드 구현 완료 (Phase 1-3)**:
+- ✅ **Phase 1 완료 (2025.12.26)**: 모델 및 마이그레이션
+  - Milestone.progress_mode 필드, Todo.milestone FK 추가
+  - 4개 모델 메서드 구현, 마이그레이션 실행
+- ✅ **Phase 2 완료 (2025.12.28)**: 서비스 레이어 확장
+  - MilestoneService 4개 메서드, TodoService 3개 메서드 구현
+  - 24개 테스트 추가 (총 249개 테스트 통과)
+- ✅ **Phase 3 완료 (2025.12.29)**: API 레이어 구현
+  - MilestoneViewSet/TodoViewSet 확장, Serializer 추가
+  - toggle_progress_mode, assign_milestone API 구현
 
 **🎯 핵심 기능**:
 1. **진행률 관리 방식 선택**
@@ -29,21 +34,20 @@ Django 기반 팀 프로젝트 관리 시스템
    - 수동 → AUTO: 즉시 TODO 기반 재계산
    - AUTO → 수동: 기존 진행률 유지
 
-**📦 구현 계획** (5단계):
-- Phase 1 (Day 1): 모델 및 마이그레이션
-  - Milestone.progress_mode (CharField, default='auto')
-  - Todo.milestone (ForeignKey, SET_NULL)
-- Phase 2 (Day 2): 서비스 레이어 확장
-- Phase 3 (Day 3): API 레이어
-- Phase 4 (Day 4-6): 프론트엔드 구현
-- Phase 5 (Day 7): 테스트 및 배포
+**📦 남은 작업 (Phase 4-5)**:
+- ⏳ **Phase 4 (진행 예정)**: 프론트엔드 구현 (2-3일)
+  - Day 1: API Client 확장, 진행률 슬라이더 컴포넌트, 타임라인 업데이트
+  - Day 2: 마일스톤 수정 모달 (HTML/JS/CSS)
+  - Day 3: TODO 페이지 연동 (배지, 할당 드롭다운, 토스트)
+- ⏳ **Phase 5**: 최종 테스트 및 배포 (1일)
+  - 통합 테스트, 엣지 케이스, 성능 테스트, 프로덕션 배포
 
 **📚 참고 문서**:
 - [마일스톤 개선 계획](./docs/architecture/design/milestone_improvement_plan.md)
 - [시나리오 및 DB 변경](./docs/architecture/design/milestone_scenario_and_db_changes.md)
-- [구현 계획 파일](~/.claude/plans/rosy-wondering-tide.md)
+- [API 마이그레이션 가이드](./docs/architecture/refactoring/api_migrations/milestone_api_migration.md)
 
-**다음 작업**: Phase 1 구현 시작 - 모델 및 마이그레이션
+**다음 작업**: Phase 4 구현 시작 - 프론트엔드 UI 구축
 
 ---
 
