@@ -1,30 +1,77 @@
 // 마일스톤 타임라인 페이지 전용 JavaScript
 
-// 월별 실제 일수 기반 타임라인 시스템
+// 월별 실제 일수 기반 타임라인 시스템 (Today-based Rolling Window ±6개월, 확장 가능)
 document.addEventListener('DOMContentLoaded', function() {
     const scrollContent = document.querySelector('.timeline-scroll-content');
     const monthHeaders = document.getElementById('monthHeaders');
-    const currentYear = new Date().getFullYear();
     const dayWidth = 12; // 일당 픽셀 너비
+
+    // ==================== 확장 상태 관리 ====================
+    let expandedLeft = false;   // 과거 방향 확장 여부
+    let expandedRight = false;  // 미래 방향 확장 여부
+
+    // ==================== 서버 시간 기준 Rolling Window 계산 ====================
+
+    // 서버에서 전달받은 오늘 날짜 파싱 (YYYY-MM-DD)
+    const today = new Date(window.teamData.today);
+    today.setHours(0, 0, 0, 0);
+
+    // 타임라인 범위 계산 함수 (확장 상태에 따라 동적 계산)
+    function calculateTimelineRange() {
+        const leftMonths = expandedLeft ? 12 : 6;
+        const rightMonths = expandedRight ? 12 : 6;
+
+        // 타임라인 시작일 (오늘 -leftMonths개월)
+        const start = new Date(today);
+        start.setMonth(start.getMonth() - leftMonths);
+        start.setDate(1); // 월 첫째 날로 설정
+
+        // 타임라인 종료일 (오늘 +rightMonths개월)
+        const end = new Date(today);
+        end.setMonth(end.getMonth() + rightMonths);
+        // 해당 월의 마지막 날로 설정
+        end.setMonth(end.getMonth() + 1);
+        end.setDate(0);
+
+        return { start, end };
+    }
+
+    let timelineRange = calculateTimelineRange();
+    let timelineStart = timelineRange.start;
+    let timelineEnd = timelineRange.end;
 
     // 각 월의 일수 계산 (윤년 고려)
     function getDaysInMonth(year, month) {
         return new Date(year, month + 1, 0).getDate();
     }
 
-    // 월별 일수 배열과 누적 위치 계산
-    const monthDays = [];
-    const monthOffsets = [];
+    // 월별 일수 배열과 누적 위치 계산 (동적 범위)
+    let monthDays = [];
+    let monthOffsets = [];
+    let monthYears = []; // 각 월의 연도 저장 (연도 구분선용)
     let totalOffset = 0;
 
-    for (let month = 0; month < 12; month++) {
-        monthOffsets[month] = totalOffset;
-        const daysInMonth = getDaysInMonth(currentYear, month);
-        monthDays[month] = daysInMonth;
+    // timelineStart부터 timelineEnd까지 순회
+    const currentMonth = new Date(timelineStart);
+    let monthIndex = 0;
+
+    while (currentMonth <= timelineEnd) {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+
+        monthOffsets[monthIndex] = totalOffset;
+        monthYears[monthIndex] = year;
+        const daysInMonth = getDaysInMonth(year, month);
+        monthDays[monthIndex] = daysInMonth;
         totalOffset += daysInMonth * dayWidth;
+
+        // 다음 달로 이동
+        currentMonth.setMonth(currentMonth.getMonth() + 1);
+        monthIndex++;
     }
 
-    const totalWidth = totalOffset; // 전체 타임라인 너비
+    let totalWidth = totalOffset; // 전체 타임라인 너비
+    let totalMonths = monthIndex; // 총 월 개수
 
     // 툴팁 요소 생성
     const tooltip = document.createElement('div');
@@ -43,82 +90,157 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.body.appendChild(tooltip);
 
-    // 월 헤더 동적 생성
+    // 월 헤더 동적 생성 (연도 포함)
     const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-    for (let month = 0; month < 12; month++) {
-        const monthHeader = document.createElement('div');
-        monthHeader.className = 'month-header';
-        monthHeader.textContent = monthNames[month];
-        monthHeader.style.cssText = `
-            position: absolute;
-            left: ${monthOffsets[month]}px;
-            width: ${monthDays[month] * dayWidth}px;
-        `;
-        monthHeaders.appendChild(monthHeader);
-    }
+    // ========================================
+    // 📌 함수 정의: 타임라인 구조 렌더링
+    // ========================================
+    function renderTimelineStructure() {
+        // 기존 타임라인 요소 제거
+        monthHeaders.innerHTML = '';
+        const markers = scrollContent.querySelectorAll('.month-marker, .day-marker, .today-marker, .today-label');
+        markers.forEach(marker => marker.remove());
 
-    // 월별 구분선 동적 생성
-    for (let month = 1; month < 12; month++) { // 1월부터 시작 (0월 제외)
-        const monthMarker = document.createElement('div');
-        monthMarker.className = 'month-marker';
-        monthMarker.style.cssText = `
-            position: absolute;
-            left: ${monthOffsets[month]}px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #8c9399;
-            pointer-events: none;
-        `;
-        scrollContent.appendChild(monthMarker);
-    }
+        // 월 헤더 동적 생성
+        const startMonth = new Date(timelineStart);
 
-    // 일별 구분선 생성 (디버깅용)
-    for (let month = 0; month < 12; month++) {
-        for (let day = 1; day <= monthDays[month]; day++) {
-            const dayPos = monthOffsets[month] + ((day - 1) * dayWidth);
-            const dayMarker = document.createElement('div');
-            dayMarker.className = 'day-marker';
-            dayMarker.style.cssText = `
+        for (let i = 0; i < totalMonths; i++) {
+            const year = monthYears[i];
+            const month = startMonth.getMonth();
+            const nextYear = i < totalMonths - 1 ? monthYears[i + 1] : year;
+            const isYearChanging = year !== nextYear;
+
+            const monthHeader = document.createElement('div');
+            monthHeader.className = 'month-header';
+
+            if (i === 0 || month === 0 || isYearChanging) {
+                monthHeader.textContent = `${year}년 ${monthNames[month]}`;
+            } else {
+                monthHeader.textContent = monthNames[month];
+            }
+
+            monthHeader.style.cssText = `
                 position: absolute;
-                left: ${dayPos}px;
-                top: 0;
-                bottom: 0;
-                width: 1px;
-                background: rgba(200, 200, 200, 0.3);
-                pointer-events: none;
+                left: ${monthOffsets[i]}px;
+                width: ${monthDays[i] * dayWidth}px;
             `;
-            scrollContent.appendChild(dayMarker);
-        }
-    }
+            monthHeaders.appendChild(monthHeader);
 
-    // 타임라인 컨테이너 너비 설정
-    scrollContent.style.width = totalWidth + 'px';
+            startMonth.setMonth(startMonth.getMonth() + 1);
+        }
+
+        // 월별 구분선 및 연도 구분선 동적 생성
+        for (let i = 1; i < totalMonths; i++) {
+            const monthMarker = document.createElement('div');
+            monthMarker.className = 'month-marker';
+
+            const currentYear = monthYears[i];
+            const prevYear = monthYears[i - 1];
+
+            if (currentYear !== prevYear) {
+                monthMarker.style.cssText = `
+                    position: absolute;
+                    left: ${monthOffsets[i]}px;
+                    top: 0;
+                    bottom: 0;
+                    width: 2px;
+                    background: #6b7280;
+                    pointer-events: none;
+                    z-index: 50;
+                `;
+            } else {
+                monthMarker.style.cssText = `
+                    position: absolute;
+                    left: ${monthOffsets[i]}px;
+                    top: 0;
+                    bottom: 0;
+                    width: 2px;
+                    background: #d1d5db;
+                    pointer-events: none;
+                `;
+            }
+
+            scrollContent.appendChild(monthMarker);
+        }
+
+        // 일별 구분선 생성
+        for (let i = 0; i < totalMonths; i++) {
+            for (let day = 1; day <= monthDays[i]; day++) {
+                const dayPos = monthOffsets[i] + ((day - 1) * dayWidth);
+                const dayMarker = document.createElement('div');
+                dayMarker.className = 'day-marker';
+                dayMarker.style.cssText = `
+                    position: absolute;
+                    left: ${dayPos}px;
+                    top: 0;
+                    bottom: 0;
+                    width: 1px;
+                    background: rgba(200, 200, 200, 0.3);
+                    pointer-events: none;
+                `;
+                scrollContent.appendChild(dayMarker);
+            }
+        }
+
+        // 타임라인 컨테이너 너비 설정
+        scrollContent.style.width = totalWidth + 'px';
+    }
 
     const milestoneItems = document.querySelectorAll('.milestone-timeline-item');
 
-    // 날짜 <-> 픽셀 변환 함수들 (새로운 월별 오프셋 기반)
+    // 날짜 <-> 픽셀 변환 함수들 (연도 고려, Rolling Window 기반)
     function dateToPixel(date) {
-        const month = date.getMonth();
-        const day = date.getDate();
-        return monthOffsets[month] + ((day - 1) * dayWidth);
+        const targetDate = new Date(date);
+        targetDate.setHours(0, 0, 0, 0);
+
+        // 타임라인 범위를 벗어나면 경계값 반환
+        if (targetDate < timelineStart) return 0;
+        if (targetDate > timelineEnd) return totalWidth;
+
+        // 타임라인 시작일부터 해당 날짜까지의 픽셀 계산
+        const currentDate = new Date(timelineStart);
+        let pixel = 0;
+        let monthIdx = 0;
+
+        while (currentDate < targetDate && monthIdx < totalMonths) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // 같은 년월이면 일수 차이 계산
+            if (targetDate.getFullYear() === year && targetDate.getMonth() === month) {
+                pixel += (targetDate.getDate() - 1) * dayWidth;
+                break;
+            }
+
+            // 다른 월이면 전체 월 일수만큼 더하고 다음 달로
+            pixel += monthDays[monthIdx] * dayWidth;
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            monthIdx++;
+        }
+
+        return pixel;
     }
 
     function pixelToDate(pixel) {
         // 어느 월에 속하는지 찾기
-        let month = 0;
-        for (let m = 0; m < 12; m++) {
-            if (pixel >= monthOffsets[m] && (m === 11 || pixel < monthOffsets[m + 1])) {
-                month = m;
+        let monthIdx = 0;
+        for (let i = 0; i < totalMonths; i++) {
+            if (pixel >= monthOffsets[i] && (i === totalMonths - 1 || pixel < monthOffsets[i + 1])) {
+                monthIdx = i;
                 break;
             }
         }
 
         // 해당 월 내에서의 일수 계산
-        const dayInMonth = Math.floor((pixel - monthOffsets[month]) / dayWidth) + 1;
-        const validDay = Math.min(Math.max(dayInMonth, 1), monthDays[month]);
+        const dayInMonth = Math.floor((pixel - monthOffsets[monthIdx]) / dayWidth) + 1;
+        const validDay = Math.min(Math.max(dayInMonth, 1), monthDays[monthIdx]);
 
-        return new Date(currentYear, month, validDay);
+        // timelineStart로부터 monthIdx만큼 이동한 날짜 계산
+        const resultDate = new Date(timelineStart);
+        resultDate.setMonth(timelineStart.getMonth() + monthIdx);
+        resultDate.setDate(validDay);
+
+        return resultDate;
     }
 
     function formatDate(date) {
@@ -133,40 +255,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // 픽셀 위치를 가장 가까운 일(day) 단위로 스냅
     function snapToDay(pixel) {
         // 어느 월에 속하는지 찾기
-        let month = 0;
-        for (let m = 0; m < 12; m++) {
-            if (pixel >= monthOffsets[m] && (m === 11 || pixel < monthOffsets[m + 1])) {
-                month = m;
+        let monthIdx = 0;
+        for (let i = 0; i < totalMonths; i++) {
+            if (pixel >= monthOffsets[i] && (i === totalMonths - 1 || pixel < monthOffsets[i + 1])) {
+                monthIdx = i;
                 break;
             }
         }
 
         // 해당 월 내에서의 일수 계산하고 반올림
-        const pixelInMonth = pixel - monthOffsets[month];
+        const pixelInMonth = pixel - monthOffsets[monthIdx];
         const dayInMonth = Math.round(pixelInMonth / dayWidth);
-        const validDay = Math.min(Math.max(dayInMonth, 0), monthDays[month] - 1);
+        const validDay = Math.min(Math.max(dayInMonth, 0), monthDays[monthIdx] - 1);
 
-        return monthOffsets[month] + (validDay * dayWidth);
+        return monthOffsets[monthIdx] + (validDay * dayWidth);
     }
 
-    milestoneItems.forEach(item => {
-        const startDate = new Date(item.dataset.start);
-        const endDate = new Date(item.dataset.end);
-        const milestoneId = item.dataset.milestoneId;
+    // ========================================
+    // 📌 함수 정의: 마일스톤 렌더링 (범위 체크 및 위치 설정)
+    // ========================================
+    function renderMilestones() {
+        const milestoneItems = document.querySelectorAll('.milestone-timeline-item');
 
-        const startPixel = dateToPixel(startDate);
-        const endPixel = dateToPixel(endDate) + dayWidth; // 종료일은 해당 날까지 포함하므로 +1일
-        const width = endPixel - startPixel;
+        milestoneItems.forEach(item => {
+            const startDate = new Date(item.dataset.start);
+            const endDate = new Date(item.dataset.end);
 
-        const milestoneBar = item.querySelector('.milestone-bar');
-        milestoneBar.style.left = startPixel + 'px';
-        milestoneBar.style.width = width + 'px';
+            // 범위 밖 마일스톤 숨김 처리
+            if (endDate < timelineStart || startDate > timelineEnd) {
+                item.style.display = 'none';
+                return;
+            }
 
-        // 툴팁 이벤트
+            // 범위 내 마일스톤 표시
+            item.style.display = '';
+            const startPixel = dateToPixel(startDate);
+            const endPixel = dateToPixel(endDate) + dayWidth;
+            const width = endPixel - startPixel;
+
+            const milestoneBar = item.querySelector('.milestone-bar');
+            milestoneBar.style.left = startPixel + 'px';
+            milestoneBar.style.width = width + 'px';
+        });
+    }
+
+    // ========================================
+    // 📌 함수 정의: 마일스톤 이벤트 리스너 초기화 (한 번만 실행)
+    // ========================================
+    function initializeMilestoneEvents() {
+        milestoneItems.forEach(item => {
+            const milestoneId = item.dataset.milestoneId;
+            const milestoneBar = item.querySelector('.milestone-bar');
+
+            // 툴팁 이벤트
         milestoneBar.addEventListener('mouseenter', function(e) {
             const title = this.dataset.title;
 
-            // ⭐ 최신 날짜를 data 속성에서 다시 읽기 (드래그 업데이트 반영)
+            // 최신 날짜를 data 속성에서 다시 읽기 (드래그 업데이트 반영)
             const parentItem = this.closest('.milestone-timeline-item');
             const currentStartDate = new Date(parentItem.dataset.start);
             const currentEndDate = new Date(parentItem.dataset.end);
@@ -384,7 +529,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
         });
-    });
+        });
+    }
+
+    // ========================================
+    // 📌 초기 렌더링 실행
+    // ========================================
+    renderTimelineStructure();
+    renderMilestones();
+    initializeMilestoneEvents();
 
     // 마일스톤 상태 계산 (클라이언트 사이드)
     function calculateMilestoneStatus(startdate, enddate, progressPercentage) {
@@ -478,13 +631,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 오늘 날짜 마커 추가
+    // 오늘 날짜 마커 추가 (서버 시간 기준)
     function addTodayMarker() {
-        // 로컬 시간대의 오늘 날짜 (시간 정보 제거 후 다음날로)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        today.setDate(today.getDate() + 1); // 다음날로 설정
-        const todayPixel = dateToPixel(today);
+        // 서버에서 받은 오늘 날짜 사용 (이미 위에서 파싱됨)
+        const todayMarkerDate = new Date(today);
+        todayMarkerDate.setDate(todayMarkerDate.getDate() + 1); // 다음날로 설정
+        const todayPixel = dateToPixel(todayMarkerDate);
 
         const todayMarker = document.createElement('div');
         todayMarker.className = 'today-marker';
@@ -522,17 +674,16 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollContent.appendChild(todayMarker);
         scrollContent.appendChild(todayLabel);
 
-        console.log(`오늘 날짜: ${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')}`);
+        console.log(`오늘 날짜 (서버): ${formatDate(today)}`);
         console.log(`오늘 날짜 마커 추가: ${todayPixel}px`);
     }
 
-    // 페이지 로드 시 현재 날짜 위치로 스크롤
+    // 페이지 로드 시 현재 날짜 위치로 스크롤 (서버 시간 기준)
     function scrollToCurrentDate() {
-        // 로컬 시간대의 오늘 날짜 (시간 정보 제거 후 다음날로)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        today.setDate(today.getDate() + 1); // 다음날로 설정
-        const todayPixel = dateToPixel(today);
+        // 서버에서 받은 오늘 날짜 사용
+        const todayMarkerDate = new Date(today);
+        todayMarkerDate.setDate(todayMarkerDate.getDate() + 1); // 다음날로 설정
+        const todayPixel = dateToPixel(todayMarkerDate);
         const scrollContainer = document.querySelector('.timeline-scroll-area');
 
         // 타임라인 컨테이너 너비의 절반을 빼서 현재 날짜가 중앙에 오도록 조정
@@ -545,31 +696,246 @@ document.addEventListener('DOMContentLoaded', function() {
             behavior: 'smooth'
         });
 
-        console.log(`오늘 날짜 (${today.toDateString()})로 스크롤: ${scrollPosition}px`);
+        console.log(`오늘 날짜 (서버 ${formatDate(today)})로 스크롤: ${scrollPosition}px`);
     }
 
     // 오늘 날짜 마커 추가 및 스크롤 실행
     addTodayMarker();
     setTimeout(scrollToCurrentDate, 100);
 
-    // 필터 기능 초기화
-    initializeFilters();
+    // ==================== 타임라인 범위 확장 기능 ====================
 
-    // 마일스톤 생성 모달 초기화
-    initializeCreateMilestoneModal();
-});
+    // 마일스톤 정렬 (범위 내 마일스톤 위, 범위 밖 마일스톤 아래)
+    function sortMilestonesByRange() {
+        const leftPanel = document.querySelector('.milestone-info-list');
+        const rightTimeline = document.querySelector('.timeline-scroll-content');
 
-// ========================================
-// 필터 기능
-// ========================================
+        if (!leftPanel || !rightTimeline) return;
 
-// 필터 상태 저장
-const filterState = {
-    status: ['in_progress', 'not_started', 'overdue', 'completed'],  // 기본: 전체
-    priority: ['critical', 'high', 'medium', 'low', 'minimal']
-};
+        // 좌측 패널 아이템들
+        const leftItems = Array.from(leftPanel.querySelectorAll('.milestone-info-item'));
+        // 우측 타임라인 아이템들
+        const rightItems = Array.from(rightTimeline.querySelectorAll('.milestone-timeline-item'));
 
-function initializeFilters() {
+        // 마일스톤을 범위 내/밖으로 분류
+        const inRangeIds = [];
+        const outOfRangeIds = [];
+
+        rightItems.forEach(item => {
+            const milestoneId = item.dataset.milestoneId;
+            const startDate = new Date(item.dataset.start);
+            const endDate = new Date(item.dataset.end);
+
+            // 범위 체크
+            if (endDate < timelineStart || startDate > timelineEnd) {
+                outOfRangeIds.push(milestoneId);
+            } else {
+                inRangeIds.push(milestoneId);
+            }
+        });
+
+        // 좌측 패널 정렬
+        const sortedLeftItems = [
+            ...leftItems.filter(item => inRangeIds.includes(item.dataset.milestoneId)),
+            ...leftItems.filter(item => outOfRangeIds.includes(item.dataset.milestoneId))
+        ];
+        sortedLeftItems.forEach(item => leftPanel.appendChild(item));
+
+        // 우측 타임라인 정렬
+        const sortedRightItems = [
+            ...rightItems.filter(item => inRangeIds.includes(item.dataset.milestoneId)),
+            ...rightItems.filter(item => outOfRangeIds.includes(item.dataset.milestoneId))
+        ];
+        sortedRightItems.forEach(item => rightTimeline.appendChild(item));
+
+        console.log(`마일스톤 정렬 완료 - 범위 내: ${inRangeIds.length}개, 범위 밖: ${outOfRangeIds.length}개`);
+    }
+
+    // 범위 외 마일스톤 개수 계산
+    function countOutOfRangeMilestones() {
+        const allMilestones = document.querySelectorAll('.milestone-timeline-item');
+        let leftCount = 0;
+        let rightCount = 0;
+
+        console.log('=== countOutOfRangeMilestones 디버깅 ===');
+        console.log(`타임라인 범위: ${formatDate(timelineStart)} ~ ${formatDate(timelineEnd)}`);
+        console.log(`전체 마일스톤 개수: ${allMilestones.length}`);
+
+        allMilestones.forEach(item => {
+            const startDate = new Date(item.dataset.start);
+            const endDate = new Date(item.dataset.end);
+
+            // 마일스톤이 현재 타임라인 범위 밖에 있는지 확인
+            if (endDate < timelineStart) {
+                leftCount++; // 과거 (타임라인 시작 전)
+                console.log(`좌측 범위 밖: ${formatDate(startDate)} ~ ${formatDate(endDate)}`);
+            } else if (startDate > timelineEnd) {
+                rightCount++; // 미래 (타임라인 종료 후)
+                console.log(`우측 범위 밖: ${formatDate(startDate)} ~ ${formatDate(endDate)}`);
+            }
+        });
+
+        console.log(`좌측 개수: ${leftCount}, 우측 개수: ${rightCount}`);
+        console.log('========================================');
+
+        return { left: leftCount, right: rightCount };
+    }
+
+    // 확장 인디케이터 상태 업데이트
+    function updateExpandButtons() {
+        const counts = countOutOfRangeMilestones();
+        const leftIndicator = document.getElementById('expandLeftIndicator');
+        const rightIndicator = document.getElementById('expandRightIndicator');
+        const leftCount = document.getElementById('leftMilestoneCount');
+        const rightCount = document.getElementById('rightMilestoneCount');
+
+        console.log('=== updateExpandButtons 디버깅 ===');
+        console.log(`expandedLeft: ${expandedLeft}, expandedRight: ${expandedRight}`);
+        console.log(`leftIndicator 존재: ${!!leftIndicator}, rightIndicator 존재: ${!!rightIndicator}`);
+
+        // 왼쪽 (과거) 인디케이터
+        if (leftIndicator) {
+            if (expandedLeft || counts.left === 0) {
+                // 이미 확장했거나 범위 밖 마일스톤이 없으면 숨김
+                leftIndicator.style.display = 'none';
+                console.log(`좌측 인디케이터 숨김 (expandedLeft: ${expandedLeft}, count: ${counts.left})`);
+            } else {
+                // 확장 가능하고 범위 밖 마일스톤이 있으면 표시
+                leftIndicator.style.display = 'flex';
+                leftCount.textContent = `${counts.left}개`;
+                console.log(`좌측 인디케이터 표시 (${counts.left}개)`);
+            }
+        }
+
+        // 오른쪽 (미래) 인디케이터
+        if (rightIndicator) {
+            if (expandedRight || counts.right === 0) {
+                // 이미 확장했거나 범위 밖 마일스톤이 없으면 숨김
+                rightIndicator.style.display = 'none';
+                console.log(`우측 인디케이터 숨김 (expandedRight: ${expandedRight}, count: ${counts.right})`);
+            } else {
+                // 확장 가능하고 범위 밖 마일스톤이 있으면 표시
+                rightIndicator.style.display = 'flex';
+                rightCount.textContent = `${counts.right}개`;
+                console.log(`우측 인디케이터 표시 (${counts.right}개)`);
+            }
+        }
+        console.log('=====================================');
+    }
+
+    // 타임라인 재렌더링 (확장 시 호출)
+    function rerenderTimeline() {
+        // 0. 현재 스크롤 위치 저장 (날짜 기준)
+        const scrollContainer = document.querySelector('.timeline-scroll-area');
+        const currentScrollLeft = scrollContainer.scrollLeft;
+        const currentDate = pixelToDate(currentScrollLeft);
+
+        // 1. 범위 재계산
+        timelineRange = calculateTimelineRange();
+        timelineStart = timelineRange.start;
+        timelineEnd = timelineRange.end;
+
+        // 2. 월별 데이터 재계산
+        const newMonthDays = [];
+        const newMonthOffsets = [];
+        const newMonthYears = [];
+        let newTotalOffset = 0;
+
+        const currentMonth = new Date(timelineStart);
+        let monthIdx = 0;
+
+        while (currentMonth <= timelineEnd) {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            newMonthOffsets[monthIdx] = newTotalOffset;
+            newMonthYears[monthIdx] = year;
+            const daysInMonth = getDaysInMonth(year, month);
+            newMonthDays[monthIdx] = daysInMonth;
+            newTotalOffset += daysInMonth * dayWidth;
+
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            monthIdx++;
+        }
+
+        // 전역 변수 업데이트
+        monthDays = newMonthDays;
+        monthOffsets = newMonthOffsets;
+        monthYears = newMonthYears;
+        totalWidth = newTotalOffset;
+        totalMonths = monthIdx;
+
+        // 3. 타임라인 구조 재렌더링
+        renderTimelineStructure();
+
+        // 4. 마일스톤 재렌더링
+        renderMilestones();
+
+        // 5. 오늘 마커 재추가
+        addTodayMarker();
+
+        // 6. 스크롤 위치 복원 (확장 전 보던 날짜 유지)
+        setTimeout(() => {
+            const newScrollLeft = dateToPixel(currentDate);
+            scrollContainer.scrollLeft = newScrollLeft;
+            console.log(`스크롤 위치 복원: ${formatDate(currentDate)} -> ${newScrollLeft}px`);
+        }, 50);
+
+        // 7. 마일스톤 정렬 (범위 밖 마일스톤 아래로)
+        sortMilestonesByRange();
+
+        // 8. 확장 버튼 상태 업데이트
+        updateExpandButtons();
+
+        console.log(`타임라인 재렌더링 완료 (leftExpanded: ${expandedLeft}, rightExpanded: ${expandedRight})`);
+    }
+
+    // 왼쪽 (과거) 확장 인디케이터 클릭 이벤트
+    const expandLeftIndicator = document.getElementById('expandLeftIndicator');
+    if (expandLeftIndicator) {
+        expandLeftIndicator.addEventListener('click', function() {
+            if (!expandedLeft) {
+                expandedLeft = true;
+                rerenderTimeline();
+                showDjangoToast('과거 6개월 범위가 추가되었습니다.', 'info');
+            }
+        });
+    }
+
+    // 오른쪽 (미래) 확장 인디케이터 클릭 이벤트
+    const expandRightIndicator = document.getElementById('expandRightIndicator');
+    if (expandRightIndicator) {
+        expandRightIndicator.addEventListener('click', function() {
+            if (!expandedRight) {
+                expandedRight = true;
+                rerenderTimeline();
+                showDjangoToast('미래 6개월 범위가 추가되었습니다.', 'info');
+            }
+        });
+    }
+
+    // 오늘 버튼 이벤트 (기존 scrollToCurrentDate 함수 재사용)
+    document.getElementById('todayBtn').addEventListener('click', function() {
+        scrollToCurrentDate();
+    });
+
+    // 초기 마일스톤 정렬 (범위 밖 마일스톤 아래로)
+    sortMilestonesByRange();
+
+    // 초기 확장 인디케이터 상태 설정
+    updateExpandButtons();
+
+    // ========================================
+    // 필터 기능
+    // ========================================
+
+    // 필터 상태 저장
+    const filterState = {
+        status: ['in_progress', 'not_started', 'overdue', 'completed'],  // 기본: 전체
+        priority: ['critical', 'high', 'medium', 'low', 'minimal']
+    };
+
+    function initializeFilters() {
     // localStorage에서 필터 상태 복원
     const savedFilter = localStorage.getItem('milestoneFilter');
     if (savedFilter) {
@@ -603,71 +969,81 @@ function initializeFilters() {
 
     // 초기 필터 적용
     const activePreset = localStorage.getItem('milestoneFilterPreset') || 'all';
-    applyFilterPreset(activePreset);
-}
-
-function applyFilterPreset(preset) {
-    switch(preset) {
-        case 'all':
-            filterState.status = ['in_progress', 'not_started', 'overdue', 'completed'];
-            break;
-        case 'active':
-            filterState.status = ['in_progress'];
-            break;
-        case 'overdue':
-            filterState.status = ['overdue'];
-            break;
-        case 'incomplete':
-            filterState.status = ['in_progress', 'not_started', 'overdue'];
-            break;
+        applyFilterPreset(activePreset);
     }
 
-    applyFilter();
+    function applyFilterPreset(preset) {
+        switch(preset) {
+            case 'all':
+                filterState.status = ['in_progress', 'not_started', 'overdue', 'completed'];
+                break;
+            case 'active':
+                filterState.status = ['in_progress'];
+                break;
+            case 'overdue':
+                filterState.status = ['overdue'];
+                break;
+            case 'incomplete':
+                filterState.status = ['in_progress', 'not_started', 'overdue'];
+                break;
+        }
 
-    // localStorage에 저장
-    localStorage.setItem('milestoneFilter', JSON.stringify(filterState));
-}
+        applyFilter();
 
-function applyFilter() {
-    // 타임라인 아이템 필터링
-    const timelineItems = document.querySelectorAll('.milestone-timeline-item');
-    timelineItems.forEach(item => {
-        const status = item.dataset.status;
-        const priority = item.dataset.priority;
+        // localStorage에 저장
+        localStorage.setItem('milestoneFilter', JSON.stringify(filterState));
+    }
 
-        const visible =
-            filterState.status.includes(status) &&
-            filterState.priority.includes(priority);
+    function applyFilter() {
+        // 타임라인 아이템 필터링
+        const timelineItems = document.querySelectorAll('.milestone-timeline-item');
+        timelineItems.forEach(item => {
+            const status = item.dataset.status;
+            const priority = item.dataset.priority;
+            const startDate = new Date(item.dataset.start);
+            const endDate = new Date(item.dataset.end);
 
-        item.style.display = visible ? 'block' : 'none';
-    });
+            // 필터 조건 체크
+            const matchesFilter =
+                filterState.status.includes(status) &&
+                filterState.priority.includes(priority);
 
-    // 좌측 정보 패널 필터링
-    const infoItems = document.querySelectorAll('.milestone-info-item');
-    infoItems.forEach(item => {
-        const status = item.dataset.status;
-        const priority = item.dataset.priority;
+            // 타임라인 범위 체크
+            const inTimelineRange = !(endDate < timelineStart || startDate > timelineEnd);
 
-        const visible =
-            filterState.status.includes(status) &&
-            filterState.priority.includes(priority);
+            // 필터와 범위 모두 만족해야 표시
+            item.style.display = (matchesFilter && inTimelineRange) ? 'block' : 'none';
+        });
 
-        item.style.display = visible ? 'flex' : 'none';
-    });
-}
+        // 좌측 정보 패널 필터링
+        const infoItems = document.querySelectorAll('.milestone-info-item');
+        infoItems.forEach(item => {
+            const status = item.dataset.status;
+            const priority = item.dataset.priority;
 
-function updateFilterButtonState(preset) {
-    const filterButtons = document.querySelectorAll('.filter-preset');
-    filterButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.preset === preset);
-    });
-}
+            const visible =
+                filterState.status.includes(status) &&
+                filterState.priority.includes(priority);
 
-// ========================================
-// 마일스톤 생성 모달
-// ========================================
+            item.style.display = visible ? 'flex' : 'none';
+        });
+    }
 
-function initializeCreateMilestoneModal() {
+    function updateFilterButtonState(preset) {
+        const filterButtons = document.querySelectorAll('.filter-preset');
+        filterButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.preset === preset);
+        });
+    }
+
+    // 필터 기능 초기화
+    initializeFilters();
+
+    // ========================================
+    // 마일스톤 생성 모달
+    // ========================================
+
+    function initializeCreateMilestoneModal() {
     const modal = document.getElementById('createMilestoneModal');
     const openBtn = document.getElementById('addMilestoneBtn');
     const closeBtn = document.getElementById('createModalClose');
@@ -760,10 +1136,14 @@ function initializeCreateMilestoneModal() {
             showDjangoToast(`마일스톤 추가에 실패했습니다: ${error.message}`, 'error');
         }
     });
-}
+    }
+
+    // 마일스톤 생성 모달 초기화
+    initializeCreateMilestoneModal();
+});
 
 // ========================================
-// 마일스톤 삭제 함수
+// 마일스톤 삭제 함수 (전역)
 // ========================================
 
 async function deleteMilestone(milestoneId, milestoneName) {
