@@ -795,29 +795,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 왼쪽 (과거) 인디케이터
         if (leftIndicator) {
-            if (expandedLeft || counts.left === 0) {
-                // 이미 확장했거나 범위 밖 마일스톤이 없으면 숨김
+            if (counts.left === 0) {
+                // 범위 밖 마일스톤이 없으면 숨김
                 leftIndicator.style.display = 'none';
-                console.log(`좌측 인디케이터 숨김 (expandedLeft: ${expandedLeft}, count: ${counts.left})`);
-            } else {
-                // 확장 가능하고 범위 밖 마일스톤이 있으면 표시
+                console.log(`좌측 인디케이터 숨김 (count: ${counts.left})`);
+            } else if (expandedLeft) {
+                // 최대 범위 도달 + 범위 밖 마일스톤 있음 → 비활성 인디케이터 표시
                 leftIndicator.style.display = 'flex';
+                leftIndicator.classList.add('disabled');
                 leftCount.textContent = `${counts.left}개`;
-                console.log(`좌측 인디케이터 표시 (${counts.left}개)`);
+                console.log(`좌측 인디케이터 비활성 표시 (최대 범위, ${counts.left}개)`);
+            } else {
+                // 확장 가능 + 범위 밖 마일스톤 있음 → 활성 인디케이터 표시
+                leftIndicator.style.display = 'flex';
+                leftIndicator.classList.remove('disabled');
+                leftCount.textContent = `${counts.left}개`;
+                console.log(`좌측 인디케이터 활성 표시 (${counts.left}개)`);
             }
         }
 
         // 오른쪽 (미래) 인디케이터
         if (rightIndicator) {
-            if (expandedRight || counts.right === 0) {
-                // 이미 확장했거나 범위 밖 마일스톤이 없으면 숨김
+            // 우측 인디케이터 위치를 타임라인 콘텐츠 끝으로 설정
+            rightIndicator.style.left = (totalWidth - 80) + 'px';
+
+            if (counts.right === 0) {
+                // 범위 밖 마일스톤이 없으면 숨김
                 rightIndicator.style.display = 'none';
-                console.log(`우측 인디케이터 숨김 (expandedRight: ${expandedRight}, count: ${counts.right})`);
-            } else {
-                // 확장 가능하고 범위 밖 마일스톤이 있으면 표시
+                console.log(`우측 인디케이터 숨김 (count: ${counts.right})`);
+            } else if (expandedRight) {
+                // 최대 범위 도달 + 범위 밖 마일스톤 있음 → 비활성 인디케이터 표시
                 rightIndicator.style.display = 'flex';
+                rightIndicator.classList.add('disabled');
                 rightCount.textContent = `${counts.right}개`;
-                console.log(`우측 인디케이터 표시 (${counts.right}개)`);
+                console.log(`우측 인디케이터 비활성 표시 (최대 범위, ${counts.right}개, left: ${totalWidth - 80}px)`);
+            } else {
+                // 확장 가능 + 범위 밖 마일스톤 있음 → 활성 인디케이터 표시
+                rightIndicator.style.display = 'flex';
+                rightIndicator.classList.remove('disabled');
+                rightCount.textContent = `${counts.right}개`;
+                console.log(`우측 인디케이터 활성 표시 (${counts.right}개, left: ${totalWidth - 80}px)`);
             }
         }
         console.log('=====================================');
@@ -898,6 +915,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 expandedLeft = true;
                 rerenderTimeline();
                 showDjangoToast('과거 6개월 범위가 추가되었습니다.', 'info');
+            } else {
+                // 이미 최대 범위 (비활성 상태)
+                showDjangoToast('이미 최대 범위(±12개월)입니다.', 'warning');
             }
         });
     }
@@ -910,6 +930,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 expandedRight = true;
                 rerenderTimeline();
                 showDjangoToast('미래 6개월 범위가 추가되었습니다.', 'info');
+            } else {
+                // 이미 최대 범위 (비활성 상태)
+                showDjangoToast('이미 최대 범위(±12개월)입니다.', 'warning');
             }
         });
     }

@@ -391,7 +391,7 @@
 }
 
 .timeline-expand-indicator.right {
-  right: 0;
+  /* left 위치는 JavaScript에서 동적 설정 (totalWidth - 80px) */
   border-left: 2px solid #0066cc;
   background: linear-gradient(270deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.85) 100%);
 }
@@ -407,6 +407,34 @@
 
 .timeline-expand-indicator.right:hover {
   background: linear-gradient(270deg, rgba(0, 102, 204, 0.15) 0%, rgba(0, 102, 204, 0.08) 100%);
+}
+
+/* 비활성 인디케이터 (최대 범위 도달) */
+.timeline-expand-indicator.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: linear-gradient(90deg, rgba(200, 200, 200, 0.5) 0%, rgba(220, 220, 220, 0.5) 100%);
+}
+
+.timeline-expand-indicator.disabled.left {
+  border-right: 2px solid #adb5bd;
+}
+
+.timeline-expand-indicator.disabled.right {
+  border-left: 2px solid #adb5bd;
+}
+
+.timeline-expand-indicator.disabled:hover {
+  background: linear-gradient(90deg, rgba(200, 200, 200, 0.5) 0%, rgba(220, 220, 220, 0.5) 100%);
+  transform: none;
+}
+
+.timeline-expand-indicator.disabled .indicator-count {
+  color: #6c757d;
+}
+
+.timeline-expand-indicator.disabled .indicator-label {
+  color: #6c757d;
 }
 
 .indicator-content {
@@ -432,8 +460,7 @@
 }
 
 .timeline-scroll-content {
-  width: 4800px;
-  min-width: 4800px;
+  /* width는 JavaScript에서 동적 설정 (totalWidth 기준) */
   height: 100%;
   position: relative;
   flex-shrink: 0;
