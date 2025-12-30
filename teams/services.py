@@ -452,29 +452,52 @@ class MilestoneService:
         """
         milestone = get_object_or_404(Milestone, pk=milestone_id, team=team)
 
-        # AUTO 모드 보호: progress_percentage 수동 설정 방지
-        if 'progress_percentage' in update_data and milestone.progress_mode == 'auto':
-            raise ValueError(self.ERROR_MESSAGES['CANNOT_SET_PROGRESS_IN_AUTO'])
-
         updated_fields = []
-        
+
+        # 제목 업데이트
+        if 'title' in update_data:
+            milestone.title = update_data['title']
+            updated_fields.append('제목')
+
+        # 설명 업데이트
+        if 'description' in update_data:
+            milestone.description = update_data['description']
+            updated_fields.append('설명')
+
+        # 우선순위 업데이트
+        if 'priority' in update_data:
+            milestone.priority = update_data['priority']
+            updated_fields.append('우선순위')
+
+        # 진행률 모드 업데이트
+        if 'progress_mode' in update_data:
+            new_mode = update_data['progress_mode']
+            if new_mode not in ['manual', 'auto']:
+                raise ValueError(self.ERROR_MESSAGES['INVALID_PROGRESS_MODE'])
+            milestone.progress_mode = new_mode
+            updated_fields.append('진행률 모드')
+
         # 시작일 업데이트
         if 'startdate' in update_data:
             startdate = self._parse_date(update_data['startdate'])
             milestone.startdate = startdate
             updated_fields.append('시작일')
-        
+
         # 종료일 업데이트
         if 'enddate' in update_data:
             enddate = self._parse_date(update_data['enddate'])
             milestone.enddate = enddate
             updated_fields.append('종료일')
-        
+
         # 날짜 검증 (둘 다 있는 경우)
         if hasattr(milestone, 'startdate') and hasattr(milestone, 'enddate'):
             if milestone.startdate > milestone.enddate:
                 raise ValueError('시작일은 종료일보다 이전이어야 합니다.')
-        
+
+        # AUTO 모드 보호: progress_percentage 수동 설정 방지
+        if 'progress_percentage' in update_data and milestone.progress_mode == 'auto':
+            raise ValueError(self.ERROR_MESSAGES['CANNOT_SET_PROGRESS_IN_AUTO'])
+
         # 진행률 업데이트
         if 'progress_percentage' in update_data:
             progress = int(update_data['progress_percentage'])

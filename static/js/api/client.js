@@ -210,6 +210,18 @@ class TodoApiClient {
     async deleteTodo(teamId, todoId) {
         return this.api.delete(`/teams/${teamId}/todos/${todoId}/`);
     }
+
+    /**
+     * TODO를 마일스톤에 할당
+     * @param {number} teamId - 팀 ID
+     * @param {number} todoId - TODO ID
+     * @param {number|null} milestoneId - 마일스톤 ID (null이면 연결 해제)
+     */
+    async assignToMilestone(teamId, todoId, milestoneId) {
+        return this.api.patch(`/teams/${teamId}/todos/${todoId}/assign-milestone/`, {
+            milestone_id: milestoneId
+        });
+    }
 }
 
 /**
@@ -273,10 +285,27 @@ class TeamApiClient {
     }
 
     /**
-     * 마일스톤 수정
+     * 마일스톤 부분 수정 (PATCH)
+     * 날짜 드래그, 진행률 슬라이더 등 일부 필드만 수정
      */
     async updateMilestone(teamId, milestoneId, milestoneData) {
         return this.api.patch(`/teams/${teamId}/milestones/${milestoneId}/`, milestoneData);
+    }
+
+    /**
+     * 마일스톤 전체 수정 (PUT)
+     * 수정 모달에서 사용 - 제목, 설명, 우선순위, 진행률 모드 등 전체 필드 수정
+     */
+    async updateMilestoneFull(teamId, milestoneId, milestoneData) {
+        return this.api.put(`/teams/${teamId}/milestones/${milestoneId}/`, milestoneData);
+    }
+
+    /**
+     * 마일스톤 조회 (단일)
+     * 수정 모달에 데이터를 채우기 위해 사용
+     */
+    async getMilestone(teamId, milestoneId) {
+        return this.api.get(`/teams/${teamId}/milestones/${milestoneId}/`);
     }
 
     /**
@@ -290,7 +319,15 @@ class TeamApiClient {
      * 마일스톤 진행률 모드 토글 (manual ↔ auto)
      */
     async toggleMilestoneProgressMode(teamId, milestoneId) {
-        return this.api.post(`/teams/${teamId}/milestones/${milestoneId}/toggle-progress-mode/`, {});
+        return this.api.post(`/teams/${teamId}/milestones/${milestoneId}/progress-mode/`, {});
+    }
+
+    /**
+     * 마일스톤 TODO 통계 조회
+     * 연결된 TODO 개수, 완료율 등 확인
+     */
+    async getMilestoneTodoStats(teamId, milestoneId) {
+        return this.api.get(`/teams/${teamId}/milestones/${milestoneId}/todo-stats/`);
     }
 }
 

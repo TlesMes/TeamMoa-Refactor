@@ -5,6 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/common/modal.css' %}" />
 <link rel="stylesheet" href="{% static 'css/pages/teams/timeline.css' %}" />
+<link rel="stylesheet" href="{% static 'css/components/progress-control.css' %}" />
 {% endblock %}
 
 {% block extra_js %}
@@ -82,16 +83,17 @@ const apiClient = new ApiClient();
              data-status="{{ milestone.get_status }}"
              data-priority="{{ milestone.priority }}">
           <div class="milestone-title">{{ milestone.title }}</div>
+          <button class="edit-milestone-btn" onclick="openEditMilestoneModal({{ milestone.id }})" title="마일스톤 수정">
+            <i class="ri-edit-line"></i>
+          </button>
           <button class="delete-btn" onclick="deleteMilestone({{ milestone.id }}, '{{ milestone.title }}')" title="마일스톤 삭제">
             <i class="ri-delete-bin-line"></i>
           </button>
-          <div class="milestone-dates">
-            <span class="date-range">{{ milestone.startdate|date:'m/d' }} - {{ milestone.enddate|date:'m/d' }}</span>
-          </div>
           <div class="milestone-meta">
             <span class="priority priority-{{ milestone.priority }}">
               {{ milestone.get_priority_display }}
             </span>
+            <span class="date-range">{{ milestone.startdate|date:'m/d' }} - {{ milestone.enddate|date:'m/d' }}</span>
             <span class="progress">{{ milestone.progress_percentage }}%</span>
           </div>
         </div>
@@ -105,7 +107,7 @@ const apiClient = new ApiClient();
 
     <!-- 우측 스크롤 영역: 타임라인 -->
     <div class="timeline-scroll-area">
-      <!-- 좌측 확장 인디케이터 -->
+      <!-- 좌측 확장 인디케이터 (sticky) -->
       <div class="timeline-expand-indicator left" id="expandLeftIndicator" style="display: none;">
         <div class="indicator-content">
           <span class="indicator-count" id="leftMilestoneCount"></span>
@@ -145,7 +147,7 @@ const apiClient = new ApiClient();
         <!-- 일별 구분선 (디버깅용) -->
       </div>
 
-      <!-- 우측 확장 인디케이터 -->
+      <!-- 우측 확장 인디케이터 (sticky) -->
       <div class="timeline-expand-indicator right" id="expandRightIndicator" style="display: none;">
         <div class="indicator-content">
           <span class="indicator-label">미래 →</span>
@@ -169,6 +171,113 @@ const apiClient = new ApiClient();
       <div class="milestone-detail" id="milestoneDetail">
         <!-- JavaScript로 동적 생성 -->
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 마일스톤 수정 모달 -->
+<div class="modal" id="editMilestoneModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>마일스톤 수정</h3>
+      <button class="modal-close" id="editModalClose">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="editMilestoneForm">
+        {% csrf_token %}
+        <input type="hidden" id="editMilestoneId" name="milestone_id">
+
+        <div class="form-group">
+          <label for="editTitle">마일스톤 제목</label>
+          <div class="input-wrapper">
+            <i class="ri-flag-line"></i>
+            <input type="text" id="editTitle" name="title" maxlength="100" placeholder="마일스톤 제목 입력">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editDescription">마일스톤 설명</label>
+          <div class="textarea-wrapper">
+            <i class="ri-file-text-line"></i>
+            <textarea id="editDescription" name="description" rows="4" placeholder="마일스톤 설명을 입력하세요"></textarea>
+          </div>
+        </div>
+
+        <div class="date-range-group">
+          <div class="form-group">
+            <label for="editStartdate">시작일</label>
+            <div class="input-wrapper">
+              <i class="ri-calendar-line"></i>
+              <input type="date" id="editStartdate" name="startdate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editEnddate">종료일</label>
+            <div class="input-wrapper">
+              <i class="ri-calendar-check-line"></i>
+              <input type="date" id="editEnddate" name="enddate">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editPriority">우선순위</label>
+          <div class="input-wrapper">
+            <i class="ri-star-line"></i>
+            <select id="editPriority" name="priority">
+              <option value="critical">최우선</option>
+              <option value="high">중요</option>
+              <option value="medium">보통</option>
+              <option value="low">낮음</option>
+              <option value="minimal">미미</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editProgressMode">진행률 관리 방식</label>
+          <div class="input-wrapper">
+            <i class="ri-settings-3-line"></i>
+            <select id="editProgressMode" name="progress_mode">
+              <option value="auto">AUTO - TODO 기반 자동 계산</option>
+              <option value="manual">수동 - 슬라이더로 직접 조정</option>
+            </select>
+          </div>
+          <small class="form-help-text">
+            <i class="ri-information-line"></i>
+            AUTO 모드는 연결된 TODO 완료율로 자동 계산됩니다.
+          </small>
+        </div>
+
+        <!-- 수동 모드일 때만 표시되는 진행률 슬라이더 -->
+        <div class="form-group" id="manualProgressGroup" style="display: none;">
+          <label for="editProgressPercentage">진행률</label>
+          <div class="progress-slider-wrapper">
+            <input type="range"
+                   id="editProgressPercentage"
+                   name="progress_percentage"
+                   min="0"
+                   max="100"
+                   value="0"
+                   class="progress-slider">
+            <span class="progress-value" id="editProgressValue">0%</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="create-btn">
+            <i class="ri-check-line"></i>
+            수정 완료
+          </button>
+          <button type="button" class="cancel-btn" id="editCancelBtn">
+            <i class="ri-close-line"></i>
+            취소
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

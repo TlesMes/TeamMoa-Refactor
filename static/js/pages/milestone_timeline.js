@@ -184,6 +184,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 타임라인 컨테이너 너비 설정
         scrollContent.style.width = totalWidth + 'px';
+
+        // 타임라인 컨테이너 높이 설정 (마일스톤 개수 기반)
+        const milestoneCount = document.querySelectorAll('.milestone-timeline-item').length;
+        const itemHeight = 80; // .milestone-timeline-item height
+        const itemMargin = 20; // .milestone-timeline-item margin (10px top + 10px bottom)
+        const minHeight = 500; // 최소 높이
+        const calculatedHeight = Math.max(minHeight, milestoneCount * (itemHeight + itemMargin));
+        scrollContent.style.height = calculatedHeight + 'px';
     }
 
     const milestoneItems = document.querySelectorAll('.milestone-timeline-item');
@@ -278,17 +286,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const milestoneItems = document.querySelectorAll('.milestone-timeline-item');
 
         milestoneItems.forEach(item => {
+            const milestoneId = item.dataset.milestoneId;
             const startDate = new Date(item.dataset.start);
             const endDate = new Date(item.dataset.end);
 
-            // 범위 밖 마일스톤 숨김 처리
+            // 좌측 리스트 아이템 찾기
+            const infoItem = document.querySelector(`.milestone-info-item[data-milestone-id="${milestoneId}"]`);
+
+            // 범위 밖 마일스톤 처리
             if (endDate < timelineStart || startDate > timelineEnd) {
                 item.style.display = 'none';
+                // 좌측 리스트 아이템에 회색 스타일 추가
+                if (infoItem) {
+                    infoItem.classList.add('out-of-range');
+                }
                 return;
             }
 
             // 범위 내 마일스톤 표시
             item.style.display = '';
+            // 좌측 리스트 아이템에서 회색 스타일 제거
+            if (infoItem) {
+                infoItem.classList.remove('out-of-range');
+            }
+
             const startPixel = dateToPixel(startDate);
             const endPixel = dateToPixel(endDate) + dayWidth;
             const width = endPixel - startPixel;
@@ -673,9 +694,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         scrollContent.appendChild(todayMarker);
         scrollContent.appendChild(todayLabel);
-
-        console.log(`오늘 날짜 (서버): ${formatDate(today)}`);
-        console.log(`오늘 날짜 마커 추가: ${todayPixel}px`);
     }
 
     // 페이지 로드 시 현재 날짜 위치로 스크롤 (서버 시간 기준)
@@ -695,8 +713,6 @@ document.addEventListener('DOMContentLoaded', function() {
             left: scrollPosition,
             behavior: 'smooth'
         });
-
-        console.log(`오늘 날짜 (서버 ${formatDate(today)})로 스크롤: ${scrollPosition}px`);
     }
 
     // 오늘 날짜 마커 추가 및 스크롤 실행
@@ -748,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         sortedRightItems.forEach(item => rightTimeline.appendChild(item));
 
-        console.log(`마일스톤 정렬 완료 - 범위 내: ${inRangeIds.length}개, 범위 밖: ${outOfRangeIds.length}개`);
     }
 
     // 범위 외 마일스톤 개수 계산
@@ -757,10 +772,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let leftCount = 0;
         let rightCount = 0;
 
-        console.log('=== countOutOfRangeMilestones 디버깅 ===');
-        console.log(`타임라인 범위: ${formatDate(timelineStart)} ~ ${formatDate(timelineEnd)}`);
-        console.log(`전체 마일스톤 개수: ${allMilestones.length}`);
-
         allMilestones.forEach(item => {
             const startDate = new Date(item.dataset.start);
             const endDate = new Date(item.dataset.end);
@@ -768,15 +779,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // 마일스톤이 현재 타임라인 범위 밖에 있는지 확인
             if (endDate < timelineStart) {
                 leftCount++; // 과거 (타임라인 시작 전)
-                console.log(`좌측 범위 밖: ${formatDate(startDate)} ~ ${formatDate(endDate)}`);
             } else if (startDate > timelineEnd) {
                 rightCount++; // 미래 (타임라인 종료 후)
-                console.log(`우측 범위 밖: ${formatDate(startDate)} ~ ${formatDate(endDate)}`);
             }
         });
-
-        console.log(`좌측 개수: ${leftCount}, 우측 개수: ${rightCount}`);
-        console.log('========================================');
 
         return { left: leftCount, right: rightCount };
     }
@@ -789,28 +795,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const leftCount = document.getElementById('leftMilestoneCount');
         const rightCount = document.getElementById('rightMilestoneCount');
 
-        console.log('=== updateExpandButtons 디버깅 ===');
-        console.log(`expandedLeft: ${expandedLeft}, expandedRight: ${expandedRight}`);
-        console.log(`leftIndicator 존재: ${!!leftIndicator}, rightIndicator 존재: ${!!rightIndicator}`);
-
         // 왼쪽 (과거) 인디케이터
         if (leftIndicator) {
             if (counts.left === 0) {
                 // 범위 밖 마일스톤이 없으면 숨김
                 leftIndicator.style.display = 'none';
-                console.log(`좌측 인디케이터 숨김 (count: ${counts.left})`);
             } else if (expandedLeft) {
                 // 최대 범위 도달 + 범위 밖 마일스톤 있음 → 비활성 인디케이터 표시
                 leftIndicator.style.display = 'flex';
                 leftIndicator.classList.add('disabled');
                 leftCount.textContent = `${counts.left}개`;
-                console.log(`좌측 인디케이터 비활성 표시 (최대 범위, ${counts.left}개)`);
             } else {
                 // 확장 가능 + 범위 밖 마일스톤 있음 → 활성 인디케이터 표시
                 leftIndicator.style.display = 'flex';
                 leftIndicator.classList.remove('disabled');
                 leftCount.textContent = `${counts.left}개`;
-                console.log(`좌측 인디케이터 활성 표시 (${counts.left}개)`);
             }
         }
 
@@ -822,22 +821,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (counts.right === 0) {
                 // 범위 밖 마일스톤이 없으면 숨김
                 rightIndicator.style.display = 'none';
-                console.log(`우측 인디케이터 숨김 (count: ${counts.right})`);
             } else if (expandedRight) {
                 // 최대 범위 도달 + 범위 밖 마일스톤 있음 → 비활성 인디케이터 표시
                 rightIndicator.style.display = 'flex';
                 rightIndicator.classList.add('disabled');
                 rightCount.textContent = `${counts.right}개`;
-                console.log(`우측 인디케이터 비활성 표시 (최대 범위, ${counts.right}개, left: ${totalWidth - 80}px)`);
             } else {
                 // 확장 가능 + 범위 밖 마일스톤 있음 → 활성 인디케이터 표시
                 rightIndicator.style.display = 'flex';
                 rightIndicator.classList.remove('disabled');
                 rightCount.textContent = `${counts.right}개`;
-                console.log(`우측 인디케이터 활성 표시 (${counts.right}개, left: ${totalWidth - 80}px)`);
             }
         }
-        console.log('=====================================');
     }
 
     // 타임라인 재렌더링 (확장 시 호출)
@@ -895,7 +890,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             const newScrollLeft = dateToPixel(currentDate);
             scrollContainer.scrollLeft = newScrollLeft;
-            console.log(`스크롤 위치 복원: ${formatDate(currentDate)} -> ${newScrollLeft}px`);
         }, 50);
 
         // 7. 마일스톤 정렬 (범위 밖 마일스톤 아래로)
@@ -904,7 +898,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 8. 확장 버튼 상태 업데이트
         updateExpandButtons();
 
-        console.log(`타임라인 재렌더링 완료 (leftExpanded: ${expandedLeft}, rightExpanded: ${expandedRight})`);
     }
 
     // 왼쪽 (과거) 확장 인디케이터 클릭 이벤트
@@ -1163,7 +1156,292 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 마일스톤 생성 모달 초기화
     initializeCreateMilestoneModal();
+
+    // ========================================
+    // 진행률 컨트롤 기능
+    // ========================================
+
+    // 진행률 슬라이더 이벤트 (수동 모드)
+    initializeProgressSliders();
+
+    function initializeProgressSliders() {
+        const sliders = document.querySelectorAll('.progress-slider');
+
+        sliders.forEach(slider => {
+            const milestoneId = slider.dataset.milestoneId;
+            let debounceTimer;
+
+            // 슬라이더 값 변경 시 즉시 UI 업데이트 (디바운스 적용)
+            slider.addEventListener('input', function(e) {
+                const value = parseInt(e.target.value);
+
+                // UI 즉시 업데이트
+                const valueSpan = this.nextElementSibling;
+                if (valueSpan && valueSpan.classList.contains('progress-value')) {
+                    valueSpan.textContent = `${value}%`;
+                }
+
+                // 디바운스: 500ms 후 서버에 전송
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    updateMilestoneProgress(milestoneId, value);
+                }, 500);
+            });
+        });
+    }
+
+    // 마일스톤 진행률 업데이트 (PATCH 요청)
+    async function updateMilestoneProgress(milestoneId, progressPercentage) {
+        try {
+            const response = await window.teamApi.updateMilestone(
+                window.teamData.id,
+                milestoneId,
+                { progress_percentage: progressPercentage }
+            );
+
+            if (response.success) {
+                // 좌측 패널 진행률 업데이트는 이미 슬라이더에서 처리됨
+
+                // 100% 도달 시 축하 메시지
+                if (progressPercentage === 100) {
+                    showDjangoToast('🎉 마일스톤을 완료했습니다!', 'success');
+                }
+
+                console.log('진행률 업데이트 성공:', progressPercentage + '%');
+            } else {
+                throw new Error(response.error || '진행률 업데이트에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('진행률 업데이트 실패:', error);
+            showDjangoToast(`진행률 업데이트에 실패했습니다: ${error.message}`, 'error');
+            location.reload(); // 실패 시 페이지 새로고침
+        }
+    }
+
+    // ========================================
+    // 마일스톤 수정 모달 초기화
+    // ========================================
+    initializeEditMilestoneModal();
+
+    function initializeEditMilestoneModal() {
+        const modal = document.getElementById('editMilestoneModal');
+        const closeBtn = document.getElementById('editModalClose');
+        const cancelBtn = document.getElementById('editCancelBtn');
+        const form = document.getElementById('editMilestoneForm');
+
+        // 모달 닫기
+        const closeModal = () => {
+            modal.classList.remove('active');
+            form.reset();
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // 모달 외부 클릭 시 닫기
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // 입력 필드 참조
+        const titleInput = document.getElementById('editTitle');
+        const startDateInput = document.getElementById('editStartdate');
+        const endDateInput = document.getElementById('editEnddate');
+        const priorityInput = document.getElementById('editPriority');
+        const progressModeInput = document.getElementById('editProgressMode');
+        const manualProgressGroup = document.getElementById('manualProgressGroup');
+        const progressSlider = document.getElementById('editProgressPercentage');
+        const progressValue = document.getElementById('editProgressValue');
+
+        // 진행률 모드 변경 시 슬라이더 표시/숨김
+        progressModeInput.addEventListener('change', function() {
+            if (this.value === 'manual') {
+                manualProgressGroup.style.display = 'block';
+            } else {
+                manualProgressGroup.style.display = 'none';
+            }
+        });
+
+        // 슬라이더 값 변경 시 표시 업데이트
+        progressSlider.addEventListener('input', function() {
+            progressValue.textContent = `${this.value}%`;
+        });
+
+        // 입력 시 에러 상태 제거
+        [titleInput, startDateInput, endDateInput, priorityInput, progressModeInput].forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    clearFieldError(this);
+                }
+            });
+        });
+
+        // 폼 제출
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const milestoneId = document.getElementById('editMilestoneId').value;
+
+            // 필수 필드 검증
+            const isValid = validateRequiredFields([
+                { input: titleInput, message: '마일스톤 제목을 입력해주세요.' },
+                { input: startDateInput, message: '시작일을 선택해주세요.' },
+                { input: endDateInput, message: '종료일을 선택해주세요.' },
+                { input: priorityInput, message: '우선순위를 선택해주세요.' },
+                { input: progressModeInput, message: '진행률 관리 방식을 선택해주세요.' }
+            ]);
+
+            if (!isValid) return;
+
+            const formData = {
+                title: titleInput.value,
+                description: document.getElementById('editDescription').value,
+                startdate: startDateInput.value,
+                enddate: endDateInput.value,
+                priority: priorityInput.value,
+                progress_mode: progressModeInput.value
+            };
+
+            // 수동 모드일 때만 진행률 포함
+            if (progressModeInput.value === 'manual') {
+                formData.progress_percentage = parseInt(progressSlider.value);
+            }
+
+            // 날짜 유효성 검사
+            if (new Date(formData.startdate) > new Date(formData.enddate)) {
+                showDjangoToast('종료일은 시작일보다 이후여야 합니다.', 'error');
+                return;
+            }
+
+            try {
+                const response = await window.teamApi.updateMilestoneFull(
+                    window.teamData.id,
+                    milestoneId,
+                    formData
+                );
+
+                if (response.success) {
+                    showDjangoToast(response.message || '마일스톤이 수정되었습니다.', 'success');
+                    closeModal();
+                    // 페이지 새로고침으로 UI 업데이트
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    throw new Error(response.error || '마일스톤 수정에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('마일스톤 수정 실패:', error);
+                showDjangoToast(`마일스톤 수정에 실패했습니다: ${error.message}`, 'error');
+            }
+        });
+    }
+
+    // ========================================
+    // 좌우 스크롤 동기화
+    // ========================================
+    const milestoneInfoList = document.querySelector('.milestone-info-list');
+    const timelineScrollArea = document.querySelector('.timeline-scroll-area');
+
+    // 우측 타임라인 스크롤 시 좌측 마일스톤 리스트도 같이 스크롤
+    if (timelineScrollArea && milestoneInfoList) {
+        timelineScrollArea.addEventListener('scroll', function() {
+            milestoneInfoList.scrollTop = this.scrollTop;
+        });
+
+        // 좌측 마일스톤 리스트 스크롤 시 우측 타임라인도 같이 스크롤 (Y축만)
+        milestoneInfoList.addEventListener('scroll', function() {
+            timelineScrollArea.scrollTop = this.scrollTop;
+        });
+    }
 });
+
+// ========================================
+// 마일스톤 수정 모달 함수 (전역)
+// ========================================
+
+async function openEditMilestoneModal(milestoneId) {
+    const modal = document.getElementById('editMilestoneModal');
+
+    try {
+        // 마일스톤 데이터 조회
+        const response = await window.teamApi.getMilestone(
+            window.teamData.id,
+            milestoneId
+        );
+
+        // 🔍 디버깅: 서버 응답 로그 출력
+        console.log('📡 서버 응답:', response);
+        console.log('  - response.success:', response.success);
+        console.log('  - response.milestone:', response.milestone);
+
+        if (response.success && response.milestone) {
+            const milestone = response.milestone;
+
+            // 폼 필드에 데이터 채우기
+            document.getElementById('editMilestoneId').value = milestone.id;
+            document.getElementById('editTitle').value = milestone.title || '';
+            document.getElementById('editDescription').value = milestone.description || '';
+            document.getElementById('editStartdate').value = milestone.startdate || '';
+            document.getElementById('editEnddate').value = milestone.enddate || '';
+            document.getElementById('editPriority').value = milestone.priority || 'medium';
+            document.getElementById('editProgressMode').value = milestone.progress_mode || 'auto';
+
+            // 진행률 슬라이더 값 설정
+            const progressPercentage = milestone.progress_percentage || 0;
+            document.getElementById('editProgressPercentage').value = progressPercentage;
+            document.getElementById('editProgressValue').textContent = `${progressPercentage}%`;
+
+            // 진행률 모드에 따라 슬라이더 표시/숨김
+            const manualProgressGroup = document.getElementById('manualProgressGroup');
+            if (milestone.progress_mode === 'manual') {
+                manualProgressGroup.style.display = 'block';
+            } else {
+                manualProgressGroup.style.display = 'none';
+            }
+
+            // 모달 열기
+            modal.classList.add('active');
+        } else {
+            throw new Error(response.error || '마일스톤 정보를 불러올 수 없습니다.');
+        }
+    } catch (error) {
+        console.error('마일스톤 조회 실패:', error);
+        showDjangoToast(`마일스톤 정보를 불러올 수 없습니다: ${error.message}`, 'error');
+    }
+}
+
+// ========================================
+// 진행률 모드 토글 함수 (전역)
+// ========================================
+
+async function toggleProgressMode(milestoneId) {
+    showConfirmModal(
+        '진행률 관리 방식을 변경하시겠습니까?<br><small style="color: #6b7280;">수동 모드에서는 슬라이더로 직접 조정하고, AUTO 모드에서는 TODO 완료율로 자동 계산됩니다.</small>',
+        async () => {
+            try {
+                const response = await window.teamApi.toggleMilestoneProgressMode(
+                    window.teamData.id,
+                    milestoneId
+                );
+
+                if (response.success) {
+                    const newMode = response.milestone.progress_mode;
+
+                    showDjangoToast(response.message || `진행률 모드가 ${newMode === 'manual' ? '수동' : 'AUTO'}으로 변경되었습니다.`, 'success');
+
+                    // 페이지 새로고침으로 UI 업데이트
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    throw new Error(response.error || '모드 변경에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('모드 변경 실패:', error);
+                showDjangoToast(`모드 변경에 실패했습니다: ${error.message}`, 'error');
+            }
+        }
+    );
+}
 
 // ========================================
 // 마일스톤 삭제 함수 (전역)

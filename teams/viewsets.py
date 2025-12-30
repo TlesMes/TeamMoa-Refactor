@@ -216,6 +216,15 @@ class MilestoneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(milestones, many=True)
         return Response(serializer.data)
 
+    def retrieve(self, request, *args, **kwargs):
+        """마일스톤 단일 조회 (수정 모달용)"""
+        milestone = self.get_object()
+        serializer = self.get_serializer(milestone)
+        return Response({
+            'success': True,
+            'milestone': serializer.data
+        })
+
     def create(self, request, *args, **kwargs):
         """마일스톤 생성"""
         team = self.get_team()
@@ -261,12 +270,21 @@ class MilestoneViewSet(viewsets.ModelViewSet):
         milestone = self.get_object()
         team = self.get_team()
 
+        # 🔍 디버깅: 받은 데이터 로깅
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"{'PUT' if not partial else 'PATCH'} 요청 - 마일스톤 ID: {milestone.id}")
+        logger.info(f"받은 데이터: {request.data}")
+
         serializer = MilestoneUpdateSerializer(
             milestone,
             data=request.data,
             partial=partial
         )
         serializer.is_valid(raise_exception=True)
+
+        # 🔍 디버깅: Serializer 검증 후 데이터
+        logger.info(f"Serializer 검증 완료: {serializer.validated_data}")
 
         try:
             # 서비스 레이어를 통한 업데이트
@@ -275,6 +293,9 @@ class MilestoneViewSet(viewsets.ModelViewSet):
                 team=team,
                 **serializer.validated_data
             )
+
+            # 🔍 디버깅: 업데이트 결과
+            logger.info(f"업데이트 완료 - 변경된 필드: {updated_fields}")
 
             # 업데이트된 마일스톤을 MilestoneSerializer로 직렬화하여 반환
             response_serializer = MilestoneSerializer(updated_milestone)

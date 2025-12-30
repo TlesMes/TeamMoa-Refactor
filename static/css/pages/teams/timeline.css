@@ -246,7 +246,7 @@
 
 /* 좌측 고정 영역: 마일스톤 정보 */
 .milestone-info-fixed {
-  width: 250px;
+  width: 350px;
   background: #e9ecef;
   border-right: 2px solid #dee2e6;
   display: flex;
@@ -278,24 +278,40 @@
 }
 
 .milestone-info-item {
-  padding: 10px 50px 10px 20px; /* 위아래 패딩 감소 */
+  padding: 12px 15px;
   margin: 10px 15px;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   border-left: 4px solid #007bff;
-  transition: background-color 0.2s ease;
-  height: 80px;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  position: relative; /* 절대 위치 버튼을 위한 relative */
+  gap: 6px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: 80px; /* 고정 높이 */
+  box-sizing: border-box;
+}
+
+.milestone-info-item .edit-milestone-btn {
+  position: absolute;
+  right: 42px;
+  top: 12px;
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #3b82f6;
+  font-size: 16px;
+  opacity: 0;
+  transition: all 0.2s ease;
 }
 
 .milestone-info-item .delete-btn {
   position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 12px;
+  top: 12px;
   background: none;
   border: none;
   padding: 6px;
@@ -307,30 +323,77 @@
   transition: all 0.2s ease;
 }
 
-.milestone-info-item:hover .delete-btn {
+.milestone-info-item:hover .delete-btn,
+.milestone-info-item:hover .edit-milestone-btn {
   opacity: 1;
 }
 
 .milestone-info-item .delete-btn:hover {
   background: #fee2e2;
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
+}
+
+.milestone-info-item .edit-milestone-btn:hover {
+  background: #dbeafe;
+  transform: scale(1.1);
 }
 
 .milestone-info-item:hover {
-  background: #f8f9fa;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* 범위 밖 마일스톤 (회색 처리) */
+.milestone-info-item.out-of-range {
+  opacity: 0.5;
+  background: #f3f4f6;
+}
+
+.milestone-info-item.out-of-range .milestone-title {
+  color: #9ca3af;
+}
+
+.milestone-info-item.out-of-range .priority {
+  opacity: 0.6;
 }
 
 .milestone-title {
-  margin: 6px 0 2px 0;
+  margin: 0;
+  padding-right: 70px;
   font-weight: 600;
   color: #2c3e50;
   font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.milestone-dates {
-  margin: 2px 0;
+.milestone-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  font-size: 11px;
+}
+
+.milestone-meta .date-range {
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.milestone-meta .progress {
+  margin-left: auto;
   font-size: 12px;
-  color: #6c757d;
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .empty-milestone-info {
@@ -527,19 +590,11 @@
   width: 100%;
 }
 
-
-.milestone-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  margin: 4px 0;
-}
-
 .priority {
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 12px;
   font-weight: 500;
+  font-size: 11px;
   color: #fff;
   min-width: 36px;
   text-align: center;
@@ -551,11 +606,6 @@
 .priority.priority-medium { background: #ffc107; color: #000; }
 .priority.priority-low { background: #007bff; }
 .priority.priority-minimal { background: #6c757d; }
-
-.progress {
-  color: #666;
-  font-weight: 500;
-}
 
 
 .empty-timeline i {
@@ -619,7 +669,9 @@
   height: 60px; /* milestone-info-header와 동일한 높이 */
   flex-shrink: 0;
   background: #dee2e6; /* milestone-info-header와 동일한 배경색 */
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
 }
@@ -753,6 +805,26 @@
 }
 
 /* Modal Styles - 공통 모달 CSS 사용 (static/css/common/modal.css) */
+
+/* Form Help Text (진행률 모드 설명) */
+.form-help-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.form-help-text i {
+  font-size: 14px;
+  flex-shrink: 0;
+}
 
 /* Responsive Design */
 @media (max-width: 1024px) {

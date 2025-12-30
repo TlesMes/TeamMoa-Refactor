@@ -153,7 +153,13 @@ class MilestoneCreateSerializer(serializers.ModelSerializer):
 
 
 class MilestoneUpdateSerializer(serializers.Serializer):
-    """마일스톤 업데이트용 직렬화 (드래그앤드롭, 진행률 변경)"""
+    """마일스톤 업데이트용 직렬화 (PATCH/PUT 모두 지원)"""
+    title = serializers.CharField(required=False, max_length=100)
+    description = serializers.CharField(required=False, allow_blank=True)
+    priority = serializers.ChoiceField(
+        choices=['critical', 'high', 'medium', 'low', 'minimal'],
+        required=False
+    )
     startdate = serializers.DateField(required=False)
     enddate = serializers.DateField(required=False)
     progress_percentage = serializers.IntegerField(required=False, min_value=0, max_value=100)

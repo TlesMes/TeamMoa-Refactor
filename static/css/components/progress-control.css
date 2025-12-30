@@ -1,0 +1,263 @@
+/* ========================================
+   Progress Control Component Styles
+   마일스톤 진행률 컨트롤 UI (슬라이더 + 진행 바 + 모드 토글)
+   ======================================== */
+
+/* 진행률 컨트롤 컨테이너 */
+.progress-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* 진행률 헤더 (모드 표시 + 토글 버튼) */
+.progress-control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.progress-mode-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.progress-mode-label i {
+  font-size: 14px;
+}
+
+.progress-mode-label.mode-manual {
+  color: #6366f1;
+}
+
+.progress-mode-label.mode-auto {
+  color: #10b981;
+}
+
+/* 모드 토글 버튼 */
+.toggle-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-mode-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.toggle-mode-btn i {
+  font-size: 14px;
+}
+
+/* 수동 모드: 슬라이더 */
+.progress-slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Webkit (Chrome, Safari) */
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #6366f1;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  background: #4f46e5;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(99, 102, 241, 0.4);
+}
+
+/* Firefox */
+.progress-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #6366f1;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.progress-slider::-moz-range-thumb:hover {
+  background: #4f46e5;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(99, 102, 241, 0.4);
+}
+
+.progress-value {
+  min-width: 50px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+/* AUTO 모드: 진행 바 */
+.progress-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-bar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: 12px;
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+/* 100% 완료 시 골드 그라디언트 */
+.progress-bar-fill.completed {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.progress-bar-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* TODO 통계 표시 */
+.progress-todo-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.todo-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.todo-stat-item i {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.todo-stat-value {
+  font-weight: 600;
+  color: #374151;
+}
+
+.todo-stat-label {
+  color: #9ca3af;
+}
+
+/* 슬라이더 트랙 배경 채우기 (선택사항) */
+.progress-slider {
+  background: linear-gradient(to right, #6366f1 0%, #6366f1 50%, #e5e7eb 50%, #e5e7eb 100%);
+  background-size: 200% 100%;
+  background-position: right;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .progress-control {
+    padding: 12px;
+  }
+
+  .progress-control-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .toggle-mode-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .progress-slider-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .progress-value {
+    text-align: center;
+  }
+
+  .progress-todo-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
