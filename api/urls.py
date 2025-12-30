@@ -47,10 +47,12 @@ urlpatterns = [
     path('v1/teams/<int:team_pk>/todos/<int:pk>/complete/', TodoViewSet.as_view({
         'post': 'complete'
     }), name='team-todos-complete'),
+    path('v1/teams/<int:team_pk>/todos/<int:pk>/assign-milestone/', TodoViewSet.as_view({
+        'patch': 'assign_milestone'
+    }), name='team-todos-assign-milestone'),
     path('v1/teams/<int:team_pk>/todos/<int:pk>/milestone/', TodoViewSet.as_view({
-        'post': 'assign_milestone',
         'delete': 'detach_milestone'
-    }), name='team-todos-milestone'),
+    }), name='team-todos-detach-milestone'),
 
     # 팀 멤버 엔드포인트
     path('v1/teams/<int:team_pk>/members/', TeamMemberViewSet.as_view({

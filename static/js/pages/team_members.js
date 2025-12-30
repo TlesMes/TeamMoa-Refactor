@@ -376,7 +376,30 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // 2. API 호출
             const response = await todoApi.completeTodo(teamId, todoId);
-            handleApiResponse(response);
+
+            // 마일스톤 정보가 포함된 토스트 메시지
+            if (response.success && response.data) {
+                const data = response.data;
+
+                if (data.milestone_updated && data.milestone_id) {
+                    // 마일스톤 진행률 업데이트된 경우
+                    const milestone = window.teamMembersData.milestones.find(m => m.id === data.milestone_id);
+                    if (milestone && data.milestone_progress !== undefined) {
+                        const message = newCompletedState
+                            ? `TODO 완료! "${milestone.title}" 마일스톤 진행률 ${data.milestone_progress}%`
+                            : `TODO 미완료 처리. "${milestone.title}" 마일스톤 진행률 ${data.milestone_progress}%`;
+                        showDjangoToast(message, 'success');
+                    } else {
+                        handleApiResponse(response);
+                    }
+                } else {
+                    // 마일스톤 없는 경우 기본 메시지
+                    handleApiResponse(response);
+                }
+            } else {
+                handleApiResponse(response);
+            }
+
             TodoDOMUtils.setLoadingState(todoId, false);
         } catch (error) {
             // 3. 실패 시 되돌리기
@@ -546,6 +569,82 @@ document.addEventListener('DOMContentLoaded', function() {
             TodoDOMUtils.showError(todoId, 'DONE 보드로 이동에 실패했습니다');
 
             handleApiError(error);
+        }
+    }
+
+    // ==================== 마일스톤 할당 기능 ====================
+
+    // 마일스톤 드롭다운 이벤트 위임
+    membersSection.addEventListener('change', async function(e) {
+        if (e.target.classList.contains('milestone-select')) {
+            const todoId = parseInt(e.target.dataset.todoId);
+            const milestoneId = e.target.value ? parseInt(e.target.value) : null;
+
+            try {
+                // API 호출
+                const response = await todoApi.assignToMilestone(teamId, todoId, milestoneId);
+
+                if (response.success) {
+                    // TODO 카드 업데이트
+                    updateTodoMilestoneBadge(todoId, milestoneId);
+
+                    // 토스트 메시지
+                    const milestone = window.teamMembersData.milestones.find(m => m.id === milestoneId);
+                    if (milestoneId) {
+                        showDjangoToast(`TODO가 "${milestone.title}" 마일스톤에 할당되었습니다.`, 'success');
+                    } else {
+                        showDjangoToast('TODO 마일스톤 연결이 해제되었습니다.', 'info');
+                    }
+                } else {
+                    showDjangoToast(response.message || '마일스톤 할당에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                handleApiError(error);
+                // 실패 시 드롭다운 되돌리기
+                const todoCard = document.querySelector(`[data-todo-id="${todoId}"]`);
+                const currentMilestoneId = todoCard?.dataset.milestoneId;
+                e.target.value = currentMilestoneId !== 'null' ? currentMilestoneId : '';
+            }
+        }
+    });
+
+    // TODO 카드의 마일스톤 배지 업데이트 함수
+    function updateTodoMilestoneBadge(todoId, milestoneId) {
+        const todoCard = document.querySelector(`[data-todo-id="${todoId}"]`);
+        if (!todoCard) return;
+
+        // data-milestone-id 업데이트
+        todoCard.dataset.milestoneId = milestoneId || 'null';
+
+        // 드롭다운 업데이트 (TODO 보드에만 존재)
+        const milestoneSelect = todoCard.querySelector('.milestone-select');
+        if (milestoneSelect) {
+            milestoneSelect.value = milestoneId || '';
+        }
+
+        // 기존 배지 제거
+        const existingBadge = todoCard.querySelector('.todo-milestone-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+
+        // 새 배지 추가 (milestoneId가 있는 경우)
+        if (milestoneId) {
+            const milestone = window.teamMembersData.milestones.find(m => m.id === milestoneId);
+            if (milestone) {
+                const badge = document.createElement('div');
+                badge.className = `todo-milestone-badge priority-${milestone.priority}`;
+                badge.innerHTML = `
+                    <i class="ri-flag-line"></i>
+                    <span>${milestone.title}</span>
+                `;
+
+                // todo-content 다음에 배지 삽입
+                const todoContent = todoCard.querySelector('.todo-content, .todo-text');
+                if (todoContent) {
+                    todoContent.insertAdjacentElement('afterend', badge);
+                }
+            }
         }
     }
 

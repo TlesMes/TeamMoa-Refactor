@@ -182,7 +182,7 @@ class TodoViewSet(viewsets.ModelViewSet):
         except ValueError as e:
             return api_error_response(request, str(e))
 
-    @action(detail=True, methods=['post'], url_path='milestone')
+    @action(detail=True, methods=['patch'], url_path='assign-milestone')
     def assign_milestone(self, request, team_pk=None, pk=None):
         """
         TODO를 마일스톤에 할당/변경/해제

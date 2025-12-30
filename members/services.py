@@ -371,7 +371,7 @@ class TodoService:
                 filter=Q(todo_set__team=team, todo_set__is_completed=False))
         ).select_related('user').prefetch_related(
             Prefetch('todo_set',
-                queryset=Todo.objects.filter(team=team).order_by('order', 'created_at'))
+                queryset=Todo.objects.filter(team=team).select_related('milestone').order_by('order', 'created_at'))
         )
 
         # TODO 보드: 미할당 & 미완료
@@ -379,14 +379,14 @@ class TodoService:
             team=team,
             assignee__isnull=True,
             is_completed=False
-        ).order_by('order', 'created_at')
+        ).select_related('milestone').order_by('order', 'created_at')
 
         # DONE 보드: 미할당 & 완료
         todos_done = Todo.objects.filter(
             team=team,
             assignee__isnull=True,
             is_completed=True
-        ).order_by('order', 'created_at')
+        ).select_related('milestone').order_by('order', 'created_at')
 
         # 🎯 최적화된 데이터 구조 - 이미 prefetch된 데이터 활용
         members_data = []

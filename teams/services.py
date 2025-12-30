@@ -642,8 +642,6 @@ class MilestoneService:
             'old_mode': old_mode,
             'new_mode': new_mode,
             'progress_recalculated': progress_recalculated,
-            'new_progress': milestone.progress_percentage
-        }
 
     def get_milestone_with_todo_stats(self, milestone_id, team):
         """

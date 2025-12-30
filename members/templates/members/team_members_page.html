@@ -21,7 +21,17 @@ window.teamMembersData = {
             isCurrentUser: {{ member_data.member.user.id }} === {{ request.user.id }}
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
-    }
+    },
+    milestones: [
+        {% for milestone in milestones %}
+        {
+            id: {{ milestone.id }},
+            title: "{{ milestone.title|escapejs }}",
+            priority: "{{ milestone.priority }}",
+            enddate: "{{ milestone.enddate|date:'m/d' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
 };
 </script>
 <!-- API 클라이언트 로드 -->
@@ -56,11 +66,26 @@ window.teamMembersData = {
              data-todo-id="{{ todo.id }}"
              data-is-completed="{{ todo.is_completed|yesno:'true,false' }}"
              data-assignee-id="{{ todo.assignee.id|default:'null' }}"
+             data-milestone-id="{{ todo.milestone.id|default:'null' }}"
              data-created-at="{{ todo.created_at|date:'c' }}"
              draggable="true">
           <div class="todo-content">{{ todo.content }}</div>
+          {% if todo.milestone %}
+          <div class="todo-milestone-badge priority-{{ todo.milestone.priority }}">
+            <i class="ri-flag-line"></i>
+            <span>{{ todo.milestone.title }}</span>
+          </div>
+          {% endif %}
           <div class="todo-meta">
             <span class="todo-date">{{ todo.created_at|date:"m/d" }}</span>
+            <select class="milestone-select" data-todo-id="{{ todo.id }}">
+              <option value="">마일스톤 선택</option>
+              {% for milestone in milestones %}
+              <option value="{{ milestone.id }}" {% if todo.milestone.id == milestone.id %}selected{% endif %}>
+                {{ milestone.title }} ({{ milestone.enddate|date:'m/d' }})
+              </option>
+              {% endfor %}
+            </select>
             {% if is_host %}
             <button class="todo-delete-btn" data-todo-id="{{ todo.id }}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -122,9 +147,16 @@ window.teamMembersData = {
                  data-todo-id="{{ todo.id }}"
                  data-is-completed="{{ todo.is_completed|yesno:'true,false' }}"
                  data-assignee-id="{{ todo.assignee.id }}"
+                 data-milestone-id="{{ todo.milestone.id|default:'null' }}"
                  data-created-at="{{ todo.created_at|date:'c' }}"
                  draggable="true">
                 <div class="todo-text">{{ todo.content }}</div>
+                {% if todo.milestone %}
+                <div class="todo-milestone-badge priority-{{ todo.milestone.priority }}">
+                  <i class="ri-flag-line"></i>
+                  <span>{{ todo.milestone.title }}</span>
+                </div>
+                {% endif %}
                 <div class="todo-actions">
                   {% if todo.assignee.user == request.user or is_host %}
                     <!-- Complete/Uncomplete Checkbox -->
@@ -137,15 +169,13 @@ window.teamMembersData = {
                     </label>
 
                     <!-- Return to Board Button -->
-                    <button class="return-btn" data-todo-id="{{ todo.id }}" title="보드로 되돌리기">
-                      ↶
+                    <button class="action-btn return-btn" data-todo-id="{{ todo.id }}" title="보드로 되돌리기">
+                      ↩
                     </button>
 
                     <!-- Delete Button -->
-                    <button class="delete-btn" data-todo-id="{{ todo.id }}" title="삭제">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
-                      </svg>
+                    <button class="action-btn delete-btn" data-todo-id="{{ todo.id }}" title="삭제">
+                      ✕
                     </button>
                   {% endif %}
                 </div>
@@ -170,9 +200,16 @@ window.teamMembersData = {
              data-todo-id="{{ todo.id }}"
              data-is-completed="true"
              data-assignee-id="null"
+             data-milestone-id="{{ todo.milestone.id|default:'null' }}"
              data-created-at="{{ todo.created_at|date:'c' }}"
              draggable="true">
           <div class="todo-content">{{ todo.content }}</div>
+          {% if todo.milestone %}
+          <div class="todo-milestone-badge priority-{{ todo.milestone.priority }}">
+            <i class="ri-flag-line"></i>
+            <span>{{ todo.milestone.title }}</span>
+          </div>
+          {% endif %}
           <div class="todo-meta">
             <span class="todo-date">완료: {{ todo.completed_at|date:"m/d" }}</span>
             {% if is_host %}

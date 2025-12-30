@@ -4,7 +4,7 @@ from django.views import View
 from django.db.models import Count, Q, Prefetch
 from members.forms import CreateTodoForm
 from members.models import Todo
-from teams.models import Team, TeamUser
+from teams.models import Team, TeamUser, Milestone
 from django.contrib import messages
 from common.mixins import TeamMemberRequiredMixin
 from django.utils import timezone
@@ -31,13 +31,20 @@ class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
         
         # 현재 사용자가 팀장인지 확인
         is_host = team.host == self.request.user
-        
+
+        # 마일스톤 목록 조회 (TODO 할당용)
+        milestones = Milestone.objects.filter(
+            team=team,
+            is_completed=False
+        ).order_by('enddate', 'priority')
+
         context.update({
             'team': team,
             'members': todo_data['members'],
             'todos_unassigned': todo_data['todos_unassigned'],
             'todos_done': todo_data['todos_done'],
             'members_data': todo_data['members_data'],
+            'milestones': milestones,
             'form': form,
             'is_host': is_host
         })

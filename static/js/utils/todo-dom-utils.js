@@ -14,6 +14,66 @@ class TodoDOMUtils {
         const day = String(d.getDate()).padStart(2, '0');
         return `${month}/${day}`;
     }
+
+    /**
+     * TODO 보드 카드의 todo-meta HTML 생성 (템플릿 재사용)
+     * @param {string} todoId - TODO ID
+     * @param {string} createdAt - 생성일 (ISO 형식)
+     * @param {string|null} currentMilestoneId - 현재 할당된 마일스톤 ID
+     * @param {boolean} isHost - 호스트 여부 (삭제 버튼 표시)
+     * @returns {HTMLElement} todo-meta div 요소
+     */
+    static createTodoMetaElement(todoId, createdAt, currentMilestoneId = null, isHost = true) {
+        const todoMeta = document.createElement('div');
+        todoMeta.className = 'todo-meta';
+
+        // 날짜 스팬
+        const todoDate = document.createElement('span');
+        todoDate.className = 'todo-date';
+        todoDate.textContent = createdAt ? this.formatDate(createdAt) : this.formatDate(new Date());
+
+        // 마일스톤 드롭다운
+        const milestoneSelect = document.createElement('select');
+        milestoneSelect.className = 'milestone-select';
+        milestoneSelect.dataset.todoId = todoId;
+
+        // 기본 옵션
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '마일스톤 선택';
+        milestoneSelect.appendChild(defaultOption);
+
+        // 마일스톤 목록 추가
+        if (window.teamMembersData && window.teamMembersData.milestones) {
+            window.teamMembersData.milestones.forEach(milestone => {
+                const option = document.createElement('option');
+                option.value = milestone.id;
+                option.textContent = `${milestone.title} (${milestone.enddate})`;
+                if (currentMilestoneId && parseInt(currentMilestoneId) === milestone.id) {
+                    option.selected = true;
+                }
+                milestoneSelect.appendChild(option);
+            });
+        }
+
+        todoMeta.appendChild(todoDate);
+        todoMeta.appendChild(milestoneSelect);
+
+        // 삭제 버튼 (호스트만)
+        if (isHost) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'todo-delete-btn';
+            deleteBtn.dataset.todoId = todoId;
+            deleteBtn.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+                </svg>
+            `;
+            todoMeta.appendChild(deleteBtn);
+        }
+
+        return todoMeta;
+    }
     /**
      * TODO를 멤버 카드로 이동
      * @param {string} todoId - 이동할 TODO ID
@@ -202,33 +262,10 @@ class TodoDOMUtils {
                 actionsDiv.remove();
             }
 
-            // todo-card에 맞는 todo-meta div 생성
-            const todoMeta = document.createElement('div');
-            todoMeta.className = 'todo-meta';
-
-            // 날짜 스팬 추가 (원본 생성일 사용)
-            const todoDate = document.createElement('span');
-            todoDate.className = 'todo-date';
-
-            // createdAt을 "mm/dd" 형식으로 변환 (0 패딩)
-            if (createdAt) {
-                todoDate.textContent = this.formatDate(createdAt);
-            } else {
-                // fallback: createdAt이 없으면 현재 날짜 사용
-                todoDate.textContent = this.formatDate(new Date());
-            }
-
-            // 삭제 버튼 추가 (template과 동일한 구조)
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'todo-delete-btn';
-            deleteBtn.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
-                </svg>
-            `;
-
-            todoMeta.appendChild(todoDate);
-            todoMeta.appendChild(deleteBtn);
+            // todo-meta 템플릿 함수 사용 (Django 템플릿과 동일한 구조)
+            const currentMilestoneId = clonedTodo.dataset.milestoneId;
+            const isHost = window.teamMembersData?.isHost || false;
+            const todoMeta = this.createTodoMetaElement(todoId, createdAt, currentMilestoneId, isHost);
             clonedTodo.appendChild(todoMeta);
         } else if (clonedTodo.classList.contains('todo-card')) {
             // DONE 보드에서 온 todo-card인 경우
