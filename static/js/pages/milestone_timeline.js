@@ -1277,21 +1277,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================
-    // 좌우 스크롤 동기화
+    // 좌우 스크롤 동기화 + 인디케이터 위치 고정
     // ========================================
     const milestoneInfoList = document.querySelector('.milestone-info-list');
     const timelineScrollArea = document.querySelector('.timeline-scroll-area');
 
-    // 우측 타임라인 스크롤 시 좌측 마일스톤 리스트도 같이 스크롤
+    // 인디케이터 위치 보정 함수 (상하 스크롤 시 같은 높이 유지)
+    function updateIndicatorPositions() {
+        const scrollTop = timelineScrollArea.scrollTop;
+
+        if (expandLeftIndicator) {
+            expandLeftIndicator.style.transform = `translateY(${scrollTop}px)`;
+        }
+
+        if (expandRightIndicator) {
+            expandRightIndicator.style.transform = `translateY(${scrollTop}px)`;
+        }
+    }
+
+    // 우측 타임라인 스크롤 시 좌측 마일스톤 리스트도 같이 스크롤 + 인디케이터 위치 보정
     if (timelineScrollArea && milestoneInfoList) {
         timelineScrollArea.addEventListener('scroll', function() {
             milestoneInfoList.scrollTop = this.scrollTop;
+            updateIndicatorPositions(); // 인디케이터 위치 보정
         });
 
-        // 좌측 마일스톤 리스트 스크롤 시 우측 타임라인도 같이 스크롤 (Y축만)
+        // 좌측 마일스톤 리스트 스크롤 시 우측 타임라인도 같이 스크롤 (Y축만) + 인디케이터 위치 보정
         milestoneInfoList.addEventListener('scroll', function() {
             timelineScrollArea.scrollTop = this.scrollTop;
+            updateIndicatorPositions(); // 인디케이터 위치 보정
         });
+
+        // 초기 인디케이터 위치 설정
+        updateIndicatorPositions();
     }
 });
 

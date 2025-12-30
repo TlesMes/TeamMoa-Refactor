@@ -433,8 +433,8 @@
 /* 타임라인 확장 인디케이터 */
 .timeline-expand-indicator {
   position: absolute;
-  top: 0;
-  bottom: 0; /* 전체 높이 사용 (스크롤바 포함) */
+  top: -100px; /* 상단 여유 공간 확보 */
+  height: calc(100% + 200px); /* 상하 100px씩 확장 */
   width: 80px;
   display: flex;
   align-items: center;
@@ -442,7 +442,7 @@
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.95) 100%);
   border: 1px solid #dee2e6;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.05s linear; /* 빠른 반응 속도 */
   z-index: 10;
   pointer-events: auto;
 }
