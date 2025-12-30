@@ -171,10 +171,10 @@ class TestTodoViewSetMilestoneIntegration:
         )
         todo = Todo.objects.create(team=team, content='Feature A', is_completed=False)
 
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        url = reverse('api:team-todos-assign-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
         data = {'milestone_id': milestone.id}
 
-        response = authenticated_client.post(url, data, format='json')
+        response = authenticated_client.patch(url, data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['todo']['milestone_id'] == milestone.id
@@ -189,10 +189,10 @@ class TestTodoViewSetMilestoneIntegration:
         from members.models import Todo
 
         todo = Todo.objects.create(team=team, content='Feature B', is_completed=False)
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        url = reverse('api:team-todos-assign-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
         data = {'milestone_id': 9999}
 
-        response = authenticated_client.post(url, data, format='json')
+        response = authenticated_client.patch(url, data, format='json')
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -218,10 +218,10 @@ class TestTodoViewSetMilestoneIntegration:
         # 새 TODO 추가
         new_todo = Todo.objects.create(team=team, content='TODO 2', is_completed=False)
 
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': new_todo.id})
+        url = reverse('api:team-todos-assign-milestone', kwargs={'team_pk': team.id, 'pk': new_todo.id})
         data = {'milestone_id': milestone.id}
 
-        response = authenticated_client.post(url, data, format='json')
+        response = authenticated_client.patch(url, data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         milestone.refresh_from_db()
@@ -248,7 +248,7 @@ class TestTodoViewSetMilestoneIntegration:
             is_completed=False
         )
 
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        url = reverse('api:team-todos-detach-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
 
         response = authenticated_client.delete(url)
 
@@ -282,7 +282,7 @@ class TestTodoViewSetMilestoneIntegration:
         assert milestone.progress_percentage == 50
 
         # TODO 1개 분리
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo2.id})
+        url = reverse('api:team-todos-detach-milestone', kwargs={'team_pk': team.id, 'pk': todo2.id})
         response = authenticated_client.delete(url)
 
         assert response.status_code == status.HTTP_200_OK
@@ -294,7 +294,7 @@ class TestTodoViewSetMilestoneIntegration:
         from members.models import Todo
 
         todo = Todo.objects.create(team=team, content='Feature D', is_completed=False)
-        url = reverse('api:team-todos-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
+        url = reverse('api:team-todos-detach-milestone', kwargs={'team_pk': team.id, 'pk': todo.id})
 
         response = authenticated_client.delete(url)
 
