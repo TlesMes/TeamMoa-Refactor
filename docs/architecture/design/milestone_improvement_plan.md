@@ -581,7 +581,7 @@ pytest
 
 **커밋**: `cf178ba` - feat(milestone): 마일스톤-TODO 연동 API 구현
 
-### Phase 4: 프론트엔드 구현 (2-3일)
+### ✅ Phase 4: 프론트엔드 구현 (완료 - 2025.12.30)
 
 **Day 0: 타임라인 연도 처리 개선 (선행 작업)** ✅ **완료 (2025.12.29)**
 - [x] **Today-based Rolling Window** 구현 (±6개월)
@@ -598,7 +598,7 @@ pytest
 - 연도 구분선: 자연스러운 회색 (#6b7280, 2px)
 - 연도 경계 양쪽에 연도 표시 (예: "2025년 12월", "2026년 1월")
 
-**Day 0-1: 타임라인 범위 확장 기능** (진행 예정)
+**Day 0-1: 타임라인 범위 확장 기능** ✅ **완료 (2025.12.29)**
 
 **목표**: 6개월 이상 지난/미래 마일스톤 확인을 위한 범위 확장 UI 구현
 
@@ -628,53 +628,43 @@ pytest
    - 확장 상태는 JavaScript 변수로 관리 (백엔드 저장 불필요)
    - 페이지 새로고침 시 자동으로 원래 뷰(±6개월)로 초기화
 
-**작업 목록**:
-- [ ] 좌우 확장 버튼 HTML 구조 추가
-- [ ] 범위 외 마일스톤 개수 계산 함수 구현
-- [ ] 확장 버튼 클릭 이벤트 핸들러
-- [ ] 확장 상태 추적 변수 (`leftExpanded`, `rightExpanded`)
-- [ ] 1회 확장 제한 로직
-- [ ] 오늘 버튼 추가 및 스타일링
-- [ ] CSS: 확장 버튼 스타일 (호버, 비활성화 상태)
-- [ ] 확장 시 타임라인 재렌더링 (월 헤더, 마일스톤 바)
+**작업 목록** (모두 완료):
+- [x] 좌우 확장 인디케이터 HTML 구조 추가 ([team_milestone_timeline.html:110-156](../../teams/templates/teams/team_milestone_timeline.html#L110-L156))
+- [x] 범위 외 마일스톤 개수 계산 함수 구현 ([milestone_timeline.js:722-895](../../static/js/pages/milestone_timeline.js#L722-L895))
+- [x] 확장 버튼 클릭 이벤트 핸들러 ([milestone_timeline.js:904-934](../../static/js/pages/milestone_timeline.js#L904-L934))
+- [x] 확장 상태 추적 변수 (`expandedLeft`, `expandedRight`) ([milestone_timeline.js:9-11](../../static/js/pages/milestone_timeline.js#L9-L11))
+- [x] 1회 확장 제한 로직 (확장 후 인디케이터 숨김)
+- [x] 오늘 버튼 추가 ([team_milestone_timeline.html:62-65](../../teams/templates/teams/team_milestone_timeline.html#L62-L65))
+- [x] CSS: 확장 인디케이터 스타일 (스크롤 시 위치 고정)
+- [x] 확장 시 타임라인 재렌더링 (월 헤더, 마일스톤 바, 구분선 모두 갱신)
 
-**기술 구현**:
-```javascript
-// 확장 상태 관리
-let expandedLeft = false;   // 과거 확장 여부
-let expandedRight = false;  // 미래 확장 여부
+**구현 완료 내용**:
+- 확장 상태 관리: `expandedLeft`, `expandedRight` 변수
+- 동적 범위 계산: 기본 ±6개월, 확장 시 ±12개월
+- 스크롤 시 인디케이터 위치 고정 (transform translateY)
+- 범위 외 마일스톤 개수 실시간 표시
 
-// 범위 계산 (기본: ±6개월, 확장: ±12개월)
-const leftMonths = expandedLeft ? 12 : 6;
-const rightMonths = expandedRight ? 12 : 6;
+**Day 1-2: 진행률 컨트롤 & 수정 모달** ✅ **완료 (2025.12.29)**
 
-// 확장 버튼 클릭
-function expandLeft() {
-    if (!expandedLeft) {
-        expandedLeft = true;
-        renderTimeline();  // 타임라인 재렌더링
-        updateExpandButtons();  // 버튼 상태 업데이트
-    }
-}
+**구현 완료 내용**:
+- [x] API Client 확장 ([static/js/api/client.js](../../static/js/api/client.js))
+  - `toggleMilestoneProgressMode()` 메서드 추가
+- [x] 진행률 슬라이더 컴포넌트를 수정 모달에 통합
+  - 수동 모드 시에만 슬라이더 표시 ([team_milestone_timeline.html:255-268](../../teams/templates/teams/team_milestone_timeline.html#L255-L268))
+- [x] CSS 스타일 작성 ([progress-control.css](../../static/css/components/progress-control.css))
+  - 슬라이더 스타일 (Webkit, Firefox 지원)
+  - AUTO 모드 진행 바 (100% 시 골드 애니메이션)
+  - TODO 통계 표시 레이아웃
+- [x] 수정 모달 HTML 구조 ([team_milestone_timeline.html:178-283](../../teams/templates/teams/team_milestone_timeline.html#L178-L283))
+  - 제목, 설명, 날짜 범위, 우선순위, 진행률 모드
+  - 진행률 슬라이더 (수동 모드에서만 표시)
+- [x] JavaScript 로직 구현 ([milestone_timeline.js:1163-1400](../../static/js/pages/milestone_timeline.js#L1163-L1400))
+  - `openEditMilestoneModal()`: 모달 데이터 로드
+  - 진행률 모드 변경 시 슬라이더 표시/숨김
+  - 슬라이더 값 실시간 업데이트
+  - `toggleProgressMode()`: 모드 전환 확인 모달
 
-// 오늘 버튼 (기존 함수 재사용)
-function scrollToToday() {
-    scrollToCurrentDate();  // 기존 함수 호출
-}
-```
-
-**Day 1: 기본 UI**
-- [x] API Client 확장 (`static/js/api/client.js`)
-- [ ] 진행률 슬라이더 컴포넌트 (`progress-control.js`)
-- [ ] 타임라인 HTML 템플릿 업데이트
-- [ ] CSS 스타일 작성 (`progress-control.css`)
-
-**Day 2: 수정 모달**
-- [ ] 수정 모달 HTML 구조
-- [ ] JavaScript 컴포넌트 (`milestone-edit-modal.js`)
-- [ ] CSS 스타일 (`milestone-edit-modal.css`)
-
-**Day 3: TODO 페이지 연동**
+**Day 3: TODO 페이지 연동** (진행 예정)
 - [ ] TODO 카드에 마일스톤 배지 표시
 - [ ] 마일스톤 할당 드롭다운
 - [ ] TODO 완료 시 토스트 메시지 개선
