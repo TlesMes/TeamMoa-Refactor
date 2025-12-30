@@ -489,3 +489,76 @@ class TestMilestoneServiceProgressMode:
         assert result['todo_stats']['completed'] == 0
         assert result['todo_stats']['in_progress'] == 0
         assert result['todo_stats']['completion_rate'] == 0
+
+    def test_update_milestone_mode_manual_to_auto_recalculates(self, team):
+        """update_milestone로 수동 → AUTO 전환 시 진행률 재계산"""
+        from members.models import Todo
+
+        # 수동 모드 마일스톤 생성
+        today = date.today()
+        milestone = Milestone.objects.create(
+            team=team,
+            title='수동→AUTO 테스트',
+            startdate=today,
+            enddate=today + timedelta(days=7),
+            priority='high',
+            progress_mode='manual',
+            progress_percentage=50  # 수동으로 50% 설정
+        )
+
+        # TODO 3개 생성 (2개 완료)
+        Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 3', milestone=milestone, is_completed=False)
+
+        # update_milestone로 모드 전환
+        updated_milestone, updated_fields = self.service.update_milestone(
+            milestone_id=milestone.id,
+            team=team,
+            progress_mode='auto'
+        )
+
+        # 검증
+        assert updated_milestone.progress_mode == 'auto'
+        assert updated_milestone.progress_percentage == 66  # 2/3 = 66%
+        assert '진행률 모드' in updated_fields
+        assert '진행률 (AUTO 재계산)' in updated_fields
+
+    def test_update_milestone_mode_auto_to_manual_keeps_progress(self, team):
+        """update_milestone로 AUTO → 수동 전환 시 기존 진행률 유지"""
+        from members.models import Todo
+
+        # AUTO 모드 마일스톤 생성
+        today = date.today()
+        milestone = Milestone.objects.create(
+            team=team,
+            title='AUTO→수동 테스트',
+            startdate=today,
+            enddate=today + timedelta(days=7),
+            priority='medium',
+            progress_mode='auto'
+        )
+
+        # TODO 4개 생성 (3개 완료)
+        Todo.objects.create(team=team, content='TODO 1', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 2', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 3', milestone=milestone, is_completed=True)
+        Todo.objects.create(team=team, content='TODO 4', milestone=milestone, is_completed=False)
+
+        # AUTO 모드에서 진행률 자동 계산
+        milestone.update_progress_from_todos()
+        milestone.refresh_from_db()
+        assert milestone.progress_percentage == 75  # 3/4 = 75%
+
+        # update_milestone로 모드 전환
+        updated_milestone, updated_fields = self.service.update_milestone(
+            milestone_id=milestone.id,
+            team=team,
+            progress_mode='manual'
+        )
+
+        # 검증: 진행률 유지
+        assert updated_milestone.progress_mode == 'manual'
+        assert updated_milestone.progress_percentage == 75  # 기존 75% 유지
+        assert '진행률 모드' in updated_fields
+        assert '진행률 (AUTO 재계산)' not in updated_fields

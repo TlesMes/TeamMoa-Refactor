@@ -474,8 +474,15 @@ class MilestoneService:
             new_mode = update_data['progress_mode']
             if new_mode not in ['manual', 'auto']:
                 raise ValueError(self.ERROR_MESSAGES['INVALID_PROGRESS_MODE'])
+
+            old_mode = milestone.progress_mode
             milestone.progress_mode = new_mode
             updated_fields.append('진행률 모드')
+
+            # manual → auto 전환 시 TODO 기반 즉시 재계산
+            if old_mode == 'manual' and new_mode == 'auto':
+                milestone.update_progress_from_todos()
+                updated_fields.append('진행률 (AUTO 재계산)')
 
         # 시작일 업데이트
         if 'startdate' in update_data:
