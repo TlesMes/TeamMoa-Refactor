@@ -1158,67 +1158,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCreateMilestoneModal();
 
     // ========================================
-    // 진행률 컨트롤 기능
-    // ========================================
-
-    // 진행률 슬라이더 이벤트 (수동 모드)
-    initializeProgressSliders();
-
-    function initializeProgressSliders() {
-        const sliders = document.querySelectorAll('.progress-slider');
-
-        sliders.forEach(slider => {
-            const milestoneId = slider.dataset.milestoneId;
-            let debounceTimer;
-
-            // 슬라이더 값 변경 시 즉시 UI 업데이트 (디바운스 적용)
-            slider.addEventListener('input', function(e) {
-                const value = parseInt(e.target.value);
-
-                // UI 즉시 업데이트
-                const valueSpan = this.nextElementSibling;
-                if (valueSpan && valueSpan.classList.contains('progress-value')) {
-                    valueSpan.textContent = `${value}%`;
-                }
-
-                // 디바운스: 500ms 후 서버에 전송
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    updateMilestoneProgress(milestoneId, value);
-                }, 500);
-            });
-        });
-    }
-
-    // 마일스톤 진행률 업데이트 (PATCH 요청)
-    async function updateMilestoneProgress(milestoneId, progressPercentage) {
-        try {
-            const response = await window.teamApi.updateMilestone(
-                window.teamData.id,
-                milestoneId,
-                { progress_percentage: progressPercentage }
-            );
-
-            if (response.success) {
-                // 좌측 패널 진행률 업데이트는 이미 슬라이더에서 처리됨
-
-                // 100% 도달 시 축하 메시지
-                if (progressPercentage === 100) {
-                    showDjangoToast('🎉 마일스톤을 완료했습니다!', 'success');
-                }
-
-                console.log('진행률 업데이트 성공:', progressPercentage + '%');
-            } else {
-                throw new Error(response.error || '진행률 업데이트에 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('진행률 업데이트 실패:', error);
-            showDjangoToast(`진행률 업데이트에 실패했습니다: ${error.message}`, 'error');
-            location.reload(); // 실패 시 페이지 새로고침
-        }
-    }
-
-    // ========================================
     // 마일스톤 수정 모달 초기화
     // ========================================
     initializeEditMilestoneModal();
@@ -1369,11 +1308,6 @@ async function openEditMilestoneModal(milestoneId) {
             window.teamData.id,
             milestoneId
         );
-
-        // 🔍 디버깅: 서버 응답 로그 출력
-        console.log('📡 서버 응답:', response);
-        console.log('  - response.success:', response.success);
-        console.log('  - response.milestone:', response.milestone);
 
         if (response.success && response.milestone) {
             const milestone = response.milestone;

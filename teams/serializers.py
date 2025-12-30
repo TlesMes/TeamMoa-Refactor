@@ -174,11 +174,14 @@ class MilestoneUpdateSerializer(serializers.Serializer):
         enddate = data.get('enddate')
 
         # AUTO 모드 보호: 진행률 수동 설정 방지
-        if self.instance and self.instance.progress_mode == 'auto':
-            if 'progress_percentage' in data:
-                raise serializers.ValidationError({
-                    'progress_percentage': 'AUTO 모드에서는 진행률을 수동으로 설정할 수 없습니다.'
-                })
+        # 최종 적용될 모드를 확인 (새 값이 있으면 새 값, 없으면 기존 값)
+        effective_mode = data.get('progress_mode', self.instance.progress_mode if self.instance else 'auto')
+
+        # 최종 모드가 AUTO일 때만 진행률 수동 설정 차단
+        if effective_mode == 'auto' and 'progress_percentage' in data:
+            raise serializers.ValidationError({
+                'progress_percentage': 'AUTO 모드에서는 진행률을 수동으로 설정할 수 없습니다.'
+            })
 
         # 둘 다 제공된 경우에만 검증
         if startdate and enddate:

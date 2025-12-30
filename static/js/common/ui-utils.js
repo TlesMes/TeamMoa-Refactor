@@ -1,11 +1,8 @@
 // DOM이 로드된 후 실행
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[UI-Utils] Loaded');
-
     // 드롭다운 기능
     const dropdownToggle = document.getElementById('userDropdown');
     const dropdownMenu = document.getElementById('dropdownMenu');
-    console.log('[UI-Utils] Dropdown elements:', { dropdownToggle, dropdownMenu });
 
     // 드롭다운이 존재하는 페이지에서만 초기화
     if (dropdownToggle && dropdownMenu) {
