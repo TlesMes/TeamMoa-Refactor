@@ -406,8 +406,8 @@
 /* 우측 스크롤 영역: 타임라인 */
 .timeline-scroll-area {
   flex: 1;
-  overflow-x: auto; /* auto 대신 scroll로 강제 표시 */
-  overflow-y: hidden;
+  overflow-x: auto;
+  overflow-y: hidden; /* 세로 스크롤 금지 (좌측 패널과 동기화) */
   background: #f0f0f0; /* 디버깅용 배경색 */
   position: relative; /* 인디케이터 절대 위치를 위한 기준점 */
 }
@@ -524,7 +524,7 @@
 
 .timeline-scroll-content {
   /* width는 JavaScript에서 동적 설정 (totalWidth 기준) */
-  height: 100%;
+  min-height: 600px; /* 마일스톤 개수가 적을 때도 컨테이너 높이 보장 */
   position: relative;
   flex-shrink: 0;
   background: #f8f9fa;
