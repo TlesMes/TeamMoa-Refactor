@@ -7,9 +7,9 @@ Django 기반 팀 프로젝트 관리 시스템
 
 ## 🎯 현재 진행 중인 작업
 
-### 🚀 마일스톤-TODO 연동 기능 개선 (2025.12.26)
+### 🎉 마일스톤-TODO 연동 기능 개선 완료! (2025.12.31)
 
-**📋 백엔드 구현 완료 (Phase 1-3)**:
+**✅ 전체 구현 완료 (Phase 1-4)**:
 - ✅ **Phase 1 완료 (2025.12.26)**: 모델 및 마이그레이션
   - Milestone.progress_mode 필드, Todo.milestone FK 추가
   - 4개 모델 메서드 구현, 마이그레이션 실행
@@ -19,6 +19,11 @@ Django 기반 팀 프로젝트 관리 시스템
 - ✅ **Phase 3 완료 (2025.12.29)**: API 레이어 구현
   - MilestoneViewSet/TodoViewSet 확장, Serializer 추가
   - toggle_progress_mode, assign_milestone API 구현
+- ✅ **Phase 4 완료 (2025.12.31)**: 프론트엔드 구현
+  - TODO 카드 마일스톤 배지 표시 (우선순위별 색상)
+  - 마일스톤 할당 드롭다운 (TODO 보드)
+  - TODO 완료 시 마일스톤 진행률 토스트 메시지
+  - 마일스톤 수정 모달 진행률 모드 전환 (manual ↔ AUTO)
 
 **🎯 핵심 기능**:
 1. **진행률 관리 방식 선택**
@@ -34,20 +39,16 @@ Django 기반 팀 프로젝트 관리 시스템
    - 수동 → AUTO: 즉시 TODO 기반 재계산
    - AUTO → 수동: 기존 진행률 유지
 
-**📦 남은 작업 (Phase 4-5)**:
-- ⏳ **Phase 4 (진행 예정)**: 프론트엔드 구현 (2-3일)
-  - Day 1: API Client 확장, 진행률 슬라이더 컴포넌트, 타임라인 업데이트
-  - Day 2: 마일스톤 수정 모달 (HTML/JS/CSS)
-  - Day 3: TODO 페이지 연동 (배지, 할당 드롭다운, 토스트)
-- ⏳ **Phase 5**: 최종 테스트 및 배포 (1일)
-  - 통합 테스트, 엣지 케이스, 성능 테스트, 프로덕션 배포
+**🐛 버그 수정 (2025.12.31)**:
+- ✅ update_milestone에서 manual → auto 전환 시 진행률 재계산 추가
+- ✅ TODO-마일스톤 통합 테스트 URL 이름 및 메서드 수정
 
 **📚 참고 문서**:
 - [마일스톤 개선 계획](./docs/architecture/design/milestone_improvement_plan.md)
 - [시나리오 및 DB 변경](./docs/architecture/design/milestone_scenario_and_db_changes.md)
 - [API 마이그레이션 가이드](./docs/architecture/refactoring/api_migrations/milestone_api_migration.md)
 
-**다음 작업**: Phase 4 구현 시작 - 프론트엔드 UI 구축
+**테스트 결과**: 264개 테스트 모두 통과 ✅
 
 ---
 
@@ -278,17 +279,15 @@ CORS_ALLOWED_ORIGINS=https://teammoa.duckdns.org
 8. **문서 구조 재구성** - ✅ 완료 (6단계 카테고리, 64% 간소화, 2025.12.08)
 9. **AWS ALB + Multi-AZ 고가용성 인프라 구축** - ✅ 완료 (2025.12.16)
    - ALB 로드밸런싱, Rolling Update, 부하 테스트 완료
-10. **마일스톤-TODO 연동 기능 개선 계획 수립** - ✅ 완료 (2025.12.26)
-   - 비즈니스 설계, 구현 계획 문서화, 5단계 7일 계획 수립
+10. **마일스톤-TODO 연동 기능 개선** - ✅ 완료 (2025.12.31)
+   - Phase 1-4 구현 완료, 버그 수정, 264개 테스트 통과
 
 ### 📋 다음 목표 (우선순위 순)
 
-1. **마일스톤-TODO 연동 기능 구현** (7일) - ⏳ 다음 작업
-   - Phase 1: 모델 및 마이그레이션
-   - Phase 2: 서비스 레이어 확장
-   - Phase 3: API 레이어
-   - Phase 4: 프론트엔드 구현
-   - Phase 5: 테스트 및 배포
+1. **프로덕션 배포** (30분-1시간) - ⏳ 다음 작업
+   - 마일스톤-TODO 연동 기능 배포
+   - EC2 서버 업데이트 및 동작 검증
+   - ALB를 통한 무중단 배포
 
 2. **성능 최적화** (3-4시간)
    - 서비스 레이어 기반 쿼리 최적화
