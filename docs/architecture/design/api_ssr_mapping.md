@@ -159,8 +159,10 @@
 | **마일스톤 목록 조회** | `/api/v1/teams/<team_pk>/milestones/` | GET | `MilestoneViewSet.list` | N/A | 초기 로드 시 서버 렌더링 |
 | **마일스톤 생성** | `/api/v1/teams/<team_pk>/milestones/` | POST | `MilestoneViewSet.create` | `teamApi.createMilestone()` | 모달에서 생성 |
 | **마일스톤 조회** | `/api/v1/teams/<team_pk>/milestones/<pk>/` | GET | `MilestoneViewSet.retrieve` | N/A | 미사용 |
-| **마일스톤 수정** | `/api/v1/teams/<team_pk>/milestones/<pk>/` | PUT, PATCH | `MilestoneViewSet.update` | `teamApi.updateMilestone()` | 드래그 앤 드롭 날짜 변경 |
+| **마일스톤 수정** | `/api/v1/teams/<team_pk>/milestones/<pk>/` | PUT, PATCH | `MilestoneViewSet.update` | `teamApi.updateMilestone()` | 드래그 앤 드롭 날짜 변경, 진행률 모드 전환 |
 | **마일스톤 삭제** | `/api/v1/teams/<team_pk>/milestones/<pk>/` | DELETE | `MilestoneViewSet.destroy` | `teamApi.deleteMilestone()` | 삭제 버튼 클릭 |
+| **진행률 모드 전환** | `/api/v1/teams/<team_pk>/milestones/<pk>/progress-mode/` | PATCH | `MilestoneViewSet.toggle_progress_mode` | `teamApi.toggleProgressMode()` | 수동 ↔ AUTO 모드 전환 |
+| **마일스톤 + TODO 통계** | `/api/v1/teams/<team_pk>/milestones/<pk>/with-stats/` | GET | `MilestoneViewSet.milestone_with_stats` | N/A | 마일스톤 상세 + TODO 완료율 조회 |
 
 **JavaScript**: `static/js/pages/milestone_timeline.js`
 
@@ -169,11 +171,17 @@
 - 좌/우 핸들로 기간 조정
 - 필터링 (상태별, 우선순위별)
 - 모달 기반 생성/삭제
+- **진행률 관리**:
+  - 수동 모드: 슬라이더로 직접 조정
+  - AUTO 모드: TODO 완료율 기반 자동 계산
+  - 모드 전환 시 진행률 재계산 (수동 → AUTO)
 
 **서비스 레이어**: `teams/services.py` - `MilestoneService`
 - `create_milestone()`: 마일스톤 생성
-- `update_milestone()`: 마일스톤 수정
+- `update_milestone()`: 마일스톤 수정 (모드 전환 시 진행률 재계산)
 - `delete_milestone()`: 마일스톤 삭제
+- `toggle_progress_mode()`: 진행률 모드 전환
+- `calculate_progress_from_todos()`: TODO 기반 진행률 계산
 
 ---
 
@@ -220,9 +228,11 @@
 | 기능 | API 엔드포인트 | HTTP 메서드 | ViewSet 액션 | JavaScript 함수 | 설명 |
 |------|----------------|-------------|--------------|------------------|------|
 | **TODO 할당** | `/api/v1/teams/<team_pk>/todos/<pk>/assign/` | POST | `TodoViewSet.assign` | `todoApi.assignTodo()` | 멤버에게 TODO 드래그 앤 드롭 |
-| **TODO 완료 토글** | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` | POST | `TodoViewSet.complete` | `todoApi.completeTodo()` | 체크박스 클릭 |
+| **TODO 완료 토글** | `/api/v1/teams/<team_pk>/todos/<pk>/complete/` | POST | `TodoViewSet.complete` | `todoApi.completeTodo()` | 체크박스 클릭 (마일스톤 진행률 자동 갱신) |
 | **TODO 보드로 이동** | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-todo/` | POST | `TodoViewSet.move_to_todo` | `todoApi.moveTodoToTodoBoard()` | DONE → TODO 보드 |
 | **DONE 보드로 이동** | `/api/v1/teams/<team_pk>/todos/<pk>/move-to-done/` | POST | `TodoViewSet.move_to_done` | `todoApi.moveTodoToDoneBoard()` | TODO/멤버 → DONE 보드 |
+| **마일스톤 할당/변경/해제** | `/api/v1/teams/<team_pk>/todos/<pk>/assign-milestone/` | PATCH | `TodoViewSet.assign_milestone` | `todoApi.assignMilestone()` | 드롭다운으로 TODO를 마일스톤에 연결 |
+| **마일스톤 분리** | `/api/v1/teams/<team_pk>/todos/<pk>/milestone/` | DELETE | `TodoViewSet.detach_milestone` | `todoApi.detachMilestone()` | TODO를 마일스톤에서 분리 |
 
 **JavaScript**: `static/js/pages/team_members.js`, `static/js/utils/todo-dom-utils.js`
 
@@ -231,12 +241,19 @@
 - Optimistic UI 업데이트 (즉시 DOM 조작 후 API 호출)
 - 권한 기반 드래그 제한 (팀장: 모든 TODO, 일반: 자신 것만)
 - 실시간 멤버별 TODO 카운터 업데이트
+- **마일스톤 연동**:
+  - TODO 카드에 마일스톤 배지 표시 (우선순위별 색상)
+  - 드롭다운으로 마일스톤 할당/변경
+  - TODO 완료 시 마일스톤 진행률 자동 갱신 (AUTO 모드)
+  - 토스트 메시지로 진행률 변화 안내
 
 **서비스 레이어**: `members/services.py` - `TodoService`
 - `assign_todo()`: TODO 할당
-- `complete_todo()`: 완료 상태 토글
+- `complete_todo()`: 완료 상태 토글 + 마일스톤 진행률 갱신
 - `move_todo_to_board()`: 보드 간 이동
 - `delete_todo()`: TODO 삭제
+- `assign_milestone_to_todo()`: TODO를 마일스톤에 할당
+- `detach_milestone_from_todo()`: TODO를 마일스톤에서 분리
 
 ---
 
@@ -510,12 +527,12 @@
 
 ## 📊 전체 통계
 
-### REST API 엔드포인트 (총 24개, 실제 사용 19개)
+### REST API 엔드포인트 (총 28개, 실제 사용 23개)
 
 | 앱 | REST API 수 | 실제 사용 | 주요 기능 |
 |----|-------------|----------|-----------|
-| **Teams** | 4개 | 4개 ✅ | 마일스톤 CRUD (3), 멤버 제거/탈퇴 (1) |
-| **Members** | 7개 | 5개 ⚠️ | TODO 상태 관리 (할당, 완료, 이동, 삭제) / **미사용**: list, create, retrieve, update |
+| **Teams** | 6개 | 6개 ✅ | 마일스톤 CRUD (3), 진행률 모드 전환 (1), 마일스톤+통계 조회 (1), 멤버 제거/탈퇴 (1) |
+| **Members** | 9개 | 7개 ⚠️ | TODO 상태 관리 (할당, 완료, 이동, 삭제), 마일스톤 연동 (할당, 분리) / **미사용**: list, create, retrieve, update |
 | **Schedules** | 3개 | 2개 ⚠️ | 개인 스케줄 저장, 팀 가용성 조회 / **미사용**: 내 스케줄 조회(SSR 대체) |
 | **Mindmaps** | 10개 | 10개 ✅ | 노드 CRUD (4), 연결선 CRUD (2), 추천 (1), 댓글 CRUD (3) |
 | **Shares** | 0개 | 0개 | (SSR 중심) |
@@ -591,5 +608,31 @@
 
 ---
 
-**최종 업데이트**: 2025.10.19 (Members App 레거시 SSR 뷰 정리 완료)
-**버전**: 2.1
+**최종 업데이트**: 2025.12.31 (마일스톤-TODO 연동 기능 추가)
+**버전**: 2.2
+
+---
+
+## 📋 변경 이력
+
+### v2.2 (2025.12.31)
+- **Teams App**: 마일스톤 API 2개 추가
+  - `PATCH /api/v1/teams/<team_pk>/milestones/<pk>/progress-mode/`: 진행률 모드 전환
+  - `GET /api/v1/teams/<team_pk>/milestones/<pk>/with-stats/`: 마일스톤 + TODO 통계 조회
+- **Members App**: TODO 마일스톤 연동 API 2개 추가
+  - `PATCH /api/v1/teams/<team_pk>/todos/<pk>/assign-milestone/`: 마일스톤 할당/변경/해제
+  - `DELETE /api/v1/teams/<team_pk>/todos/<pk>/milestone/`: 마일스톤 분리
+- 서비스 레이어 메서드 추가:
+  - `MilestoneService.toggle_progress_mode()`, `calculate_progress_from_todos()`
+  - `TodoService.assign_milestone_to_todo()`, `detach_milestone_from_todo()`
+- 총 REST API: 24개 → 28개 (실제 사용 19개 → 23개)
+
+### v2.1 (2025.10.19)
+- Members App 레거시 SSR 뷰 2개 삭제 (`MemberCompleteTodoView`, `MemberDeleteTodoView`)
+
+### v2.0 (2025.10.18)
+- 레거시 코드 대규모 정리 (총 16개 항목 삭제)
+  - Teams: REST API 2개, Serializer 2개
+  - Members: AJAX 뷰 4개
+  - Mindmaps: SSR 뷰 3개
+  - API 클라이언트: 미사용 메서드 7개
