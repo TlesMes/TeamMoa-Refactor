@@ -85,52 +85,52 @@ flowchart TD
 
 ## 📚 포트폴리오 문서 구성
 
-| 문서 | 페이지 | 핵심 내용 | 추천 대상 |
-|------|--------|----------|----------|
-| [프로젝트 개요](./overview.md) | 8p | 프로젝트 배경, 4대 핵심 기능, 기술 스택 선택 이유 | **필독** (전체 흐름 파악) |
-| [아키텍처 설계](./architecture.md) | 10p | 서비스 레이어 패턴, API vs SSR 전략, DB 설계 | 백엔드 아키텍처 관심자 |
-| [인프라 및 배포](./infrastructure.md) | 12p | Docker, CI/CD, AWS EC2, Nginx + SSL | DevOps/인프라 관심자 |
-| [테스트 전략](./testing.md) | 12p | 221개 테스트 구축 과정, pytest fixture 패턴 | 테스트 전략 관심자 |
-| [트러블슈팅](./troubleshooting.md) | 12p | 8건 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
-| [실시간 마인드맵](./features/realtime-mindmap.md) | 13p | Canvas API, WebSocket, 커서 공유 (50ms 스로틀링) | 실시간 협업 기능 상세 |
-| [OAuth 2.0 인증](./features/oauth-authentication.md) | 15p | django-allauth, 이메일 기반 계정 병합, 중복 연결 차단 | 소셜 로그인 구현 |
-| [성능 최적화](./features/performance-optimization.md) | 14p | N+1 쿼리 해결, annotate + prefetch, 쿼리 수 81% 감소 | Django ORM 최적화 |
+| 문서 | 핵심 내용 | 추천 대상 |
+|------|----------|----------|
+| [프로젝트 개요](./overview.md) | 프로젝트 배경, 4대 핵심 기능, 기술 스택 선택 이유 | **필독** (전체 흐름 파악) |
+| [아키텍처 설계](./architecture.md) | 서비스 레이어 패턴, API vs SSR 전략, DB 설계 | 백엔드 아키텍처 관심자 |
+| [인프라 및 배포](./infrastructure.md) | Docker, CI/CD, AWS EC2, Nginx + SSL | DevOps/인프라 관심자 |
+| [테스트 전략](./testing.md) | 221개 테스트 구축 과정, pytest fixture 패턴 | 테스트 전략 관심자 |
+| [트러블슈팅](./troubleshooting.md) | 8건 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
+| [실시간 마인드맵](./features/realtime-mindmap.md) | Canvas API, WebSocket, 커서 공유 (50ms 스로틀링) | 실시간 협업 기능 상세 |
+| [OAuth 2.0 인증](./features/oauth-authentication.md) | django-allauth, 이메일 기반 계정 병합, 중복 연결 차단 | 소셜 로그인 구현 |
+| [성능 최적화](./features/performance-optimization.md) | N+1 쿼리 해결, annotate + prefetch, 쿼리 수 81% 감소 | Django ORM 최적화 |
 
-**총 분량**: 96페이지 (A4 기준) | **코드 예시**: 150개 이상 | **코드 검증**: 100% 완료
+**총 분량**: 9개 문서 | **코드 예시**: 150개 이상 | **코드 검증**: 100% 완료
 
 ---
 
 ## 🎯 문서 읽는 추천 순서
 
 ### 1. 빠른 이해
-1. **[프로젝트 개요](./overview.md)** (8페이지)
+1. **[프로젝트 개요](./overview.md)**
    - 프로젝트 배경 및 핵심 기능
    - 기술 스택 선택 이유
    - 주요 성과
 
 ### 2. 기술 깊이 확인
-2. **[아키텍처 설계](./architecture.md)** (10페이지)
+2. **[아키텍처 설계](./architecture.md)**
    - 서비스 레이어 패턴 도입 배경 (Before/After 코드)
    - API vs SSR 선택 기준
    - 쿼리 최적화 (N+1 해결)
 
-3. **[인프라 및 배포](./infrastructure.md)** (12페이지)
+3. **[인프라 및 배포](./infrastructure.md)**
    - Docker 멀티 스테이지 빌드
    - GitHub Actions CI/CD 파이프라인
    - Dynamic Security Group
 
 ### 3. 실전 경험 확인
-4. **[테스트 전략](./testing.md)** (12페이지)
+4. **[테스트 전략](./testing.md)**
    - 221개 테스트 구축 과정
    - fixture 패턴 및 재사용
 
-5. **[트러블슈팅](./troubleshooting.md)** (12페이지)
+5. **[트러블슈팅](./troubleshooting.md)**
    - HTTPS 리디렉션 루프
    - username/email 영구 점유 문제
    - N+1 쿼리 최적화
 
 ### 4. 심화 기능
-6. **[실시간 마인드맵](./features/realtime-mindmap.md)** (13페이지)
+6. **[실시간 마인드맵](./features/realtime-mindmap.md)**
    - WebSocket 실시간 통신
    - Canvas API 좌표계 변환
    - 50ms 스로틀링 최적화
