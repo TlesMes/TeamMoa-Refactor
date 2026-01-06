@@ -393,7 +393,7 @@ async def handle_node_move(self, data):
 
 **측정 환경**:
 - 일시: 2025년 12월 8일
-- 환경: 프로덕션 (`https://teammoa.duckdns.org`, AWS EC2 t3.micro)
+- 환경: 프로덕션 (`https://teammoa.shop`, AWS EC2 t3.micro + ALB)
 - 측정 방법: Chrome DevTools Network 탭, 동일 브라우저에서 2개 탭 동시 측정
 - 측정 시나리오: 노드 드래그로 7회 연속 측정
 
@@ -561,7 +561,7 @@ function screenToCanvas(screenX, screenY) {
 **작성일**: 2025년 12월 8일
 **최종 수정**: 2025년 12월 8일 (실측 성능 지표 추가)
 **버전**: 2.1
-**데모**: [https://teammoa.duckdns.org](https://teammoa.duckdns.org)
+**데모**: [https://teammoa.shop](https://teammoa.shop)
 **코드 위치**:
 - Consumer: [`mindmaps/consumers.py`](../../../mindmaps/consumers.py)
 - 클라이언트: [`static/js/pages/mindmap_detail.js`](../../../static/js/pages/mindmap_detail.js)

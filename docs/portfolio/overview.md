@@ -287,14 +287,14 @@ git push origin main → 자동 테스트 → 자동 빌드 → 자동 배포 �
 ---
 
 ### 3. 프로덕션 배포
-- **HTTPS 적용** - Let's Encrypt SSL 인증서 (자동 갱신)
-- **도메인** - DuckDNS 무료 도메인 (`teammoa.duckdns.org`)
+- **HTTPS 적용** - AWS ACM SSL 인증서 (*.teammoa.shop)
+- **도메인** - teammoa.shop (Route 53 + ALB)
 - **컨테이너 구성** - MySQL, Redis, Django, Nginx (모두 Healthy 상태)
 - **OAuth 2.0** - Google, GitHub 소셜 로그인 정상 작동
 
 **인프라 구성**:
 ```
-도메인: https://teammoa.duckdns.org
+도메인: https://teammoa.shop
 서버: AWS EC2 t3.micro (Ubuntu 22.04)
 IP: 3.34.102.12
 
@@ -329,7 +329,7 @@ IP: 3.34.102.12
 ## 데모 및 링크
 
 ### 🌐 Live Demo
-**URL**: [https://teammoa.duckdns.org](https://teammoa.duckdns.org)
+**URL**: [https://teammoa.shop](https://teammoa.shop)
 
 **테스트 계정**:
 - 회원가입 후 이메일 인증 필요
