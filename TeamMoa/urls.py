@@ -69,3 +69,9 @@ urlpatterns = [
 # Serve static files in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'static'))
+
+    # Django Debug Toolbar (개발 환경 전용)
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

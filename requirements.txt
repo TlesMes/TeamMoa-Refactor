@@ -62,3 +62,6 @@ pytest==8.3.4
 pytest-django==4.9.0
 pytest-cov==6.0.0
 coverage==7.6.9
+
+# Development Tools
+django-debug-toolbar==4.4.6
