@@ -332,8 +332,8 @@ class TestTodoServiceGetTeamTodosWithStats:
 
         result = todo_service.get_team_todos_with_stats(team)
 
-        assert result['todos_unassigned'].count() == 1  # Unassigned 1
-        assert result['todos_done'].count() == 1  # Done 1
+        assert len(result['todos_unassigned']) == 1  # Unassigned 1
+        assert len(result['todos_done']) == 1  # Done 1
         assert result['members'].count() == 2  # host + member
 
         # 멤버 통계 확인
@@ -346,8 +346,8 @@ class TestTodoServiceGetTeamTodosWithStats:
         """빈 팀의 Todo 조회"""
         result = todo_service.get_team_todos_with_stats(team)
 
-        assert result['todos_unassigned'].count() == 0
-        assert result['todos_done'].count() == 0
+        assert len(result['todos_unassigned']) == 0
+        assert len(result['todos_done']) == 0
         assert result['members'].count() == 1  # host만 존재
 
 
