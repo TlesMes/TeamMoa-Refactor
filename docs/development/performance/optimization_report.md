@@ -53,7 +53,7 @@ members_with_stats = TeamUser.objects.filter(team=team).annotate(
         queryset=Todo.objects.filter(team=team).order_by('created_at'))
 )
 
-# 쿼리 수: 16개 → 2개 (800% 성능 향상!)
+# 쿼리 수: 16개 → 4개 (75% 감소!)
 ```
 
 **핵심 기법:**
@@ -87,7 +87,7 @@ return Post.objects.filter(isTeams=team.id).select_related('writer')
 
 | 뷰 | AS-IS 쿼리 수 | TO-BE 쿼리 수 | 개선율 | 비고 |
 |---|------------|-----------|--------|------|
-| **TeamMembersPageView** | 16개 (N=5) | 2개 | **800%** | 가장 큰 개선 |
+| **TeamMembersPageView** | 16개 (N=5) | 4개 | **75%** | 가장 큰 개선 |
 | **MindmapDetailView** | 6개 | 2개 | **200%** | prefetch 적용 |
 | **PostListView** | 4개 | 2개 | **100%** | select_related |
 
@@ -155,8 +155,8 @@ return Post.objects.filter(isTeams=team.id).select_related('writer')
 ## 📈 **성과 요약**
 
 ### **주요 성취**
-✅ **800% 성능 향상** (가장 큰 병목점)  
-✅ **N+1 쿼리 완전 해결** (16개 → 2개)  
+✅ **75% 쿼리 감소** (가장 큰 병목점)
+✅ **N+1 쿼리 완전 해결** (16개 → 4개)  
 ✅ **확장 가능한 아키텍처** (O(N×M) → O(N))  
 ✅ **코드 품질 개선** (DRY 원칙 적용)  
 ✅ **Django 모범 사례 준수**  
@@ -238,6 +238,6 @@ context['members'] = TeamUser.objects.filter(team=team).select_related('user')
 
 ---
 
-**📍 작성일**: 2025년 8월 28일  
-**🔧 기술 스택**: Django 4.x, Python 3.x, SQLite/PostgreSQL  
-**⚡ 성과**: 평균 400% 성능 향상, N+1 쿼리 완전 해결
+**📍 작성일**: 2025년 8월 28일
+**🔧 기술 스택**: Django 4.x, Python 3.x, MySQL 8.0
+**⚡ 성과**: 쿼리 수 75% 감소 (16개→4개), N+1 쿼리 완전 해결
