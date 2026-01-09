@@ -680,6 +680,176 @@ def get_node_with_comments(self, node_id, node=None):
 
 ---
 
+### 10. ✅ 템플릿 태그로 인한 N+1 쿼리 문제
+
+**중요도**: High | **영향 범위**: 공유 게시판, 노드 댓글 목록 성능 저하 | **해결 완료**: 2026.01.10
+
+#### 문제 상황
+
+Django Debug Toolbar 분석 결과, 공유 게시판 목록과 노드 댓글 목록에서 항목 개수에 비례하여 쿼리가 증가하는 N+1 문제 발견.
+
+**공유 게시판 목록**:
+- 게시물 0개: 8 쿼리
+- 게시물 1개: 10 쿼리
+- 게시물 2개: 11 쿼리
+- 게시물 3개: 12 쿼리
+- **증가율**: 게시물 +1개당 쿼리 +1~2개
+
+**노드 댓글 목록**:
+- 댓글 개수에 비례하여 쿼리 증가
+
+#### 원인 분석
+
+**1. 템플릿 태그에서 추가 쿼리 발생**
+
+```django
+<!-- shares/templates/shares/post_list.html -->
+{% for post in post_list %}
+  <span class="post-author">
+    {% user_display_name post.teamuser.user team %}  <!-- ← N+1 발생 -->
+  </span>
+{% endfor %}
+```
+
+**2. `user_display_name` 템플릿 태그 내부 로직**
+
+```python
+# accounts/templatetags/user_filters.py
+@register.simple_tag
+def user_display_name(user, team):
+    return User.get_display_name_in_team(user, team)
+
+# accounts/models.py
+@classmethod
+def get_display_name_in_team(cls, user_or_none, team):
+    # 3. 팀 탈퇴 체크 - 게시물/댓글마다 실행됨! ⚠️
+    if not TeamUser.objects.filter(team=team, user=user_or_none).exists():
+        return "탈퇴한 사용자"
+
+    return user_or_none.nickname
+```
+
+**3. N+1 쿼리 발생 흐름**
+
+```
+게시물 목록 조회 (1개 쿼리)
+    ↓
+템플릿 렌더링 시작
+    ↓
+게시물 1: {% user_display_name %} → TeamUser.objects.filter().exists() (쿼리 1)
+게시물 2: {% user_display_name %} → TeamUser.objects.filter().exists() (쿼리 2)
+게시물 3: {% user_display_name %} → TeamUser.objects.filter().exists() (쿼리 3)
+...
+```
+
+**4. 서비스 레이어는 이미 최적화되어 있었음**
+
+```python
+# shares/services.py
+posts_queryset = Post.objects.filter(team=team).select_related('teamuser__user')
+```
+
+`select_related('teamuser__user')`로 Post → TeamUser → User를 JOIN으로 가져왔지만, 템플릿 태그에서 추가 검증 쿼리가 발생함.
+
+#### 해결 과정
+
+**해결 방법**: 템플릿에서 직접 `nickname` 접근하여 템플릿 태그 우회
+
+**1. 공유 게시판 목록 템플릿 수정** ([`shares/templates/shares/post_list.html`](../../shares/templates/shares/post_list.html))
+
+```django
+<!-- Before: N+1 발생 -->
+<span class="post-author">
+  {% if post.teamuser %}
+    {% user_display_name post.teamuser.user team %}
+  {% else %}
+    탈퇴한 사용자
+  {% endif %}
+</span>
+
+<!-- After: 직접 접근 (추가 쿼리 없음) -->
+<span class="post-author">
+  {% if post.teamuser and post.teamuser.user %}
+    {{ post.teamuser.user.nickname }}
+  {% else %}
+    탈퇴한 사용자
+  {% endif %}
+</span>
+```
+
+**2. 노드 댓글 템플릿 수정** ([`mindmaps/templates/mindmaps/node_detail_page.html`](../../mindmaps/templates/mindmaps/node_detail_page.html))
+
+```django
+<!-- Before: N+1 발생 -->
+<span class="node-detail-comment-author">
+  {% user_display_name comment.user team %}
+</span>
+
+<!-- After: 직접 접근 (추가 쿼리 없음) -->
+<span class="node-detail-comment-author">
+  {% if comment.user %}
+    {{ comment.user.nickname }}
+  {% else %}
+    탈퇴한 사용자
+  {% endif %}
+</span>
+```
+
+**3. 마인드맵 Line N+1 해결** ([`mindmaps/services.py:109`](../../mindmaps/services.py#L109))
+
+```python
+# Before: from_node, to_node 접근 시 개별 쿼리
+lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).order_by('id')
+
+# After: select_related로 사전 로딩
+lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('from_node', 'to_node').order_by('id')
+```
+
+#### 최적화 결과
+
+**공유 게시판 목록**:
+- **Before**: 게시물 3개 시 12 쿼리
+- **After**: 게시물 3개 시 8 쿼리 (33% 감소)
+- 게시물 증가에도 쿼리 수 일정
+
+**노드 댓글 목록**:
+- **Before**: 댓글 N개 시 8+N 쿼리
+- **After**: 댓글 N개 시 8 쿼리 (N개 쿼리 제거)
+
+**마인드맵 상세 (Line)**:
+- **Before**: Line N개 시 9+2N 쿼리
+- **After**: Line N개 시 9 쿼리 (2N개 쿼리 제거)
+
+#### 재발 방지
+
+**1. 템플릿 태그 사용 가이드라인**
+- 템플릿 태그 내부에서 DB 쿼리 실행 금지 (특히 루프 내부)
+- 이미 로드된 관계는 직접 접근 (예: `user.nickname` vs 템플릿 태그)
+- 검증 로직은 서비스 레이어에서 처리
+
+**2. Django Debug Toolbar 필수 확인 항목**
+- "Similar queries" 섹션: 반복 패턴 확인
+- "Duplicates" 섹션: 동일 쿼리 확인
+- 목록 페이지는 항목 수에 관계없이 쿼리 수 일정하게 유지
+
+**3. ORM 최적화 체크리스트**
+- ✅ 서비스 레이어: `select_related()`, `prefetch_related()` 적용
+- ✅ 템플릿: 추가 쿼리 발생 여부 확인
+- ✅ 템플릿 태그/필터: DB 쿼리 실행 금지
+
+#### 교훈
+
+- **"서비스 최적화 ≠ 전체 최적화"**: 서비스 레이어에서 JOIN을 적용해도 템플릿 레이어에서 추가 쿼리가 발생할 수 있음
+- **템플릿 태그의 숨은 비용**: 편의성을 위한 템플릿 태그가 성능 병목이 될 수 있음
+- **계층 간 협업 중요성**: ORM 최적화는 서비스 레이어부터 템플릿까지 전 계층에서 고려해야 함
+
+**코드 위치**:
+- [`shares/templates/shares/post_list.html:84-90`](../../shares/templates/shares/post_list.html#L84-L90)
+- [`mindmaps/templates/mindmaps/node_detail_page.html:56-62`](../../mindmaps/templates/mindmaps/node_detail_page.html#L56-L62)
+- [`mindmaps/services.py:109`](../../mindmaps/services.py#L109)
+
+---
+
 ## 회고
 
 ### Critical 이슈 해결 성과
@@ -711,14 +881,14 @@ def get_node_with_comments(self, node_id, node=None):
 
 **중요도별 분포**
 1. 🔴 **Critical** (5건): 서비스 중단, 사용자 경험 직접 영향, 성능 최적화 도구 부재
-2. 🟡 **High** (4건): 배포 안정성, 무중단 배포, 핵심 기능 장애
+2. 🟡 **High** (5건): 배포 안정성, 무중단 배포, 핵심 기능 장애, N+1 쿼리
 3. 🟢 **Medium** (1건): 데이터 정합성
 
 **기술 영역별 분포**
 1. **인프라 계층** (4건): HTTPS, Health Check, Security Group, ALB Connection Draining
 2. **데이터 계층** (3건): username/email, 트랜잭션, N+1 쿼리
 3. **실시간 통신** (2건): WebSocket 연결, Nginx 프록시
-4. **성능 최적화** (1건): Django Debug Toolbar 설정
+4. **성능 최적화** (2건): Django Debug Toolbar 설정, 템플릿 태그 N+1 쿼리
 
 ### 재발 방지 전략
 
@@ -749,6 +919,6 @@ def get_node_with_comments(self, node_id, node=None):
 
 ---
 
-**작성일**: 2025년 1월 9일
-**버전**: 2.4
-**총 트러블슈팅 건수**: 10건
+**작성일**: 2026년 1월 10일
+**버전**: 2.5
+**총 트러블슈팅 건수**: 11건 (Critical 5건, High 5건, Medium 1건)

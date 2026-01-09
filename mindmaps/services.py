@@ -105,7 +105,8 @@ class MindmapService:
 
         # mindmap_id를 직접 사용하여 불필요한 JOIN 방지
         nodes = Node.objects.filter(mindmap_id=mindmap_id).order_by('id')
-        lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).order_by('id')
+        # N+1 방지: from_node, to_node를 사전 로딩
+        lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('from_node', 'to_node').order_by('id')
 
         return {
             'mindmap': mindmap,

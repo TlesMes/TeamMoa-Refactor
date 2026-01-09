@@ -62,8 +62,8 @@
       </div>
       <div class="post-meta">
         <span class="post-author">
-          {% if post.teamuser %}
-            {% user_display_name post.teamuser.user team %}
+          {% if post.teamuser and post.teamuser.user %}
+            {{ post.teamuser.user.nickname }}
           {% else %}
             탈퇴한 사용자
           {% endif %}
@@ -82,8 +82,8 @@
       </div>
       <div class="post-meta">
         <span class="post-author">
-          {% if post.teamuser %}
-            {% user_display_name post.teamuser.user team %}
+          {% if post.teamuser and post.teamuser.user %}
+            {{ post.teamuser.user.nickname }}
           {% else %}
             탈퇴한 사용자
           {% endif %}
