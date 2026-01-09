@@ -509,7 +509,7 @@ aws ec2 revoke-security-group-ingress \
 
 **개요:**
 - 테스트 실행 후 테스트 통계를 자동으로 문서에 반영
-- `README.md`, `CLAUDE.md`, `docs/portfolio/testing.md` 등 자동 업데이트
+- `README.md`, `CLAUDE.md`, `docs/technical/testing.md` 등 자동 업데이트
 - `[skip ci]` 태그로 무한 루프 방지
 
 ### 🔄 동작 방식

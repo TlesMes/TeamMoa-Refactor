@@ -60,7 +60,7 @@ Django 기반 팀 프로젝트 관리 시스템
 - ✅ **README**: 문서 가이드
 
 **✅ 문서 구조 대폭 개선** (2025.12.08):
-- ✅ **6단계 카테고리 체계**: portfolio | architecture (design|refactoring|migration) | guides | development | troubleshooting
+- ✅ **6단계 카테고리 체계**: technical | architecture (design|refactoring|migration) | guides | development | troubleshooting
 - ✅ **docs/README.md 간소화**: 314줄 → 113줄 (64% 감소)
 - ✅ **44개 문서 재분류**: 정적 구조 vs 시간의 흐름 분리
 - ✅ **가독성 대폭 개선**: 수평선 구분, 인용구 설명, 들여쓰기 단순화

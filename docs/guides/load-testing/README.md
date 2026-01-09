@@ -47,7 +47,7 @@ locust -f locustfile.py --host https://teammoa.shop
 ## 📚 관련 문서
 
 - **[프로젝트 README](../../../README.md)** - 프로덕션 성능 검증 섹션
-- **[Infrastructure 문서](../../portfolio/infrastructure.md)** - 부하 테스트 및 성능 검증 섹션
+- **[Infrastructure 문서](../../technical/infrastructure.md)** - 부하 테스트 및 성능 검증 섹션
 - **[ALB 구축 가이드](../alb_deployment_guide.md)** - AWS ALB 설정 방법
 
 ---
