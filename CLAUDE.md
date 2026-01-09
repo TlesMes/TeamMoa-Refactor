@@ -121,7 +121,7 @@ Internet → ALB (HTTPS:443)
 **📚 참고 문서**:
 - [부하 테스트 리포트](./docs/guides/load-testing/load-test-report.md)
 - [ALB 구축 가이드](./docs/guides/alb_deployment_guide.md)
-- [infrastructure.md - ALB 섹션](./docs/portfolio/infrastructure.md#aws-application-load-balancer-alb)
+- [infrastructure.md - ALB 섹션](./docs/technical/infrastructure.md#aws-application-load-balancer-alb)
 
 ---
 

@@ -571,7 +571,7 @@ test_stats.json  # 자동 생성 파일, git에 포함하지 않음
 - **스크립트**: `scripts/update_test_docs.py`
 - **워크플로우**: `.github/workflows/ci-cd.yml` (106-127번 라인)
 - **수동 실행**: `.github/workflows/update-test-docs.yml`
-- **마커 포함 문서**: `README.md`, `CLAUDE.md`, `docs/portfolio/testing.md`, `docs/README.md`
+- **마커 포함 문서**: `README.md`, `CLAUDE.md`, `docs/technical/testing.md`, `docs/README.md`
 
 ---
 

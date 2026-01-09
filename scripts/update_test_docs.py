@@ -319,7 +319,7 @@ def update_all_docs(stats):
         docs_root / 'README.md',
         docs_root / 'guides' / 'testing_guide.md',
         docs_root / 'guides' / 'cicd_alb_deployment.md',
-        docs_root / 'portfolio' / 'testing.md',
+        docs_root / 'technical' / 'testing.md',
     ]
 
     updated_count = 0

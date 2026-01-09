@@ -16,6 +16,24 @@
 
 ---
 
+## 📑 목차
+
+- [프로젝트 소개](#-프로젝트-소개)
+- [주요 기능](#-주요-기능)
+  - [팀 대시보드](#1️⃣-팀-대시보드)
+  - [직관적인 TODO 관리](#2️⃣-직관적인-todo-관리)
+  - [실시간 마인드맵 협업](#3️⃣-실시간-마인드맵-협업)
+  - [마일스톤 타임라인](#4️⃣-마일스톤-타임라인)
+  - [팀 스케줄 & 가용성 관리](#5️⃣-팀-스케줄--가용성-관리)
+- [기술 스택 & 아키텍처](#️-기술-스택--아키텍처)
+- [프로덕션 성능 검증](#-프로덕션-성능-검증)
+- [기술 문서](#-기술-문서)
+- [빠른 시작](#-빠른-시작)
+- [프로젝트 구조](#-프로젝트-구조)
+- [라이선스](#-라이선스)
+
+---
+
 ## 💡 프로젝트 소개
 
 **TeamMoa**는 팀 협업에 필요한 모든 도구를 하나로 모은 올인원 플랫폼입니다.
@@ -188,12 +206,12 @@ def view_teams(self):
 
 ### 핵심 성과
 
-| 지표 | 목표 (SLA) | 측정값 | 달성 여부 |
-|------|----------|--------|----------|
-| **95%ile 응답 시간** | ≤ 500ms | **70ms** | ✅ **86% 향상** |
-| **평균 응답 시간** | - | **52ms** | ✅ **매우 안정적** |
-| **에러율** | ≤ 1% | **0.32%** | ✅ **68% 향상** |
-| **최대 RPS** | ≥ 10 | **40.34** | ✅ **303% 초과 달성** |
+| 지표 | 측정값 | 평가 |
+|------|--------|------|
+| **95%ile 응답 시간** | **70ms** | 우수 (일반적 목표: 200-500ms) |
+| **평균 응답 시간** | **52ms** | 매우 안정적 |
+| **에러율** | **0.32%** | 우수 (일반적 목표: 1% 이하) |
+| **최대 RPS** | **40.34** | t3.micro 2대 기준 우수 |
 
 ### 테스트별 상세 결과
 
@@ -216,22 +234,22 @@ def view_teams(self):
 
 ---
 
-## 📚 포트폴리오 문서
+## 📚 기술 문서
 
-> **기술 중심, 검증 가능한 수치, 문제 해결 과정 중심 작성**
+> **아키텍처, 설계 결정, 문제 해결 과정 상세 기록**
 
 ### 핵심 문서
-- **[프로젝트 개요](./docs/portfolio/overview.md)** - 배경, 핵심 기능, 성과, 학습 내용
-- **[아키텍처 설계](./docs/portfolio/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
-- **[인프라 및 배포](./docs/portfolio/infrastructure.md)** - Docker, CI/CD, AWS EC2
+- **[프로젝트 개요](./docs/technical/overview.md)** - 배경, 핵심 기능, 성과, 학습 내용
+- **[아키텍처 설계](./docs/technical/architecture.md)** - 서비스 레이어 패턴, 하이브리드 SSR+API
+- **[인프라 및 배포](./docs/technical/infrastructure.md)** - Docker, CI/CD, AWS EC2
 <!-- AUTO:TEST_COUNT -->
-- **[테스트 전략](./docs/portfolio/testing.md)** - 264개 테스트, fixture 패턴
-- **[트러블슈팅](./docs/portfolio/troubleshooting.md)** - 8건 문제 해결 사례
+- **[테스트 전략](./docs/technical/testing.md)** - 264개 테스트, fixture 패턴
+- **[트러블슈팅](./docs/technical/troubleshooting.md)** - 8건 문제 해결 사례
 
 ### 기능 상세
-- **[실시간 마인드맵](./docs/portfolio/features/realtime-mindmap.md)** - WebSocket + Canvas API
-- **[OAuth 2.0 인증](./docs/portfolio/features/oauth-authentication.md)** - django-allauth, 계정 병합
-- **[성능 최적화](./docs/portfolio/features/performance-optimization.md)** - N+1 쿼리 해결, 81% 감소
+- **[실시간 마인드맵](./docs/technical/features/realtime-mindmap.md)** - WebSocket + Canvas API
+- **[OAuth 2.0 인증](./docs/technical/features/oauth-authentication.md)** - django-allauth, 계정 병합
+- **[성능 최적화](./docs/technical/features/performance-optimization.md)** - N+1 쿼리 해결, 81% 감소
 
 ---
 
@@ -286,7 +304,7 @@ TeamMoa/
 ├── static/             # 정적 파일 (CSS 모듈, JavaScript)
 ├── templates/          # 템플릿 (base_team, base_user, base_public)
 ├── docs/               # 프로젝트 문서 (96p, 150+ 코드 예시)
-│   ├── portfolio/      # 포트폴리오 문서 (아키텍처, 인증, 실시간, CI/CD)
+│   ├── technical/      # 기술 문서 (아키텍처, 인증, 실시간, CI/CD)
 │   ├── architecture/   # 아키텍처 설계 & 리팩토링 히스토리
 │   │   ├── design/     # 정적 구조 (API 매핑, 가이드라인)
 │   │   ├── refactoring/# 시간의 흐름 (CBV, 서비스, API, Mindmaps)
