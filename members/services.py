@@ -374,19 +374,15 @@ class TodoService:
                 queryset=Todo.objects.filter(team=team).select_related('milestone').order_by('order', 'created_at'))
         )
 
-        # TODO 보드: 미할당 & 미완료
-        todos_unassigned = Todo.objects.filter(
+        # 미할당 TODO를 한 번에 조회 후 Python에서 분리 (쿼리 1개 절약)
+        todos_unassigned_all = list(Todo.objects.filter(
             team=team,
-            assignee__isnull=True,
-            is_completed=False
-        ).select_related('milestone').order_by('order', 'created_at')
+            assignee__isnull=True
+        ).select_related('milestone').order_by('order', 'created_at'))
 
-        # DONE 보드: 미할당 & 완료
-        todos_done = Todo.objects.filter(
-            team=team,
-            assignee__isnull=True,
-            is_completed=True
-        ).select_related('milestone').order_by('order', 'created_at')
+        # Python에서 완료 여부로 분리 (추가 쿼리 없음)
+        todos_unassigned = [todo for todo in todos_unassigned_all if not todo.is_completed]
+        todos_done = [todo for todo in todos_unassigned_all if todo.is_completed]
 
         # 🎯 최적화된 데이터 구조 - 이미 prefetch된 데이터 활용
         members_data = []

@@ -20,17 +20,18 @@ class MindmapListPageView(TeamMemberRequiredMixin, ListView):
     model = Mindmap
     template_name = 'mindmaps/mindmap_list_page.html'
     context_object_name = 'mindmaps'
-    
+
     def __init__(self):
         super().__init__()
         self.mindmap_service = MindmapService()
-    
+
     def get_queryset(self):
         return self.mindmap_service.get_team_mindmaps(self.kwargs['pk'])
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        # Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=self.kwargs['pk'])
         context['team'] = team
         return context
 
@@ -40,18 +41,24 @@ class MindmapDetailPageView(TeamMemberRequiredMixin, DetailView):
     template_name = 'mindmaps/mindmap_detail_page.html'
     context_object_name = 'mindmap'
     pk_url_kwarg = 'mindmap_id'
-    
+
     def __init__(self):
         super().__init__()
         self.mindmap_service = MindmapService()
-    
+
     def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정 (중복 쿼리 방지)
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
         context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        
+        # Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=self.kwargs['pk'])
+
         # 서비스 레이어를 통한 최적화된 조회
-        mindmap_data = self.mindmap_service.get_mindmap_with_nodes(self.kwargs['mindmap_id'])
-        
+        # mindmap은 이미 조회했으므로 self.object 전달
+        mindmap_data = self.mindmap_service.get_mindmap_with_nodes(self.kwargs['mindmap_id'], mindmap=self.object)
+
         context.update({
             'team': team,
             'nodes': mindmap_data['nodes'],
@@ -135,12 +142,18 @@ class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
         self.mindmap_service = MindmapService()
     
     def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정 (중복 쿼리 방지)
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
         context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=self.kwargs['pk'])
-        
+        # Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=self.kwargs['pk'])
+
         # 서비스 레이어를 통한 최적화된 조회
-        node_data = self.mindmap_service.get_node_with_comments(self.kwargs['node_id'])
-        
+        # node는 이미 조회했으므로 self.object 전달
+        node_data = self.mindmap_service.get_node_with_comments(self.kwargs['node_id'], node=self.object)
+
         context.update({
             'team': team,
             'comments': node_data['comments']

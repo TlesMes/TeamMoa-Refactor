@@ -16,14 +16,15 @@ TEAM_MEMBERS_PAGE = 'members:team_members_page'
 
 class TeamMembersPageView(TeamMemberRequiredMixin, TemplateView):
     template_name = 'members/team_members_page.html'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.todo_service = TodoService()
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        team = get_object_or_404(Team, pk=kwargs['pk'])
+        # Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=kwargs['pk'])
         
         # 서비스에서 최적화된 데이터 조회
         todo_data = self.todo_service.get_team_todos_with_stats(team)

@@ -84,13 +84,14 @@ class MindmapService:
         
         return mindmap_title
     
-    def get_mindmap_with_nodes(self, mindmap_id):
+    def get_mindmap_with_nodes(self, mindmap_id, mindmap=None):
         """
         마인드맵과 관련된 모든 노드, 연결선을 최적화된 쿼리로 조회합니다.
-        
+
         Args:
             mindmap_id (int): 마인드맵 ID
-            
+            mindmap (Mindmap, optional): 이미 조회된 Mindmap 객체 (중복 조회 방지)
+
         Returns:
             dict: {
                 'mindmap': Mindmap 객체,
@@ -98,12 +99,14 @@ class MindmapService:
                 'lines': NodeConnection 쿼리셋
             }
         """
-        mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
-        
-        # 최적화된 쿼리: 관련 객체들을 한번에 조회
-        nodes = Node.objects.filter(mindmap=mindmap).select_related('mindmap').order_by('id')
-        lines = NodeConnection.objects.filter(mindmap=mindmap).select_related('mindmap').order_by('id')
-        
+        # mindmap이 전달되지 않았을 때만 조회
+        if mindmap is None:
+            mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
+
+        # mindmap_id를 직접 사용하여 불필요한 JOIN 방지
+        nodes = Node.objects.filter(mindmap_id=mindmap_id).order_by('id')
+        lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).order_by('id')
+
         return {
             'mindmap': mindmap,
             'nodes': nodes,
@@ -113,16 +116,15 @@ class MindmapService:
     def get_team_mindmaps(self, team_id):
         """
         팀의 모든 마인드맵을 조회합니다.
-        
+
         Args:
             team_id (int): 팀 ID
-            
+
         Returns:
             QuerySet: Mindmap 쿼리셋
         """
-        team = get_object_or_404(Team, pk=team_id)
-        
-        return Mindmap.objects.filter(team=team).select_related('team').order_by('-id')
+        # team_id만 사용하여 불필요한 Team 조회 방지
+        return Mindmap.objects.filter(team_id=team_id).select_related('team').order_by('-id')
     
     # ================================
     # 노드 관리 메서드
@@ -334,24 +336,28 @@ class MindmapService:
             user=user
         )
     
-    def get_node_with_comments(self, node_id):
+    def get_node_with_comments(self, node_id, node=None):
         """
         노드와 관련된 모든 댓글을 조회합니다.
-        
+
         Args:
             node_id (int): 노드 ID
-            
+            node (Node, optional): 이미 조회된 Node 객체 (중복 조회 방지)
+
         Returns:
             dict: {
                 'node': Node 객체,
                 'comments': Comment 쿼리셋
             }
         """
-        node = get_object_or_404(Node, pk=node_id)
-        
+        # node가 전달되지 않았을 때만 조회
+        if node is None:
+            node = get_object_or_404(Node, pk=node_id)
+
         # 최적화된 쿼리: 댓글과 관련 사용자 정보 사전 로딩
-        comments = Comment.objects.filter(node=node).select_related('node', 'user').order_by('-id')
-        
+        # node_id를 직접 사용하여 불필요한 JOIN 방지
+        comments = Comment.objects.filter(node_id=node_id).select_related('user').order_by('-id')
+
         return {
             'node': node,
             'comments': comments

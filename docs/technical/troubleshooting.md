@@ -1,6 +1,6 @@
 # 트러블슈팅
 
-> **9건의 핵심 문제 해결 과정**
+> **10건의 핵심 문제 해결 과정**
 > 문제 정의 → 원인 분석 → 해결 과정 → 재발 방지
 
 ---
@@ -10,6 +10,7 @@
 - [Django 관련](#django-관련)
 - [WebSocket 관련](#websocket-관련)
 - [데이터베이스 관련](#데이터베이스-관련)
+- [성능 최적화](#성능-최적화)
 
 ---
 
@@ -474,11 +475,216 @@ for team in teams:
 
 ---
 
+## 성능 최적화
+
+### 9. ✅ 중복 쿼리 문제 (Mixin-View 계층 간 이중 조회)
+
+**중요도**: High | **영향 범위**: 팀 관련 모든 페이지 성능 저하 | **해결 완료**: 2026.01.09
+
+#### 문제 상황
+
+Django Debug Toolbar를 사용해 쿼리를 분석한 결과, 팀 메인 페이지에서 15개 쿼리 중 8개(53%)가 중복 실행되는 문제 발견. 동일한 `Team`, `User` 객체를 Mixin, View, Template 각 계층에서 반복적으로 조회하여 불필요한 DB 부하 발생.
+
+#### 원인 분석
+
+**1. Mixin과 View의 이중 조회**
+
+```python
+# common/mixins.py
+class TeamMemberRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        team = get_object_or_404(Team, pk=kwargs['pk'])  # ← 1번째 조회
+        # 권한 검증 후 버림
+        return super().dispatch(request, *args, **kwargs)
+
+# teams/views.py
+class TeamMainPageView(DetailView):
+    model = Team  # ← DetailView가 자동으로 2번째 조회
+
+    def get_context_data(self, **kwargs):
+        team = self.get_object()  # ← 3번째 접근
+```
+
+**2. Django Debug Toolbar 분석 결과**
+
+| 페이지 | 총 쿼리 | 중복 쿼리 | 중복율 | 주요 중복 대상 |
+|-------|---------|----------|--------|---------------|
+| 팀 메인 | 15개 | 8개 | 53% | `accounts_user` 4번, `teams_team` 4번 |
+| 멤버 보드 | 15개 | 8개 | 53% | `accounts_user` 3번, `teams_team` 3번, `members_todo` 4번 |
+| 마인드맵 목록 | 10개 | 5개 | 50% | `accounts_user` 3번, `teams_team` 4번 |
+| 마인드맵 상세 | 15개 | 8개 | 53% | `teams_team` 3번, `mindmaps_mindmap` 3번, `mindmaps_node` 3번 |
+
+**3. 중복 발생 흐름**
+
+```
+HTTP Request
+    ↓
+1. TeamMemberRequiredMixin.dispatch()
+   → SELECT * FROM teams_team WHERE id=1  # 1번째
+   → SELECT * FROM accounts_user WHERE id=2  # user 조회
+    ↓
+2. DetailView.get_object()
+   → SELECT * FROM teams_team WHERE id=1  # 2번째 (중복!)
+    ↓
+3. get_context_data()
+   → team.host → SELECT * FROM accounts_user  # 3번째 (중복!)
+    ↓
+4. Template Rendering
+   → {{ team.members.count }} → SELECT COUNT(*)  # 4번째 (중복!)
+```
+
+#### 해결 과정
+
+**1. Mixin 캐싱 및 JOIN 최적화** ([`common/mixins.py`](../../common/mixins.py))
+
+```python
+class TeamMemberRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        # Team 객체를 select_related/prefetch_related로 최적화하여 조회
+        team = get_object_or_404(
+            Team.objects.select_related('host').prefetch_related('members'),
+            pk=kwargs['pk']
+        )
+        if request.user not in team.members.all():
+            messages.error(request, "팀원이 아닙니다.")
+            return redirect('teams:main_page')
+
+        # View에서 재사용할 수 있도록 캐시에 저장
+        self._team_cache = team
+        return super().dispatch(request, *args, **kwargs)
+```
+
+**2. View에서 캐시 재사용** ([`teams/views.py`](../../teams/views.py))
+
+```python
+class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
+    def get_object(self, queryset=None):
+        """Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)"""
+        if hasattr(self, '_team_cache'):
+            return self._team_cache
+        team = super().get_object(queryset)
+        self._team_cache = team
+        return team
+
+    def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
+        context = super().get_context_data(**kwargs)
+        team = self.object  # 캐시된 객체 사용
+
+        # TeamUser 조회 시 user 정보를 JOIN으로 가져옴 (N+1 방지)
+        context['members'] = TeamUser.objects.filter(team=team).select_related('user')
+        # ... (나머지 로직)
+```
+
+**3. COUNT 쿼리 제거** ([`members/services.py`](../../members/services.py))
+
+```python
+# 미할당 TODO를 한 번에 조회 후 Python에서 분리 (쿼리 1개 절약)
+todos_unassigned_all = list(Todo.objects.filter(
+    team=team,
+    assignee__isnull=True
+).select_related('milestone').order_by('order', 'created_at'))
+
+# Python에서 완료 여부로 분리 (추가 쿼리 없음)
+todos_unassigned = [todo for todo in todos_unassigned_all if not todo.is_completed]
+todos_done = [todo for todo in todos_unassigned_all if todo.is_completed]
+```
+
+**4. 마인드맵 상세 페이지 최적화** ([`mindmaps/views.py`](../../mindmaps/views.py), [`mindmaps/services.py`](../../mindmaps/services.py))
+
+```python
+# mindmaps/views.py
+class MindmapDetailPageView(TeamMemberRequiredMixin, DetailView):
+    def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정 (중복 쿼리 방지)
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
+        context = super().get_context_data(**kwargs)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=self.kwargs['pk'])
+
+        # mindmap은 이미 조회했으므로 self.object 전달
+        mindmap_data = self.mindmap_service.get_mindmap_with_nodes(
+            self.kwargs['mindmap_id'], mindmap=self.object
+        )
+
+# mindmaps/services.py
+def get_mindmap_with_nodes(self, mindmap_id, mindmap=None):
+    # mindmap이 전달되지 않았을 때만 조회
+    if mindmap is None:
+        mindmap = get_object_or_404(Mindmap, pk=mindmap_id)
+
+    # mindmap_id를 직접 사용하여 불필요한 JOIN 방지
+    nodes = Node.objects.filter(mindmap_id=mindmap_id).order_by('id')
+    lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).order_by('id')
+```
+
+**5. 노드 상세 페이지 최적화** ([`mindmaps/views.py`](../../mindmaps/views.py), [`mindmaps/services.py`](../../mindmaps/services.py))
+
+```python
+# mindmaps/views.py
+class NodeDetailPageView(TeamMemberRequiredMixin, DetailView):
+    def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
+        context = super().get_context_data(**kwargs)
+        team = getattr(self, '_team_cache', None) or get_object_or_404(Team, pk=self.kwargs['pk'])
+
+        # node는 이미 조회했으므로 self.object 전달
+        node_data = self.mindmap_service.get_node_with_comments(
+            self.kwargs['node_id'], node=self.object
+        )
+
+# mindmaps/services.py
+def get_node_with_comments(self, node_id, node=None):
+    # node가 전달되지 않았을 때만 조회
+    if node is None:
+        node = get_object_or_404(Node, pk=node_id)
+
+    # node_id를 직접 사용하여 불필요한 JOIN 방지
+    comments = Comment.objects.filter(node_id=node_id).select_related('user').order_by('-id')
+```
+
+#### 최적화 결과
+
+**측정 환경**: Django Debug Toolbar (로컬 Docker 환경, 2026.01.09)
+
+| 페이지 | 쿼리 수 | 응답 시간 | 개선율 |
+|--------|---------|----------|--------|
+| **팀 메인** | 13개 → 8개 | 3.7 ms → 2.37 ms | 38% 감소, 39% 단축 ✅ |
+| **멤버 보드** | 15개 → 10개 | 4.8 ms → 3.22 ms | 33% 감소, 33% 단축 ✅ |
+| **마인드맵 목록** | 10개 → 7개 | 3.23 ms → 1.98 ms | 30% 감소, 39% 단축 ✅ |
+| **마인드맵 상세** | 11개 → 9개 | 3.41 ms → 2.39 ms | 18% 감소, 30% 단축 ✅ | 
+
+**핵심 개선 사항**:
+- ✅ Mixin-View 계층 간 Team 객체 캐싱으로 중복 조회 완전 제거
+- ✅ `select_related('host')` + `prefetch_related('members')` JOIN 최적화
+- ✅ `list()` 사용으로 템플릿 COUNT 쿼리 제거
+- ✅ Python 필터링으로 조건별 SELECT 쿼리 통합
+- ✅ DetailView `self.object` 사전 설정으로 서비스 레이어 중복 조회 방지
+- ✅ FK 필드 ID 직접 사용으로 불필요한 JOIN 제거 (예: `mindmap_id=X` vs `mindmap=obj`)
+
+**코드 위치**:
+- [`common/mixins.py:6-26`](../../common/mixins.py#L6-L26) - TeamMemberRequiredMixin
+- [`teams/views.py:215-256`](../../teams/views.py#L215-L256) - TeamMainPageView
+- [`members/services.py:377-385`](../../members/services.py#L377-L385) - get_team_todos_with_stats
+- [`mindmaps/views.py:39-67`](../../mindmaps/views.py#L39-L67) - MindmapDetailPageView
+- [`mindmaps/views.py:134-161`](../../mindmaps/views.py#L134-L161) - NodeDetailPageView
+- [`mindmaps/services.py:87-114`](../../mindmaps/services.py#L87-L114) - get_mindmap_with_nodes
+- [`mindmaps/services.py:339-364`](../../mindmaps/services.py#L339-L364) - get_node_with_comments
+
+---
+
 ## 회고
 
 ### Critical 이슈 해결 성과
 
-**🔴 4건의 Critical 이슈 해결로 서비스 안정화**
+**🔴 5건의 Critical 이슈 해결로 서비스 안정화**
 
 1. **HTTPS 리디렉션 루프** (#1)
    - 서비스 중단 → 즉시 복구
@@ -497,10 +703,14 @@ for team in teams:
    - 11번 쿼리 → 1번 쿼리로 최적화 (10배 쿼리 감소)
    - `select_related()`로 ORM 최적화 학습
 
+5. **Django Debug Toolbar 설정** (#9)
+   - 쿼리 분석 도구 부재 → Docker 환경에서도 정상 작동
+   - 중복 쿼리 53% 발견 (15개 → 7-8개로 최적화 가능)
+
 ### 문제 해결 패턴 분석
 
 **중요도별 분포**
-1. 🔴 **Critical** (4건): 서비스 중단, 사용자 경험 직접 영향
+1. 🔴 **Critical** (5건): 서비스 중단, 사용자 경험 직접 영향, 성능 최적화 도구 부재
 2. 🟡 **High** (4건): 배포 안정성, 무중단 배포, 핵심 기능 장애
 3. 🟢 **Medium** (1건): 데이터 정합성
 
@@ -508,6 +718,7 @@ for team in teams:
 1. **인프라 계층** (4건): HTTPS, Health Check, Security Group, ALB Connection Draining
 2. **데이터 계층** (3건): username/email, 트랜잭션, N+1 쿼리
 3. **실시간 통신** (2건): WebSocket 연결, Nginx 프록시
+4. **성능 최적화** (1건): Django Debug Toolbar 설정
 
 ### 재발 방지 전략
 
@@ -524,7 +735,7 @@ for team in teams:
 - Locust 부하 테스트로 배포 중 에러율 측정
 
 **문서화**
-- 트러블슈팅 9건 문서화로 지식 체계화
+- 트러블슈팅 10건 문서화로 지식 체계화
 - 코드 위치 링크로 추적성 확보
 
 ### 기술적 성장
@@ -538,6 +749,6 @@ for team in teams:
 
 ---
 
-**작성일**: 2025년 1월 8일
-**버전**: 2.3
-**총 트러블슈팅 건수**: 9건
+**작성일**: 2025년 1월 9일
+**버전**: 2.4
+**총 트러블슈팅 건수**: 10건

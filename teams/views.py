@@ -216,26 +216,40 @@ class TeamMainPageView(TeamMemberRequiredMixin, DetailView):
     model = Team
     template_name = 'teams/team_main_page.html'
     context_object_name = 'team'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.team_service = TeamService()
         self.milestone_service = MilestoneService()
-    
+
+    def get_object(self, queryset=None):
+        """Mixin에서 캐시한 team 객체 재사용 (중복 쿼리 방지)"""
+        if hasattr(self, '_team_cache'):
+            return self._team_cache
+        # 캐시가 없으면 조회하고 캐싱
+        team = super().get_object(queryset)
+        self._team_cache = team
+        return team
+
     def get_context_data(self, **kwargs):
+        # get_object()를 먼저 호출하여 self.object 설정
+        if not hasattr(self, 'object') or self.object is None:
+            self.object = self.get_object()
+
         context = super().get_context_data(**kwargs)
-        team = self.get_object()
+        team = self.object  # self.get_object() 대신 self.object 사용
         today_date = datetime.now().date()
-        
-        context['members'] = TeamUser.objects.filter(team=team)
+
+        # TeamUser 조회 시 user 정보를 JOIN으로 가져옴 (N+1 방지)
+        context['members'] = TeamUser.objects.filter(team=team).select_related('user')
         milestones = self.milestone_service.get_team_milestones(team)
         context['milestones'] = milestones
         context['today_date'] = today_date
-        
+
         # QuerySet 재사용하여 통계 계산 (중복 쿼리 방지)
         stats = self.team_service.get_team_statistics(team, milestones=milestones)
         context.update(stats)
-        
+
         return context
 
 
