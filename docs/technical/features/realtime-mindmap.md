@@ -142,7 +142,7 @@ sequenceDiagram
     B->>Channels: WebSocket 연결
     C->>Channels: WebSocket 연결
 
-    Note over A,MySQL: 노드 이동 이벤트
+    Note over A,MySQL: 노드 이동 이벤트(Optimistic Update -> 즉시 UI 반영)
     A->>Channels: node_move<br/>{node_id: 123, x: 100, y: 200}
     Channels->>MySQL: DB 업데이트<br/>UPDATE nodes SET posX=100, posY=200
     MySQL-->>Channels: 저장 완료
@@ -155,7 +155,6 @@ sequenceDiagram
     B->>B: 노드 위치 갱신
     C->>C: 노드 위치 갱신
 ```
-
 **데이터 흐름**:
 1. **클라이언트 A**가 노드 이동
 2. **WebSocket**으로 서버 전송 (`node_move`)
