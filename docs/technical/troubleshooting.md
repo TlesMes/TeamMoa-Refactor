@@ -134,19 +134,19 @@ CI/CD 파이프라인을 통한 자동 배포 중 1~2초간 502 Bad Gateway 에�
 
 #### 해결 과정
 
-**1. ALB Connection Draining 300초 설정**
+**1. ALB Connection Draining 30초 설정**
 ```bash
-# Target Group Deregistration Delay 설정
+# Target Group Deregistration Delay 설정 (5초 → 30초)
 aws elbv2 modify-target-group-attributes \
   --target-group-arn $TARGET_GROUP_ARN \
-  --attributes Key=deregistration_delay.timeout_seconds,Value=300
+  --attributes Key=deregistration_delay.timeout_seconds,Value=30
 ```
 
 **2. Rolling Update 배포 순서 조정**
 ```bash
 # GitHub Actions Workflow에서 자동화
 1. 서버 1번 Target Deregister
-2. 300초 대기 (Connection Draining)
+2. 30초 대기 (Connection Draining)
 3. 서버 1번 컨테이너 재시작
 4. Health Check 통과 확인 (3회, 10초 간격)
 5. 서버 1번 Target Register
@@ -862,7 +862,7 @@ lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('fro
 
 2. **ALB 무중단 배포 중 502 에러** (#3)
    - 5% 요청 실패 → 완전한 무중단 배포 달성
-   - Connection Draining 300초 대기 로직으로 진행 중인 요청 안전 처리
+   - Connection Draining 30초 대기 로직으로 진행 중인 요청 안전 처리
    - Locust 부하 테스트로 "무중단"을 정량적으로 검증
 
 3. **username/email 영구 점유** (#4)
@@ -896,7 +896,7 @@ lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('fro
 - Health check 엔드포인트 표준화
 - CI/CD cleanup 단계 `if: always()` 적용
 - Management Command 크론 자동화
-- ALB Connection Draining 300초 대기 로직 자동화
+- ALB Connection Draining 30초 대기 로직 자동화
 
 **모니터링**
 - Django Debug Toolbar로 쿼리 수 실시간 확인

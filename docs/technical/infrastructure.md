@@ -1002,7 +1002,7 @@ aws elbv2 wait target-in-service \
 
 **무중단 배포 달성**:
 - ✅ 배포 중에도 항상 1개 이상의 인스턴스가 트래픽 처리
-- ✅ Connection Draining으로 기존 연결 우아하게 종료 (최대 300초)
+- ✅ Connection Draining으로 기존 연결 우아하게 종료 (30초)
 - ✅ Health Check 통과 후에만 트래픽 전송 (실패 시 자동 롤백)
 
 ---
@@ -1151,26 +1151,24 @@ Duration: 1 day (86400 seconds)
 
 ---
 
-#### 3. 배포 중 502 에러
+#### 3. Connection Draining 최적화
 
-**증상**:
-- Rolling Update 배포 중 일부 사용자에게 502 에러
-
-**원인**:
-- Connection Draining Timeout 부족 (기본 300초)
-- 긴 요청(파일 업로드 등)이 강제 종료됨
+**문제 상황**:
+- 초기 설정: Connection Draining 5초
+- Rolling Update 배포 중 진행 중인 요청이 강제 종료될 위험
 
 **해결**:
 ```bash
-# Connection Draining Timeout 증가
+# Connection Draining을 30초로 증가
 aws elbv2 modify-target-group-attributes \
-  --target-group-arn arn:aws:elasticloadbalancing:... \
-  --attributes Key=deregistration_delay.timeout_seconds,Value=600
+  --target-group-arn arn:aws:elasticloadbalancing:ap-northeast-2:525329199821:targetgroup/teammoa-tg/0f795de75b98e54d \
+  --attributes Key=deregistration_delay.timeout_seconds,Value=30
 ```
 
-**Best Practice**:
-- 배포 전 Health Check로 긴 요청 완료 대기
-- 배포 시간대를 트래픽 낮은 시간대로 조정 (새벽 2~4시)
+**결과**:
+- ✅ 5초 → 30초로 증가
+- ✅ 일반적인 HTTP 요청 안전하게 완료 가능
+- ✅ 배포 시간 최소화 (너무 긴 값은 배포 지연 유발)
 
 ---
 
