@@ -1,6 +1,6 @@
 # 트러블슈팅
 
-> **10건의 핵심 문제 해결 과정**
+> **11건의 핵심 문제 해결 과정**
 > 문제 정의 → 원인 분석 → 해결 과정 → 재발 방지
 
 ---
@@ -372,9 +372,83 @@ class AuthService:
 
 ---
 
+### 6. 🟡 이메일 인증 링크 도메인 불일치 (localhost 링크 발송)
+
+**중요도**: Medium | **영향 범위**: 회원가입 이메일 인증 실패
+
+**문제**:
+- 프로덕션 환경에서 회원가입 후 이메일 인증 링크가 `http://localhost:8000/...`로 발송됨
+- 사용자가 링크 클릭 시 접속 불가 (localhost는 로컬 머신만 접근 가능)
+
+**원인**:
+```bash
+# EC2 서버 .env 파일
+ALLOWED_HOSTS=localhost,127.0.0.1,teammoa.shop,www.teammoa.shop
+# ❌ SITE_DOMAIN 설정 누락!
+```
+
+- Django `settings.SITE_DOMAIN`이 환경 변수에 정의되지 않음
+- 기본값 `localhost:8000` 사용 ([`TeamMoa/settings/base.py:83`](../../TeamMoa/settings/base.py#L83))
+- `django.contrib.sites` 프레임워크가 이메일 링크 생성 시 잘못된 도메인 사용
+
+**해결**:
+
+1. **`.env` 파일에 도메인 설정 추가**:
+```bash
+# Site Settings (이메일 인증 링크용)
+SITE_DOMAIN=teammoa.shop
+SITE_NAME=TeamMoa
+
+# CORS도 함께 업데이트
+CORS_ALLOWED_ORIGINS=https://teammoa.shop,https://www.teammoa.shop,https://teammoa.duckdns.org
+```
+
+2. **컨테이너 재생성** (환경 변수 반영):
+```bash
+docker compose -f docker-compose.web.yml up -d --force-recreate
+```
+
+3. **Django Site 객체 업데이트** (DB 반영):
+```bash
+docker compose -f docker-compose.web.yml exec web python manage.py migrate
+```
+
+4. **설정 확인**:
+```bash
+docker compose -f docker-compose.web.yml exec web python manage.py shell -c \
+  "from django.contrib.sites.models import Site; site = Site.objects.get(id=1); print(f'Domain: {site.domain}, Name: {site.name}')"
+# 출력: Domain: teammoa.shop, Name: TeamMoa
+```
+
+**설정 파일 위치**:
+```python
+# TeamMoa/settings/base.py:83-84
+SITE_DOMAIN = env('SITE_DOMAIN', default='localhost:8000')  # ⚠️ 기본값 주의!
+SITE_NAME = env('SITE_NAME', default='TeamMoa')
+```
+
+**작동 원리**:
+- `accounts/signals.py`에서 마이그레이션 시 `Site` 객체 자동 업데이트
+- Django Allauth가 이메일 템플릿 렌더링 시 `{{ site.domain }}` 사용
+- 이메일 인증 링크: `https://{{ site.domain }}/accounts/confirm-email/...`
+
+**재발 방지**:
+- `.env.example`에 `SITE_DOMAIN`, `SITE_NAME` 설정 예시 포함 (✅ 완료)
+- 도메인 변경 시 체크리스트:
+  1. `ALLOWED_HOSTS` 업데이트
+  2. `SITE_DOMAIN` 업데이트
+  3. `CORS_ALLOWED_ORIGINS` 업데이트
+  4. SSL 인증서 갱신 (Let's Encrypt)
+  5. OAuth 리디렉션 URI 업데이트 (Google, GitHub)
+- 프로덕션 배포 체크리스트에 "Site 도메인 확인" 항목 추가
+
+**관련 이슈**: ALB 구축 후 도메인을 `duckdns.org`에서 `teammoa.shop`으로 변경했으나, `.env` 파일의 `SITE_DOMAIN` 설정을 누락하여 발생
+
+---
+
 ## WebSocket 관련
 
-### 6. 🟢 WebSocket 연결 실패 (404 Not Found)
+### 7. 🟢 WebSocket 연결 실패 (404 Not Found)
 
 **중요도**: Medium | **영향 범위**: 실시간 마인드맵 기능 전체 불가
 
@@ -403,7 +477,7 @@ CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "TeamMoa.asgi:application"]
 
 ---
 
-### 7. 🟡 Nginx WebSocket 프록시 실패 (502 Bad Gateway)
+### 8. 🟡 Nginx WebSocket 프록시 실패 (502 Bad Gateway)
 
 **중요도**: High | **영향 범위**: 프로덕션 실시간 협업 기능 중단
 
@@ -440,7 +514,7 @@ location /ws/ {
 
 ## 데이터베이스 관련
 
-### 8. 🔴 N+1 쿼리 문제 (느린 페이지 로딩)
+### 9. 🔴 N+1 쿼리 문제 (느린 페이지 로딩)
 
 **중요도**: Critical | **영향 범위**: 팀 목록 페이지 성능 저하
 
@@ -477,7 +551,7 @@ for team in teams:
 
 ## 성능 최적화
 
-### 9. ✅ 중복 쿼리 문제 (Mixin-View 계층 간 이중 조회)
+### 10. ✅ 중복 쿼리 문제 (Mixin-View 계층 간 이중 조회)
 
 **중요도**: High | **영향 범위**: 팀 관련 모든 페이지 성능 저하 | **해결 완료**: 2026.01.09
 
@@ -680,7 +754,7 @@ def get_node_with_comments(self, node_id, node=None):
 
 ---
 
-### 10. ✅ 템플릿 태그로 인한 N+1 쿼리 문제
+### 11. ✅ 템플릿 태그로 인한 N+1 쿼리 문제
 
 **중요도**: High | **영향 범위**: 공유 게시판, 노드 댓글 목록 성능 저하 | **해결 완료**: 2026.01.10
 
