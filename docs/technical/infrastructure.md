@@ -1359,7 +1359,6 @@ docker exec teammoa_db_prod mysqldump -u root -p teammoa_db > backup.sql
 
 **작성일**: 2025년 12월 2일
 **버전**: 1.0
-**Live**: [https://teammoa.duckdns.org](https://teammoa.duckdns.org)
 **코드 위치**:
 - Dockerfile: [`Dockerfile`](../../Dockerfile)
 - Docker Compose: [`docker-compose.yml`](../../docker-compose.yml), [`docker-compose.prod.yml`](../../docker-compose.prod.yml)

@@ -560,7 +560,6 @@ function screenToCanvas(screenX, screenY) {
 **작성일**: 2025년 12월 8일
 **최종 수정**: 2025년 12월 8일 (실측 성능 지표 추가)
 **버전**: 2.1
-**데모**: [https://teammoa.shop](https://teammoa.shop)
 **코드 위치**:
 - Consumer: [`mindmaps/consumers.py`](../../../mindmaps/consumers.py)
 - 클라이언트: [`static/js/pages/mindmap_detail.js`](../../../static/js/pages/mindmap_detail.js)

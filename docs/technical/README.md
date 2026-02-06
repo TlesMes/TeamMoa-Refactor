@@ -139,10 +139,6 @@ flowchart TD
 
 ## 🔗 프로젝트 링크
 
-### Live Demo
-- **URL**: [https://teammoa.shop](https://teammoa.shop)
-- **테스트 계정**: 회원가입 후 이메일 인증 필요 (Google/GitHub OAuth 가능)
-
 ### GitHub Repository
 - **URL**: [https://github.com/TlesMes/TeamMoa-Refactor](https://github.com/TlesMes/TeamMoa-Refactor)
 - **CI/CD**: GitHub Actions (자동 배포)

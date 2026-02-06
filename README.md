@@ -3,9 +3,6 @@
 > Django 기반의 **실시간 협업 플랫폼**
 > WebSocket, 서비스 레이어 아키텍처, CI/CD 자동화를 적용한 프로젝트
 
-### 🌐 Live Demo
-**[https://teammoa.shop](https://teammoa.shop)**
-
 ### 🖼️ 서비스 미리보기
 ![TeamMoa 랜딩 페이지](./docs/images/features/landing_page.png)
 *TeamMoa 랜딩 페이지 - 팀 협업을 위한 올인원 플랫폼*
