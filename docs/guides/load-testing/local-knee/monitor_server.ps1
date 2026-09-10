@@ -27,8 +27,19 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 Write-Host "출력 디렉터리: $OutDir"
 $out = Join-Path $OutDir "server_$Stage.csv"
 
-$dbPass = $env:DB_ROOT_PASSWORD
-if (-not $dbPass) { $dbPass = "rootpassword" }
+# MySQL 접속 정보는 컨테이너 환경변수에서 직접 읽는다.
+# 호스트 셸의 $env:DB_ROOT_PASSWORD 에 의존하면 값이 없을 때 조용히
+# 기본값으로 떨어져 커넥션 수가 전 구간 -1로 기록된다 (실제로 그랬다).
+# DB가 먼저 한계에 닿았는지 판정하는 핵심 지표라 실패를 드러내야 한다.
+$dbPass = (docker exec teammoa_db_lt printenv MYSQL_ROOT_PASSWORD 2>$null)
+if ($dbPass) { $dbPass = $dbPass.Trim() }
+if (-not $dbPass) {
+    Write-Warning "MySQL 루트 패스워드를 얻지 못했다. 커넥션 수가 -1로 기록된다."
+} else {
+    $probe = docker exec -e MYSQL_PWD=$dbPass teammoa_db_lt mysql -uroot -N -B -e "SHOW GLOBAL STATUS LIKE 'Threads_connected'" 2>$null
+    if ($probe) { Write-Host "MySQL 지표 수집 확인: $probe" }
+    else { Write-Warning "MySQL 조회 실패. 커넥션 수가 -1로 기록된다." }
+}
 
 "ts,host_cpu_pct,web_cpu_pct,web_mem_mb,db_cpu_pct,db_mem_mb,redis_cpu_pct,mysql_threads_connected,mysql_threads_running" |
     Out-File -FilePath $out -Encoding utf8
@@ -67,8 +78,8 @@ while ((Get-Date) -lt $deadline) {
     # MySQL 커넥션 수 — DB가 먼저 한계에 닿았는지 판정하는 핵심 지표
     $connected = -1; $running = -1
     try {
-        $status = docker exec teammoa_db_lt mysql -uroot "-p$dbPass" -N -B `
-                      -e "SHOW GLOBAL STATUS WHERE Variable_name IN ('Threads_connected','Threads_running');" 2>$null
+        $status = docker exec -e MYSQL_PWD=$dbPass teammoa_db_lt mysql -uroot -N -B `
+                      -e "SHOW GLOBAL STATUS LIKE 'Threads%'" 2>$null
         foreach ($line in $status) {
             $p = $line -split "`t"
             if ($p[0] -eq 'Threads_connected') { $connected = [int]$p[1] }
