@@ -44,6 +44,36 @@ if (-not $dbPass) {
 "ts,host_cpu_pct,web_cpu_pct,web_mem_mb,db_cpu_pct,db_mem_mb,redis_cpu_pct,mysql_threads_connected,mysql_threads_running,web_count,nginx_cpu_pct" |
     Out-File -FilePath $out -Encoding utf8
 
+# ── 측정 전 호스트 부하 점검 ───────────────────────────────
+# 2026-09-11: 부하 측정 중에 게임(StarRail)이 코어 1개를 계속 쓰고 있었다.
+# 호스트 CPU 89~94% 안에 8~10%p가 앱과 무관한 부하였고, 같은 조건의
+# 재측정에서 RPS가 16% 흔들렸는데 원인을 확정할 수 없게 됐다.
+# 측정 전에 이걸 기록하지 않으면 나중에 되짚을 방법이 없다.
+$procLog = Join-Path $OutDir "host_processes_$Stage.txt"
+$infra = @('docker', 'com.docker', 'vmmem', 'wslservice', 'Idle', 'System', 'powershell', 'pwsh')
+$before = @{}
+Get-Process | ForEach-Object { $before[$_.Id] = $_.CPU }
+Start-Sleep -Seconds 3
+$busy = Get-Process | ForEach-Object {
+    $d = $_.CPU - $before[$_.Id]
+    if ($null -ne $d -and $d -gt 0) {
+        [pscustomobject]@{ Name = $_.Name; Cores = [math]::Round($d / 3, 2); MemMB = [math]::Round($_.WorkingSet64/1MB) }
+    }
+} | Where-Object { $_.Cores -gt 0.05 } | Sort-Object Cores -Descending
+
+"측정 시작: $(Get-Date -Format o)"           | Out-File $procLog -Encoding utf8
+"호스트 CPU를 쓰고 있는 프로세스 (3초 측정):" | Out-File $procLog -Encoding utf8 -Append
+$busy | Format-Table -AutoSize | Out-String   | Out-File $procLog -Encoding utf8 -Append
+
+Write-Host "호스트 부하 점검 -> $procLog"
+foreach ($p in $busy) {
+    $isInfra = $false
+    foreach ($i in $infra) { if ($p.Name -like "*$i*") { $isInfra = $true } }
+    if (-not $isInfra -and $p.Cores -ge 0.3) {
+        Write-Warning "무관한 프로세스가 CPU를 쓰고 있다: $($p.Name) = 코어 $($p.Cores)개. 측정이 오염된다. 종료를 검토할 것."
+    }
+}
+
 Write-Host "수집 시작 -> $out  ($DurationSec 초, $IntervalSec 초 간격)"
 $deadline = (Get-Date).AddSeconds($DurationSec)
 
