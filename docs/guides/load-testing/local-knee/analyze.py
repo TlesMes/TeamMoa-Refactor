@@ -217,9 +217,20 @@ def plot(stages):
     vu = [s["users"] for s in stages]
     fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
 
-    ax[0].plot(vu, [s["rps"] for s in stages], "o-", color="#2563eb")
+    rps = [s["rps"] for s in stages]
+    # 선형 증가 기준선: 가장 낮은 VU 구간의 VU당 RPS를 그대로 연장한다.
+    # 실측이 이 선을 따라가는 구간이 "선형으로 확장된 구간"이고,
+    # 선에서 떨어지기 시작하는 지점이 포화의 시작이다.
+    slope = rps[0] / vu[0]
+    ax[0].plot(vu, [slope * v for v in vu], "--", color="#9ca3af",
+               label=f"ideal linear ({slope:.2f} RPS/VU)")
+    ax[0].plot(vu, rps, "o-", color="#2563eb", label="measured")
+    peak = max(rps)
+    ax[0].axhline(peak, ls=":", color="#dc2626", label=f"ceiling {peak:.0f} RPS")
+    ax[0].set_ylim(0, max(peak, slope * vu[-1]) * 1.1)
     ax[0].set_title("Throughput (RPS)")
     ax[0].set_xlabel("Virtual Users")
+    ax[0].legend(fontsize=8)
 
     ax[1].plot(vu, [s["p95_ms"] for s in stages], "o-", color="#dc2626", label="p95")
     ax[1].plot(vu, [s["avg_ms"] for s in stages], "o--", color="#f59e0b", label="avg")
