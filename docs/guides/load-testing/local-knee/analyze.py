@@ -70,8 +70,11 @@ def summarize_stage(prefix):
     hist = f"{prefix}_stats_history.csv"
     if not os.path.exists(hist):
         return None
-    rows = [r for r in read_csv(hist) if r.get("Name") == "Aggregated"]
-    rows = steady_rows(rows)
+    all_rows = [r for r in read_csv(hist) if r.get("Name") == "Aggregated"]
+    # 목표 VU는 필터링 전 전체에서 구한다. 정상 상태 구간만 보면 실제로
+    # 유지된 수가 나오는데, 둘이 다른 단계(VU400→371)가 판정에 중요하다.
+    target = int(max(num(r, "User Count", default=0) for r in all_rows)) if all_rows else 0
+    rows = steady_rows(all_rows)
     if not rows:
         return None
 
@@ -85,7 +88,7 @@ def summarize_stage(prefix):
     total_fps = statistics.mean(fps) if fps else 0
     return {
         "window": stage_window(rows),
-        "users_target": int(max(num(r, "User Count", default=0) for r in rows)),
+        "users_target": target,
         "users": int(max(num(r, "User Count", default=0) for r in rows)),
         "rps": total_rps,
         "avg_ms": statistics.mean(avg) if avg else 0,

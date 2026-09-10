@@ -51,6 +51,11 @@ VU_STAGES = [50, 100, 200, 400, 800]
 STAGE_DURATION_SEC = 180
 WARMUP_DISCARD_SEC = 60
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+# 측정 회차를 분리해 보관한다. 1차(단일 프로세스) 결과를 덮어쓰지 않기 위해
+# 2차는 RESULTS_DIR=results-mp 로 실행한다.
+RESULTS_DIR = os.environ.get(
+    "RESULTS_DIR", os.path.join(os.path.dirname(__file__), "results"))
+if not os.path.isabs(RESULTS_DIR):
+    RESULTS_DIR = os.path.join(os.path.dirname(__file__), RESULTS_DIR)
 os.makedirs(RESULTS_DIR, exist_ok=True)
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
