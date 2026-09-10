@@ -1,4 +1,4 @@
-<#
+﻿<#
 서버 PC 자원 사용량 수집기 (부하 테스트 단계마다 실행)
 
 "서버가 한계였다"를 증명하려면 부하 곡선만으로는 부족하다. 같은 시간대의
@@ -11,10 +11,20 @@ param(
     [Parameter(Mandatory = $true)][string]$Stage,
     [int]$DurationSec = 200,
     [int]$IntervalSec = 3,
-    [string]$OutDir = "$PSScriptRoot\results"
+    [string]$OutDir
 )
 
+# $PSScriptRoot 는 호출 방식에 따라 비어 있을 수 있다. 비면 출력이 드라이브
+# 루트로 새어나가 결과를 잃는다. 여러 경로로 스크립트 위치를 복원한다.
+if (-not $OutDir) {
+    $root = $PSScriptRoot
+    if (-not $root) { $root = Split-Path -Parent $MyInvocation.MyCommand.Path }
+    if (-not $root) { $root = (Get-Location).Path }
+    $OutDir = Join-Path $root "results"
+}
+
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+Write-Host "출력 디렉터리: $OutDir"
 $out = Join-Path $OutDir "server_$Stage.csv"
 
 $dbPass = $env:DB_ROOT_PASSWORD
