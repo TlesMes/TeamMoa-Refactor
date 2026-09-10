@@ -54,13 +54,15 @@ def steady_rows(rows):
         return []
     t0 = float(rows[0]["Timestamp"])
     target = max(num(r, "User Count", default=0) or 0 for r in rows)
-    out = []
-    for r in rows:
-        if (num(r, "User Count", default=0) or 0) < target:
-            continue  # 스폰 진행 중
-        if float(r["Timestamp"]) - t0 < config.WARMUP_DISCARD_SEC:
-            continue
-        out.append(r)
+    # VU가 목표치를 유지하지 못하는 단계가 있다. 서버가 500을 던지면 on_start의
+    # 로그인이 실패해 VU가 죽고 User Count가 목표 아래로 내려간다(VU400→371,
+    # VU800→634). "정확히 목표치"를 요구하면 그 단계가 통째로 누락되는데,
+    # 하필 그런 단계가 가장 중요한 구간이다. 목표의 90%면 정상 상태로 본다.
+    out = [r for r in rows
+           if (num(r, "User Count", default=0) or 0) >= target * 0.9
+           and float(r["Timestamp"]) - t0 >= config.WARMUP_DISCARD_SEC]
+    if not out:  # 그래도 비면 워밍업만 잘라내고 뒤쪽 2/3를 쓴다
+        out = rows[len(rows) // 3:]
     return out
 
 
@@ -83,6 +85,7 @@ def summarize_stage(prefix):
     total_fps = statistics.mean(fps) if fps else 0
     return {
         "window": stage_window(rows),
+        "users_target": int(max(num(r, "User Count", default=0) for r in rows)),
         "users": int(max(num(r, "User Count", default=0) for r in rows)),
         "rps": total_rps,
         "avg_ms": statistics.mean(avg) if avg else 0,
