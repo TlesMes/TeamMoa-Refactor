@@ -43,6 +43,22 @@ cd docs/guides/load-testing/local-knee
 pip install locust psutil matplotlib
 ```
 
+### iperf3 설치 (대역폭 측정용, 노트북에도 필요)
+
+서버 PC에는 이미 설치했다 (`ar51an.iPerf3` 3.21). 노트북에도 같은 버전을 깐다.
+
+```powershell
+# Windows
+winget install --id ar51an.iPerf3 --accept-source-agreements --accept-package-agreements
+```
+```bash
+# macOS / Linux
+brew install iperf3        # 또는  sudo apt install iperf3
+```
+
+> winget 설치 직후에는 PATH가 현재 셸에 반영되지 않는다. 셸을 새로 열거나
+> 전체 경로로 실행할 것.
+
 ### 이 노트북 스펙을 먼저 기록한다 (리포트 근거 항목)
 
 ```bash
@@ -69,12 +85,21 @@ curl -i http://192.168.50.97:8000/health/
 
 ### 네트워크가 병목이 아님을 증명 — 수치를 남긴다
 
+서버 PC에서 서버 세션이 `iperf3 -s` 를 띄운다. 그 다음 노트북에서:
+
 ```bash
-# 서버 PC에서 iperf3 -s 를 띄운 뒤
+# 업로드 방향 (노트북 → 서버) : 요청 트래픽에 해당
 iperf3 -c 192.168.50.97 -t 20
+
+# 다운로드 방향 (서버 → 노트북) : 응답 트래픽에 해당. 이쪽이 더 중요하다
+iperf3 -c 192.168.50.97 -t 20 -R
 ```
 
-**기록**: RTT 평균/최대/표준편차, 대역폭(Mbps), 재전송 수.
+**기록**: 양방향 대역폭(Mbps), RTT 평균/최대/표준편차, TCP 재전송(Retr) 수.
+
+> 응답이 요청보다 훨씬 크므로(공유게시판 8.7KB 등) **`-R` 방향이 병목 판정의
+> 핵심**이다. 재전송 수가 눈에 띄면 무선 간섭이 있다는 뜻이고, 그 상태의 p95는
+> 서버 특성이 아니라 무선 특성을 반영한다.
 
 > ⚠️ 서버·노트북 **양쪽 다 무선**이고 같은 AP에 붙어 있다.
 > 두 단말이 같은 채널의 airtime을 나눠 쓰기 때문에 유선 대비 실효 대역폭이
