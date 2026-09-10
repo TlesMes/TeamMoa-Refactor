@@ -1,0 +1,8 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,05_공유게시판,HTTPError('500 Server Error: Internal Server Error for url: 05_공유게시판'),4,2026-09-10T16:12:54Z,2026-09-10T16:15:35Z
+GET,02_홈_페이지,HTTPError('500 Server Error: Internal Server Error for url: 02_홈_페이지'),12,2026-09-10T16:12:54Z,2026-09-10T16:15:35Z
+POST,01_API_로그인,CatchResponseError('status 500'),29,2026-09-10T16:12:54Z,2026-09-10T16:12:54Z
+GET,06_API_TODO_목록,HTTPError('500 Server Error: Internal Server Error for url: 06_API_TODO_목록'),2,2026-09-10T16:13:03Z,2026-09-10T16:13:04Z
+GET,07_API_스케줄_조회,HTTPError('500 Server Error: Internal Server Error for url: 07_API_스케줄_조회'),4,2026-09-10T16:13:03Z,2026-09-10T16:13:03Z
+GET,04_API_팀_상세,HTTPError('500 Server Error: Internal Server Error for url: 04_API_팀_상세'),2,2026-09-10T16:13:03Z,2026-09-10T16:13:03Z
+GET,03_API_팀_목록,HTTPError('500 Server Error: Internal Server Error for url: 03_API_팀_목록'),3,2026-09-10T16:12:54Z,2026-09-10T16:13:03Z

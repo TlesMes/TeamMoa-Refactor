@@ -23,8 +23,14 @@ RESULTS = config.RESULTS_DIR
 
 
 def read_csv(path):
-    with open(path, newline="", encoding="utf-8-sig") as f:
-        return list(csv.DictReader(f))
+    # locust가 이 Windows 환경의 기본 코드페이지(cp949)로 CSV를 쓰는 경우가
+    # 있어(태스크 이름의 한글 때문) utf-8-sig가 실패하면 cp949로 재시도한다.
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as f:
+            return list(csv.DictReader(f))
+    except UnicodeDecodeError:
+        with open(path, newline="", encoding="cp949") as f:
+            return list(csv.DictReader(f))
 
 
 def num(row, *keys, default=None):

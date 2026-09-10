@@ -72,22 +72,55 @@ def run_stage(vu):
     t = threading.Thread(target=sample_generator, args=(stage, stop_evt), daemon=True)
     t.start()
 
-    cmd = [
-        sys.executable, "-m", "locust",
-        "-f", os.path.join(HERE, "locustfile.py"),
-        "--host", config.TARGET_URL,
-        "--headless",
-        "-u", str(vu),
-        "-r", str(spawn_rate),
-        "-t", f"{config.STAGE_DURATION_SEC}s",
-        "--csv", prefix,
-        "--csv-full-history",
-        "--only-summary",
-        # 워커 프로세스를 코어 수만큼 띄운다. 이게 없으면 locust가 1코어만 써서
-        # 생성기가 먼저 포화되고, 서버 한계가 아니라 생성기 한계를 재게 된다.
-        "--processes", str(config.LOCUST_PROCESSES),
-    ]
-    rc = subprocess.call(cmd, cwd=HERE)
+    locustfile = os.path.join(HERE, "locustfile.py")
+    base_cmd = [sys.executable, "-m", "locust", "-f", locustfile]
+
+    worker_procs = []
+    if sys.platform == "win32":
+        # --processes는 네이티브 Windows에서 미지원(WSL 전용)이라 gevent
+        # 단일 프로세스로 떨어져 1코어만 쓰게 된다. 생성기가 먼저 포화되는
+        # 문제를 피하려고 master-worker를 수동으로 띄운다(워커는 독립
+        # 프로세스라 Windows에서도 동작). 마스터가 리슨을 시작한 뒤에
+        # 워커를 붙여야 초기 연결 실패/재시도 지연이 없다.
+        cmd = base_cmd + [
+            "--host", config.TARGET_URL,
+            "--headless", "--master",
+            "--expect-workers", str(config.LOCUST_PROCESSES),
+            "-u", str(vu),
+            "-r", str(spawn_rate),
+            "-t", f"{config.STAGE_DURATION_SEC}s",
+            "--csv", prefix,
+            "--csv-full-history",
+            "--only-summary",
+        ]
+        master_proc = subprocess.Popen(cmd, cwd=HERE)
+        time.sleep(3)  # 마스터가 5557 포트 리슨을 시작할 시간 확보
+
+        for _ in range(config.LOCUST_PROCESSES):
+            worker_procs.append(subprocess.Popen(
+                base_cmd + ["--worker", "--master-host", "127.0.0.1"],
+                cwd=HERE,
+            ))
+
+        rc = master_proc.wait()
+    else:
+        cmd = base_cmd + [
+            "--host", config.TARGET_URL,
+            "--headless",
+            "-u", str(vu),
+            "-r", str(spawn_rate),
+            "-t", f"{config.STAGE_DURATION_SEC}s",
+            "--csv", prefix,
+            "--csv-full-history",
+            "--only-summary",
+            "--processes", str(config.LOCUST_PROCESSES),
+        ]
+        rc = subprocess.call(cmd, cwd=HERE)
+
+    for p in worker_procs:
+        p.terminate()
+    for p in worker_procs:
+        p.wait(timeout=10)
 
     stop_evt.set()
     t.join(timeout=5)
