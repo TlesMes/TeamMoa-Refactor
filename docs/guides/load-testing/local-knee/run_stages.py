@@ -32,7 +32,17 @@ RESULTS = config.RESULTS_DIR
 
 
 def sample_generator(stage, stop_evt):
-    """생성기(노트북) 자원 사용량 샘플링"""
+    """생성기(노트북) 자원 사용량 샘플링
+
+    ⚠️ net_sent_mb / net_recv_mb 는 psutil.net_io_counters() 기반이라
+    **노트북 전체 트래픽**이다. locust가 쓴 양이 아니다. 실제로 요청 수가
+    거의 같은 단계끼리도 45% 차이가 났다. 대역폭 실사용량은 이 값이 아니라
+    시나리오 가중치 × 응답 크기로 산출할 것 (REPORT.md 4절).
+    이 컬럼은 상한으로만 읽는다.
+
+    cpu_pct 는 시스템 전체지만 이쪽은 의도한 것이다 — 워커 6개가 별도
+    프로세스라 마스터 프로세스만 재면 생성기 포화를 놓친다.
+    """
     path = os.path.join(RESULTS, f"generator_{stage}.csv")
     psutil.cpu_percent(interval=None)  # 첫 호출은 버림
     with open(path, "w", newline="", encoding="utf-8") as f:
