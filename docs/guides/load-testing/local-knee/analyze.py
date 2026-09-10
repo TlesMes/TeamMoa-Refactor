@@ -4,8 +4,12 @@
 locust의 _stats_history.csv 에서 **워밍업 구간을 잘라낸 정상 상태**만 집계한다.
 스폰 구간을 포함해 평균을 내면 무릎 위치가 흐려진다.
 
-서버 CSV(server_*.csv, 서버 PC에서 수집)와 생성기 CSV(generator_*.csv)가
-같은 results/ 에 있으면 함께 병합한다.
+서버 CSV와 생성기 CSV(generator_*.csv)가 같은 results/ 에 있으면 함께 병합한다.
+서버 CSV는 두 방식 다 받는다:
+  - server_<stage>.csv      단계마다 따로 수집한 경우
+  - server_continuous.csv   전 구간 연속 수집한 경우 (권장)
+연속 수집이면 각 단계의 정상 상태 구간으로 잘라 쓰므로, 서버 세션과 생성기 세션이
+단계 시작 시각을 서로 맞출 필요가 없다.
 
 실행:
     pip install matplotlib
@@ -78,6 +82,7 @@ def summarize_stage(prefix):
     total_rps = statistics.mean(rps) if rps else 0
     total_fps = statistics.mean(fps) if fps else 0
     return {
+        "window": stage_window(rows),
         "users": int(max(num(r, "User Count", default=0) for r in rows)),
         "rps": total_rps,
         "avg_ms": statistics.mean(avg) if avg else 0,
@@ -88,10 +93,17 @@ def summarize_stage(prefix):
     }
 
 
-def summarize_side(path, cols):
+SERVER_COLS = ["host_cpu_pct", "web_cpu_pct", "web_mem_mb", "db_cpu_pct",
+               "mysql_threads_connected", "mysql_threads_running"]
+
+
+def summarize_side(path, cols, window=None):
+    """window=(start_epoch, end_epoch) 가 주어지면 그 구간의 행만 집계한다."""
     if not os.path.exists(path):
         return {}
     rows = read_csv(path)
+    if window:
+        rows = [r for r in rows if _in_window(r.get("ts"), window)]
     out = {}
     for c in cols:
         vals = [float(r[c]) for r in rows if r.get(c) not in ("", None) and float(r[c]) >= 0]
@@ -99,6 +111,28 @@ def summarize_side(path, cols):
             out[c + "_avg"] = statistics.mean(vals)
             out[c + "_max"] = max(vals)
     return out
+
+
+def _in_window(ts, window):
+    """서버 수집기의 ISO 타임스탬프를 epoch로 바꿔 구간 안인지 본다."""
+    if not ts:
+        return False
+    try:
+        dt = datetime.fromisoformat(ts)
+    except ValueError:
+        return False
+    if dt.tzinfo is None:
+        dt = dt.astimezone()   # naive면 로컬 시간대로 간주
+    e = dt.timestamp()
+    return window[0] <= e <= window[1]
+
+
+def stage_window(rows):
+    """정상 상태 구간의 (시작, 끝) epoch. 서버 CSV를 같은 구간으로 자르는 데 쓴다."""
+    if not rows:
+        return None
+    ts = [float(r["Timestamp"]) for r in rows]
+    return (min(ts), max(ts))
 
 
 def main():
@@ -111,10 +145,21 @@ def main():
             print(f"[skip] {stage}: 정상 상태 구간 없음")
             continue
         s["stage"] = stage
-        s.update(summarize_side(
-            os.path.join(RESULTS, f"server_{stage}.csv"),
-            ["host_cpu_pct", "web_cpu_pct", "web_mem_mb", "db_cpu_pct",
-             "mysql_threads_connected", "mysql_threads_running"]))
+
+        # 서버 지표: 단계별 파일이 있으면 그걸 쓰고, 없으면 연속 수집 파일을
+        # 이 단계의 정상 상태 구간으로 잘라 쓴다.
+        # 연속 수집 방식이면 두 세션이 단계 시작을 맞출 필요가 없다.
+        per_stage = os.path.join(RESULTS, f"server_{stage}.csv")
+        continuous = os.path.join(RESULTS, "server_continuous.csv")
+        if os.path.exists(per_stage):
+            s.update(summarize_side(per_stage, SERVER_COLS))
+            s["server_src"] = "per-stage"
+        elif os.path.exists(continuous):
+            s.update(summarize_side(continuous, SERVER_COLS, window=s["window"]))
+            s["server_src"] = "continuous"
+        else:
+            s["server_src"] = "없음"
+
         s.update(summarize_side(
             os.path.join(RESULTS, f"generator_{stage}.csv"),
             ["cpu_pct", "mem_pct"]))
@@ -130,6 +175,7 @@ def main():
            "DB CPU% | MySQL conn | 생성기CPU% | 판정 |")
     print(hdr)
     print("|" + "---|" * 12)
+    srcs = {s.get("server_src") for s in stages}
     knee = None
     for s in stages:
         breach = (s["p95_ms"] > config.STOP_P95_MS or s["err_pct"] > config.STOP_ERROR_RATE)
@@ -144,6 +190,7 @@ def main():
                   v="위반" if breach else "정상", **s))
 
     print()
+    print(f"서버 지표 출처: {', '.join(sorted(x for x in srcs if x))}")
     print(f"중단 조건: p95 > {config.STOP_P95_MS}ms 또는 에러율 > {config.STOP_ERROR_RATE}%")
     print(f"무릎(최초 위반 단계): {knee or '나오지 않음 — 무엇이 먼저 걸렸는지 규명 필요'}")
 

@@ -226,10 +226,20 @@ VU 단계: **50 → 100 → 200 → 400 → 800** (배수 증가)
 
 ### 각 단계마다
 
-**서버 PC에서 (단계 시작 직전):**
+**서버 PC에서 — 전 구간 연속 수집 (권장).**
+측정 시작 전에 한 번만 띄우고, 모든 단계가 끝날 때까지 끄지 않는다.
+
 ```powershell
-powershell -ExecutionPolicy Bypass -File docs\guides\load-testing\local-knee\monitor_server.ps1 -Stage vu0050 -DurationSec 200
+powershell -ExecutionPolicy Bypass -File docs\guides\load-testing\local-knee\monitor_server.ps1 -Stage continuous -DurationSec 5400
 ```
+
+`analyze.py` 가 `server_continuous.csv` 를 각 단계의 정상 상태 구간(Locust CSV의
+타임스탬프)으로 잘라 쓴다. **그래서 두 세션이 단계 시작 시각을 서로 맞출 필요가 없다.**
+생성기는 자기 페이스대로 진행하면 된다.
+
+> 단계별로 따로 수집하고 싶다면 `-Stage vu0050` 처럼 단계명을 주면 되고,
+> 그 경우 이름을 locust CSV 접두사와 정확히 맞춰야 한다.
+> 두 방식이 모두 있으면 단계별 파일이 우선한다.
 
 **노트북에서:**
 ```bash
