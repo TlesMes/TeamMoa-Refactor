@@ -26,9 +26,20 @@ from schedules.models import PersonalDaySchedule
 
 random.seed(42)  # 재현 가능하게 고정
 
-USERS_TOTAL = 300
-TEAMS_TOTAL = 3
-USERS_PER_TEAM = USERS_TOTAL // TEAMS_TOTAL   # 100
+# 2차 측정에서 VU를 1200까지 올리므로 계정을 늘릴 수 있게 파라미터화했다.
+#
+# ⚠️ USERS_PER_TEAM 은 **절대 바꾸지 말 것.**
+# 기존 팀에 멤버를 더 넣으면 팀 상세/스케줄 집계 쿼리가 무거워져 요청당 비용이
+# 달라지고, 1차 측정(팀당 100명)과 수치를 나란히 놓을 수 없게 된다.
+# 계정을 늘릴 때는 **같은 모양의 팀을 새로 만든다** — TEAMS_TOTAL 만 올린다.
+#   예) 1200 계정 = TEAMS_TOTAL 12 × 팀당 100명
+#
+#   LOADTEST_TEAMS=12 python manage.py shell < seed_load_data.py
+import os
+
+USERS_PER_TEAM = 100                                   # 고정 (1차와 동일)
+TEAMS_TOTAL = int(os.environ.get("LOADTEST_TEAMS", "3"))
+USERS_TOTAL = USERS_PER_TEAM * TEAMS_TOTAL
 POSTS_PER_TEAM = 60      # 공유게시판 목록 N+1 노출용
 TODOS_PER_TEAM = 120     # TODO 목록 N+1 노출용
 SCHEDULE_DAYS = 7        # 팀 가용시간 계산 대상 기간

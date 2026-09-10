@@ -17,7 +17,10 @@ TARGET_URL = os.environ.get("TARGET_URL", "http://192.168.50.97:8000")
 TEAM_IDS = [int(x) for x in os.environ.get("TEAM_IDS", "1,2,3").split(",")]
 
 TEST_USER_PASSWORD = "LoadTest2024!"
-USERS_TOTAL = 300
+# 시드된 계정 수. TEAM_IDS 와 반드시 함께 맞춰야 한다.
+# locustfile 이 (user_index-1) // (USERS_TOTAL/len(TEAM_IDS)) 로 팀을 고르므로,
+# 둘이 어긋나면 VU가 자기 팀이 아닌 팀을 조회해 403/404를 받는다.
+USERS_TOTAL = int(os.environ.get("USERS_TOTAL", "300"))
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 대기 시간 — 사용자당 약 1~2 RPS
