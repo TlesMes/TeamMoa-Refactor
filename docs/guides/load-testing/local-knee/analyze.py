@@ -18,6 +18,7 @@ locust의 _stats_history.csv 에서 **워밍업 구간을 잘라낸 정상 상�
 import csv
 import glob
 import os
+import re
 import statistics
 from datetime import datetime
 
@@ -107,10 +108,17 @@ SERVER_COLS = ["host_cpu_pct", "web_cpu_pct", "web_mem_mb", "db_cpu_pct",
 
 
 def summarize_side(path, cols, window=None):
-    """window=(start_epoch, end_epoch) 가 주어지면 그 구간의 행만 집계한다."""
-    if not os.path.exists(path):
+    """window=(start_epoch, end_epoch) 가 주어지면 그 구간의 행만 집계한다.
+
+    path 는 파일 하나 또는 여러 개(리스트)를 받는다. 여러 개면 합쳐서 본다.
+    """
+    paths = [path] if isinstance(path, str) else list(path)
+    rows = []
+    for p in paths:
+        if os.path.exists(p):
+            rows.extend(read_csv(p))
+    if not rows:
         return {}
-    rows = read_csv(path)
     if window:
         rows = [r for r in rows if _in_window(r.get("ts"), window)]
     out = {}
@@ -159,15 +167,22 @@ def main():
         # 이 단계의 정상 상태 구간으로 잘라 쓴다.
         # 연속 수집 방식이면 두 세션이 단계 시작을 맞출 필요가 없다.
         per_stage = os.path.join(RESULTS, f"server_{stage}.csv")
-        continuous = os.path.join(RESULTS, "server_continuous.csv")
         if os.path.exists(per_stage):
             s.update(summarize_side(per_stage, SERVER_COLS))
             s["server_src"] = "per-stage"
-        elif os.path.exists(continuous):
-            s.update(summarize_side(continuous, SERVER_COLS, window=s["window"]))
-            s["server_src"] = "continuous"
         else:
-            s["server_src"] = "없음"
+            # 연속 수집 파일은 여러 개일 수 있다. 생성기가 재부팅으로 죽어
+            # 사다리가 끊기면 수집기도 다시 띄우게 되고, 그때 파일이 나뉜다
+            # (server_continuous.csv + server_resume.csv). 하나만 보면 재개된
+            # 단계의 서버 지표가 통째로 비어버린다.
+            cont = [f for f in sorted(glob.glob(os.path.join(RESULTS, "server_*.csv")))
+                    if not re.search(r"server_vu\d+\.csv$", f)]
+            if cont:
+                s.update(summarize_side(cont, SERVER_COLS, window=s["window"]))
+                s["server_src"] = "+".join(
+                    os.path.basename(f)[7:-4] for f in cont)
+            else:
+                s["server_src"] = "없음"
 
         s.update(summarize_side(
             os.path.join(RESULTS, f"generator_{stage}.csv"),
