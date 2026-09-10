@@ -100,7 +100,10 @@ def summarize_stage(prefix):
 
 
 SERVER_COLS = ["host_cpu_pct", "web_cpu_pct", "web_mem_mb", "db_cpu_pct",
-               "mysql_threads_connected", "mysql_threads_running"]
+               "mysql_threads_connected", "mysql_threads_running",
+               # 2차에서 Nginx CPU를 빠뜨려 호스트 CPU의 상당 부분이
+               # 설명되지 않았다(합계 700% vs 호스트 89%). 이후 측정은 포함한다.
+               "nginx_cpu_pct"]
 
 
 def summarize_side(path, cols, window=None):

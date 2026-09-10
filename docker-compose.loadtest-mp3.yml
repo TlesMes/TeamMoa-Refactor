@@ -1,0 +1,21 @@
+# 병목 확정 실험 — 앱 프로세스 3개 오버레이 (2026-09-11)
+#
+# docker-compose.loadtest-mp.yml 위에 겹쳐 쓴다. Nginx의 upstream 만
+# 3개짜리 설정으로 바꾸고, web4~6 은 기동하지 않는다.
+#
+# 사용:
+#   docker compose -f docker-compose.loadtest-mp.yml -f docker-compose.loadtest-mp3.yml \
+#       stop web4 web5 web6
+#   docker compose -f docker-compose.loadtest-mp.yml -f docker-compose.loadtest-mp3.yml \
+#       up -d --force-recreate nginx
+#
+# 6개로 되돌릴 때:
+#   docker compose -f docker-compose.loadtest-mp.yml up -d --force-recreate
+services:
+  nginx:
+    volumes:
+      - ./deploy/nginx-loadtest-3.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web1
+      - web2
+      - web3

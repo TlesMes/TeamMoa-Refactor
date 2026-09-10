@@ -41,7 +41,7 @@ if (-not $dbPass) {
     else { Write-Warning "MySQL 조회 실패. 커넥션 수가 -1로 기록된다." }
 }
 
-"ts,host_cpu_pct,web_cpu_pct,web_mem_mb,db_cpu_pct,db_mem_mb,redis_cpu_pct,mysql_threads_connected,mysql_threads_running,web_count" |
+"ts,host_cpu_pct,web_cpu_pct,web_mem_mb,db_cpu_pct,db_mem_mb,redis_cpu_pct,mysql_threads_connected,mysql_threads_running,web_count,nginx_cpu_pct" |
     Out-File -FilePath $out -Encoding utf8
 
 Write-Host "수집 시작 -> $out  ($DurationSec 초, $IntervalSec 초 간격)"
@@ -62,6 +62,7 @@ while ((Get-Date) -lt $deadline) {
     # 구성에서 프로세스 하나의 CPU만 보고 "아직 여유 있다"고 오독하게 된다.
     $web = @{cpu = -1; mem = -1}; $db = @{cpu = -1; mem = -1}; $redisCpu = -1
     $webCount = 0
+    $nginxCpu = -1
     try {
         $raw = docker stats --no-stream --format "{{.Name}}|{{.CPUPerc}}|{{.MemUsage}}" 2>$null
         $webCpu = 0.0; $webMem = 0.0
@@ -79,6 +80,7 @@ while ((Get-Date) -lt $deadline) {
             }
             elseif ($name -eq 'teammoa_db_lt')    { $db = @{cpu = $cpu; mem = [math]::Round($mem, 1)} }
             elseif ($name -eq 'teammoa_redis_lt') { $redisCpu = $cpu }
+            elseif ($name -eq 'teammoa_nginx_lt') { $nginxCpu = $cpu }
         }
         if ($webCount -gt 0) {
             $web = @{cpu = [math]::Round($webCpu, 2); mem = [math]::Round($webMem, 1)}
@@ -97,7 +99,7 @@ while ((Get-Date) -lt $deadline) {
         }
     } catch { }
 
-    "$ts,$hostCpu,$($web.cpu),$($web.mem),$($db.cpu),$($db.mem),$redisCpu,$connected,$running,$webCount" |
+    "$ts,$hostCpu,$($web.cpu),$($web.mem),$($db.cpu),$($db.mem),$redisCpu,$connected,$running,$webCount,$nginxCpu" |
         Out-File -FilePath $out -Encoding utf8 -Append
 
     Start-Sleep -Seconds $IntervalSec
