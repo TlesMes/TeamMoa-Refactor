@@ -1,0 +1,192 @@
+"""
+단계별 결과 집계 + 곡선 생성 (2026-09-10)
+
+locust의 _stats_history.csv 에서 **워밍업 구간을 잘라낸 정상 상태**만 집계한다.
+스폰 구간을 포함해 평균을 내면 무릎 위치가 흐려진다.
+
+서버 CSV(server_*.csv, 서버 PC에서 수집)와 생성기 CSV(generator_*.csv)가
+같은 results/ 에 있으면 함께 병합한다.
+
+실행:
+    pip install matplotlib
+    python analyze.py
+"""
+import csv
+import glob
+import os
+import statistics
+from datetime import datetime
+
+import config
+
+RESULTS = config.RESULTS_DIR
+
+
+def read_csv(path):
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
+
+
+def num(row, *keys, default=None):
+    """헤더 이름이 locust 버전마다 달라서 후보를 순서대로 시도한다."""
+    for k in keys:
+        if k in row and row[k] not in ("", "N/A", None):
+            try:
+                return float(row[k])
+            except ValueError:
+                pass
+    return default
+
+
+def steady_rows(rows):
+    """스폰 완료 + WARMUP_DISCARD_SEC 이후 구간만 남긴다."""
+    if not rows:
+        return []
+    t0 = float(rows[0]["Timestamp"])
+    target = max(num(r, "User Count", default=0) or 0 for r in rows)
+    out = []
+    for r in rows:
+        if (num(r, "User Count", default=0) or 0) < target:
+            continue  # 스폰 진행 중
+        if float(r["Timestamp"]) - t0 < config.WARMUP_DISCARD_SEC:
+            continue
+        out.append(r)
+    return out
+
+
+def summarize_stage(prefix):
+    hist = f"{prefix}_stats_history.csv"
+    if not os.path.exists(hist):
+        return None
+    rows = [r for r in read_csv(hist) if r.get("Name") == "Aggregated"]
+    rows = steady_rows(rows)
+    if not rows:
+        return None
+
+    rps = [num(r, "Requests/s", default=0) for r in rows]
+    fps = [num(r, "Failures/s", default=0) for r in rows]
+    p95 = [num(r, "95%", "95%ile", default=0) for r in rows]
+    avg = [num(r, "Total Average Response Time", "Total Median Response Time", default=0)
+           for r in rows]
+
+    total_rps = statistics.mean(rps) if rps else 0
+    total_fps = statistics.mean(fps) if fps else 0
+    return {
+        "users": int(max(num(r, "User Count", default=0) for r in rows)),
+        "rps": total_rps,
+        "avg_ms": statistics.mean(avg) if avg else 0,
+        "p95_ms": statistics.mean(p95) if p95 else 0,
+        "p95_max_ms": max(p95) if p95 else 0,
+        "err_pct": (total_fps / total_rps * 100) if total_rps else 0,
+        "samples": len(rows),
+    }
+
+
+def summarize_side(path, cols):
+    if not os.path.exists(path):
+        return {}
+    rows = read_csv(path)
+    out = {}
+    for c in cols:
+        vals = [float(r[c]) for r in rows if r.get(c) not in ("", None) and float(r[c]) >= 0]
+        if vals:
+            out[c + "_avg"] = statistics.mean(vals)
+            out[c + "_max"] = max(vals)
+    return out
+
+
+def main():
+    stages = []
+    for prefix in sorted(glob.glob(os.path.join(RESULTS, "vu*_stats_history.csv"))):
+        base = prefix.replace("_stats_history.csv", "")
+        stage = os.path.basename(base)
+        s = summarize_stage(base)
+        if not s:
+            print(f"[skip] {stage}: 정상 상태 구간 없음")
+            continue
+        s["stage"] = stage
+        s.update(summarize_side(
+            os.path.join(RESULTS, f"server_{stage}.csv"),
+            ["host_cpu_pct", "web_cpu_pct", "web_mem_mb", "db_cpu_pct",
+             "mysql_threads_connected", "mysql_threads_running"]))
+        s.update(summarize_side(
+            os.path.join(RESULTS, f"generator_{stage}.csv"),
+            ["cpu_pct", "mem_pct"]))
+        stages.append(s)
+
+    if not stages:
+        print("결과 없음. run_stages.py 를 먼저 실행할 것.")
+        return
+
+    stages.sort(key=lambda s: s["users"])
+
+    hdr = ("| VU | RPS | 평균(ms) | p95(ms) | p95최대 | 에러율 | 서버CPU% | web CPU% | "
+           "DB CPU% | MySQL conn | 생성기CPU% | 판정 |")
+    print(hdr)
+    print("|" + "---|" * 12)
+    knee = None
+    for s in stages:
+        breach = (s["p95_ms"] > config.STOP_P95_MS or s["err_pct"] > config.STOP_ERROR_RATE)
+        if breach and knee is None:
+            knee = s["stage"]
+        print("| {users} | {rps:.1f} | {avg_ms:.1f} | {p95_ms:.1f} | {p95_max_ms:.0f} | "
+              "{err_pct:.2f}% | {hc:.0f} | {wc:.0f} | {dc:.0f} | {mc:.0f} | {gc:.0f} | {v} |".format(
+                  hc=s.get("host_cpu_pct_avg", -1), wc=s.get("web_cpu_pct_avg", -1),
+                  dc=s.get("db_cpu_pct_avg", -1),
+                  mc=s.get("mysql_threads_connected_max", -1),
+                  gc=s.get("cpu_pct_avg", -1),
+                  v="위반" if breach else "정상", **s))
+
+    print()
+    print(f"중단 조건: p95 > {config.STOP_P95_MS}ms 또는 에러율 > {config.STOP_ERROR_RATE}%")
+    print(f"무릎(최초 위반 단계): {knee or '나오지 않음 — 무엇이 먼저 걸렸는지 규명 필요'}")
+
+    try:
+        plot(stages)
+    except ImportError:
+        print("(matplotlib 없음 — 그래프 생략)")
+
+
+def plot(stages):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    vu = [s["users"] for s in stages]
+    fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
+
+    ax[0].plot(vu, [s["rps"] for s in stages], "o-", color="#2563eb")
+    ax[0].set_title("Throughput (RPS)")
+    ax[0].set_xlabel("Virtual Users")
+
+    ax[1].plot(vu, [s["p95_ms"] for s in stages], "o-", color="#dc2626", label="p95")
+    ax[1].plot(vu, [s["avg_ms"] for s in stages], "o--", color="#f59e0b", label="avg")
+    ax[1].axhline(config.STOP_P95_MS, ls=":", color="gray", label="stop: 500ms")
+    ax[1].set_title("Response time (ms)")
+    ax[1].set_xlabel("Virtual Users")
+    ax[1].legend()
+
+    ax[2].plot(vu, [s["err_pct"] for s in stages], "o-", color="#7c3aed", label="error %")
+    ax[2].plot(vu, [s.get("host_cpu_pct_avg", 0) for s in stages], "s--",
+               color="#059669", label="server CPU %")
+    ax[2].plot(vu, [s.get("cpu_pct_avg", 0) for s in stages], "^--",
+               color="#9ca3af", label="generator CPU %")
+    ax[2].axhline(config.STOP_ERROR_RATE, ls=":", color="gray")
+    ax[2].set_title("Errors & saturation")
+    ax[2].set_xlabel("Virtual Users")
+    ax[2].legend()
+
+    for a in ax:
+        a.set_xscale("log", base=2)
+        a.set_xticks(vu)
+        a.set_xticklabels([str(v) for v in vu])
+        a.grid(alpha=.3)
+
+    fig.tight_layout()
+    out = os.path.join(RESULTS, "knee_curve.png")
+    fig.savefig(out, dpi=140)
+    print(f"그래프: {out}")
+
+
+if __name__ == "__main__":
+    main()

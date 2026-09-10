@@ -1,0 +1,99 @@
+# 로컬 한계점 탐색 부하 테스트용 스택 (2026-09-10)
+#
+# 설계 의도:
+#  - prod와 동일한 이미지/설정(DEBUG=False, WhiteNoise, CONN_MAX_AGE)을 쓴다.
+#  - 코드 bind-mount를 하지 않는다. Windows 호스트 bind-mount는 파일 I/O가 매우 느려
+#    측정값을 오염시킨다. 이미지에 구워진 코드를 그대로 쓴다.
+#  - Nginx를 두지 않는다. Daphne(ASGI)를 직접 때려 변수를 하나 줄인다.
+#    → 리포트에 "Nginx 없음"을 명시한다.
+#  - DB/Redis 포트를 호스트에 노출한다. 부하 중 커넥션 수 등 지표 수집용.
+services:
+  db:
+    image: mysql:8.0
+    container_name: teammoa_db_lt
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-teammoa_db}
+      MYSQL_USER: ${DB_USER:-teammoa_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teammoa_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data_lt:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=300
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: teammoa_redis_lt
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: teammoa-web:loadtest
+    container_name: teammoa_web_lt
+    restart: unless-stopped
+    command: daphne -b 0.0.0.0 -p 8000 TeamMoa.asgi:application
+    volumes:
+      - static_volume_lt:/app/staticfiles
+      - media_volume_lt:/app/media
+    ports:
+      - "0.0.0.0:8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=TeamMoa.settings.loadtest
+      - DB_HOST=db
+      - DB_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - ALLOWED_HOSTS=*
+      - SECURE_SSL_REDIRECT=False
+      - CORS_ALLOWED_ORIGINS=
+      # 부하 테스트는 인증된 세션으로 도는데, 로그인 API에 rate limit이 걸려 있으면
+      # 429가 나면서 "서버 한계"가 아니라 "정책 한계"를 재게 된다. 값은 RUNBOOK 참고.
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mysql_data_lt:
+    name: teammoa_mysql_data_lt
+  redis_data_lt:
+    name: teammoa_redis_data_lt
+  static_volume_lt:
+    name: teammoa_static_lt
+  media_volume_lt:
+    name: teammoa_media_lt
+
+networks:
+  default:
+    name: teammoa_lt_network

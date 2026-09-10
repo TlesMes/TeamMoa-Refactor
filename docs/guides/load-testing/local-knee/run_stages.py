@@ -1,0 +1,112 @@
+"""
+노트북(부하 생성기)에서 실행하는 단계별 실행기 (2026-09-10)
+
+VU를 배수로 올리며 각 단계를 headless Locust로 돌리고,
+동시에 **생성기 자신의 CPU를 샘플링**한다.
+생성기 CPU 기록이 없으면 "서버 한계를 쟀다"고 말할 수 없다 —
+생성기가 먼저 포화되면 서버는 한가해 보이기 때문이다.
+
+사전 준비:
+    pip install locust psutil
+
+실행:
+    TARGET_URL=http://192.168.50.97:8000 TEAM_IDS=1,2,3 python run_stages.py
+    (Windows PowerShell: $env:TARGET_URL="..."; $env:TEAM_IDS="1,2,3"; python run_stages.py)
+
+특정 단계만:
+    python run_stages.py 400
+"""
+import csv
+import os
+import subprocess
+import sys
+import threading
+import time
+
+import psutil
+
+import config
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+RESULTS = config.RESULTS_DIR
+
+
+def sample_generator(stage, stop_evt):
+    """생성기(노트북) 자원 사용량 샘플링"""
+    path = os.path.join(RESULTS, f"generator_{stage}.csv")
+    psutil.cpu_percent(interval=None)  # 첫 호출은 버림
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["ts", "cpu_pct", "mem_pct", "net_sent_mb", "net_recv_mb", "open_sockets"])
+        base = psutil.net_io_counters()
+        while not stop_evt.is_set():
+            time.sleep(2)
+            n = psutil.net_io_counters()
+            try:
+                socks = len(psutil.Process().net_connections())
+            except Exception:
+                socks = -1
+            w.writerow([
+                time.strftime("%Y-%m-%dT%H:%M:%S"),
+                psutil.cpu_percent(interval=None),
+                psutil.virtual_memory().percent,
+                round((n.bytes_sent - base.bytes_sent) / 1e6, 2),
+                round((n.bytes_recv - base.bytes_recv) / 1e6, 2),
+                socks,
+            ])
+            f.flush()
+
+
+def run_stage(vu):
+    stage = f"vu{vu:04d}"
+    prefix = os.path.join(RESULTS, stage)
+    spawn_rate = max(10, vu // 10)   # 스폰 구간을 10초 내로 끝내 정상 상태를 길게 확보
+
+    print("=" * 60)
+    print(f"[{stage}] VU={vu} spawn_rate={spawn_rate} "
+          f"processes={config.LOCUST_PROCESSES} "
+          f"duration={config.STAGE_DURATION_SEC}s  target={config.TARGET_URL}")
+    print("=" * 60)
+
+    stop_evt = threading.Event()
+    t = threading.Thread(target=sample_generator, args=(stage, stop_evt), daemon=True)
+    t.start()
+
+    cmd = [
+        sys.executable, "-m", "locust",
+        "-f", os.path.join(HERE, "locustfile.py"),
+        "--host", config.TARGET_URL,
+        "--headless",
+        "-u", str(vu),
+        "-r", str(spawn_rate),
+        "-t", f"{config.STAGE_DURATION_SEC}s",
+        "--csv", prefix,
+        "--csv-full-history",
+        "--only-summary",
+        # 워커 프로세스를 코어 수만큼 띄운다. 이게 없으면 locust가 1코어만 써서
+        # 생성기가 먼저 포화되고, 서버 한계가 아니라 생성기 한계를 재게 된다.
+        "--processes", str(config.LOCUST_PROCESSES),
+    ]
+    rc = subprocess.call(cmd, cwd=HERE)
+
+    stop_evt.set()
+    t.join(timeout=5)
+    print(f"[{stage}] locust exit={rc}")
+    return rc
+
+
+def main():
+    stages = [int(a) for a in sys.argv[1:]] or config.VU_STAGES
+    print(f"단계: {stages}")
+    print(f"중단 조건(측정 전 확정): p95 > {config.STOP_P95_MS}ms 또는 "
+          f"에러율 > {config.STOP_ERROR_RATE}%")
+    for vu in stages:
+        run_stage(vu)
+        if vu != stages[-1]:
+            print("서버 회복 대기 30초...")
+            time.sleep(30)
+    print("\n완료. analyze.py 로 정상 상태 구간을 집계할 것.")
+
+
+if __name__ == "__main__":
+    main()
