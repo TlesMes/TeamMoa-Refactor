@@ -944,7 +944,7 @@ lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('fro
    - Soft Delete + 조건부 Unique 제약으로 DB 설계 개선
 
 4. **N+1 쿼리** (#8)
-   - 11번 쿼리 → 1번 쿼리로 최적화 (10배 쿼리 감소)
+   - 11번 쿼리 → 1번 쿼리로 최적화 (91% 감소, 팀 10개 기준 1+N 예시)
    - `select_related()`로 ORM 최적화 학습
 
 5. **Django Debug Toolbar 설정** (#9)
