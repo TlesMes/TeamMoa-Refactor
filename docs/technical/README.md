@@ -91,10 +91,10 @@ flowchart TD
 | [아키텍처 설계](./architecture.md) | 서비스 레이어 패턴, API vs SSR 전략, DB 설계 | 백엔드 아키텍처 관심자 |
 | [인프라 및 배포](./infrastructure.md) | Docker, CI/CD, AWS EC2, Nginx + SSL | DevOps/인프라 관심자 |
 | [테스트 전략](./testing.md) | 221개 테스트 구축 과정, pytest fixture 패턴 | 테스트 전략 관심자 |
-| [트러블슈팅](./troubleshooting.md) | 8건 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
+| [트러블슈팅](./troubleshooting.md) | 12건 문제 해결 사례 (HTTPS, N+1, WebSocket) | 실전 경험 확인 |
 | [실시간 마인드맵](./features/realtime-mindmap.md) | Canvas API, WebSocket, 커서 공유 (50ms 스로틀링) | 실시간 협업 기능 상세 |
 | [OAuth 2.0 인증](./features/oauth-authentication.md) | django-allauth, 이메일 기반 계정 병합, 중복 연결 차단 | 소셜 로그인 구현 |
-| [성능 최적화](./features/performance-optimization.md) | N+1 쿼리 해결, annotate + prefetch, 쿼리 수 81% 감소 | Django ORM 최적화 |
+| [성능 최적화](./features/performance-optimization.md) | N+1 쿼리 해결, annotate + prefetch, 페이지별 쿼리 수 75~83% 감소 | Django ORM 최적화 |
 
 **총 분량**: 9개 문서 | **코드 예시**: 150개 이상 | **코드 검증**: 100% 완료
 

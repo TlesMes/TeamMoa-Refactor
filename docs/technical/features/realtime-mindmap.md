@@ -500,7 +500,7 @@ async def handle_node_move(self, data):
 daphne -b 0.0.0.0 -p 8000 TeamMoa.asgi:application
 ```
 
-**상세**: [트러블슈팅 문서 #6](../troubleshooting.md#6-🟢-websocket-연결-실패-404-not-found)
+**상세**: [트러블슈팅 문서 #8](../troubleshooting.md#8-websocket-연결-실패-404-not-found)
 
 ---
 
@@ -519,7 +519,7 @@ location /ws/ {
 }
 ```
 
-**상세**: [트러블슈팅 문서 #7](../troubleshooting.md#7-🟡-nginx-websocket-프록시-실패-502-bad-gateway)
+**상세**: [트러블슈팅 문서 #9](../troubleshooting.md#9-nginx-websocket-프록시-실패-502-bad-gateway)
 
 ---
 

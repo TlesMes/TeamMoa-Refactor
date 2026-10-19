@@ -13,12 +13,12 @@ TeamMoa 팀 협업 플랫폼의 개발 과정, 아키텍처 설계, 그리고 �
 - [아키텍처 설계](technical/architecture.md) - 서비스 레이어, API vs SSR 전략, DB 설계
 - [인프라 및 배포](technical/infrastructure.md) - Docker, CI/CD, AWS EC2, Nginx + SSL
 - [테스트 전략](technical/testing.md) - 221개 테스트 구축 과정, pytest fixture 패턴
-- [트러블슈팅](technical/troubleshooting.md) - 8건 문제 해결 사례 (HTTPS, N+1, WebSocket)
+- [트러블슈팅](technical/troubleshooting.md) - 12건 문제 해결 사례 (HTTPS, N+1, WebSocket)
 
 **기능 상세**
 - [실시간 마인드맵](technical/features/realtime-mindmap.md) - Canvas API, WebSocket, 커서 공유
 - [OAuth 2.0 인증](technical/features/oauth-authentication.md) - django-allauth, 계정 병합
-- [성능 최적화](technical/features/performance-optimization.md) - N+1 쿼리 해결, 81% 감소
+- [성능 최적화](technical/features/performance-optimization.md) - N+1 쿼리 해결, 페이지별 75~83% 감소
 
 ---
 
