@@ -92,8 +92,10 @@ LOGGING = {
     },
 }
 
-# Database connection pooling (optional but recommended)
-DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=600)
+# Persistent DB connections are disabled: under ASGI (Daphne) Django opens a
+# connection per request thread and never reuses it, so CONN_MAX_AGE > 0 leaks
+# connections. See https://code.djangoproject.com/ticket/33497
+DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=0)
 
 # Email backend (use real SMTP in production)
 # Already configured in base.py, but ensure it's using real SMTP
