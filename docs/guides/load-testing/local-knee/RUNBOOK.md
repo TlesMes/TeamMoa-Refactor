@@ -34,7 +34,7 @@
 | RAM | 32 GB |
 | OS | Windows 11 Pro 26200 |
 | 컨테이너 | Docker Desktop (WSL2 백엔드) |
-| 스택 | `docker-compose.loadtest.yml` — MySQL 8.0 / Redis 7 / Django(Daphne) |
+| 스택 | `deploy/loadtest/docker-compose.loadtest.yml` — MySQL 8.0 / Redis 7 / Django(Daphne) |
 
 **앱 서버는 gunicorn이 아니라 Daphne(ASGI) 단일 프로세스다.**
 워커 프로세스 개념이 없고, 동기 뷰는 `asgiref` 스레드풀에서 처리된다.
@@ -93,14 +93,17 @@
 ### 2-1. 서버 기동
 
 ```powershell
-docker compose -f docker-compose.loadtest.yml up -d --build
-docker compose -f docker-compose.loadtest.yml ps
+docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml up -d --build
+docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml ps
 ```
+
+> 저장소 루트에서 실행한다. `--env-file .env`는 Compose 파일 안의 `${DB_ROOT_PASSWORD}` 등을
+> 루트 `.env`로 채우기 위해 필요하다(생략하면 Compose 파일 폴더의 `.env`를 찾아 기본값이 들어간다).
 
 ### 2-2. 시드 데이터 생성 (계정 300 / 팀 3 / 게시물·TODO·스케줄)
 
 ```powershell
-docker compose -f docker-compose.loadtest.yml exec -T web python manage.py shell < docs/guides/load-testing/local-knee/seed_load_data.py
+docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml exec -T web python manage.py shell < docs/guides/load-testing/local-knee/seed_load_data.py
 ```
 
 마지막 줄에 출력되는 `TEAM_IDS = [...]` 를 받아 적는다. 노트북에서 쓴다.
@@ -319,12 +322,12 @@ python analyze.py
 ```bash
 git switch -c perf/before-n1-fix 43eefc5
 # loadtest 설정/compose/시드 스크립트는 이 브랜치에 없으므로 main에서 가져온다
-git checkout main -- TeamMoa/settings/loadtest.py docker-compose.loadtest.yml docs/guides/load-testing/local-knee
-docker compose -f docker-compose.loadtest.yml up -d --build
+git checkout main -- TeamMoa/settings/loadtest.py deploy/loadtest/docker-compose.loadtest.yml docs/guides/load-testing/local-knee
+docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml up -d --build
 ```
 
 > 대조군 브랜치에는 이후 추가된 마이그레이션이 없으므로 **DB 볼륨을 반드시 새로 만든다**
-> (`docker compose -f docker-compose.loadtest.yml down -v` 후 재기동 + 시드 재생성).
+> (`docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml down -v` 후 재기동 + 시드 재생성).
 > 같은 DB를 공유하면 스키마 불일치로 측정이 아니라 에러를 재게 된다.
 
 같은 시드 / 같은 중단 조건 / 같은 단계로 한 번 더 돌린다.
