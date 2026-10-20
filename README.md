@@ -216,6 +216,7 @@ TeamMoa-Refactor/
 ├── deploy/             # 배포 설정 (Nginx, entrypoint, cron)
 │   └── loadtest/       # 부하 테스트용 Compose 파일
 ├── docs/               # 프로젝트 문서
+│   ├── api/            # OpenAPI 스펙 (openapi.yaml)
 │   ├── technical/      # 기술 문서 (아키텍처, 인증, 실시간, CI/CD)
 │   ├── architecture/   # 아키텍처 설계 & 리팩토링 히스토리
 │   │   ├── design/     # 정적 구조 (API 매핑, 가이드라인)
