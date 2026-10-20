@@ -8,7 +8,7 @@ loaduser1~300 과 팀 3개를 전제한다. 이 스크립트가 그 전제를 �
 차이가 드러난다. 그래서 팀당 게시물/TODO/스케줄을 넉넉히 만든다.
 
 실행:
-    docker compose -f docker-compose.loadtest.yml exec -T web \
+    docker compose --env-file .env -f deploy/loadtest/docker-compose.loadtest.yml exec -T web \
         python manage.py shell < docs/guides/load-testing/local-knee/seed_load_data.py
 
 멱등하다. 두 번 돌려도 중복 생성하지 않는다.

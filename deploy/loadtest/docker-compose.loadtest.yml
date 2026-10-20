@@ -7,6 +7,10 @@
 #  - Nginx를 두지 않는다. Daphne(ASGI)를 직접 때려 변수를 하나 줄인다.
 #    → 리포트에 "Nginx 없음"을 명시한다.
 #  - DB/Redis 포트를 호스트에 노출한다. 부하 중 커넥션 수 등 지표 수집용.
+
+# 파일이 deploy/loadtest/로 옮겨져도 기존과 같은 프로젝트 이름을 쓴다.
+name: teammoa
+
 services:
   db:
     image: mysql:8.0
@@ -47,7 +51,7 @@ services:
 
   web:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile
     image: teammoa-web:loadtest
     container_name: teammoa_web_lt
@@ -59,7 +63,7 @@ services:
     ports:
       - "0.0.0.0:8000:8000"
     env_file:
-      - .env
+      - ../../.env
     environment:
       - DJANGO_SETTINGS_MODULE=TeamMoa.settings.loadtest
       - DB_HOST=db

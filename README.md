@@ -213,6 +213,8 @@ TeamMoa-Refactor/
 ├── TeamMoa/            # Django 설정 (settings/, asgi.py, urls.py)
 ├── static/             # 정적 파일 (CSS 모듈, JavaScript)
 ├── templates/          # 템플릿 (base_team, base_user, base_public)
+├── deploy/             # 배포 설정 (Nginx, entrypoint, cron)
+│   └── loadtest/       # 부하 테스트용 Compose 파일
 ├── docs/               # 프로젝트 문서
 │   ├── technical/      # 기술 문서 (아키텍처, 인증, 실시간, CI/CD)
 │   ├── architecture/   # 아키텍처 설계 & 리팩토링 히스토리
