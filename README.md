@@ -29,7 +29,7 @@ pytest 264개 테스트 · GitHub Actions CI/CD · AWS ALB + Multi-AZ EC2 · [�
 - [기술 문서](#기술-문서)
 - [빠른 시작](#빠른-시작)
 - [프로젝트 구조](#프로젝트-구조)
-- [한계와 다음 단계](#한계와-다음-단계)
+- [한계](#한계)
 - [라이선스](#라이선스)
 
 ## 시연
@@ -228,12 +228,11 @@ TeamMoa-Refactor/
 └── pytest.ini          # 테스트 설정
 ```
 
-## 한계와 다음 단계
+## 한계
 
 - 배포 서버는 중단 상태다. AWS 구성과 배포 과정은 [인프라 문서](./docs/technical/infrastructure.md) 참고.
 - 성능 수치는 로컬 Docker(WSL2) 환경 측정값이라 클라우드 환경 절대값과 직접 비교할 수 없다.
 - 프론트엔드는 Vanilla JS로 작성했다. 백엔드 중심 프로젝트다.
-- 다음 단계: N+1 최적화 전후 처리량 비교 ([REPORT "다음에 할 것"](./docs/guides/load-testing/local-knee/REPORT.md#11-다음에-할-것) 참고).
 
 ## 라이선스
 
