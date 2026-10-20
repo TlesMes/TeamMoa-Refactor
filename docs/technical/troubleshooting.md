@@ -1,6 +1,6 @@
 # 트러블슈팅
 
-> **11건의 핵심 문제 해결 과정**
+> **12건의 핵심 문제 해결 과정**
 > 문제 정의 → 원인 분석 → 해결 과정 → 재발 방지
 
 ---
@@ -16,7 +16,7 @@
 
 ## 배포 관련
 
-### 1. 🔴 HTTPS 리디렉션 루프 (무한 리디렉션)
+### 1. HTTPS 리디렉션 루프 (무한 리디렉션)
 
 **중요도**: Critical | **영향 범위**: 프로덕션 전체 서비스 중단
 
@@ -57,7 +57,7 @@ location / {
 
 ---
 
-### 2. 🟡 Docker Health Check 실패 (502 Bad Gateway)
+### 2. Docker Health Check 실패 (502 Bad Gateway)
 
 **중요도**: High | **영향 범위**: 컨테이너 오케스트레이션 실패, 무중단 배포 불가
 
@@ -110,7 +110,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ---
 
-### 3. 🟡 ALB 무중단 배포 중 502 Bad Gateway (Connection Draining)
+### 3. ALB 무중단 배포 중 502 Bad Gateway (Connection Draining)
 
 **중요도**: High | **영향 범위**: 무중단 배포 실패, 배포 중 약 5% 요청 실패
 
@@ -212,7 +212,7 @@ aws elbv2 modify-target-group-attributes \
 
 ---
 
-### 4. 🟡 GitHub Actions Dynamic Security Group IP 제거 실패
+### 4. GitHub Actions Dynamic Security Group IP 제거 실패
 
 **중요도**: High | **영향 범위**: CI/CD 파이프라인 중단, 배포 불가
 
@@ -246,7 +246,7 @@ aws elbv2 modify-target-group-attributes \
 
 ## Django 관련
 
-### 4. 🔴 username/email 영구 점유 문제
+### 5. username/email 영구 점유 문제
 
 **중요도**: Critical | **영향 범위**: 사용자 경험 저하, DB 리소스 낭비
 
@@ -328,7 +328,7 @@ class Command(BaseCommand):
 
 ---
 
-### 5. 🟢 트랜잭션 원자성 위반 (회원가입 + 이메일 발송)
+### 6. 트랜잭션 원자성 위반 (회원가입 + 이메일 발송)
 
 **중요도**: Medium | **영향 범위**: 데이터 일관성 문제, 더미 계정 생성
 
@@ -372,7 +372,7 @@ class AuthService:
 
 ---
 
-### 6. 🟡 이메일 인증 링크 도메인 불일치 (localhost 링크 발송)
+### 7. 이메일 인증 링크 도메인 불일치 (localhost 링크 발송)
 
 **중요도**: Medium | **영향 범위**: 회원가입 이메일 인증 실패
 
@@ -448,7 +448,7 @@ SITE_NAME = env('SITE_NAME', default='TeamMoa')
 
 ## WebSocket 관련
 
-### 7. 🟢 WebSocket 연결 실패 (404 Not Found)
+### 8. WebSocket 연결 실패 (404 Not Found)
 
 **중요도**: Medium | **영향 범위**: 실시간 마인드맵 기능 전체 불가
 
@@ -477,7 +477,7 @@ CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "TeamMoa.asgi:application"]
 
 ---
 
-### 8. 🟡 Nginx WebSocket 프록시 실패 (502 Bad Gateway)
+### 9. Nginx WebSocket 프록시 실패 (502 Bad Gateway)
 
 **중요도**: High | **영향 범위**: 프로덕션 실시간 협업 기능 중단
 
@@ -514,7 +514,7 @@ location /ws/ {
 
 ## 데이터베이스 관련
 
-### 9. 🔴 N+1 쿼리 문제 (느린 페이지 로딩)
+### 10. N+1 쿼리 문제 (느린 페이지 로딩)
 
 **중요도**: Critical | **영향 범위**: 팀 목록 페이지 성능 저하
 
@@ -551,7 +551,7 @@ for team in teams:
 
 ## 성능 최적화
 
-### 10. ✅ 중복 쿼리 문제 (Mixin-View 계층 간 이중 조회)
+### 11. 중복 쿼리 문제 (Mixin-View 계층 간 이중 조회)
 
 **중요도**: High | **영향 범위**: 팀 관련 모든 페이지 성능 저하 | **해결 완료**: 2026.01.09
 
@@ -754,7 +754,7 @@ def get_node_with_comments(self, node_id, node=None):
 
 ---
 
-### 11. ✅ 템플릿 태그로 인한 N+1 쿼리 문제
+### 12. 템플릿 태그로 인한 N+1 쿼리 문제
 
 **중요도**: High | **영향 범위**: 공유 게시판, 노드 댓글 목록 성능 저하 | **해결 완료**: 2026.01.10
 
@@ -939,15 +939,15 @@ lines = NodeConnection.objects.filter(mindmap_id=mindmap_id).select_related('fro
    - Connection Draining 30초 대기 로직으로 진행 중인 요청 안전 처리
    - Locust 부하 테스트로 "무중단"을 정량적으로 검증
 
-3. **username/email 영구 점유** (#4)
+3. **username/email 영구 점유** (#5)
    - 재가입 불가 → 자동 정리 시스템 구축
    - Soft Delete + 조건부 Unique 제약으로 DB 설계 개선
 
-4. **N+1 쿼리** (#8)
+4. **N+1 쿼리** (#10)
    - 11번 쿼리 → 1번 쿼리로 최적화 (91% 감소, 팀 10개 기준 1+N 예시)
    - `select_related()`로 ORM 최적화 학습
 
-5. **Django Debug Toolbar 설정** (#9)
+5. **Django Debug Toolbar 설정** (#11)
    - 쿼리 분석 도구 부재 → Docker 환경에서도 정상 작동
    - 중복 쿼리 53% 발견 (15개 → 7-8개로 최적화 가능)
 

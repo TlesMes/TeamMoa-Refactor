@@ -59,8 +59,8 @@ Django 기반 팀 프로젝트 관리 시스템
 - **ORM 최적화 완성**: 서비스 레이어(`select_related`) + 템플릿(직접 접근) 조합
 
 **📚 참고 문서**:
-- [troubleshooting.md - 중복 쿼리 문제](./docs/technical/troubleshooting.md#9-중복-쿼리-문제-mixin-view-계층-간-이중-조회)
-- [troubleshooting.md - 템플릿 태그 N+1 문제](./docs/technical/troubleshooting.md#10-템플릿-태그로-인한-n1-쿼리-문제)
+- [troubleshooting.md - 중복 쿼리 문제](./docs/technical/troubleshooting.md#11-중복-쿼리-문제-mixin-view-계층-간-이중-조회)
+- [troubleshooting.md - 템플릿 태그 N+1 문제](./docs/technical/troubleshooting.md#12-템플릿-태그로-인한-n1-쿼리-문제)
 
 ---
 
